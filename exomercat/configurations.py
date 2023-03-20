@@ -3,7 +3,6 @@ import configparser
 
 
 def service_files_initialization() -> None:
-
     """
     The service_files_initialization function creates the EMC and EMClogs folders if they do not exist,
     and deletes all files in the EMClogs folder. It then creates check_alias.txt, coord_errors.txt, binary_mismatch.txt,
@@ -29,6 +28,7 @@ def service_files_initialization() -> None:
     if not os.path.exists("EMClogs/"):
         os.makedirs("EMClogs")
     os.system("rm EMClogs/*")
+
 
 def find_const() -> None:
     # TODO fix so that it does the operation inside the function
@@ -561,7 +561,6 @@ def read_config():
 
 
 def read_config_replacements(section: str):
-
     """
     The read_config_replacements function reads the replacements.ini file and returns a dictionary of
     replacement values for use in the replace_text function.

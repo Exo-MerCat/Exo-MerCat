@@ -11,6 +11,7 @@ from astropy.io.votable import parse_single_table
 from astropy.io import ascii
 import logging
 
+
 class Eu(Catalog):
     def __init__(self) -> None:
         """
@@ -57,9 +58,11 @@ class Eu(Catalog):
                 )
             except BaseException:
                 local_copy = glob.glob(filename + "*.csv")[0]
-                logging.info("Error fetching the catalog, taking a local copy:", local_copy)
+                logging.info(
+                    "Error fetching the catalog, taking a local copy:", local_copy
+                )
                 self.data = pd.read_csv(local_copy)
-        logging.info('Catalog downloaded.')
+        logging.info("Catalog downloaded.")
 
     def uniform_catalog(self) -> None:
         """
@@ -123,7 +126,7 @@ class Eu(Catalog):
                 "Pulsar": "Pulsar Timing",
             }
         )
-        logging.info('Catalog uniformed.')
+        logging.info("Catalog uniformed.")
 
     def remove_theoretical_masses(self) -> None:
         """
@@ -144,7 +147,8 @@ class Eu(Catalog):
                 self.data["RADPROV"].str.contains("Theoretical", na=False), "R" + value
             ] = np.nan
 
-        logging.info('Theoretical masses/radii removed.')
+        logging.info("Theoretical masses/radii removed.")
+
     def assign_status(self) -> None:
         """
         The assign_status function assigns a status to each planet based on the
@@ -164,10 +168,9 @@ class Eu(Catalog):
             self.data["planet_status"].str.contains("Retracted"), "Status"
         ] = "FALSE POSITIVE"
 
-        logging.info('Status column assigned.')
-        logging.info('Updated Status:')
+        logging.info("Status column assigned.")
+        logging.info("Updated Status:")
         logging.info(list(self.data.Status.value_counts()))
-
 
     def handle_reference_format(self) -> None:
         """
@@ -176,8 +179,7 @@ class Eu(Catalog):
         """
         for item in ["e", "Mass", "Msini", "i", "a", "P", "R"]:
             self.data[item + "_url"] = self.name
-        logging.info('Reference columns uniformed.')
-
+        logging.info("Reference columns uniformed.")
 
     def convert_coordinates(self) -> None:
         """

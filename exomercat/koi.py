@@ -3,6 +3,8 @@ from astropy.coordinates import SkyCoord
 import astropy.units as u
 import numpy as np
 import logging
+
+
 class Koi(Catalog):
     def __init__(self) -> None:
         """
@@ -104,7 +106,7 @@ class Koi(Catalog):
         self.data["Default_Name"] = self.data["KOILETTER"]
         self.data["disposition"] = self.data["koi_disposition"]
         self.data["discoverymethod"] = "Transit"
-        logging.info('Catalog uniformed.')
+        logging.info("Catalog uniformed.")
 
     def convert_coordinates(self) -> None:
         """
@@ -135,4 +137,4 @@ class Koi(Catalog):
             else np.nan,
             axis=1,
         )
-        logging.info('Converted coordinates from hourangle to deg.')
+        logging.info("Converted coordinates from hourangle to deg.")

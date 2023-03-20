@@ -22,18 +22,16 @@ from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 
 # Parse command line arguments
 parser = ArgumentParser(formatter_class=ArgumentDefaultsHelpFormatter)
-parser.add_argument("-v", "--verbose",action="store_true", help="increase verbosity")
-parser.add_argument("-w", "--warnings",action="store_true", help="show UserWarnings")
+parser.add_argument("-v", "--verbose", action="store_true", help="increase verbosity")
+parser.add_argument("-w", "--warnings", action="store_true", help="show UserWarnings")
 args = vars(parser.parse_args())
 
-if args['verbose']:
-    logging.basicConfig(format='%(asctime)s %(message)s:', level=logging.INFO)
-if args['warnings']:
+if args["verbose"]:
+    logging.basicConfig(format="%(asctime)s %(message)s:", level=logging.INFO)
+if args["warnings"]:
     warnings.filterwarnings("once")
 else:
     warnings.filterwarnings("ignore")
-
-
 
 
 timeout = 100000
@@ -49,20 +47,20 @@ def main():
     service_files_initialization()
 
     for cat in [Koi(), Epic()]:
-        logging.info('****** '+cat.name+' ******')
+        logging.info("****** " + cat.name + " ******")
         config_per_cat = config_dict[cat.name]
-        cat.download_and_save_cat(config_per_cat['url'], config_per_cat['file'])
+        cat.download_and_save_cat(config_per_cat["url"], config_per_cat["file"])
         cat.uniform_catalog()
         cat.convert_coordinates()
-        cat.print_catalog('UniformSources/' + cat.name + '.csv')
+        cat.print_catalog("UniformSources/" + cat.name + ".csv")
 
     emc = Emc()
 
     cat_types = [Eu(), Nasa(), Oec()]
     for cat in cat_types:
-        logging.info('****** '+cat.name+' ******')
+        logging.info("****** " + cat.name + " ******")
         config_per_cat = config_dict[cat.name]
-        cat.download_and_save_cat(config_per_cat['url'], config_per_cat['file'])
+        cat.download_and_save_cat(config_per_cat["url"], config_per_cat["file"])
         cat.uniform_catalog()
         cat.uniform_name_host_letter()
         cat.remove_theoretical_masses()
@@ -71,16 +69,15 @@ def main():
         cat.handle_reference_format()
         cat.replace_known_mistakes()
         cat.assign_status()
-        cat.check_koiepic_tables('UniformSources/koi.csv')
-        cat.check_koiepic_tables('UniformSources/epic.csv')
+        cat.check_koiepic_tables("UniformSources/koi.csv")
+        cat.check_koiepic_tables("UniformSources/epic.csv")
         cat.fill_binary_column()
         cat.convert_coordinates()
         cat.make_uniform_alias_list()
         cat.replace_known_mistakes()
         cat.keep_columns()
         cat.convert_datatypes()
-        cat.data = cat.data.sort_values(by="Name")
-        cat.print_catalog('UniformSources/' + cat.name + '.csv')
+        cat.print_catalog("UniformSources/" + cat.name + ".csv")
         cat.create_catalogstatus_string()
         emc.data = pd.concat([emc.data, cat.data])
 
@@ -89,7 +86,7 @@ def main():
     # TODO: check binary for same target
     # TODO: check default coordinate mismatch
     emc.get_host_info_from_simbad()
-    print('Check on other catalogs:')
+    print("Check on other catalogs:")
     emc.tess_main_id()
     emc.gaia_main_id()
     # emc.twomass_main_id()
@@ -107,10 +104,13 @@ def main():
     emc.merge_into_single_entry()
     emc.select_best_mass()
     emc.keep_columns()
-    emc.print_catalog('Exo-MerCat/exo-mercat'+date.today().strftime("%m-%d-%Y")+'.csv')
-    emc.print_catalog('Exo-MerCat/exo-mercat.csv')
+    emc.print_catalog(
+        "Exo-MerCat/exo-mercat" + date.today().strftime("%m-%d-%Y") + ".csv"
+    )
+    emc.print_catalog("Exo-MerCat/exo-mercat.csv")
     # emc.check_coordinates()
     #
+
 
 if __name__ == "__main__":
     main()

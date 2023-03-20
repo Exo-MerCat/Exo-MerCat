@@ -4,6 +4,7 @@ import astropy.units as u
 import numpy as np
 import logging
 
+
 class Epic(Catalog):
     def __init__(self) -> None:
         """
@@ -98,7 +99,7 @@ class Epic(Catalog):
                     if x != "nan"
                 ]
             )
-        logging.info('Catalog uniformed.')
+        logging.info("Catalog uniformed.")
 
     def convert_coordinates(self) -> None:
         """
@@ -129,5 +130,4 @@ class Epic(Catalog):
             else np.nan,
             axis=1,
         )
-        logging.info('Converted coordinates from hourangle to deg.')
-
+        logging.info("Converted coordinates from hourangle to deg.")

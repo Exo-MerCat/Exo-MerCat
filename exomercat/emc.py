@@ -11,6 +11,7 @@ from astropy import units as u
 from astropy.coordinates import SkyCoord
 import logging
 
+
 class Emc(Catalog):
     def __init__(self):
         """
@@ -57,7 +58,7 @@ class Emc(Catalog):
                                 final_alias_total.append(internal_al)
 
             self.data.loc[self.data.Host == host, "alias"] = ",".join(final_alias_total)
-        logging.info('Aliases labeled as hosts in some other entry checked.')
+        logging.info("Aliases labeled as hosts in some other entry checked.")
 
     def simbad_list_host_search(self, column: str) -> None:
         """
@@ -811,7 +812,9 @@ class Emc(Catalog):
         for (mainid, letter), group in grouped_df:
             entry = pd.DataFrame([mainid], columns=["MAIN_ID"])
             entry["Letter"] = letter
-            entry['angular_separation']=str(list(set(group.angular_separation.unique())))
+            entry["angular_separation"] = str(
+                list(set(group.angular_separation.unique()))
+            )
             entry["ra_official"] = list(set(group.ra))[0]
             entry["dec_official"] = list(set(group.dec))[0]
 
@@ -846,26 +849,30 @@ class Emc(Catalog):
                 result.loc[0, p] = np.nan
 
                 #                result.MAIN_ID=mainid
-                subgroup = group[p[:-1]].fillna(np.nan).replace('',np.nan)
+                subgroup = group[p[:-1]].fillna(np.nan).replace("", np.nan)
                 subgroup = subgroup.dropna(subset=[p[1]])
                 subgroup = subgroup.dropna(subset=[p[3], p[2]])
 
                 if len(subgroup) > 0:
-                    subgroup[p[1]]=subgroup[p[1]].astype('float')
-                    subgroup['maxrel'] = subgroup[p[3]].astype('float') / subgroup[p[1]].astype('float')
-                    subgroup['minrel'] = subgroup[p[2]].astype('float') / subgroup[p[1]].astype('float')
-                    subgroup=subgroup.replace(np.inf, np.nan)
-                    subgroup['maxrel'] = subgroup['maxrel'].fillna(subgroup[p[2]])
-                    subgroup['minrel'] = subgroup['minrel'].fillna(subgroup[p[2]])
+                    subgroup[p[1]] = subgroup[p[1]].astype("float")
+                    subgroup["maxrel"] = subgroup[p[3]].astype("float") / subgroup[
+                        p[1]
+                    ].astype("float")
+                    subgroup["minrel"] = subgroup[p[2]].astype("float") / subgroup[
+                        p[1]
+                    ].astype("float")
+                    subgroup = subgroup.replace(np.inf, np.nan)
+                    subgroup["maxrel"] = subgroup["maxrel"].fillna(subgroup[p[2]])
+                    subgroup["minrel"] = subgroup["minrel"].fillna(subgroup[p[2]])
                     subgroup[p[-1]] = subgroup[["maxrel", "minrel"]].max(axis=1)
 
-                    result = subgroup.loc[subgroup[p[-1]] == subgroup[p[-1]].min(),p]
+                    result = subgroup.loc[subgroup[p[-1]] == subgroup[p[-1]].min(), p]
                     result = result.sort_values(by=p[0]).head(1)
-                    result=result.reset_index().drop(columns=["index"])
+                    result = result.reset_index().drop(columns=["index"])
 
-                result=result[p]
+                result = result[p]
 
-                entry = pd.concat([entry, result], axis=1 )
+                entry = pd.concat([entry, result], axis=1)
 
                 # Status
                 entry["Status_string"] = ",".join(group.CatalogStatus)
@@ -879,14 +886,18 @@ class Emc(Catalog):
                     entry["Status"] = "FALSE POSITIVE"
                 # YEAR OF DISCOVERY
                 try:
-                    entry["YOD"] = sorted(group.YOD.astype('int').dropna().unique())[0]
+                    entry["Discovery_year"] = sorted(
+                        group.YOD.astype("int").dropna().unique()
+                    )[0]
                 except:
-                    entry["YOD"]=np.nan
+                    entry["Discovery_year"] = np.nan
                 # Discovery method
                 try:
-                    entry["DiscMeth"] = list(set(group.DiscMeth[group.DiscMeth!='Default'].unique()))
+                    entry["Discovery_method"] = list(
+                        set(group.DiscMeth[group.DiscMeth != "Default"].unique())
+                    )
                 except:
-                    entry['DiscMeth'] = 'NA'
+                    entry["Discovery_method"] = "NA"
                 # Catalog
                 entry["catalog"] = str(sorted(group.catalog.unique()))
 
@@ -900,10 +911,14 @@ class Emc(Catalog):
                     [x for x in set(final_alias.split(",")) if x]
                 )
             try:
-                final_catalog = pd.concat([final_catalog, entry], sort=False).reset_index(drop=True)
+                final_catalog = pd.concat(
+                    [final_catalog, entry], sort=False
+                ).reset_index(drop=True)
             except:
-                import ipdb;ipdb.set_trace()
-        self.data =final_catalog
+                import ipdb
+
+                ipdb.set_trace()
+        self.data = final_catalog
 
     def select_best_mass(self) -> None:
         """
@@ -930,7 +945,7 @@ class Emc(Catalog):
         self.data.loc[
             self.data.MASSREL.fillna(1e9) > self.data.MSINIREL.fillna(1e9),
             "BestMass_provenance",
-        ] = 'Msini'
+        ] = "Msini"
 
         self.data.loc[
             self.data.MASSREL.fillna(1e9) <= self.data.MSINIREL.fillna(1e9), "BestMass"
@@ -950,7 +965,7 @@ class Emc(Catalog):
         self.data.loc[
             self.data.MASSREL.fillna(1e9) > self.data.MSINIREL.fillna(1e9),
             "BestMass_provenance",
-        ] = 'Mass'
+        ] = "Mass"
 
     def keep_columns(self) -> None:
         """
@@ -998,14 +1013,14 @@ class Emc(Catalog):
             "i_max",
             "i_min",
             "i_url",
-            "DiscMeth",
+            "Discovery_method",
             "Status",
             "Status_string",
             "CONFIRMED",
-            "YOD",
+            "Discovery_year",
             "final_alias",
             "catalog",
-            'angular_separation'
-            #"MismatchFlagHost",
+            "angular_separation"
+            # "MismatchFlagHost",
         ]
-        self.data=self.data[keep]
+        self.data = self.data[keep]

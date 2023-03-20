@@ -11,6 +11,7 @@ from astropy.coordinates import SkyCoord
 import astropy.units as u
 import logging
 
+
 def get_parameter(treeobject, parameter: str) -> str:
     """
     The getParameter function takes two arguments:
@@ -197,7 +198,9 @@ class Oec(Catalog):
 
             except BaseException:
                 local_copy = glob.glob(filename + "*.csv")[0]
-                logging.warning("Error fetching the catalog, taking a local copy:", local_copy)
+                logging.warning(
+                    "Error fetching the catalog, taking a local copy:", local_copy
+                )
                 input_file = gzip.open(local_copy, "r")
 
         table = ET.parse(input_file)
@@ -249,7 +252,7 @@ class Oec(Catalog):
 
         tab.to_csv(filename + date.today().strftime("%m-%d-%Y") + ".csv")
         self.data = tab
-        logging.info('Catalog downloaded.')
+        logging.info("Catalog downloaded.")
 
     def uniform_catalog(self) -> None:
         """
@@ -306,7 +309,7 @@ class Oec(Catalog):
                 "RV": "Radial Velocity",
             }
         )
-        logging.info('Catalog uniformed.')
+        logging.info("Catalog uniformed.")
 
     def remove_theoretical_masses(self) -> None:
         # TODO wrong name at least
@@ -338,7 +341,7 @@ class Oec(Catalog):
             self.data.loc[
                 self.data["masstype"] == "msini", "Msini" + value
             ] = self.data.loc[self.data["masstype"] == "msini", "M" + value]
-        logging.info('Theoretical masses/radii removed.')
+        logging.info("Theoretical masses/radii removed.")
 
     def assign_status(self) -> None:
         """
@@ -357,8 +360,8 @@ class Oec(Catalog):
                 self.data.at[i, "Status"] = "FALSE POSITIVE"
             elif "Kepler Objects of Interest" in self.data.at[i, "list"]:
                 self.data.at[i, "Status"] = "CANDIDATE"
-        logging.info('Status column assigned.')
-        logging.info('Updated Status:')
+        logging.info("Status column assigned.")
+        logging.info("Updated Status:")
         logging.info(self.data.Status.value_counts())
 
     def handle_reference_format(self) -> None:
@@ -368,8 +371,7 @@ class Oec(Catalog):
         """
         for item in ["e", "Mass", "Msini", "i", "a", "P", "R"]:
             self.data[item + "_url"] = self.name
-        logging.info('Reference columns uniformed.')
-
+        logging.info("Reference columns uniformed.")
 
     def convert_coordinates(self) -> None:
         """
@@ -399,4 +401,4 @@ class Oec(Catalog):
             else np.nan,
             axis=1,
         )
-        logging.info('Converted coordinates from hourangle to deg.')
+        logging.info("Converted coordinates from hourangle to deg.")

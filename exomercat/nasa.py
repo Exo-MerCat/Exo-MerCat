@@ -3,6 +3,7 @@ import numpy as np
 from exomercat.catalogs import Catalog
 import logging
 
+
 class Nasa(Catalog):
     def __init__(self) -> None:
         """
@@ -106,7 +107,7 @@ class Nasa(Catalog):
             }
         )
 
-        logging.info('Catalog uniformed.')
+        logging.info("Catalog uniformed.")
 
     def sort_bestmass_to_mass_or_msini(self) -> None:
         """
@@ -186,8 +187,7 @@ class Nasa(Catalog):
                 else:
                     self.data.at[i, item + "_url"] = ""
             self.data.loc[self.data[item].isnull(), item + "_url"] = ""
-        logging.info('Reference columns uniformed.')
-
+        logging.info("Reference columns uniformed.")
 
     def assign_status(self) -> None:
         """
@@ -204,15 +204,16 @@ class Nasa(Catalog):
 
         """
         self.data["Status"] = "CONFIRMED"
-        logging.info('Status column assigned.')
-        logging.info('Updated Status:')
+        logging.info("Status column assigned.")
+        logging.info("Updated Status:")
         logging.info(self.data.Status.value_counts())
+
     def convert_coordinates(self) -> None:
-        '''The coordinates function takes the RA and Dec columns of a dataframe,
+        """The coordinates function takes the RA and Dec columns of a dataframe,
         and converts them to decimal degrees. It replaces any
         missing values with NaN. Finally, it uses SkyCoord to convert from hour angles and
         degrees into decimal degrees.
-        NOT NECESSARY since NASA already has coordinates in degrees'''
+        NOT NECESSARY since NASA already has coordinates in degrees"""
         pass
 
     def remove_theoretical_masses(self):
@@ -247,4 +248,4 @@ class Nasa(Catalog):
             self.data.loc[
                 self.data["R_url"].str.contains("Calculated", na=False), "R" + value
             ] = np.nan
-        logging.info('Theoretical masses/radii removed.')
+        logging.info("Theoretical masses/radii removed.")

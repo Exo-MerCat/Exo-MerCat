@@ -9,6 +9,7 @@ from typing import Union
 import unidecode
 import logging
 
+
 def uniform_string(name: str) -> str:
     """
     The uniform_string function takes a string as input and returns the same string with some common formatting
@@ -93,7 +94,9 @@ class Catalog:
                 )
             except BaseException:
                 local_copy = glob.glob(filename + "*.csv")[0]
-                logging.warning("Error fetching the catalog, taking a local copy:", local_copy)
+                logging.warning(
+                    "Error fetching the catalog, taking a local copy:", local_copy
+                )
                 self.data = pd.read_csv(local_copy)
 
     def convert_datatypes(self) -> None:
@@ -103,8 +106,7 @@ class Catalog:
         to a more space-efficient type. If so, then that conversion is made.
         """
         self.data = self.data.convert_dtypes()
-        logging.info('Converted datatypes.')
-
+        logging.info("Converted datatypes.")
 
     def read_csv_catalog(self, filename: str) -> None:
         """
@@ -166,8 +168,7 @@ class Catalog:
             "catalog",
         ]
         self.data = self.data[keep]
-        logging.info('Selected columns to keep.')
-
+        logging.info("Selected columns to keep.")
 
     def replace_known_mistakes(self) -> None:
         """
@@ -207,7 +208,7 @@ class Catalog:
             for i in config_binary.keys():
                 # does that only the second time it runs
                 if i in self.data.loc[j, "Name"] and "Binary" in self.data.columns:
-                    self.data.loc[j, "Binary"] = config_binary[i].replace('NaN','')
+                    self.data.loc[j, "Binary"] = config_binary[i].replace("NaN", "")
 
         for repl_searchname in ["ra", "dec"]:
             config_replace = read_config_replacements(repl_searchname)
@@ -229,7 +230,7 @@ class Catalog:
         self.data["Name"] = self.data["Name"].apply(unidecode.unidecode)
         self.data["Name"] = self.data.Name.apply(lambda x: " ".join(x.split()))
         self.data = self.data.reset_index(drop=True)
-        logging.info('Known mistakes replaced.')
+        logging.info("Known mistakes replaced.")
 
     def remove_theoretical_masses(self):
         """
@@ -265,10 +266,18 @@ class Catalog:
                 Specify whether the function should print out a list of brown dwarfs
         """
         if print:
-            self.data[self.data.Mass.fillna(self.data.Msini.fillna(0)).replace('', 0).astype(float) > 20.].to_csv(
-                'UniformSources/' + self.name + '_brown_dwarfs.csv')
-        self.data = self.data[self.data.Mass.fillna(self.data.Msini.fillna(0)).replace('', 0).astype(float) <= 20.]
-
+            self.data[
+                self.data.Mass.fillna(self.data.Msini.fillna(0))
+                .replace("", 0)
+                .astype(float)
+                > 20.0
+            ].to_csv("UniformSources/" + self.name + "_brown_dwarfs.csv")
+        self.data = self.data[
+            self.data.Mass.fillna(self.data.Msini.fillna(0))
+            .replace("", 0)
+            .astype(float)
+            <= 20.0
+        ]
 
     def make_errors_absolute(self) -> None:
         """
@@ -297,8 +306,7 @@ class Catalog:
             if self.data[c].dtype in numerics
         ]:
             self.data[c] = self.data[c].abs()
-        logging.info('Made all errors absolute values.')
-
+        logging.info("Made all errors absolute values.")
 
     def uniform_name_host_letter(self) -> None:
         """
@@ -322,7 +330,6 @@ class Catalog:
                 if al != "":
                     polished_alias = polished_alias + "," + uniform_string(al)
             self.data.at[i, "alias"] = polished_alias.lstrip(",")
-
 
         self.data["Letter"] = self.data.apply(lambda row: row.Name[-1:].strip(), axis=1)
 
@@ -352,8 +359,7 @@ class Catalog:
                 alias_polished = alias_polished + "," + al.rstrip()
 
             self.data.at[i, "alias"] = alias_polished.lstrip(",")
-        logging.info('Name, Host, Letter columns uniformed.')
-
+        logging.info("Name, Host, Letter columns uniformed.")
 
     def assign_status(self):
         """
@@ -369,7 +375,6 @@ class Catalog:
         status of that object to whatever status is listed in the KOI and EPIC catalogs and update its coordinates
         if they are missing from the dataframe.
         """
-
 
         tab = pd.read_csv(table_path)
         tab = tab.fillna("")
@@ -409,12 +414,11 @@ class Catalog:
                         if internal_al not in final_alias_total:
                             final_alias_total.append(internal_al)
 
-
             self.data.at[index, "alias"] = ",".join(
                 [x for x in set(final_alias_total) if x != "nan"]
             )
 
-        logging.info('Status from '+ table_path+' checked.')
+        logging.info("Status from " + table_path + " checked.")
 
     def fill_binary_column(self) -> None:
         """
@@ -485,10 +489,13 @@ class Catalog:
                 self.data.binaryflag == 2, "Binary"
             ].replace("", "S-type")
 
-            self.data.loc[self.data.binaryflag == 1, "Binary"] = "AB"
-            self.data.loc[self.data.binaryflag == 3, "Binary"] = "Rogue"
-        logging.info('Fixed planets orbiting binary stars.')
-
+            self.data.loc[self.data.binaryflag == 1, "Binary"] = self.data.loc[
+                self.data.binaryflag == 1, "Binary"
+            ].replace("", "AB")
+            self.data.loc[self.data.binaryflag == 3, "Binary"] = self.data.loc[
+                self.data.binaryflag == 3, "Binary"
+            ].replace("", "Rogue")
+        logging.info("Fixed planets orbiting binary stars.")
 
     def create_catalogstatus_string(self) -> None:
         """
@@ -497,7 +504,7 @@ class Catalog:
         column for use in creating plots.
         """
         self.data["CatalogStatus"] = self.data.catalog + ": " + self.data.Status
-        logging.info('CatalogStatus column created.')
+        logging.info("CatalogStatus column created.")
 
     def make_uniform_alias_list(self):
         """
@@ -514,7 +521,7 @@ class Catalog:
             self.data.loc[self.data.Host == host, "alias"] = ",".join(
                 [x for x in set(final_alias.split(",")) if x]
             )
-        logging.info('Lists of aliases uniformed.')
+        logging.info("Lists of aliases uniformed.")
 
     def convert_coordinates(self) -> None:
         """
@@ -535,6 +542,6 @@ class Catalog:
 
 
         """
+        self.data = self.data.sort_values(by="Name")
         self.data.to_csv(filename)
-        logging.info('Printed catalog.')
-
+        logging.info("Printed catalog.")
