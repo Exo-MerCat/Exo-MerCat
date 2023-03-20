@@ -1,6 +1,8 @@
 # Exo-MerCat
 
 ## Installation
+This version is compatible with Python 3.8.
+
 ```pip install -r requirements.txt```
 
 ## Usage 

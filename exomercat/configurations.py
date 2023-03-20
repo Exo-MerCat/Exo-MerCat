@@ -4,25 +4,18 @@ import configparser
 
 def service_files_initialization() -> None:
     """
-    The service_files_initialization function creates the EMC and EMClogs folders if they do not exist,
-    and deletes all files in the EMClogs folder. It then creates check_alias.txt, coord_errors.txt, binary_mismatch.txt,
-    mainid.txt and duplicatedentries.txt in the EMClogs folder.
-
-    Parameters
-    ----------
-
-    Returns
-    -------
-
-        The mainid
-
-    Doc Author
-    ----------
-        Trelent
+    The service_files_initialization function creates the Exo-MerCat, InputSources, UniformedSources and EMClogs folders
+   if they do not exist, and deletes all files in the EMClogs folder.
     """
-    # CREATE OUTPUT FOLDER
+    # CREATE OUTPUT FOLDERS
     if not os.path.exists("Exo-MerCat/"):
         os.makedirs("Exo-MerCat")
+
+    if not os.path.exists("InputSources/"):
+        os.makedirs("InputSources")
+
+    if not os.path.exists("UniformSources/"):
+        os.makedirs("UniformSources")
 
     # CREATE LOG FOLDER
     if not os.path.exists("EMClogs/"):
