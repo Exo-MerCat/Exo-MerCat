@@ -14,14 +14,26 @@ from exomercat.emc import Emc
 from exomercat.koi import Koi
 from exomercat.configurations import *
 import socket
+import warnings
 import pandas as pd
 from datetime import date
 import logging
+from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 
-import warnings
-warnings.filterwarnings("ignore", 'This pattern is interpreted as a regular expression')
+# Parse command line arguments
+parser = ArgumentParser(formatter_class=ArgumentDefaultsHelpFormatter)
+parser.add_argument("-v", "--verbose",action="store_true", help="increase verbosity")
+parser.add_argument("-w", "--warnings",action="store_true", help="show UserWarnings")
+args = vars(parser.parse_args())
 
-logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.INFO)
+if args['verbose']:
+    logging.basicConfig(format='%(asctime)s %(message)s:', level=logging.INFO)
+if args['warnings']:
+    warnings.filterwarnings("once")
+else:
+    warnings.filterwarnings("ignore")
+
+
 
 
 timeout = 100000
