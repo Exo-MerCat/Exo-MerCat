@@ -56,7 +56,7 @@ class Epic(Catalog):
             axis=1,
         )
 
-        self.data["Default_Name"] = self.data["EPICLETTER"]
+        self.data["Name"] = self.data["EPICLETTER"]
 
         self.data["LETTER"] = self.data.EPICLETTER.apply(lambda row: row[-1:])
         self.data["HDLETTER"] = self.data.hd_name + " " + self.data.LETTER

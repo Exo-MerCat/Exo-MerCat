@@ -27,7 +27,7 @@ parser.add_argument("-w", "--warnings", action="store_true", help="show UserWarn
 args = vars(parser.parse_args())
 
 if args["verbose"]:
-    logging.basicConfig(format="%(asctime)s %(message)s:", level=logging.INFO)
+    logging.basicConfig(format="%(asctime)s: %(message)s", level=logging.INFO)
 if args["warnings"]:
     warnings.filterwarnings("once")
 else:

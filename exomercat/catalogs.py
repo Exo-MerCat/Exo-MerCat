@@ -388,8 +388,8 @@ class Catalog:
 
             if len(sub) > 0:
                 self.data.at[index, "Status"] = sub.at[0, "disposition"]
-                if not list(sub.Default_Name)[0] == "":
-                    self.data.at[index, "Name"] = sub.at[0, "Default_Name"]
+                if not list(sub.Name)[0] == "":
+                    self.data.at[index, "Name"] = sub.at[0, "Name"]
                 if self.data.at[index, "DiscMeth"] == "nan":
                     self.data.at[index, "DiscMeth"] = sub.at[0, "discoverymethod"]
 
@@ -404,8 +404,8 @@ class Catalog:
             sub = sub.drop_duplicates().reset_index()
             if len(sub) > 0:
                 self.data.at[index, "Status"] = sub.at[0, "disposition"]
-                if not list(sub.Default_Name)[0] == "":
-                    self.data.at[index, "Name"] = sub.at[0, "Default_Name"]
+                if not list(sub.Name)[0] == "":
+                    self.data.at[index, "Name"] = sub.at[0, "Name"]
                 if self.data.at[index, "DiscMeth"] == "nan":
                     self.data.at[index, "DiscMeth"] = sub.at[0, "discoverymethod"]
 
