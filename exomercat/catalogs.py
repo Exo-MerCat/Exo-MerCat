@@ -311,7 +311,7 @@ class Catalog:
                     f.write("BINARY: " + binary + "\n")
         f.close()
 
-        f.open("EMCLogs/performed_replacements.txt", "a")
+        f = open("EMCLogs/performed_replacements.txt", "a")
         for name in config_binary.keys():
             self.data.loc[self.data.Name == name, "Binary"] = config_binary[
                 name
