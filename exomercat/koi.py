@@ -82,8 +82,11 @@ class Koi(Catalog):
                 + str(self.data.at[i, "KICHOST"])
             )
 
-            self.data.at[i, "alias"] = ",".join(
-                [x for x in set(self.data.at[i, "alias"].split(",")) if x != "nan"]
+            self.data.at[i, "alias"] = (
+                ",".join(
+                    [x for x in set(self.data.at[i, "alias"].split(",")) if x != "nan"]
+                )
+                + ","
             )
 
             self.data.at[i, "aliasplanet"] = (
@@ -95,12 +98,15 @@ class Koi(Catalog):
                 + ","
                 + str(self.data.at[i, "kepler_name"])
             )
-            self.data.at[i, "aliasplanet"] = ",".join(
-                [
-                    x
-                    for x in set(self.data.at[i, "aliasplanet"].split(","))
-                    if x != "nan"
-                ]
+            self.data.at[i, "aliasplanet"] = (
+                ",".join(
+                    [
+                        x
+                        for x in set(self.data.at[i, "aliasplanet"].split(","))
+                        if x != "nan"
+                    ]
+                )
+                + ","
             )
 
         self.data["Name"] = self.data["KOILETTER"]

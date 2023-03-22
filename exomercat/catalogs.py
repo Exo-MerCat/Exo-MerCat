@@ -170,6 +170,21 @@ class Catalog:
         self.data = self.data[keep]
         logging.info("Selected columns to keep.")
 
+    def identify_brown_dwarfs(self) -> None:
+        """
+        The identify_brown_dwarfs function identifies possible brown dwarfs in the dataframe.
+            It does this by checking if the last character of a planet name is a number or if it ends
+            with an uppercase letter. If so, it fills the Letter cell with 'BD' to filter it out later.
+            The function excludes KOI-like objects by avoid the patterns ".0d" with d being a digit.
+        """
+        for i in self.data.index:
+            if not str(re.search("\d$", self.data.at[i, "Name"], re.M)) == "None":
+                if self.data.at[i, "Name"][-3:-1] != ".0":
+                    self.data.at[i, "Letter"] = "BD"
+            if not str(re.search("[aABCD]$", self.data.at[i, "Name"], re.M)) == "None":
+                self.data.at[i, "Letter"] = "BD"
+        logging.info("Identified possible Brown Dwarfs (no letter for planet name).")
+
     def replace_known_mistakes(self) -> None:
         """
         The replace function replaces the values in the dataframe with those specified in replacements.ini
@@ -177,38 +192,78 @@ class Catalog:
         const = find_const()
         config_name = read_config_replacements("NAME")
         config_host = read_config_replacements("HOST")
-        config_hd = read_config_replacements("HD")
-        config_binary = read_config_replacements("BINARY")
+        # config_hd = read_config_replacements("HD")
+
+        # check unused replacements
+        f = open("EMClogs/unused_replacements.txt", "a")
+        f.write("****" + self.name + "****\n")
+        for name in config_name.keys():
+            if len(self.data[self.data.Name == name]) == 0:
+                f.write("NAME: " + name + "\n")
+        for host in config_host.keys():
+            if len(self.data[self.data.Host == host]) == 0:
+                f.write("HOST: " + host + "\n")
+        # for hd in config_hd.keys():
+        #     if len(self.data[self.data.Name == hd])==0:
+        #         f.write('HD: '+ hd+'\n')
+        for coord in ["ra", "dec"]:
+            config_replace = read_config_replacements(coord)
+            for name in config_replace.keys():
+                if len(self.data.loc[self.data.Host == name]) == 0:
+                    f.write(coord + ": " + name + "\n")
+                else:
+                    if (
+                        abs(
+                            self.data.loc[self.data.Host == name, coord]
+                            - float(config_replace[name])
+                        ).all()
+                        <= 0.01
+                    ):
+                        f.write(
+                            coord
+                            + ": "
+                            + name
+                            + " "
+                            + str(
+                                max(
+                                    abs(
+                                        self.data.loc[self.data.Host == name][coord]
+                                        - float(config_replace[name])
+                                    )
+                                )
+                            )
+                            + "\n"
+                        )
+
+        f.close()
+
+        f = open("EMClogs/performed_replacements.txt", "a")
+        f.write("****" + self.name + "****\n")
         for j in self.data.index:
             for i in const.keys():
                 if i in self.data.loc[j, "Name"]:
                     self.data.loc[j, "Name"] = self.data.loc[j, "Name"].replace(
                         i, const[i]
                     )
+                    f.write("NAME: " + i + " to " + const[i] + "\n")
             for i in const.keys():
                 if i in self.data.loc[j, "Host"]:
                     self.data.loc[j, "Host"] = self.data.loc[j, "Host"].replace(
                         i, const[i]
                     )
+                    f.write("HOST: " + i + " to " + const[i] + "\n")
             for i in config_name.keys():
                 if i in self.data.loc[j, "Name"]:
                     self.data.loc[j, "Name"] = self.data.loc[j, "Name"].replace(
                         i, config_name[i]
                     )
+                    f.write("NAME: " + i + " to " + config_name[i] + "\n")
             for i in config_host.keys():
                 if i in self.data.loc[j, "Host"]:
                     self.data.loc[j, "Host"] = self.data.loc[j, "Host"].replace(
                         i, config_host[i]
                     )
-            for i in config_hd.keys():
-                if i in self.data.loc[j, "Name"]:
-                    self.data.loc[j, "Name"] = self.data.loc[j, "Name"].replace(
-                        i, config_hd[i]
-                    )
-            for i in config_binary.keys():
-                # does that only the second time it runs
-                if i in self.data.loc[j, "Name"] and "Binary" in self.data.columns:
-                    self.data.loc[j, "Binary"] = config_binary[i].replace("NaN", "")
+                    f.write("HOST: " + i + " to " + config_host[i] + "\n")
 
         for repl_searchname in ["ra", "dec"]:
             config_replace = read_config_replacements(repl_searchname)
@@ -217,6 +272,7 @@ class Catalog:
                     self.data.loc[self.data.Host == name, repl_searchname] = float(
                         change
                     )
+                    f.write(repl_searchname + ": " + name + " to " + change + "\n")
                 except BaseException:
                     pass
 
@@ -226,11 +282,42 @@ class Catalog:
                 self.data = self.data[
                     ~(self.data[check].str.contains(drop.strip(), na=False))
                 ]
+                f.write("DROP: " + check + ":" + drop + "\n")
 
+        f.close()
         self.data["Name"] = self.data["Name"].apply(unidecode.unidecode)
         self.data["Name"] = self.data.Name.apply(lambda x: " ".join(x.split()))
         self.data = self.data.reset_index(drop=True)
         logging.info("Known mistakes replaced.")
+
+    def check_known_binary_mismatches(self) -> None:
+        """
+        The check_known_binary_mismatches function checks for known mismatches between the binary names in the
+            dataframe and those in the config file. If there is a mismatch, it will replace it with what is specified
+            in the config file. It also writes to two files: one that lists all of the replacements performed, and
+            another that lists all the replacements not used.
+        """
+        config_binary = read_config_replacements("BINARY")
+        f = open("EMClogs/unused_replacements.txt", "a")
+        # check unused replacements
+        for binary in config_binary.keys():
+            if len(self.data[self.data.Name == binary]) == 0:
+                f.write("BINARY: " + binary + "\n")
+            else:
+                if (
+                    self.data[self.data.Name == binary].Binary
+                    == config_binary[binary].replace("NaN", "")
+                ).all():
+                    f.write("BINARY: " + binary + "\n")
+        f.close()
+
+        f.open("EMCLogs/performed_replacements.txt", "a")
+        for name in config_binary.keys():
+            self.data.loc[self.data.Name == name, "Binary"] = config_binary[
+                name
+            ].replace("NaN", "")
+            f.write("BINARY: " + name + " to " + config_binary[name] + "\n")
+        f.close()
 
     def remove_theoretical_masses(self):
         """
@@ -267,16 +354,22 @@ class Catalog:
         """
         if print:
             self.data[
+                (
+                    self.data.Mass.fillna(self.data.Msini.fillna(0))
+                    .replace("", 0)
+                    .astype(float)
+                    > 20.0
+                )
+                | (self.data.Letter == "BD")
+            ].to_csv("UniformSources/" + self.name + "_brown_dwarfs.csv")
+        self.data = self.data[
+            (
                 self.data.Mass.fillna(self.data.Msini.fillna(0))
                 .replace("", 0)
                 .astype(float)
-                > 20.0
-            ].to_csv("UniformSources/" + self.name + "_brown_dwarfs.csv")
-        self.data = self.data[
-            self.data.Mass.fillna(self.data.Msini.fillna(0))
-            .replace("", 0)
-            .astype(float)
-            <= 20.0
+                <= 20.0
+            )
+            & (self.data.Letter != "BD")
         ]
 
     def make_errors_absolute(self) -> None:
@@ -327,6 +420,8 @@ class Catalog:
         for i in self.data.index:
             polished_alias = ""
             for al in self.data.at[i, "alias"].split(","):
+                if not str(re.search(" [b-z]$", al, re.M)) == "None":
+                    al = al[:-1].strip()
                 if al != "":
                     polished_alias = polished_alias + "," + uniform_string(al)
             self.data.at[i, "alias"] = polished_alias.lstrip(",")
@@ -344,21 +439,20 @@ class Catalog:
                     .replace("5", "f")
                     .replace("6", "g")
                     .replace("7", "h")
-                    .replace("8", "i" "" "")
+                    .replace("8", "i")
+                )
+                self.data.loc[self.data.Name == identifier, "Name"] = (
+                    identifier.replace(".01", " b")
+                    .replace(".02", " c")
+                    .replace(".03", " d")
+                    .replace(".04", " e")
+                    .replace(".05", " f")
+                    .replace(".06", " g")
+                    .replace(".07", " h")
+                    .replace(".08", " i")
                 )
                 # self.data.loc[self.data.Name == identifier, "Host"] = identifier[:-3].strip()
-            elif str(re.search(" [b-i]$", identifier, re.M)) == "None":
-                self.data.loc[self.data.Name == identifier, "Letter"] = "b"
 
-        for i in self.data.index:
-            alias_polished = ""
-            for al in self.data.at[i, "alias"].split(","):
-                al = re.sub(".0\d$", "", al.rstrip())
-                al = re.sub(" [b-i]$", "", al.rstrip())
-                al = re.sub("^K0", "KOI-", al.lstrip())
-                alias_polished = alias_polished + "," + al.rstrip()
-
-            self.data.at[i, "alias"] = alias_polished.lstrip(",")
         logging.info("Name, Host, Letter columns uniformed.")
 
     def assign_status(self):
@@ -382,8 +476,7 @@ class Catalog:
         for index in self.data.index:
             name = self.data.at[index, "Name"]
             final_alias_total = self.data.at[index, "alias"].split(",")
-
-            sub = tab[tab.aliasplanet.str.contains(name)]
+            sub = tab[tab.aliasplanet.str.contains(name + ",")]
             sub = sub.drop_duplicates().reset_index()
 
             if len(sub) > 0:
@@ -399,8 +492,10 @@ class Catalog:
                             final_alias_total.append(internal_al)
 
             host = self.data.at[index, "Host"]
+            letter = self.data.at[index, "Letter"]
             # check hosts
-            sub = tab[tab.alias.str.contains(host)]
+            sub = tab[tab.alias.str.contains(host + ",")]
+            sub = sub[sub.LETTER == letter]
             sub = sub.drop_duplicates().reset_index()
             if len(sub) > 0:
                 self.data.at[index, "Status"] = sub.at[0, "disposition"]
@@ -411,6 +506,23 @@ class Catalog:
 
                 for internal_alias in sub.alias:
                     for internal_al in internal_alias.split(","):
+                        internal_al = (
+                            uniform_string(internal_al)
+                            .replace(" b", "")
+                            .replace(" c", "")
+                            .replace(" d", "")
+                            .replace(" e", "")
+                            .replace(" f", "")
+                            .replace(" g", "")
+                            .replace(" h", "")
+                            .replace(".01", "")
+                            .replace(".02", "")
+                            .replace(".03", "")
+                            .replace(".04", "")
+                            .replace(".05", "")
+                            .replace(".06", "")
+                            .replace(".07", "")
+                        )
                         if internal_al not in final_alias_total:
                             final_alias_total.append(internal_al)
 
@@ -519,7 +631,7 @@ class Catalog:
             for al in group.alias:
                 final_alias = final_alias + "," + al
             self.data.loc[self.data.Host == host, "alias"] = ",".join(
-                [x for x in set(final_alias.split(",")) if x]
+                [uniform_string(x) for x in set(final_alias.split(",")) if x]
             )
         logging.info("Lists of aliases uniformed.")
 

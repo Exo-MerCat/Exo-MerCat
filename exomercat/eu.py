@@ -5,7 +5,7 @@ import pandas as pd
 import urllib.request
 import numpy as np
 from exomercat.configurations import *
-from exomercat.catalogs import Catalog
+from exomercat.catalogs import Catalog, uniform_string
 from datetime import date
 from astropy.io.votable import parse_single_table
 from astropy.io import ascii
@@ -112,9 +112,10 @@ class Eu(Catalog):
         for i in self.data.index:
             alias_polished = ""
             for al in self.data.at[i, "alias"].split(","):
-                al = re.sub(".0\d$", "", al.rstrip())
-                al = re.sub(" [b-i]$", "", al.rstrip())
-                al = re.sub("^K0", "KOI-", al.lstrip())
+                al = uniform_string(al)
+                # al = re.sub(".0\d$", "", al.rstrip())
+                # al = re.sub(" [b-i]$", "", al.rstrip())
+                # al = re.sub("^K0", "KOI-", al.lstrip())
                 alias_polished = alias_polished + "," + al.rstrip()
 
             self.data.at[i, "alias"] = alias_polished.lstrip(",")
@@ -170,7 +171,7 @@ class Eu(Catalog):
 
         logging.info("Status column assigned.")
         logging.info("Updated Status:")
-        logging.info(list(self.data.Status.value_counts()))
+        logging.info(self.data.Status.value_counts())
 
     def handle_reference_format(self) -> None:
         """

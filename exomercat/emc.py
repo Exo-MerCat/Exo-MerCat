@@ -1,7 +1,5 @@
 import numpy as np
 import pandas as pd
-import pdb, traceback, sys
-from exomercat.configurations import *
 from astroquery.simbad import Simbad
 from statistics import mode
 from exomercat.catalogs import Catalog
@@ -13,7 +11,7 @@ import logging
 
 
 class Emc(Catalog):
-    def __init__(self):
+    def __init__(self) -> None:
         """
         The __init__ function is called when the class is instantiated. It sets up the instance of the class, and
         defines any variables that will be used by other functions in the class. In this case, we are setting up
@@ -23,12 +21,23 @@ class Emc(Catalog):
         self.name = "exomercat"
         self.data = pd.DataFrame()
 
+    def convert_coordinates(self) -> None:
+        """The coordinates function takes the RA and Dec columns of a dataframe,
+        and converts them to decimal degrees. It replaces any
+        missing values with NaN. Finally, it uses SkyCoord to convert from hour angles and
+        degrees into decimal degrees.
+        NOT NECESSARY since EMC already has coordinates in degrees"""
+        pass
+
     def alias_as_host(self) -> None:
         """
         The alias_as_host function takes the alias column and checks if any of the aliases are labeled as hosts in
         some other entry. If they are, it will change their host to be that of the original host. It will
-        then add all aliases of both hosts into one list for each row.
+        then add all aliases of both hosts into one list for each row. It is okay if it happens multiple times,
+        as long as it uniforms the host name and adds up all the aliases, SIMBAD will find them coherently.
         """
+        f = open("EMClogs/alias_as_host.txt", "a")
+        counter = 0
         host: str
         for host, group in self.data.groupby(by="Host"):
             final_alias = ""
@@ -40,25 +49,25 @@ class Emc(Catalog):
                 set([x.strip() for x in set(final_alias.split(",")) if x])
             )
 
-            counter = 0
             final_alias_total = final_alias.copy()
             for al in final_alias:
                 if len(self.data.loc[self.data.Host == al]) > 0:
                     counter = counter + 1
                     self.data.loc[self.data.Host == al, "Host"] = host
-                    print(
-                        "KNOWN ALIAS AS HOST",
-                        host,
-                        al,
-                        file=open("EMClogs/alias_as_host.txt", "a"),
-                    )
+                    f.write("ALIAS: " + al + " AS HOST:" + host + "\n")
                     for internal_alias in self.data.loc[self.data.Host == al].alias:
                         for internal_al in internal_alias.split(","):
                             if internal_al not in final_alias_total:
                                 final_alias_total.append(internal_al)
 
             self.data.loc[self.data.Host == host, "alias"] = ",".join(final_alias_total)
-        logging.info("Aliases labeled as hosts in some other entry checked.")
+        f.close()
+
+        logging.info(
+            "Aliases labeled as hosts in some other entry checked. It happens "
+            + str(counter)
+            + " times."
+        )
 
     def simbad_list_host_search(self, column: str) -> None:
         """
@@ -100,7 +109,16 @@ class Emc(Catalog):
                 self.data.at[i, "DEC"] = result_table_successful[
                     result_table_successful.TYPED_ID == check
                 ]["DEC"].to_numpy()[0]
-
+        f = open("EMClogs/main_id_correction.txt", "a")
+        for identifier in self.data["MAIN_ID"]:
+            if not str(re.search("[\ \d][b-i]$", identifier, re.M)) == "None":
+                self.data.loc[self.data.MAIN_ID == identifier, "MAIN_ID"] = identifier[
+                    :-1
+                ].strip()
+                f.write(
+                    "MAINID corrected " + identifier + " to " + identifier[:-1] + "\n"
+                )
+        f.close()
         self.data.MAIN_ID = self.data.MAIN_ID.fillna("")
         self.data.IDS = self.data.IDS.fillna("")
         self.data.RA = self.data.RA.fillna("")
@@ -357,6 +375,7 @@ class Emc(Catalog):
                     )
 
                     response = service.run_sync(query, timeout=None)
+
                     table = response.to_table().to_pandas()
                     if len(table) > 0:
                         self.data.loc[i, "MAIN_ID"] = "TIC " + str(
@@ -570,9 +589,10 @@ class Emc(Catalog):
         """
         countra = 0
         countdec = 0
-        countrasimbad = 0
-        countdecsimbad = 0
+
         self.data["Coordinate_Mismatch"] = ""
+
+        f = open("EMClogs/check_coordinates.txt", "a")
         for host, group in self.data[self.data.MAIN_ID == ""].groupby("Host"):
             ra = mode(list(round(group.ra, 3)))
             dec = mode(list(round(group.dec, 3)))
@@ -580,34 +600,36 @@ class Emc(Catalog):
 
             if (abs(group["ra"] - ra) > 0.1).any():
                 countra = countra + 1
-                print(
-                    "*** MISMATCH ON RA *** ",
-                    group[["Name", "Host", "Binary", "Letter", "catalog", "ra"]],
-                    file=open("EMClogs/check_coordinates.txt", "a"),
+                f.write(
+                    "*** MISMATCH ON RA *** "
+                    + str(
+                        (group[["Name", "Host", "Binary", "Letter", "catalog", "ra"]])
+                    )
+                    + "\n"
                 )
-                mismatch_string = "ra"
+                mismatch_string = "RA"
             if (abs(group["dec"] - dec) > 0.1).any():
                 countdec = countdec + 1
-                print(
-                    "*** MISMATCH ON DEC *** ",
-                    group[["Name", "Host", "Binary", "Letter", "catalog", "dec"]],
-                    file=open("EMClogs/check_coordinates.txt", "a"),
+                f.write(
+                    "*** MISMATCH ON DEC *** "
+                    + str(
+                        (group[["Name", "Host", "Binary", "Letter", "catalog", "dec"]])
+                    )
+                    + "\n"
                 )
                 mismatch_string = mismatch_string + "DEC"
 
             self.data.loc[group.index]["Coordinate_Mismatch"] = mismatch_string
+        f.close()
+        logging.info("Found " + str(countra) + " mismatched RA.")
+        logging.info("Found " + str(countdec) + " mismatched DEC.")
+        logging.info(self.data.Coordinate_Mismatch.value_counts())
 
-        print("Mismatched RA", countra, countrasimbad)
-        print("Mismatched DEC", countdec, countdecsimbad)
-        print(self.data.Coordinate_Mismatch.value_counts())
-
-    def simbad_coordinate_check(self):
+    def get_coordinates_from_simbad(self):
         """
-        The simbad_coordinate_check function takes the dataframe and checks if
-        there are any matches in Simbad for the coordinates of each object.
-        It does this by querying Simbad with a circle around each coordinate,
-        starting at 0.01 degrees and increasing to 0.5 degrees until it finds
-        a match or gives up.
+        This function takes the dataframe and checks if there are any matches in Simbad for the coordinates of each
+        object. It does this by querying Simbad with a circle around each coordinate, starting at 0.01 degrees and
+        increasing to 0.5 degrees until it finds a match or gives up.
         """
         self.data["angular_separation"] = 0
         service = pyvo.dal.TAPService("http://simbad.u-strasbg.fr:80/simbad/sim-tap")
@@ -653,19 +675,16 @@ class Emc(Catalog):
                     result_table = result_table.to_pandas()
                     self.data.loc[ind, "IDS"] = result_table.loc[0, "IDS"]
 
-            print(
-                "After coordinate check at tolerance",
-                tolerance,
-                self.data[self.data.MAIN_ID == ""].shape,
-            )
-            print(
-                "Maximum angular separation at tolerance",
-                tolerance,
-                max(self.data.angular_separation),
+            logging.info(
+                "After coordinate check at tolerance "
+                + str(tolerance)
+                + " residuals: "
+                + str(self.data[self.data.MAIN_ID == ""].shape)
+                + ". Maximum angular separation: "
+                + str(max(self.data.angular_separation))
             )
             if len(self.data[self.data.MAIN_ID == ""]) == 0:
                 break
-        print(self.data.angular_separation.value_counts())
 
     def check_same_host_different_id(self) -> None:
         """
@@ -674,113 +693,203 @@ class Emc(Catalog):
         This should _never_ happen unless the SIMBAD search is failing.
 
         """
+        f = open("EMClogs/same_host_different_id.txt", "a")
         for host, group in self.data.groupby("HostBinary"):
             if len(group.MAIN_ID.drop_duplicates()) > 1:
-                print(
-                    "BINARY MISMATCH FOR THE SAME TARGET",
-                    host,
-                    list(group.MAIN_ID),
-                    list(group.Binary),
-                    list(group.catalog),
-                    file=open("EMClogs/mainid.txt", "a"),
+                f.write(
+                    host
+                    + " MAIN_ID: "
+                    + str(list(group.MAIN_ID))
+                    + " Binary: "
+                    + str(list(group.Binary))
+                    + " Catalog: "
+                    + str(list(group.catalog))
+                    + "\n"
                 )
 
         for host, group in self.data.groupby("Host"):
             if len(group.MAIN_ID.drop_duplicates()) > 1:
-                print(
-                    "BINARY MISMATCH FOR THE SAME TARGET",
-                    host,
-                    list(group.MAIN_ID),
-                    list(group.Binary),
-                    list(group.catalog),
-                    file=open("EMClogs/mainid.txt", "a"),
+                f.write(
+                    host
+                    + " MAIN_ID: "
+                    + str(list(group.MAIN_ID))
+                    + " Binary: "
+                    + str(list(group.Binary))
+                    + " Catalog: "
+                    + str(list(group.catalog))
+                    + "\n"
                 )
+        logging.info("Checked if host is found under different MAIN_IDs.")
 
-    def check_binary_mismatch(self) -> None:
+    def check_binary_mismatch(self, keyword: str) -> None:
         """
-        The check_binary_mismatch function checks for binary
-        mismatches in the data (planets that orbit a binary but are
-        controversial in the various catalogs and/or SIMBAD). It
-        also checks if the SIMBAD MAIN_ID labels the target as a binary.
-        Ideally, all of these issues should be fixed by a human.
+        The check_binary_mismatch function checks for binary mismatches in the data (planets that orbit a binary but are
+        controversial in the various catalogs and/or SIMBAD). It also checks if the SIMBAD MAIN_ID labels the target as
+        a binary. Ideally, all of these issues should be fixed by a human for the code to work properly.
         """
-        # TODO assume one value per binary
-        for (name), group in self.data.groupby(by="Name"):
-            if len(set(group.Binary)) > 1:
-                print(
-                    "BINARY MISMATCH FOR THE SAME TARGET",
-                    name,
-                    list(group.MAIN_ID),
-                    list(group.Binary),
-                    list(group.catalog),
-                    file=open("EMClogs/binary_mismatch.txt", "a"),
-                )
-        for (identifier, letter), group in self.data.groupby(by=["MAIN_ID", "Letter"]):
-            if len(set(group.Binary)) > 1:
-                print(
-                    "BINARY MISMATCH FOR THE SAME TARGET (MAIN_ID)",
-                    identifier,
-                    letter,
-                    list(group.Binary),
-                    list(group.catalog),
-                    file=open("EMClogs/coord_errors.txt", "a"),
-                )
+
+        f = open("EMClogs/binary_mismatch.txt", "a")
+        f.write("****" + keyword + "****\n")
         for i in self.data.index:
             if (
-                not str(re.search(r"([\s\d][ABCNS])$", self.data.at[i, "MAIN_ID"]))
+                not str(re.search(r"([\s\d][ABCNS])$", self.data.at[i, keyword]))
                 == "None"
             ):
                 if (
-                    not self.data.at[i, "MAIN_ID"][-1:].strip()
+                    not self.data.at[i, keyword][-1:].strip()
                     == self.data.at[i, "Binary"]
                 ):
-                    print(
-                        "MISSED POTENTIAL BINARY ",
-                        self.data.at[i, "MAIN_ID"],
-                        self.data.at[i, "Name"],
-                        "Binary",
-                        self.data.at[i, "Binary"],
-                        file=open("EMClogs/binary_mismatch.txt", "a"),
+                    f.write(
+                        "MISSED POTENTIAL BINARY Key:"
+                        + self.data.at[i, keyword]
+                        + " Name: "
+                        + self.data.at[i, "Name"]
+                        + " Binary :"
+                        + self.data.at[i, "Binary"]
+                        + "\n"
                     )
 
-    def check_duplicates_in_same_catalog(self) -> None:
-        """
-        The check_duplicates_in_same_catalog function checks for
-        duplicates within the same catalog. It does this by grouping
-        the dataframe by name and checking if there are any values
-        that appear more than once . If so, it prints out a list
-        of all duplicate entries to a text file called
-        "duplicatedentries.txt" in the EMC logs folder.
-        """
-        # TODO fix conceptually
-        count = 0
-        count_mainid = 0
-        for (name), group in self.data.groupby("Name"):
-            if max(group.catalog.value_counts()) > 1:
-                count = count + 1
-                print(
-                    "DUPLICATES WITHIN THE SAME TARGET",
-                    name,
-                    list(group.MAIN_ID),
-                    list(group.Binary),
-                    list(group.catalog),
-                    list(group.Status),
-                    file=open("EMClogs/duplicatedentries.txt", "a"),
+        f.write("****" + keyword + "+Letter THAT COULD BE UNIFORMED****\n")
+        for (key, letter), group in self.data.groupby(by=[keyword, "Letter"]):
+            if len(set(group.Binary)) > 1:
+                # Uniform only S-type
+                if len(group[group.Binary == "S-type"]) > 0:
+                    warning = ""
+                    for i in group[group.Binary == "S-type"].index:
+                        for j in group[group.Binary != "S-type"].index:
+                            if (
+                                abs(group.at[i, "ra"] - group.at[j, "ra"]) > 0.01
+                                and abs(group.at[i, "dec"] - group.at[j, "dec"]) > 0.01
+                            ):
+                                warning = " WARNING, Coordinate Mismatch (PotentialMismatch 1)"
+                                self.data.loc[i, "PotentialMismatch"] = 1
+
+                    f.write(
+                        key
+                        + " NAME:"
+                        + str(list(self.data.loc[group.index, "Name"]))
+                        + " HOST:"
+                        + str(list(self.data.loc[group.index, "Host"]))
+                        + " LETTER:"
+                        + letter
+                        + " BINARY:"
+                        + str(list(self.data.loc[group.index, "Binary"]))
+                        + " CATALOG:"
+                        + str(str(list(self.data.loc[group.index, "catalog"])))
+                        + warning
+                        + " \n"
+                    )
+                    self.data.loc[
+                        group[group.Binary == "S-type"].index, "Binary"
+                    ] = group[group.Binary != "S-type"].Binary.mode()[0]
+
+        for (key, letter), group in self.data.groupby(by=[keyword, "Letter"]):
+            if len(set(group.Binary)) > 1:
+                # UNIFORM only null
+                if len(group[group.Binary == ""]) > 0:
+                    warning = ""
+                    for i in group[group.Binary == ""].index:
+                        for j in group[group.Binary != ""].index:
+                            if (
+                                abs(group.at[i, "ra"] - group.at[j, "ra"]) > 0.01
+                                and abs(group.at[i, "dec"] - group.at[j, "dec"]) > 0.01
+                            ):
+                                warning = (
+                                    " WARNING, Coordinate Mismatch (PotentialMismatch 1) RA: "
+                                    + str(list(group.ra))
+                                    + " DEC:"
+                                    + str(list(group.dec))
+                                )
+                                self.data.loc[i, "PotentialMismatch"] = 1
+
+                    f.write(
+                        key
+                        + " NAME:"
+                        + str(list(group.Name))
+                        + " HOST:"
+                        + str(list(group["Host"]))
+                        + " LETTER:"
+                        + letter
+                        + " BINARY:"
+                        + str(list(group["Binary"]))
+                        + " CATALOG:"
+                        + str(str(list(group["catalog"])))
+                        + warning
+                        + " \n"
+                    )
+
+                    self.data.loc[group[group.Binary == ""].index, "Binary"] = group[
+                        group.Binary != ""
+                    ].Binary.mode()[0]
+
+        # Identify weird systems after applying the correction:
+        f.write(
+            "\n****"
+            + keyword
+            + "+Letter THAT ARE INCONSISTENTLY LABELED (Potential Mismatch 2). They should be treated manually in replacements.ini ****\n\n"
+        )
+        for (key, letter), group in self.data.groupby(by=[keyword, "Letter"]):
+            if len(set(group.Binary)) > 1:
+                f.write(
+                    key
+                    + " NAME:"
+                    + str(list(group.Name))
+                    + " HOST: "
+                    + str(list(group.Host))
+                    + " LETTER:"
+                    + letter
+                    + " BINARY:"
+                    + str(list(group.Binary))
+                    + " CATALOG:"
+                    + str(list(group.catalog))
+                    + "\n"
                 )
-        for (identifier, letter), group in self.data.groupby(["MAIN_ID", "Letter"]):
-            if max(group.catalog.value_counts()) > 1:
-                count_mainid = count_mainid + 1
-                print(
-                    "DUPLICATES WITHIN THE SAME TARGET (MAINID CHECK)",
-                    identifier,
-                    letter,
-                    list(group.Name),
-                    list(group.Binary),
-                    list(group.catalog),
-                    list(group.Status),
-                    file=open("EMClogs/duplicatedentries.txt", "a"),
-                )
-        print("Duplicate values", count, "with mainid", count_mainid)
+                self.data.loc[group.index, "PotentialMismatch"] = 2
+
+        f.close()
+        logging.info("Checked potential binaries to be manually corrected.")
+        logging.info(
+            "Automatic correction results: "
+            + str(self.data.PotentialMismatch.value_counts())
+        )
+
+    # def check_duplicates_in_same_catalog(self) -> None:
+    #     """
+    #     The check_duplicates_in_same_catalog function checks for
+    #     duplicates within the same catalog. It does this by grouping
+    #     the dataframe by name and checking if there are any values
+    #     that appear more than once . If so, it prints out a list
+    #     of all duplicate entries to a text file called
+    #     "duplicatedentries.txt" in the EMC logs folder.
+    #     """
+    #     count = 0
+    #     count_mainid = 0
+    #     for (name), group in self.data.groupby("Name"):
+    #         if max(group.catalog.value_counts()) > 1:
+    #             count = count + 1
+    #             print(
+    #                 "DUPLICATES WITHIN THE SAME TARGET",
+    #                 name,
+    #                 list(group.MAIN_ID),
+    #                 list(group.Binary),
+    #                 list(group.catalog),
+    #                 list(group.Status),
+    #                 file=open("EMClogs/duplicatedentries.txt", "a"),
+    #             )
+    #     for (identifier, letter), group in self.data.groupby(["MAIN_ID", "Letter"]):
+    #         if max(group.catalog.value_counts()) > 1:
+    #             count_mainid = count_mainid + 1
+    #             print(
+    #                 "DUPLICATES WITHIN THE SAME TARGET (MAINID CHECK)",
+    #                 identifier,
+    #                 letter,
+    #                 list(group.Name),
+    #                 list(group.Binary),
+    #                 list(group.catalog),
+    #                 list(group.Status),
+    #                 file=open("EMClogs/duplicatedentries.txt", "a"),
+    #             )
+    #     print("Duplicate values", count, "with mainid", count_mainid)
 
     def cleanup_catalog(self) -> None:
         """
@@ -793,6 +902,7 @@ class Emc(Catalog):
             self.data.loc[self.data[col + "_max"] == 0, col + "_max"] = np.nan
             self.data.loc[self.data[col + "_min"] == np.inf, col + "_min"] = np.nan
             self.data.loc[self.data[col + "_max"] == np.inf, col + "_max"] = np.nan
+        logging.info("Catalog cleared from zeroes and infinities.")
 
     def merge_into_single_entry(self) -> None:
         """
@@ -807,11 +917,16 @@ class Emc(Catalog):
         The function then concatenates all of these entries together into a final catalog.
         """
         final_catalog = pd.DataFrame()
+        f = open("EMClogs/duplicate_entries.txt", "a")
 
-        grouped_df = self.data.groupby(["MAIN_ID", "Letter"], sort=True, as_index=False)
-        for (mainid, letter), group in grouped_df:
+        grouped_df = self.data.groupby(
+            ["MAIN_ID", "Binary", "Letter"], sort=True, as_index=False
+        )
+        for (mainid, binary, letter), group in grouped_df:
             entry = pd.DataFrame([mainid], columns=["MAIN_ID"])
+            entry["Binary"] = binary
             entry["Letter"] = letter
+
             entry["angular_separation"] = str(
                 list(set(group.angular_separation.unique()))
             )
@@ -831,8 +946,6 @@ class Emc(Catalog):
                     break
 
             entry["Host"] = list(set(group["Host"]))[0]
-            # TODO: select most probable
-            entry["Binary"] = list(set(group["Binary"]))[0]
 
             # SELECT BEST MEASUREMENT
             params = [
@@ -899,26 +1012,35 @@ class Emc(Catalog):
                 except:
                     entry["Discovery_method"] = "NA"
                 # Catalog
+
+                if len(group) > len(group.catalog.unique()):
+                    f.write(
+                        "DUPLICATE ENTRY "
+                        + mainid
+                        + " "
+                        + letter
+                        + " CATALOGS "
+                        + str(group.catalog.values)
+                        + " STATUS "
+                        + str(group.Status.values)
+                        + "\n"
+                    )
                 entry["catalog"] = str(sorted(group.catalog.unique()))
 
                 # final Alias
                 final_alias = ""
-                for al in group.alias:
-                    final_alias = final_alias + "," + str(al)
-                for al in group.list_id:
+                for al in group.final_alias:
                     final_alias = final_alias + "," + str(al)
                 entry["final_alias"] = ",".join(
-                    [x for x in set(final_alias.split(",")) if x]
+                    [x for x in set(final_alias.split(",")) if x not in ["A", "B", ""]]
                 )
-            try:
-                final_catalog = pd.concat(
-                    [final_catalog, entry], sort=False
-                ).reset_index(drop=True)
-            except:
-                import ipdb
 
-                ipdb.set_trace()
+            final_catalog = pd.concat([final_catalog, entry], sort=False).reset_index(
+                drop=True
+            )
+        f.close()
         self.data = final_catalog
+        logging.info("Catalog merged into single entries.")
 
     def select_best_mass(self) -> None:
         """
@@ -966,6 +1088,7 @@ class Emc(Catalog):
             self.data.MASSREL.fillna(1e9) > self.data.MSINIREL.fillna(1e9),
             "BestMass_provenance",
         ] = "Mass"
+        logging.info("BestMass calculated.")
 
     def keep_columns(self) -> None:
         """

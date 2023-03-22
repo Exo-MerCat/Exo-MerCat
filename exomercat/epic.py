@@ -78,8 +78,11 @@ class Epic(Catalog):
                 + ","
                 + str(self.data.at[i, "KEPHOST"])
             )
-            self.data.at[i, "alias"] = ",".join(
-                [x for x in set(self.data.at[i, "alias"].split(",")) if x != "nan"]
+            self.data.at[i, "alias"] = (
+                ",".join(
+                    [x for x in set(self.data.at[i, "alias"].split(",")) if x != "nan"]
+                )
+                + ","
             )
             self.data.at[i, "aliasplanet"] = (
                 str(self.data.at[i, "TICLETTER"])
@@ -92,12 +95,15 @@ class Epic(Catalog):
                 + ","
                 + str(self.data.at[i, "k2_name"])
             )
-            self.data.at[i, "aliasplanet"] = ",".join(
-                [
-                    x
-                    for x in set(self.data.at[i, "aliasplanet"].split(","))
-                    if x != "nan"
-                ]
+            self.data.at[i, "aliasplanet"] = (
+                ",".join(
+                    [
+                        x
+                        for x in set(self.data.at[i, "aliasplanet"].split(","))
+                        if x != "nan"
+                    ]
+                )
+                + ","
             )
         logging.info("Catalog uniformed.")
 
