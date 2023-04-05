@@ -4,8 +4,8 @@ import configparser
 
 def service_files_initialization() -> None:
     """
-     The service_files_initialization function creates the Exo-MerCat, InputSources, UniformedSources and EMClogs folders
-    if they do not exist, and deletes all files in the EMClogs folder.
+    The service_files_initialization function creates the Exo-MerCat, InputSources, UniformedSources and EMClogs
+    folders if they do not exist, and deletes all files in the EMClogs folder.
     """
     # CREATE OUTPUT FOLDERS
     if not os.path.exists("Exo-MerCat/"):
@@ -23,7 +23,7 @@ def service_files_initialization() -> None:
     os.system("rm EMClogs/*")
 
 
-def find_const() -> None:
+def find_const() -> dict:
     # TODO fix so that it does the operation inside the function
     """
     The find_const function takes a string and returns the same string with all of its

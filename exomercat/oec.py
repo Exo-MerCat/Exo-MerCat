@@ -262,11 +262,11 @@ class Oec(Catalog):
         self.data = self.data.replace({"None": np.nan})
         self.data = self.data.rename(
             columns={
-                "name": "Name",
-                "discoverymethod": "DiscMeth",
-                "period": "P",
-                "period_min": "P_min",
-                "period_max": "P_max",
+                "name": "name",
+                "discoverymethod": "discovery_method",
+                "period": "p",
+                "period_min": "p_min",
+                "period_max": "p_max",
                 "semimajoraxis": "a",
                 "semimajoraxis_min": "a_min",
                 "semimajoraxis_max": "a_max",
@@ -276,10 +276,10 @@ class Oec(Catalog):
                 "inclination": "i",
                 "inclination_min": "i_min",
                 "inclination_max": "i_max",
-                "radius": "R",
-                "radius_min": "R_min",
-                "radius_max": "R_max",
-                "discoveryyear": "YOD",
+                "radius": "r",
+                "radius_min": "r_min",
+                "radius_max": "r_max",
+                "discoveryyear": "discovery_year",
                 "mass": "M",
                 "mass_min": "M_min",
                 "mass_max": "M_max",
@@ -291,13 +291,13 @@ class Oec(Catalog):
         self.data["alias"] = self.data.alias.apply(
             lambda x: x.strip("[]").replace("'", "").replace("nan", "")
         )
-        self.data["Host"] = self.data.Name.apply(lambda x: str(x[:-1]).strip())
+        self.data["host"] = self.data.name.apply(lambda x: str(x[:-1]).strip())
 
-        for ident in self.data.Name:
+        for ident in self.data.name:
             if not str(re.search("(\.0)\\d$", ident, re.M)) == "None":
-                self.data.loc[self.data.Name == ident, "Host"] = ident[:-3].strip()
+                self.data.loc[self.data.name == ident, "host"] = ident[:-3].strip()
             elif not str(re.search("\\d$", ident, re.M)) == "None":
-                self.data.loc[self.data.Name == ident, "Host"] = ident
+                self.data.loc[self.data.name == ident, "host"] = ident
 
         self.data = self.data.replace(
             {
@@ -316,7 +316,7 @@ class Oec(Catalog):
         """
         The remove_theoretical_masses function is used to remove
         the theoretical masses from the dataframe.
-        It does this by replacing all of the values in Mass and Msini
+        It does this by replacing all of the values in mass and msini
         with their corresponding M value, depending on whether or
         not it is a msini mass.
 
@@ -336,10 +336,10 @@ class Oec(Catalog):
         """
         for value in ["", "_min", "_max"]:
             self.data.loc[
-                self.data["masstype"] != "msini", "Mass" + value
+                self.data["masstype"] != "msini", "mass" + value
             ] = self.data.loc[self.data["masstype"] != "msini", "M" + value]
             self.data.loc[
-                self.data["masstype"] == "msini", "Msini" + value
+                self.data["masstype"] == "msini", "msini" + value
             ] = self.data.loc[self.data["masstype"] == "msini", "M" + value]
         logging.info("Theoretical masses/radii removed.")
 
@@ -353,23 +353,23 @@ class Oec(Catalog):
         """
         for i in self.data.index:
             if "Confirmed" in self.data.at[i, "list"]:
-                self.data.at[i, "Status"] = "CONFIRMED"
+                self.data.at[i, "status"] = "CONFIRMED"
             elif "Controversial" in self.data.at[i, "list"]:
-                self.data.at[i, "Status"] = "CANDIDATE"
+                self.data.at[i, "status"] = "CANDIDATE"
             elif "Retracted" in self.data.at[i, "list"]:
-                self.data.at[i, "Status"] = "FALSE POSITIVE"
+                self.data.at[i, "status"] = "FALSE POSITIVE"
             elif "Kepler Objects of Interest" in self.data.at[i, "list"]:
-                self.data.at[i, "Status"] = "CANDIDATE"
-        logging.info("Status column assigned.")
-        logging.info("Updated Status:")
-        logging.info(self.data.Status.value_counts())
+                self.data.at[i, "status"] = "CANDIDATE"
+        logging.info("status column assigned.")
+        logging.info("Updated status:")
+        logging.info(self.data.status.value_counts())
 
     def handle_reference_format(self) -> None:
         """
         The handle_reference_format function is used to create a url for each reference in the references list.
         Since the Open Exoplanet Catalog does not provide references, we just use "OEC" as a keyword.
         """
-        for item in ["e", "Mass", "Msini", "i", "a", "P", "R"]:
+        for item in ["e", "mass", "msini", "i", "a", "p", "r"]:
             self.data[item + "_url"] = self.name
         logging.info("Reference columns uniformed.")
 

@@ -32,11 +32,11 @@ class Nasa(Catalog):
         self.data["catalog"] = self.name
         self.data = self.data.rename(
             columns={
-                "pl_name": "Name",
-                "discoverymethod": "DiscMeth",
-                "pl_orbper": "P",
-                "pl_orbpererr2": "P_min",
-                "pl_orbpererr1": "P_max",
+                "pl_name": "name",
+                "discoverymethod": "discovery_method",
+                "pl_orbper": "p",
+                "pl_orbpererr2": "p_min",
+                "pl_orbpererr1": "p_max",
                 "pl_orbsmax": "a",
                 "pl_orbsmaxerr2": "a_min",
                 "pl_orbsmaxerr1": "a_max",
@@ -46,25 +46,25 @@ class Nasa(Catalog):
                 "pl_orbincl": "i",
                 "pl_orbinclerr2": "i_min",
                 "pl_orbinclerr1": "i_max",
-                "pl_radj": "R",
-                "pl_radjerr2": "R_min",
-                "pl_radjerr1": "R_max",
-                "disc_year": "YOD",
-                "disc_refname": "Reference",
+                "pl_radj": "r",
+                "pl_radjerr2": "r_min",
+                "pl_radjerr1": "r_max",
+                "disc_year": "discovery_year",
+                "disc_refname": "reference",
                 "rv_flag": "RV",
                 "tran_flag": "Transit",
                 "ttv_flag": "TTV",
-                "pl_msinij": "Msini",
-                "pl_msinijerr2": "Msini_min",
-                "pl_msinijerr1": "Msini_max",
-                "pl_massj": "Mass",
-                "pl_massjerr2": "Mass_min",
-                "pl_massjerr1": "Mass_max",
-                "pl_bmassj": "BestMass",
-                "pl_bmassjerr2": "BestMass_min",
-                "pl_bmassjerr1": "BestMass_max",
-                "pl_bmassprov": "BestMass_provenance",
-                "hostname": "Host",
+                "pl_msinij": "msini",
+                "pl_msinijerr2": "msini_min",
+                "pl_msinijerr1": "msini_max",
+                "pl_massj": "mass",
+                "pl_massjerr2": "mass_min",
+                "pl_massjerr1": "mass_max",
+                "pl_bmassj": "bestmass",
+                "pl_bmassjerr2": "bestmass_min",
+                "pl_bmassjerr1": "bestmass_max",
+                "pl_bmassprov": "bestmass_provenance",
+                "hostname": "host",
                 "st_age": "Age (Gyrs)",
                 "st_ageerr1": "Age_max",
                 "st_ageerr2": "Age_min",
@@ -74,9 +74,9 @@ class Nasa(Catalog):
                 "pl_radj_reflink": "R_url",
                 "pl_orbeccen_reflink": "e_url",
                 "pl_orbsmax_reflink": "a_url",
-                "pl_orbper_reflink": "P_url",
+                "pl_orbper_reflink": "p_url",
                 "pl_orbincl_reflink": "i_url",
-                "pl_bmassj_reflink": "BestMass_url",
+                "pl_bmassj_reflink": "bestmass_url",
             }
         )
 
@@ -84,7 +84,7 @@ class Nasa(Catalog):
             # this happens when you use PLANETARY SYSTEMS TABLE
             self.data = self.data[self.data.default_flag == 1]
 
-        if "BestMass" in self.data.columns:
+        if "bestmass" in self.data.columns:
             # this happens when you use PLANETARY COMPOSITE PARAMETERS TABLE
             self.sort_bestmass_to_mass_or_msini()
 
@@ -111,10 +111,11 @@ class Nasa(Catalog):
 
     def sort_bestmass_to_mass_or_msini(self) -> None:
         """
-        The sort_bestmass_to_mass_or_msini function takes in a DataFrame and sorts the values of BestMass into either Mass or Msini.
-        If the value of BestMass is found to be a mass, then it will be sorted into Mass. If it is found to be an msini value, then
-        it will instead go into Msini. If neither are true (i.e., if it's some other type of data, e.g. M-R relationship), then both
-        Mass and Msini are set to NaN for that row.
+        The sort_bestmass_to_mass_or_msini function takes in a DataFrame and sorts the values of bestmass
+        into either mass or msini.If the value of bestmass is found to be a mass, then it will be sorted
+        into mass. If it is found to be an msini value, then it will instead go into msini. If neither
+        are true (i.e., if it's some other type of data, e.g. M-R relationship), then both mass and msini
+        are set to NaN for that row.
 
         Parameters
         ----------
@@ -122,35 +123,35 @@ class Nasa(Catalog):
                 Access the attributes and methods of the class in python
         """
         for i in self.data.index:
-            if self.data.at[i, "BestMass_provenance"] == "Mass":
-                self.data.at[i, "Mass"] = self.data.at[i, "BestMass"]
-                self.data.at[i, "Mass_max"] = self.data.at[i, "BestMass_max"]
-                self.data.at[i, "Mass_min"] = self.data.at[i, "BestMass_min"]
-                self.data.at[i, "Mass_url"] = self.data.at[i, "BestMass_url"]
-            elif self.data.at[i, "BestMass_provenance"] == "Msini":
-                self.data.at[i, "Msini"] = self.data.at[i, "BestMass"]
-                self.data.at[i, "Msini_max"] = self.data.at[i, "BestMass_max"]
-                self.data.at[i, "Msini_min"] = self.data.at[i, "BestMass_min"]
-                self.data.at[i, "Msini_url"] = self.data.at[i, "BestMass_url"]
-            elif (self.data.at[i, "BestMass_provenance"] == "M-R relationship") or (
-                self.data.at[i, "BestMass_provenance"] == "Msin(i)/sin(i)"
+            if self.data.at[i, "bestmass_provenance"] == "Mass":
+                self.data.at[i, "mass"] = self.data.at[i, "bestmass"]
+                self.data.at[i, "mass_max"] = self.data.at[i, "bestmass_max"]
+                self.data.at[i, "mass_min"] = self.data.at[i, "bestmass_min"]
+                self.data.at[i, "mass_url"] = self.data.at[i, "bestmass_url"]
+            elif self.data.at[i, "bestmass_provenance"] == "Msini":
+                self.data.at[i, "msini"] = self.data.at[i, "bestmass"]
+                self.data.at[i, "msini_max"] = self.data.at[i, "bestmass_max"]
+                self.data.at[i, "msini_min"] = self.data.at[i, "bestmass_min"]
+                self.data.at[i, "msini_url"] = self.data.at[i, "bestmass_url"]
+            elif (self.data.at[i, "bestmass_provenance"] == "M-R relationship") or (
+                self.data.at[i, "bestmass_provenance"] == "Msin(i)/sin(i)"
             ):
-                self.data.at[i, "Msini"] = np.nan
-                self.data.at[i, "Msini_max"] = np.nan
-                self.data.at[i, "Msini_min"] = np.nan
-                self.data.at[i, "Msini_url"] = np.nan
-                self.data.at[i, "Mass"] = np.nan
-                self.data.at[i, "Mass_max"] = np.nan
-                self.data.at[i, "Mass_min"] = np.nan
-                self.data.at[i, "Mass_url"] = np.nan
+                self.data.at[i, "msini"] = np.nan
+                self.data.at[i, "msini_max"] = np.nan
+                self.data.at[i, "msini_min"] = np.nan
+                self.data.at[i, "msini_url"] = np.nan
+                self.data.at[i, "mass"] = np.nan
+                self.data.at[i, "mass_max"] = np.nan
+                self.data.at[i, "mass_min"] = np.nan
+                self.data.at[i, "mass_url"] = np.nan
             else:
-                print(self.data.at[i, "BestMass_provenance"])
+                print(self.data.at[i, "bestmass_provenance"])
                 raise RuntimeError
 
     def handle_reference_format(self) -> None:
         """
         The handle_reference_format function takes in a dataframe and replaces the reference column with
-        a url column. The function also adds columns for each of the seven parameters (e, Mass, Msini, i, a, P and R)
+        a url column. The function also adds columns for each of the seven parameters (e, mass, msini, i, a, P and R)
         and sets them to be equal to the corresponding reference column. It then removes all rows where any of these
         parameters are null.
 
@@ -160,13 +161,13 @@ class Nasa(Catalog):
                 Access variables that belong to a class
 
         """
-        for item in ["e", "Mass", "Msini", "i", "a", "P", "R"]:
+        for item in ["e", "mass", "msini", "i", "a", "p", "r"]:
             if item + "_url" not in self.data.columns:
-                self.data[item + "_url"] = self.data["Reference"]
+                self.data[item + "_url"] = self.data["reference"]
 
         r = re.compile("href=(.*) target")
 
-        for item in ["e", "Mass", "Msini", "i", "a", "P", "R"]:
+        for item in ["e", "mass", "msini", "i", "a", "p", "r"]:
             for i in self.data.index:
                 # filter finite values by checking if x == x (false for nan, inf)
                 if self.data.at[i, item + "_url"] == self.data.at[i, item + "_url"]:
@@ -203,10 +204,10 @@ class Nasa(Catalog):
             None
 
         """
-        self.data["Status"] = "CONFIRMED"
+        self.data["status"] = "CONFIRMED"
         logging.info("Status column assigned.")
         logging.info("Updated Status:")
-        logging.info(self.data.Status.value_counts())
+        logging.info(self.data.status.value_counts())
 
     def convert_coordinates(self) -> None:
         """The coordinates function takes the RA and Dec columns of a dataframe,
@@ -219,7 +220,7 @@ class Nasa(Catalog):
     def remove_theoretical_masses(self):
         """
         The remove_theoretical_masses function removes mass and radius estimates calculated through M-R relationships.
-        It does this by removing all rows where the Mass_url, Msini_url, and R_url columns contain
+        It does this by removing all rows where the mass_url, msini_url, and R_url columns contain
         the word "Calculated".
 
 
@@ -236,13 +237,13 @@ class Nasa(Catalog):
         """
         for value in ["", "_min", "_max", "_url"]:
             self.data.loc[
-                self.data["Mass_url"].str.contains("Calculated", na=False),
-                "Mass" + value,
+                self.data["mass_url"].str.contains("Calculated", na=False),
+                "mass" + value,
             ] = np.nan
 
             self.data.loc[
-                self.data["Msini_url"].str.contains("Calculated", na=False),
-                "Msini" + value,
+                self.data["msini_url"].str.contains("Calculated", na=False),
+                "msini" + value,
             ] = np.nan
 
             self.data.loc[

@@ -109,7 +109,7 @@ class Koi(Catalog):
                 + ","
             )
 
-        self.data["Name"] = self.data["KOILETTER"]
+        self.data["name"] = self.data["KOILETTER"]
         self.data["disposition"] = self.data["koi_disposition"]
         self.data["discoverymethod"] = "Transit"
         logging.info("Catalog uniformed.")

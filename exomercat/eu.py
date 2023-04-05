@@ -1,5 +1,4 @@
-import glob, re
-import logging
+import glob
 
 import pandas as pd
 import urllib.request
@@ -73,10 +72,10 @@ class Eu(Catalog):
         self.data = self.data.replace("None", "").replace("nan", np.nan)
         self.data = self.data.rename(
             columns={
-                "detection_type": "DiscMeth",
-                "orbital_period": "P",
-                "orbital_period_error_max": "P_max",
-                "orbital_period_error_min": "P_min",
+                "detection_type": "discovery_method",
+                "orbital_period": "p",
+                "orbital_period_error_max": "p_max",
+                "orbital_period_error_min": "p_min",
                 "semi_major_axis": "a",
                 "semi_major_axis_error_max": "a_max",
                 "semi_major_axis_error_min": "a_min",
@@ -86,21 +85,21 @@ class Eu(Catalog):
                 "inclination": "i",
                 "inclination_error_max": "i_max",
                 "inclination_error_min": "i_min",
-                "name": "Name",
+                "name": "name",
                 "updated": "Update",
-                "discovered": "YOD",
-                "mass": "Mass",
-                "mass_error_max": "Mass_max",
-                "mass_error_min": "Mass_min",
-                "mass_sini": "Msini",
-                "mass_sini_error_max": "Msini_max",
-                "mass_sini_error_min": "Msini_min",
-                "radius": "R",
-                "radius_error_max": "R_max",
-                "radius_error_min": "R_min",
+                "discovered": "discovery_year",
+                "mass": "mass",
+                "mass_error_max": "mass_max",
+                "mass_error_min": "mass_min",
+                "mass_sini": "msini",
+                "mass_sini_error_max": "msini_max",
+                "mass_sini_error_min": "msini_min",
+                "radius": "r",
+                "radius_error_max": "r_max",
+                "radius_error_min": "r_min",
                 "mass_detection_type": "MASSPROV",
                 "radius_detection_type": "RADPROV",
-                "star_name": "Host",
+                "star_name": "host",
                 "bib_reference": "Reference",
             }
         )
@@ -138,11 +137,11 @@ class Eu(Catalog):
         for value in ["", "_min", "_max"]:
             self.data.loc[
                 self.data["MASSPROV"].str.contains("Theoretical", na=False),
-                "Mass" + value,
+                "mass" + value,
             ] = np.nan
             self.data.loc[
                 self.data["MASSPROV"].str.contains("Theoretical", na=False),
-                "Msini" + value,
+                "msini" + value,
             ] = np.nan
             self.data.loc[
                 self.data["RADPROV"].str.contains("Theoretical", na=False), "R" + value
@@ -158,7 +157,7 @@ class Eu(Catalog):
         and sets them as CANDIDATE. Finally, it looks for retracted planets and sets them
         as FALSE POSITIVE.
         """
-        self.data["Status"] = "CONFIRMED"
+        self.data["status"] = "CONFIRMED"
         self.data.loc[
             self.data["planet_status"].str.contains(
                 "Candidate|Unconfirmed|Controversial"
@@ -178,7 +177,7 @@ class Eu(Catalog):
         The handle_reference_format function is used to create a url for each reference in the references list.
         Since the Exoplanet Encyclopaedia table does not provide references, we just use "EU" as a keyword.
         """
-        for item in ["e", "Mass", "Msini", "i", "a", "P", "R"]:
+        for item in ["e", "mass", "msini", "i", "a", "p", "r"]:
             self.data[item + "_url"] = self.name
         logging.info("Reference columns uniformed.")
 

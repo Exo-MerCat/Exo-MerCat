@@ -127,13 +127,13 @@ class Catalog:
         The keep_columns function removes all columns from the dataframe except for those specified in the keep list.
         """
         keep = [
-            "Name",
-            "DiscMeth",
+            "name",
+            "discovery_method",
             "ra",
             "dec",
-            "P",
-            "P_max",
-            "P_min",
+            "p",
+            "p_max",
+            "p_min",
             "a",
             "a_max",
             "a_min",
@@ -143,28 +143,28 @@ class Catalog:
             "i",
             "i_max",
             "i_min",
-            "Mass",
-            "Mass_max",
-            "Mass_min",
-            "Msini",
-            "Msini_max",
-            "Msini_min",
-            "R",
-            "R_max",
-            "R_min",
-            "YOD",
+            "mass",
+            "mass_max",
+            "mass_min",
+            "msini",
+            "msini_max",
+            "msini_min",
+            "r",
+            "r_max",
+            "r_min",
+            "discovery_year",
             "alias",
             "a_url",
-            "Mass_url",
-            "P_url",
-            "Msini_url",
-            "R_url",
+            "mass_url",
+            "p_url",
+            "msini_url",
+            "r_url",
             "i_url",
             "e_url",
-            "Host",
-            "Binary",
-            "Letter",
-            "Status",
+            "host",
+            "binary",
+            "letter",
+            "status",
             "catalog",
         ]
         self.data = self.data[keep]
@@ -174,15 +174,15 @@ class Catalog:
         """
         The identify_brown_dwarfs function identifies possible brown dwarfs in the dataframe.
             It does this by checking if the last character of a planet name is a number or if it ends
-            with an uppercase letter. If so, it fills the Letter cell with 'BD' to filter it out later.
+            with an uppercase letter. If so, it fills the letter cell with 'BD' to filter it out later.
             The function excludes KOI-like objects by avoid the patterns ".0d" with d being a digit.
         """
         for i in self.data.index:
-            if not str(re.search("\d$", self.data.at[i, "Name"], re.M)) == "None":
-                if self.data.at[i, "Name"][-3:-1] != ".0":
-                    self.data.at[i, "Letter"] = "BD"
-            if not str(re.search("[aABCD]$", self.data.at[i, "Name"], re.M)) == "None":
-                self.data.at[i, "Letter"] = "BD"
+            if not str(re.search("\d$", self.data.at[i, "name"], re.M)) == "None":
+                if self.data.at[i, "name"][-3:-1] != ".0":
+                    self.data.at[i, "letter"] = "BD"
+            if not str(re.search("[aABCD]$", self.data.at[i, "name"], re.M)) == "None":
+                self.data.at[i, "letter"] = "BD"
         logging.info("Identified possible Brown Dwarfs (no letter for planet name).")
 
     def replace_known_mistakes(self) -> None:
@@ -198,23 +198,23 @@ class Catalog:
         f = open("EMClogs/unused_replacements.txt", "a")
         f.write("****" + self.name + "****\n")
         for name in config_name.keys():
-            if len(self.data[self.data.Name == name]) == 0:
+            if len(self.data[self.data.name == name]) == 0:
                 f.write("NAME: " + name + "\n")
         for host in config_host.keys():
-            if len(self.data[self.data.Host == host]) == 0:
+            if len(self.data[self.data.host == host]) == 0:
                 f.write("HOST: " + host + "\n")
         # for hd in config_hd.keys():
-        #     if len(self.data[self.data.Name == hd])==0:
+        #     if len(self.data[self.data.name == hd])==0:
         #         f.write('HD: '+ hd+'\n')
         for coord in ["ra", "dec"]:
             config_replace = read_config_replacements(coord)
             for name in config_replace.keys():
-                if len(self.data.loc[self.data.Host == name]) == 0:
+                if len(self.data.loc[self.data.host == name]) == 0:
                     f.write(coord + ": " + name + "\n")
                 else:
                     if (
                         abs(
-                            self.data.loc[self.data.Host == name, coord]
+                            self.data.loc[self.data.host == name, coord]
                             - float(config_replace[name])
                         ).all()
                         <= 0.01
@@ -227,7 +227,7 @@ class Catalog:
                             + str(
                                 max(
                                     abs(
-                                        self.data.loc[self.data.Host == name][coord]
+                                        self.data.loc[self.data.host == name][coord]
                                         - float(config_replace[name])
                                     )
                                 )
@@ -241,26 +241,26 @@ class Catalog:
         f.write("****" + self.name + "****\n")
         for j in self.data.index:
             for i in const.keys():
-                if i in self.data.loc[j, "Name"]:
-                    self.data.loc[j, "Name"] = self.data.loc[j, "Name"].replace(
+                if i in self.data.loc[j, "name"]:
+                    self.data.loc[j, "name"] = self.data.loc[j, "name"].replace(
                         i, const[i]
                     )
                     f.write("NAME: " + i + " to " + const[i] + "\n")
             for i in const.keys():
-                if i in self.data.loc[j, "Host"]:
-                    self.data.loc[j, "Host"] = self.data.loc[j, "Host"].replace(
+                if i in self.data.loc[j, "host"]:
+                    self.data.loc[j, "host"] = self.data.loc[j, "host"].replace(
                         i, const[i]
                     )
                     f.write("HOST: " + i + " to " + const[i] + "\n")
             for i in config_name.keys():
-                if i in self.data.loc[j, "Name"]:
-                    self.data.loc[j, "Name"] = self.data.loc[j, "Name"].replace(
+                if i in self.data.loc[j, "name"]:
+                    self.data.loc[j, "name"] = self.data.loc[j, "name"].replace(
                         i, config_name[i]
                     )
                     f.write("NAME: " + i + " to " + config_name[i] + "\n")
             for i in config_host.keys():
-                if i in self.data.loc[j, "Host"]:
-                    self.data.loc[j, "Host"] = self.data.loc[j, "Host"].replace(
+                if i in self.data.loc[j, "host"]:
+                    self.data.loc[j, "host"] = self.data.loc[j, "host"].replace(
                         i, config_host[i]
                     )
                     f.write("HOST: " + i + " to " + config_host[i] + "\n")
@@ -269,7 +269,7 @@ class Catalog:
             config_replace = read_config_replacements(repl_searchname)
             for name, change in config_replace.items():
                 try:
-                    self.data.loc[self.data.Host == name, repl_searchname] = float(
+                    self.data.loc[self.data.host == name, repl_searchname] = float(
                         change
                     )
                     f.write(repl_searchname + ": " + name + " to " + change + "\n")
@@ -285,8 +285,8 @@ class Catalog:
                 f.write("DROP: " + check + ":" + drop + "\n")
 
         f.close()
-        self.data["Name"] = self.data["Name"].apply(unidecode.unidecode)
-        self.data["Name"] = self.data.Name.apply(lambda x: " ".join(x.split()))
+        self.data["name"] = self.data["name"].apply(unidecode.unidecode)
+        self.data["name"] = self.data.name.apply(lambda x: " ".join(x.split()))
         self.data = self.data.reset_index(drop=True)
         logging.info("Known mistakes replaced.")
 
@@ -301,19 +301,19 @@ class Catalog:
         f = open("EMClogs/unused_replacements.txt", "a")
         # check unused replacements
         for binary in config_binary.keys():
-            if len(self.data[self.data.Name == binary]) == 0:
+            if len(self.data[self.data.name == binary]) == 0:
                 f.write("BINARY: " + binary + "\n")
             else:
                 if (
-                    self.data[self.data.Name == binary].Binary
-                    == config_binary[binary].replace("NaN", "")
-                ).all():
-                    f.write("BINARY: " + binary + "\n")
+                    config_binary[binary].replace("NaN", "")
+                    in self.data[self.data.name == binary].binary.tolist()
+                ):
+                    f.write("BINARY ALREADY PRESENT: " + binary + "\n")
         f.close()
 
         f = open("EMCLogs/performed_replacements.txt", "a")
         for name in config_binary.keys():
-            self.data.loc[self.data.Name == name, "Binary"] = config_binary[
+            self.data.loc[self.data.name == name, "binary"] = config_binary[
                 name
             ].replace("NaN", "")
             f.write("BINARY: " + name + " to " + config_binary[name] + "\n")
@@ -340,36 +340,36 @@ class Catalog:
         """
         return NotImplementedError
 
-    def remove_known_brown_dwarfs(self, print: bool) -> None:
+    def remove_known_brown_dwarfs(self, print_flag: bool) -> None:
         """
         The remove_known_brown_dwarfs function removes all known brown dwarfs from the dataframe.
         It does this by checking if the mass of a planet is less than 20 Mjup, and if it isn't,
-        then it will be removed from the dataframe. If print is set to True, then a csv file will be created
+        then it will be removed from the dataframe. If print_flag is set to True, then a csv file will be created
         with all of these planets in them.
 
         Parameters
         ----------
-            print: bool
+            print_flag: bool
                 Specify whether the function should print out a list of brown dwarfs
         """
-        if print:
+        if print_flag:
             self.data[
                 (
-                    self.data.Mass.fillna(self.data.Msini.fillna(0))
+                    self.data.mass.fillna(self.data.msini.fillna(0))
                     .replace("", 0)
                     .astype(float)
                     > 20.0
                 )
-                | (self.data.Letter == "BD")
+                | (self.data.letter == "BD")
             ].to_csv("UniformSources/" + self.name + "_brown_dwarfs.csv")
         self.data = self.data[
             (
-                self.data.Mass.fillna(self.data.Msini.fillna(0))
+                self.data.mass.fillna(self.data.msini.fillna(0))
                 .replace("", 0)
                 .astype(float)
                 <= 20.0
             )
-            & (self.data.Letter != "BD")
+            & (self.data.letter != "BD")
         ]
 
     def make_errors_absolute(self) -> None:
@@ -381,20 +381,20 @@ class Catalog:
         for c in [
             c
             for c in [
-                "P_max",
+                "p_max",
                 "a_max",
                 "e_max",
                 "i_max",
-                "R_max",
-                "Msini_max",
-                "Mass_max",
-                "P_min",
+                "r_max",
+                "msini_max",
+                "mass_max",
+                "p_min",
                 "a_min",
                 "e_min",
                 "i_min",
-                "R_min",
-                "Msini_min",
-                "Mass_min",
+                "r_min",
+                "msini_min",
+                "mass_min",
             ]
             if self.data[c].dtype in numerics
         ]:
@@ -406,16 +406,16 @@ class Catalog:
         The uniform_name_host_letter function uniforms the names, hosts, and aliases.
         """
 
-        self.data["Name"] = self.data.Name.apply(lambda x: uniform_string(x))
-        ind = self.data[self.data.Host == ""].index
-        self.data["Host"] = self.data.Host.replace("", np.nan).fillna(self.data.Name)
+        self.data["name"] = self.data.name.apply(lambda x: uniform_string(x))
+        ind = self.data[self.data.host == ""].index
+        self.data["host"] = self.data.host.replace("", np.nan).fillna(self.data.name)
 
-        for identifier in self.data.loc[ind, "Host"]:
+        for identifier in self.data.loc[ind, "host"]:
             if not str(re.search(" [b-z]$", identifier, re.M)) == "None":
-                self.data.loc[self.data.Host == identifier, "Host"] = identifier[
+                self.data.loc[self.data.host == identifier, "host"] = identifier[
                     :-1
                 ].strip()
-        self.data["Host"] = self.data.Host.apply(lambda x: uniform_string(x))
+        self.data["host"] = self.data.host.apply(lambda x: uniform_string(x))
 
         for i in self.data.index:
             polished_alias = ""
@@ -426,11 +426,11 @@ class Catalog:
                     polished_alias = polished_alias + "," + uniform_string(al)
             self.data.at[i, "alias"] = polished_alias.lstrip(",")
 
-        self.data["Letter"] = self.data.apply(lambda row: row.Name[-1:].strip(), axis=1)
 
-        for identifier in self.data.Name:
+
+        for identifier in self.data.name:
             if not str(re.search("(\.0)\\d$", identifier, re.M)) == "None":
-                self.data.loc[self.data.Name == identifier, "Letter"] = (
+                self.data.loc[self.data.name == identifier, "letter"] = (
                     identifier[-1:]
                     .replace("1", "b")
                     .replace("2", "c")
@@ -441,7 +441,7 @@ class Catalog:
                     .replace("7", "h")
                     .replace("8", "i")
                 )
-                self.data.loc[self.data.Name == identifier, "Name"] = (
+                self.data.loc[self.data.name == identifier, "name"] = (
                     identifier.replace(".01", " b")
                     .replace(".02", " c")
                     .replace(".03", " d")
@@ -451,9 +451,11 @@ class Catalog:
                     .replace(".07", " h")
                     .replace(".08", " i")
                 )
-                # self.data.loc[self.data.Name == identifier, "Host"] = identifier[:-3].strip()
+            else:
+                self.data.loc[self.data.name == identifier, "letter"] = identifier[-1:]
+                # self.data.loc[self.data.name == identifier, "host"] = identifier[:-3].strip()
 
-        logging.info("Name, Host, Letter columns uniformed.")
+        logging.info("name, host, letter columns uniformed.")
 
     def assign_status(self):
         """
@@ -474,35 +476,35 @@ class Catalog:
         tab = tab.fillna("")
 
         for index in self.data.index:
-            name = self.data.at[index, "Name"]
+            name = self.data.at[index, "name"]
             final_alias_total = self.data.at[index, "alias"].split(",")
             sub = tab[tab.aliasplanet.str.contains(name + ",")]
             sub = sub.drop_duplicates().reset_index()
 
             if len(sub) > 0:
-                self.data.at[index, "Status"] = sub.at[0, "disposition"]
-                if not list(sub.Name)[0] == "":
-                    self.data.at[index, "Name"] = sub.at[0, "Name"]
-                if self.data.at[index, "DiscMeth"] == "nan":
-                    self.data.at[index, "DiscMeth"] = sub.at[0, "discoverymethod"]
+                self.data.at[index, "status"] = sub.at[0, "disposition"]
+                if not list(sub.name)[0] == "":
+                    self.data.at[index, "name"] = sub.at[0, "name"]
+                if self.data.at[index, "discovery_method"] == "nan":
+                    self.data.at[index, "discovery_method"] = sub.at[0, "discoverymethod"]
 
                 for internal_alias in sub.alias:
                     for internal_al in internal_alias.split(","):
                         if internal_al not in final_alias_total:
                             final_alias_total.append(internal_al)
 
-            host = self.data.at[index, "Host"]
-            letter = self.data.at[index, "Letter"]
+            host = self.data.at[index, "host"]
+            letter = self.data.at[index, "letter"]
             # check hosts
             sub = tab[tab.alias.str.contains(host + ",")]
             sub = sub[sub.LETTER == letter]
             sub = sub.drop_duplicates().reset_index()
             if len(sub) > 0:
-                self.data.at[index, "Status"] = sub.at[0, "disposition"]
-                if not list(sub.Name)[0] == "":
-                    self.data.at[index, "Name"] = sub.at[0, "Name"]
-                if self.data.at[index, "DiscMeth"] == "nan":
-                    self.data.at[index, "DiscMeth"] = sub.at[0, "discoverymethod"]
+                self.data.at[index, "status"] = sub.at[0, "disposition"]
+                if not list(sub.name)[0] == "":
+                    self.data.at[index, "name"] = sub.at[0, "name"]
+                if self.data.at[index, "discovery_method"] == "nan":
+                    self.data.at[index, "discovery_method"] = sub.at[0, "discoverymethod"]
 
                 for internal_alias in sub.alias:
                     for internal_al in internal_alias.split(","):
@@ -530,93 +532,93 @@ class Catalog:
                 [x for x in set(final_alias_total) if x != "nan"]
             )
 
-        logging.info("Status from " + table_path + " checked.")
+        logging.info("status from " + table_path + " checked.")
 
     def fill_binary_column(self) -> None:
         """
         The fill_binary_column function fills the binary column of the dataframe with
         the appropriate values. It does this by checking if there is a binary letter at the end of that host
-        column. If so, it strips out that letter and puts it into its own column called Binary.
+        column. If so, it strips out that letter and puts it into its own column called binary.
         If not, nothing happens.
         """
         self.data = self.data.reset_index()
-        self.data["Binary"] = ""
+        self.data["binary"] = ""
         for i in self.data.index:
-            # protect in case planet name in Host column
+            # protect in case planet name in host column
             if (
-                not str(re.search(r"([ABCNLS\d][a-z])$", self.data.at[i, "Host"]))
+                not str(re.search(r"([ABCNLS\d][a-z])$", self.data.at[i, "host"]))
                 == "None"
             ):
-                self.data.at[i, "Host"] = self.data.at[i, "Host"][:-1].strip()
+                self.data.at[i, "host"] = self.data.at[i, "host"][:-1].strip()
 
-            # strip the binary letter and put it in Binary column
+            # strip the binary letter and put it in binary column
             if (
-                not str(re.search(r"[\s\d][ABCNS]\s", self.data.at[i, "Name"]))
+                not str(re.search(r"[\s\d][ABCNS]\s", self.data.at[i, "name"]))
                 == "None"
             ):
-                self.data.at[i, "Binary"] = self.data.at[i, "Name"][-3:-2]
+                self.data.at[i, "binary"] = self.data.at[i, "name"][-3:-2]
 
             # specific for circumbinary planets (AB)
             if (
-                not str(re.search(r"[\s\d](AB)\s[a-z]$", self.data.at[i, "Name"]))
+                not str(re.search(r"[\s\d](AB)\s[a-z]$", self.data.at[i, "name"]))
                 == "None"
             ):
-                self.data.at[i, "Binary"] = "AB"
+                self.data.at[i, "binary"] = "AB"
 
             if (
-                not str(re.search(r"[\s\d](\(AB\))\s[a-z]$", self.data.at[i, "Name"]))
+                not str(re.search(r"[\s\d](\(AB\))\s[a-z]$", self.data.at[i, "name"]))
                 == "None"
             ):
-                self.data.at[i, "Binary"] = "AB"
+                self.data.at[i, "binary"] = "AB"
 
-            # strip the binary letter and put it in Binary column
-            if not str(re.search(r"[\s\d][ABCNS]$", self.data.at[i, "Host"])) == "None":
-                self.data.at[i, "Binary"] = self.data.at[i, "Host"][-1:]
-                self.data.at[i, "Host"] = self.data.at[i, "Host"][:-1].strip()
+            # strip the binary letter and put it in binary column
+            if not str(re.search(r"[\s\d][ABCNS]$", self.data.at[i, "host"])) == "None":
+                self.data.at[i, "binary"] = self.data.at[i, "host"][-1:]
+                self.data.at[i, "host"] = self.data.at[i, "host"][:-1].strip()
 
             # specific for circumbinary planets (AB)
-            if not str(re.search(r"[\s\d](AB)$", self.data.at[i, "Host"])) == "None":
-                self.data.at[i, "Binary"] = "AB"
-                self.data.at[i, "Host"] = self.data.at[i, "Host"][:-3].strip()
+            if not str(re.search(r"[\s\d](AB)$", self.data.at[i, "host"])) == "None":
+                self.data.at[i, "binary"] = "AB"
+                self.data.at[i, "host"] = self.data.at[i, "host"][:-3].strip()
 
             if (
-                not str(re.search(r"[\s\d](\(AB\))$", self.data.at[i, "Host"]))
+                not str(re.search(r"[\s\d](\(AB\))$", self.data.at[i, "host"]))
                 == "None"
             ):
-                self.data.at[i, "Binary"] = "AB"
-                self.data.at[i, "Host"] = self.data.at[i, "Host"][:-4].strip()
+                self.data.at[i, "binary"] = "AB"
+                self.data.at[i, "host"] = self.data.at[i, "host"][:-4].strip()
 
-        self.data["Host"] = self.data.Host.apply(
+        self.data["host"] = self.data.host.apply(
             lambda x: " ".join(x.strip().strip(".").strip(" (").split())
         )
 
         if "cb_flag" in self.data.columns:
             # SPECIFIC TO NASA
-            self.data.loc[self.data.cb_flag == 1, "Binary"] = "AB"
+            self.data.loc[self.data.cb_flag == 1, "binary"] = "AB"
 
         if "binaryflag" in self.data.columns:
             # SPECIFIC TO OEC
             # if unknown host star, be less specific with S-type, otherwise keep the known letter
-            self.data.loc[self.data.binaryflag == 2, "Binary"] = self.data.loc[
-                self.data.binaryflag == 2, "Binary"
+            self.data.loc[self.data.binaryflag == 2, "binary"] = self.data.loc[
+                self.data.binaryflag == 2, "binary"
             ].replace("", "S-type")
 
-            self.data.loc[self.data.binaryflag == 1, "Binary"] = self.data.loc[
-                self.data.binaryflag == 1, "Binary"
+            self.data.loc[self.data.binaryflag == 1, "binary"] = self.data.loc[
+                self.data.binaryflag == 1, "binary"
             ].replace("", "AB")
-            self.data.loc[self.data.binaryflag == 3, "Binary"] = self.data.loc[
-                self.data.binaryflag == 3, "Binary"
+            self.data.loc[self.data.binaryflag == 3, "binary"] = self.data.loc[
+                self.data.binaryflag == 3, "binary"
             ].replace("", "Rogue")
         logging.info("Fixed planets orbiting binary stars.")
 
     def create_catalogstatus_string(self) -> None:
         """
-        The create_catalogstatus_string function creates a new column in the dataframe called "CatalogStatus"
-        which is a concatenation of the Catalog and Status columns. This function is used to create an additional
+        The create_catalogstatus_string function creates a new column in the dataframe called "Catalogstatus"
+        which is a concatenation of the Catalog and status columns. This function is used to create an additional
         column for use in creating plots.
         """
-        self.data["CatalogStatus"] = self.data.catalog + ": " + self.data.Status
-        logging.info("CatalogStatus column created.")
+        self.data["Catalogstatus"] = self.data.catalog + ": " + self.data.status
+        logging.info("Catalogstatus column created.")
 
     def make_uniform_alias_list(self):
         """
@@ -625,12 +627,12 @@ class Catalog:
         host. The set is filtered to remove any None or NaN values, as well as removing the host name from this list.
         Finally, it iterates through each row in the groupby object and sets its alias value equal to this new list.
         """
-        for host, group in self.data.groupby(by="Host"):
+        for host, group in self.data.groupby(by="host"):
             final_alias = ""
 
             for al in group.alias:
                 final_alias = final_alias + "," + al
-            self.data.loc[self.data.Host == host, "alias"] = ",".join(
+            self.data.loc[self.data.host == host, "alias"] = ",".join(
                 [uniform_string(x) for x in set(final_alias.split(",")) if x]
             )
         logging.info("Lists of aliases uniformed.")
@@ -654,6 +656,6 @@ class Catalog:
 
 
         """
-        self.data = self.data.sort_values(by="Name")
+        self.data = self.data.sort_values(by="name")
         self.data.to_csv(filename)
         logging.info("Printed catalog.")
