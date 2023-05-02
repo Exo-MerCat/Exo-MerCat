@@ -3,12 +3,14 @@ import glob
 import pandas as pd
 import urllib.request
 import numpy as np
-from exomercat.configurations import *
-from exomercat.catalogs import Catalog, uniform_string
+from exo_mercat.configurations import *
+from exo_mercat.catalogs import Catalog, uniform_string
 from datetime import date
 from astropy.io.votable import parse_single_table
 from astropy.io import ascii
 import logging
+from pathlib import Path
+
 
 
 class Eu(Catalog):
@@ -20,49 +22,43 @@ class Eu(Catalog):
         super().__init__()
         self.name = "eu"
 
-    def download_and_save_cat(self, url: str, filename: str) -> None:
+    def download_catalog(self, url: str, filename: str) -> str:
         """
-        The download_and_save_cat function downloads a catalog from the web and saves it to disk.
-        It takes two arguments: url, which is the URL of the catalog to be downloaded, and filename,
-        which is where we want to save that file locally. It returns nothing.
+        The download_catalog function downloads the catalog from a given url and saves it to a file.
+            If the file already exists, it will not be downloaded again.
 
-        Parameters
-        ----------
-            self
-                Allow the function to refer to and modify a class instance's attributes
-            url:str
-                Specify the url of the catalog to download
-            filename:str
-                Specify the name of the file where we want to store our data
+        Args:
+            self: Represent the instance of the class
+            url: str: Specify the url of the catalog to be downloaded
+            filename: str: Specify the name of the file to be downloaded
+
+        Returns:
+            The string of the file path of the catalog
 
         """
-        if os.path.exists(filename + date.today().strftime("%m-%d-%Y") + ".csv"):
+        file_path_str = filename + date.today().strftime("%m-%d-%Y") + '.csv'
+        if os.path.exists(file_path_str):
             logging.info("Reading existing file")
-            self.data = pd.read_csv(
-                filename + date.today().strftime("%m-%d-%Y") + ".csv"
-            )
         else:
             try:
                 urllib.request.urlretrieve(url, "votable.xml")
                 table = parse_single_table("votable.xml").to_table()
                 ascii.write(
                     table,
-                    filename + date.today().strftime("%m-%d-%Y") + ".csv",
+                    file_path_str,
                     format="csv",
                     overwrite=True,
                 )
                 os.remove("votable.xml")
-                self.data = pd.read_csv(
-                    filename + date.today().strftime("%m-%d-%Y") + ".csv"
-                )
-            except BaseException:
-                local_copy = glob.glob(filename + "*.csv")[0]
-                logging.info(
-                    "Error fetching the catalog, taking a local copy:", local_copy
-                )
-                self.data = pd.read_csv(local_copy)
-        logging.info("Catalog downloaded.")
 
+            except BaseException:
+                file_path_str = glob.glob(filename + "*.csv")[0]
+                logging.info(
+                    "Error fetching the catalog, taking a local copy:", file_path_str
+                )
+
+        logging.info("Catalog downloaded.")
+        return file_path_str
     def uniform_catalog(self) -> None:
         """
         The uniform_catalog function takes the raw data from a catalog and converts it into a uniform format.

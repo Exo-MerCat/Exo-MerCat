@@ -6,13 +6,13 @@ Created on Mon Oct  7 10:35:12 2019
 @author: eleonoraalei
 """
 
-from exomercat.nasa import Nasa
-from exomercat.eu import Eu
-from exomercat.oec import Oec
-from exomercat.epic import Epic
-from exomercat.emc import Emc
-from exomercat.koi import Koi
-from exomercat.configurations import *
+from exo_mercat.nasa import Nasa
+from exo_mercat.eu import Eu
+from exo_mercat.oec import Oec
+from exo_mercat.epic import Epic
+from exo_mercat.emc import Emc
+from exo_mercat.koi import Koi
+from exo_mercat.configurations import *
 import socket
 import warnings
 import pandas as pd
@@ -52,7 +52,8 @@ def main():
         for cat in [Koi(), Epic()]:
             logging.info("****** " + cat.name + " ******")
             config_per_cat = config_dict[cat.name]
-            cat.download_and_save_cat(config_per_cat["url"], config_per_cat["file"])
+            file_path_str=cat.download_catalog(config_per_cat['url'], config_per_cat["file"])
+            cat.read_csv_catalog(file_path_str)
             cat.uniform_catalog()
             cat.convert_coordinates()
             cat.print_catalog("UniformSources/" + cat.name + ".csv")
@@ -62,7 +63,8 @@ def main():
         for cat in cat_types:
             logging.info("****** " + cat.name + " ******")
             config_per_cat = config_dict[cat.name]
-            cat.download_and_save_cat(config_per_cat["url"], config_per_cat["file"])
+            file_path=cat.download_catalog(config_per_cat["url"], config_per_cat["file"])
+            cat.read_csv_catalog(file_path)
             cat.uniform_catalog()
             cat.convert_coordinates()
             cat.replace_known_mistakes()
@@ -95,10 +97,10 @@ def main():
     emc.check_binary_mismatch(keyword='host')
     emc.get_host_info_from_simbad()
     logging.info("Check on other catalogs:")
-    emc.tess_main_id()
-    emc.gaia_main_id()
+    #emc.tess_main_id()
+    #emc.gaia_main_id()
     # emc.twomass_main_id()
-    emc.epic_main_id()
+    #emc.epic_main_id()
     emc.check_coordinates()
     emc.get_coordinates_from_simbad()
     emc.polish_main_id()
@@ -111,6 +113,7 @@ def main():
     emc.convert_datatypes()
     emc.merge_into_single_entry(verbose=args['verbose'])
     emc.select_best_mass()
+    emc.set_exo_mercat_name()
     emc.keep_columns()
     emc.print_catalog(
         "Exo-MerCat/exo-mercat" + date.today().strftime("%m-%d-%Y") + ".csv"

@@ -4,12 +4,13 @@ import xml.etree.ElementTree as ET
 import gzip
 import pandas as pd
 import numpy as np
-from exomercat.configurations import *
-from exomercat.catalogs import Catalog
+from exo_mercat.configurations import *
+from exo_mercat.catalogs import Catalog
 from datetime import date
 from astropy.coordinates import SkyCoord
 import astropy.units as u
 import logging
+from pathlib import Path
 
 
 def get_parameter(treeobject, parameter: str) -> str:
@@ -95,6 +96,111 @@ def getParameter_all(treeobject: ET.Element, parameter: str) -> str:
     return ret
 
 
+def convert_xmlfile_to_csvfile(file_path: Path) -> None:
+    fields = [
+        "name",
+        "binaryflag",
+        "mass",
+        "masstype",
+        "mass_min",
+        "mass_max",
+        "radius",
+        "radius_min",
+        "radius_max",
+        "period",
+        "period_min",
+        "period_max",
+        "semimajoraxis",
+        "semimajoraxis_min",
+        "semimajoraxis_max",
+        "eccentricity",
+        "eccentricity_min",
+        "eccentricity_max",
+        "periastron",
+        "longitude",
+        "ascendingnode",
+        "inclination",
+        "inclination_min",
+        "inclination_max",
+        "temperature",
+        "age",
+        "discoverymethod",
+        "discoveryyear",
+        "lastupdate",
+        "system_rightascension",
+        "system_declination",
+        "system_distance",
+        "hoststar_mass",
+        "hoststar_radius",
+        "hoststar_metallicity",
+        "hoststar_temperature",
+        "hoststar_age",
+        "hoststar_magJ",
+        "hoststar_magI",
+        "hoststar_magU",
+        "hoststar_magR",
+        "hoststar_magB",
+        "hoststar_magV",
+        "hoststar_magH",
+        "hoststar_magK",
+        "hoststar_spectraltype",
+        "alias",
+        "list",
+    ]
+    input_file = gzip.open(
+        file_path, "r"
+    )
+    table = ET.parse(input_file)
+    tab = pd.DataFrame()
+
+    # read the catalog from XML to Pandas
+    for system in table.findall(".//system"):
+        planets = system.findall(".//planet")
+        stars = system.findall(".//star")
+
+        for planet in planets:
+            parameters = pd.DataFrame(
+                [get_parameter(system, "alias")], columns=["alias"]
+            )
+
+            for field in fields:
+                parameters[field] = None
+                parameters[field] = get_parameter(planet, field)
+                parameters.alias = get_parameter(system, "alias")
+                if field[0:7] == "system_":
+                    parameters[field] = get_parameter(system, field[7:])
+                elif field[0:9] == "hoststar_":
+                    parameters[field] = get_parameter(stars, field[9:])
+                elif field == "list":
+                    parameters[field] = getParameter_all(planet, field)
+                elif field == "masstype":
+                    parameters[field] = get_attribute(planet, field[0:-4], "type")
+                elif field[-4:] == "_min":
+                    parameters[field] = get_attribute(
+                        planet, field[0:-4], "errorminus"
+                    )
+                elif field[-4:] == "_max":
+                    parameters[field] = get_attribute(
+                        planet, field[0:-4], "errorplus"
+                    )
+
+            parameters.binaryflag = 0
+            if planet in system.findall(".//binary/planet"):
+                # P type planets
+                parameters.binaryflag = 1
+            if planet in system.findall(".//binary/star/planet"):
+                # S type planets
+                parameters.binaryflag = 2
+            if len(stars) == 0:
+                # rogue planets
+                parameters.binaryflag = 3
+
+            tab = pd.concat([tab, parameters], sort=False)
+
+    new_file_path=Path(str(file_path[:-6]+'csv'))
+    tab.to_csv(new_file_path)
+
+
 class Oec(Catalog):
     def __init__(self) -> None:
         """
@@ -109,150 +215,35 @@ class Oec(Catalog):
         super().__init__()
         self.name = "oec"
 
-    def download_and_save_cat(self, url: str, filename: str) -> None:
-        """
-        The download_and_save_cat function downloads a catalog from the web and saves it to disk. It takes two
-        arguments: url, which is the URL of the catalog to be downloaded, and filename, which is where we want
-        to save that file locally. It returns nothing.
+    def download_catalog(self, url: str, filename: str) -> str:
 
-        Parameters
-        ----------
-            self
-                Allow the function to refer to and modify a class instance's attributes
-            url:str
-                Specify the url of the catalog to download
-            filename:str
-                Specify the name of the file where we want to store our data
 
-        """
-        fields = [
-            "name",
-            "binaryflag",
-            "mass",
-            "masstype",
-            "mass_min",
-            "mass_max",
-            "radius",
-            "radius_min",
-            "radius_max",
-            "period",
-            "period_min",
-            "period_max",
-            "semimajoraxis",
-            "semimajoraxis_min",
-            "semimajoraxis_max",
-            "eccentricity",
-            "eccentricity_min",
-            "eccentricity_max",
-            "periastron",
-            "longitude",
-            "ascendingnode",
-            "inclination",
-            "inclination_min",
-            "inclination_max",
-            "temperature",
-            "age",
-            "discoverymethod",
-            "discoveryyear",
-            "lastupdate",
-            "system_rightascension",
-            "system_declination",
-            "system_distance",
-            "hoststar_mass",
-            "hoststar_radius",
-            "hoststar_metallicity",
-            "hoststar_temperature",
-            "hoststar_age",
-            "hoststar_magJ",
-            "hoststar_magI",
-            "hoststar_magU",
-            "hoststar_magR",
-            "hoststar_magB",
-            "hoststar_magV",
-            "hoststar_magH",
-            "hoststar_magK",
-            "hoststar_spectraltype",
-            "alias",
-            "list",
-        ]
-
-        if os.path.exists(filename + date.today().strftime("%m-%d-%Y") + ".xml.gz"):
+        file_path_str=filename + date.today().strftime("%m-%d-%Y") + ".csv"
+        if os.path.exists(file_path_str):
             logging.info("Reading existing file")
-            input_file = gzip.open(
-                filename + date.today().strftime("%m-%d-%Y") + ".xml.gz", "r"
-            )
 
         else:
+            file_path_xml_str = filename + date.today().strftime("%m-%d-%Y") + ".xml.gz"
             try:
                 os.system(
                     'wget "'
                     + url
                     + '" -O "'
-                    + filename
-                    + date.today().strftime("%m-%d-%Y")
-                    + '.xml.gz"'
+                    + file_path_xml_str
+                    +'"'
                 )
-                input_file = gzip.open(
-                    filename + date.today().strftime("%m-%d-%Y") + ".xml.gz", "r"
-                )
+                logging.info("Convert from .xml to .csv")
+                convert_xmlfile_to_csvfile(file_path_xml_str)
 
             except BaseException:
-                local_copy = glob.glob(filename + "*.csv")[0]
+                file_path_str = glob.glob(filename + "*.csv")[0]
                 logging.warning(
-                    "Error fetching the catalog, taking a local copy:", local_copy
-                )
-                input_file = gzip.open(local_copy, "r")
-
-        table = ET.parse(input_file)
-        tab = pd.DataFrame()
-
-        # read the catalog from XML to Pandas
-        for system in table.findall(".//system"):
-            planets = system.findall(".//planet")
-            stars = system.findall(".//star")
-
-            for planet in planets:
-                parameters = pd.DataFrame(
-                    [get_parameter(system, "alias")], columns=["alias"]
+                    "Error fetching the catalog, taking a local copy:", file_path_str
                 )
 
-                for field in fields:
-                    parameters[field] = None
-                    parameters[field] = get_parameter(planet, field)
-                    parameters.alias = get_parameter(system, "alias")
-                    if field[0:7] == "system_":
-                        parameters[field] = get_parameter(system, field[7:])
-                    elif field[0:9] == "hoststar_":
-                        parameters[field] = get_parameter(stars, field[9:])
-                    elif field == "list":
-                        parameters[field] = getParameter_all(planet, field)
-                    elif field == "masstype":
-                        parameters[field] = get_attribute(planet, field[0:-4], "type")
-                    elif field[-4:] == "_min":
-                        parameters[field] = get_attribute(
-                            planet, field[0:-4], "errorminus"
-                        )
-                    elif field[-4:] == "_max":
-                        parameters[field] = get_attribute(
-                            planet, field[0:-4], "errorplus"
-                        )
-
-                parameters.binaryflag = 0
-                if planet in system.findall(".//binary/planet"):
-                    # P type planets
-                    parameters.binaryflag = 1
-                if planet in system.findall(".//binary/star/planet"):
-                    # S type planets
-                    parameters.binaryflag = 2
-                if len(stars) == 0:
-                    # rogue planets
-                    parameters.binaryflag = 3
-
-                tab = pd.concat([tab, parameters], sort=False)
-
-        tab.to_csv(filename + date.today().strftime("%m-%d-%Y") + ".csv")
-        self.data = tab
         logging.info("Catalog downloaded.")
+        return file_path_str
+
 
     def uniform_catalog(self) -> None:
         """
@@ -288,9 +279,8 @@ class Oec(Catalog):
             }
         )
         self.data = self.data.reset_index()
-        self.data["alias"] = self.data.alias.apply(
-            lambda x: x.strip("[]").replace("'", "").replace("nan", "")
-        )
+        # import ipdb;ipdb.set_trace()
+        self.data["alias"] = self.data.alias.fillna('')
         self.data["host"] = self.data.name.apply(lambda x: str(x[:-1]).strip())
 
         for ident in self.data.name:

@@ -2,7 +2,7 @@ import glob
 import re
 import pandas as pd
 import numpy as np
-from exomercat.configurations import *
+from exo_mercat.configurations import *
 from datetime import date
 from pathlib import Path
 from typing import Union
@@ -59,45 +59,46 @@ class Catalog:
         self.data = None
         self.name = "catalog"
 
-    def download_and_save_cat(self, url: str, filename: str) -> None:
-        """
-        The download_and_save_cat function downloads a catalog from the web and saves it to disk.
-        It takes two arguments: url, which is the URL of the catalog to be downloaded, and filename,
-        which is where we want to save that file locally. It returns nothing.
 
-        Parameters
-        ----------
-            self
-                Allow the function to refer to and modify a class instance's attributes
-            url:str
-                Specify the url of the catalog to download
-            filename:str
-                Specify the name of the file where we want to store our data
+    def download_catalog(self, url: str, filename: str) -> Path:
         """
-        if os.path.exists(filename + date.today().strftime("%m-%d-%Y") + ".csv"):
+        The download_catalog function downloads the catalog from a given url and saves it to a file.
+            If the file already exists, it will not be downloaded again.
+
+        Args:
+            self: Represent the instance of the class
+            url: str: Specify the url of the catalog to be downloaded
+            filename: str: Specify the name of the file to be downloaded
+
+        Returns:
+            The string of the file path of the catalog
+
+        """
+        file_path = filename + date.today().strftime("%m-%d-%Y") + '.csv'
+        if os.path.exists(file_path):
             logging.info("Reading existing file")
-            self.data = pd.read_csv(
-                filename + date.today().strftime("%m-%d-%Y") + ".csv", low_memory=False
-            )
         else:
             try:
                 os.system(
                     'wget "'
                     + url
                     + '" -O "'
-                    + filename
-                    + date.today().strftime("%m-%d-%Y")
-                    + '.csv"'
+                    + file_path
+                    +'"'
                 )
-                self.data = pd.read_csv(
-                    filename + date.today().strftime("%m-%d-%Y") + ".csv"
-                )
+
             except BaseException:
-                local_copy = glob.glob(filename + "*.csv")[0]
+                file_path = glob.glob(filename + "*.csv")[0]
                 logging.warning(
-                    "Error fetching the catalog, taking a local copy:", local_copy
+                    "Error fetching the catalog, taking a local copy:",file_path
                 )
-                self.data = pd.read_csv(local_copy)
+        logging.info("Catalog downloaded.")
+
+        return Path(file_path)
+
+    def read_csv_catalog(self, file_path_str: str) -> None:
+
+        self.data = pd.read_csv(file_path_str, low_memory= False)
 
     def convert_datatypes(self) -> None:
         """
@@ -107,20 +108,6 @@ class Catalog:
         """
         self.data = self.data.convert_dtypes()
         logging.info("Converted datatypes.")
-
-    def read_csv_catalog(self, filename: str) -> None:
-        """
-        The read_csv_catalog function reads a csv file and stores the data in a pandas DataFrame.
-
-        Parameters
-        ----------
-            self
-                Access variables that belongs to the class
-            filename:str
-                Specify the name of the file that will be read
-
-        """
-        self.data = pd.read_csv(filename)
 
     def keep_columns(self) -> None:
         """
@@ -195,7 +182,7 @@ class Catalog:
         # config_hd = read_config_replacements("HD")
 
         # check unused replacements
-        f = open("EMClogs/unused_replacements.txt", "a")
+        f = open("Logs/unused_replacements.txt", "a")
         f.write("****" + self.name + "****\n")
         for name in config_name.keys():
             if len(self.data[self.data.name == name]) == 0:
@@ -237,7 +224,7 @@ class Catalog:
 
         f.close()
 
-        f = open("EMClogs/performed_replacements.txt", "a")
+        f = open("Logs/performed_replacements.txt", "a")
         f.write("****" + self.name + "****\n")
         for j in self.data.index:
             for i in const.keys():
@@ -298,7 +285,7 @@ class Catalog:
             another that lists all the replacements not used.
         """
         config_binary = read_config_replacements("BINARY")
-        f = open("EMClogs/unused_replacements.txt", "a")
+        f = open("Logs/unused_replacements.txt", "a")
         # check unused replacements
         for binary in config_binary.keys():
             if len(self.data[self.data.name == binary]) == 0:
@@ -311,7 +298,7 @@ class Catalog:
                     f.write("BINARY ALREADY PRESENT: " + binary + "\n")
         f.close()
 
-        f = open("EMCLogs/performed_replacements.txt", "a")
+        f = open("Logs/performed_replacements.txt", "a")
         for name in config_binary.keys():
             self.data.loc[self.data.name == name, "binary"] = config_binary[
                 name
@@ -425,8 +412,6 @@ class Catalog:
                 if al != "":
                     polished_alias = polished_alias + "," + uniform_string(al)
             self.data.at[i, "alias"] = polished_alias.lstrip(",")
-
-
 
         for identifier in self.data.name:
             if not str(re.search("(\.0)\\d$", identifier, re.M)) == "None":
@@ -657,5 +642,5 @@ class Catalog:
 
         """
         self.data = self.data.sort_values(by="name")
-        self.data.to_csv(filename)
+        self.data.to_csv(filename,index=None)
         logging.info("Printed catalog.")

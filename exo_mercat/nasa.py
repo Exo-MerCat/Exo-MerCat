@@ -1,6 +1,6 @@
 import re
 import numpy as np
-from exomercat.catalogs import Catalog
+from exo_mercat.catalogs import Catalog
 import logging
 
 

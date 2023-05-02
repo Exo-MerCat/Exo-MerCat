@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 from astroquery.simbad import Simbad
 from statistics import mode
-from exomercat.catalogs import Catalog
+from exo_mercat.catalogs import Catalog
 import re
 import pyvo
 from astropy import units as u
@@ -18,7 +18,7 @@ class Emc(Catalog):
         a dataframe to hold our data.
         """
         super().__init__()
-        self.name = "exomercat"
+        self.name = "exo_mercat"
         self.data = pd.DataFrame()
 
     def convert_coordinates(self) -> None:
@@ -36,7 +36,7 @@ class Emc(Catalog):
         then add all aliases of both hosts into one list for each row. It is okay if it happens multiple times,
         as long as it uniforms the host name and adds up all the aliases, SIMBAD will find them coherently.
         """
-        f = open("EMClogs/alias_as_host.txt", "a")
+        f = open("Logs/alias_as_host.txt", "a")
         counter = 0
         host: str
         for host, group in self.data.groupby(by="host"):
@@ -558,25 +558,21 @@ class Emc(Catalog):
         of those planet's hosts to be equal.
         """
         # TODO check that it makes sense
+        f = open("Logs/check_alias.txt", "a")
         count = 0
         for ids, group in self.data.groupby(by="list_id"):
             if ids != "" and len(set(group.host)) > 1:
                 self.data.loc[self.data.alias == ids, "host"] = list(group.host)[0]
-                print(
-                    "HOST ",
-                    list(group.host),
-                    list(group.catalog),
-                    list(group.status),
-                    list(group.letter),
-                    "ID ",
-                    list(group.main_id),
-                    file=open("EMClogs/check_alias.txt", "a"),
+                f.write(
+                    "HOST "+str(list(group.host))+str(list(group.catalog))+str(list(group.status))+str(
+                    list(group.letter))+" ID "+str(list(group.main_id))
                 )
                 count = count + 1
         logging.info(
             "Planets that had a different host name but same SIMBAD alias: "
             + str(count)
         )
+        f.close()
 
     def check_coordinates(self):
         """
@@ -592,7 +588,7 @@ class Emc(Catalog):
 
         self.data["coordinate_mismatch"] = ""
 
-        f = open("EMClogs/check_coordinates.txt", "a")
+        f = open("Logs/check_coordinates.txt", "a")
         for host, group in self.data[self.data.main_id == ""].groupby("host"):
             ra = mode(list(round(group.ra, 3)))
             dec = mode(list(round(group.dec, 3)))
@@ -696,7 +692,7 @@ class Emc(Catalog):
         This should _never_ happen unless the SIMBAD search is failing.
 
         """
-        f = open("EMClogs/same_host_different_id.txt", "a")
+        f = open("Logs/same_host_different_id.txt", "a")
         for host, group in self.data.groupby("hostbinary"):
             if len(group.main_id.drop_duplicates()) > 1:
                 f.write(
@@ -723,10 +719,11 @@ class Emc(Catalog):
                     + "\n"
                 )
         logging.info("Checked if host is found under different main_ids.")
+        f.close()
 
     def polish_main_id(self) -> None:
         counter=0
-        f = open("EMClogs/main_id_correction.txt", "a")
+        f = open("Logs/main_id_correction.txt", "a")
         for identifier in self.data["main_id"]:
             if not str(re.search("[\s\d][b-i]$", identifier, re.M)) == "None":
                 counter+=1
@@ -753,7 +750,7 @@ class Emc(Catalog):
         """
         self.data['binary']=self.data['binary'].fillna('')
         self.data['potential_binary_mismatch']=0
-        f = open("EMClogs/binary_mismatch.txt", "a")
+        f = open("Logs/binary_mismatch.txt", "a")
         f.write("****" + keyword + "****\n")
         for i in self.data.index:
             if (
@@ -900,7 +897,7 @@ class Emc(Catalog):
     #                 list(group.binary),
     #                 list(group.catalog),
     #                 list(group.status),
-    #                 file=open("EMClogs/duplicatedentries.txt", "a"),
+    #                 file=open("Logs/duplicatedentries.txt", "a"),
     #             )
     #     for (identifier, letter), group in self.data.groupby(["main_id", "letter"]):
     #         if max(group.catalog.value_counts()) > 1:
@@ -913,7 +910,7 @@ class Emc(Catalog):
     #                 list(group.binary),
     #                 list(group.catalog),
     #                 list(group.status),
-    #                 file=open("EMClogs/duplicatedentries.txt", "a"),
+    #                 file=open("Logs/duplicatedentries.txt", "a"),
     #             )
     #     print("Duplicate values", count, "with mainid", count_mainid)
 
@@ -943,7 +940,7 @@ class Emc(Catalog):
         The function then concatenates all of these entries together into a final catalog.
         """
         final_catalog = pd.DataFrame()
-        f = open("EMClogs/duplicate_entries.txt", "a")
+        f = open("Logs/duplicate_entries.txt", "a")
 
         grouped_df = self.data.groupby(
             ["main_id", "binary", "letter"], sort=True, as_index=False
@@ -1119,12 +1116,17 @@ class Emc(Catalog):
 
         logging.info("Bestmass calculated.")
 
+    def set_exo_mercat_name(self) -> None:
+        self.data['exo-mercat_name'] = self.data.apply(
+            lambda row: row['main_id'] + ' ' + str(row['binary']).replace('nan', '') + ' ' + row['letter'], axis=1)
+        self.data=self.data.sort_values(by='exo-mercat_name')
     def keep_columns(self) -> None:
         """
         The keep_columns function is used to keep only the columns that are needed for the analysis.
         The function takes in a dataframe and returns a new dataframe with only the columns listed above.
         """
         keep = [
+            'exo-mercat_name',
             "name",
             "host",
             "letter",

@@ -1,51 +1,64 @@
-from exomercat.catalogs import Catalog
+from exo_mercat.catalogs import Catalog
 from astropy.coordinates import SkyCoord
 import astropy.units as u
 import numpy as np
 import logging
 
 
-class Epic(Catalog):
+class Koi(Catalog):
     def __init__(self) -> None:
         """
         The __init__ function is called when the class is instantiated.
-        It sets up the instance of the class, and defines any variables that will be used by other functions in the class.
+        It sets up the instance of the class, and defines any variables that will be used by all instances of this class.
         """
         super().__init__()
-        self.name = "epic"
+        self.name = "koi"
         self.data = None
 
     def uniform_catalog(self) -> None:
         """
-        The uniform_catalog function takes the data from the K2targets catalog and creates a new table with only
-        the columns we need for our analysis. It also adds some useful columns that are derived from existing ones.
+        The uniform_catalog function takes the raw data from the NASA Exoplanet Archive and
+        returns a pandas DataFrame with columns for each of the following:
+            - kepid (the Kepler ID)
+            - kepoi_name (the KOI name)
+            - kepler_name (the Kepler host star name, if available)
+            - koi_disposition (CANDIDATE, FALSE POSITIVE, NOT DISPOSITIONED OR CONFIRMED)
+
+        Parameters
+        ----------
+            self
+                Access variables that belong to the class and not to the function
+
+        Returns
+        -------
+
+            None
         """
         self.data = self.data[
             [
-                "pl_name",
-                "pl_letter",
-                "k2_name",
-                "epic_hostname",
-                "hostname",
-                "hd_name",
-                "hip_name",
-                "tic_id",
-                "gaia_id",
-                "disposition",
-                "ra",
-                "dec",
-                "discoverymethod",
+                "kepid",
+                "kepoi_name",
+                "kepler_name",
+                "koi_disposition",
+                "ra_str",
+                "dec_str",
             ]
         ]
-        self.data = self.data.drop_duplicates()
-        self.data["KEPHOST"] = self.data.k2_name
-        self.data["KEPHOST"].fillna(self.data["hostname"], inplace=True)
-        self.data["KEPHOST"] = self.data.apply(
-            lambda row: row["KEPHOST"].rstrip(" bcdefghi"), axis=1
+        self.data["KOI"] = self.data["kepoi_name"].apply(
+            lambda x: "KOI-" + x.lstrip("K").lstrip("0")
         )
-
-        self.data["EPICLETTER"] = self.data.apply(
-            lambda row: row.pl_name.replace(".01", " b")
+        self.data["KOIHOST"] = self.data["KOI"].apply(
+            lambda x: x[:-3] + x[-3:].rstrip(".01234567")
+        )
+        self.data["KEPHOST"] = self.data.apply(
+            lambda row: row["kepler_name"].rstrip(" bcdefghi")
+            if not str(row.kepler_name) == "nan"
+            else "nan",
+            axis=1,
+        )
+        self.data["KICHOST"] = self.data["kepid"].apply(lambda x: "KIC " + str(x))
+        self.data["KOILETTER"] = self.data.apply(
+            lambda row: row.KOI.replace(".01", " b")
             .replace(".02", " c")
             .replace(".03", " d")
             .replace(".04", " e")
@@ -56,44 +69,34 @@ class Epic(Catalog):
             axis=1,
         )
 
-        self.data["name"] = self.data["EPICLETTER"]
+        self.data["LETTER"] = self.data.KOILETTER.apply(lambda row: row[-1:])
+        self.data["KIC"] = self.data["KICHOST"] + " " + self.data["LETTER"]
+        self.data = self.data.rename(columns={"ra_str": "ra", "dec_str": "dec"})
 
-        self.data["LETTER"] = self.data.EPICLETTER.apply(lambda row: row[-1:])
-        self.data["HDLETTER"] = self.data.hd_name + " " + self.data.LETTER
-        self.data["HIPLETTER"] = self.data.hip_name + " " + self.data.LETTER
-        self.data["TICLETTER"] = self.data.tic_id + " " + self.data.LETTER
-        self.data["GAIALETTER"] = self.data.gaia_id + " " + self.data.LETTER
-        self.data[["hd_name", "hip_name", "tic_id", "gaia_id"]] = self.data[
-            ["hd_name", "hip_name", "tic_id", "gaia_id"]
-        ].fillna("")
         for i in self.data.index:
             self.data.at[i, "alias"] = (
-                str(self.data.at[i, "tic_id"])
-                + ","
-                + str(self.data.at[i, "hip_name"])
-                + ","
-                + str(self.data.at[i, "hd_name"])
-                + ","
-                + str(self.data.at[i, "gaia_id"])
+                str(self.data.at[i, "KOIHOST"])
                 + ","
                 + str(self.data.at[i, "KEPHOST"])
+                + ","
+                + str(self.data.at[i, "KICHOST"])
             )
+
             self.data.at[i, "alias"] = (
                 ",".join(
                     [x for x in set(self.data.at[i, "alias"].split(",")) if x != "nan"]
                 )
                 + ","
             )
+
             self.data.at[i, "aliasplanet"] = (
-                str(self.data.at[i, "TICLETTER"])
+                str(self.data.at[i, "KOI"])
                 + ","
-                + str(self.data.at[i, "HDLETTER"])
+                + str(self.data.at[i, "KOILETTER"])
                 + ","
-                + str(self.data.at[i, "HIPLETTER"])
+                + str(self.data.at[i, "KIC"])
                 + ","
-                + str(self.data.at[i, "GAIALETTER"])
-                + ","
-                + str(self.data.at[i, "k2_name"])
+                + str(self.data.at[i, "kepler_name"])
             )
             self.data.at[i, "aliasplanet"] = (
                 ",".join(
@@ -105,6 +108,10 @@ class Epic(Catalog):
                 )
                 + ","
             )
+
+        self.data["name"] = self.data["KOILETTER"]
+        self.data["disposition"] = self.data["koi_disposition"]
+        self.data["discoverymethod"] = "Transit"
         logging.info("Catalog uniformed.")
 
     def convert_coordinates(self) -> None:
