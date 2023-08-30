@@ -1,16 +1,17 @@
 import glob
-
-import pandas as pd
-import urllib.request
-import numpy as np
-from exo_mercat.configurations import *
-from exo_mercat.catalogs import Catalog, uniform_string
-from datetime import date
-from astropy.io.votable import parse_single_table
-from astropy.io import ascii
 import logging
+import urllib.request
+from datetime import date
 from pathlib import Path
 
+import numpy as np
+import pandas as pd
+import requests
+from astropy.io import ascii
+from astropy.io.votable import parse_single_table
+
+from exo_mercat.catalogs import Catalog, uniform_string
+from exo_mercat.configurations import *
 
 
 class Eu(Catalog):
@@ -22,7 +23,7 @@ class Eu(Catalog):
         super().__init__()
         self.name = "eu"
 
-    def download_catalog(self, url: str, filename: str) -> str:
+    def download_catalog(self, url: str, filename: str, timeout=None) -> Path:
         """
         The download_catalog function downloads the catalog from a given url and saves it to a file.
             If the file already exists, it will not be downloaded again.
@@ -36,12 +37,15 @@ class Eu(Catalog):
             The string of the file path of the catalog
 
         """
-        file_path_str = filename + date.today().strftime("%m-%d-%Y") + '.csv'
+        file_path_str = filename + date.today().strftime("%m-%d-%Y") + ".csv"
         if os.path.exists(file_path_str):
             logging.info("Reading existing file")
         else:
             try:
-                urllib.request.urlretrieve(url, "votable.xml")
+                result = requests.get(url, timeout=timeout)
+                with open("votable.xml", "wb") as f:
+                    f.write(result.content)
+
                 table = parse_single_table("votable.xml").to_table()
                 ascii.write(
                     table,
@@ -51,20 +55,28 @@ class Eu(Catalog):
                 )
                 os.remove("votable.xml")
 
-            except BaseException:
-                file_path_str = glob.glob(filename + "*.csv")[0]
-                logging.info(
-                    "Error fetching the catalog, taking a local copy:", file_path_str
-                )
+            except:
+                if len(glob.glob(filename + "*.csv")) > 0:
+                    file_path_str = glob.glob(filename + "*.csv")[0]
+
+                    logging.warning(
+                        "Error fetching the catalog, taking a local copy: %s",
+                        file_path_str,
+                    )
+                else:
+                    raise ValueError("Could not find previous catalogs")
 
         logging.info("Catalog downloaded.")
-        return file_path_str
+        return Path(file_path_str)
+
     def uniform_catalog(self) -> None:
         """
         The uniform_catalog function takes the raw data from a catalog and converts it into a uniform format.
         The function also adds in columns for aliases, discovery methods, and references.
         """
         self.data["catalog"] = self.name
+        self.data["catalog_name"] = self.data["name"]
+
         self.data = self.data.replace("None", "").replace("nan", np.nan)
         self.data = self.data.rename(
             columns={
@@ -96,10 +108,9 @@ class Eu(Catalog):
                 "mass_detection_type": "MASSPROV",
                 "radius_detection_type": "RADPROV",
                 "star_name": "host",
-                "bib_reference": "Reference",
             }
         )
-
+        self.data["reference"] = self.name
         self.data["alias"] = self.data["alternate_names"].str.cat(
             self.data[["star_alternate_names"]].fillna(""), sep=","
         )
@@ -111,7 +122,7 @@ class Eu(Catalog):
                 # al = re.sub(".0\d$", "", al.rstrip())
                 # al = re.sub(" [b-i]$", "", al.rstrip())
                 # al = re.sub("^K0", "KOI-", al.lstrip())
-                alias_polished = alias_polished + "," + al.rstrip()
+                alias_polished = alias_polished + "," + al.rstrip().lstrip()
 
             self.data.at[i, "alias"] = alias_polished.lstrip(",")
 
@@ -140,7 +151,7 @@ class Eu(Catalog):
                 "msini" + value,
             ] = np.nan
             self.data.loc[
-                self.data["RADPROV"].str.contains("Theoretical", na=False), "R" + value
+                self.data["RADPROV"].str.contains("Theoretical", na=False), "r" + value
             ] = np.nan
 
         logging.info("Theoretical masses/radii removed.")
@@ -158,15 +169,15 @@ class Eu(Catalog):
             self.data["planet_status"].str.contains(
                 "Candidate|Unconfirmed|Controversial"
             ),
-            "Status",
+            "status",
         ] = "CANDIDATE"
         self.data.loc[
-            self.data["planet_status"].str.contains("Retracted"), "Status"
+            self.data["planet_status"].str.contains("Retracted"), "status"
         ] = "FALSE POSITIVE"
 
         logging.info("Status column assigned.")
         logging.info("Updated Status:")
-        logging.info(self.data.Status.value_counts())
+        logging.info(self.data.status.value_counts())
 
     def handle_reference_format(self) -> None:
         """
@@ -174,7 +185,9 @@ class Eu(Catalog):
         Since the Exoplanet Encyclopaedia table does not provide references, we just use "EU" as a keyword.
         """
         for item in ["e", "mass", "msini", "i", "a", "p", "r"]:
-            self.data[item + "_url"] = self.name
+            self.data[item + "_url"] = self.data[item].apply(
+                lambda x: "" if pd.isna(x) or np.isinf(x) else "eu"
+            )
         logging.info("Reference columns uniformed.")
 
     def convert_coordinates(self) -> None:

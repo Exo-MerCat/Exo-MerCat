@@ -30,6 +30,8 @@ class Nasa(Catalog):
             None
         """
         self.data["catalog"] = self.name
+        self.data["catalog_name"] = self.data["pl_name"]
+
         self.data = self.data.rename(
             columns={
                 "pl_name": "name",
@@ -54,12 +56,12 @@ class Nasa(Catalog):
                 "rv_flag": "RV",
                 "tran_flag": "Transit",
                 "ttv_flag": "TTV",
-                "pl_msinij": "msini",
-                "pl_msinijerr2": "msini_min",
-                "pl_msinijerr1": "msini_max",
-                "pl_massj": "mass",
-                "pl_massjerr2": "mass_min",
-                "pl_massjerr1": "mass_max",
+                # "pl_msinij": "msini",
+                # "pl_msinijerr2": "msini_min",
+                # "pl_msinijerr1": "msini_max",
+                # "pl_massj": "mass",
+                # "pl_massjerr2": "mass_min",
+                # "pl_massjerr1": "mass_max",
                 "pl_bmassj": "bestmass",
                 "pl_bmassjerr2": "bestmass_min",
                 "pl_bmassjerr1": "bestmass_max",
@@ -71,7 +73,7 @@ class Nasa(Catalog):
                 "st_mass": "Mstar",
                 "st_masserr1": "Mstar_max",
                 "st_masserr2": "Mstar_min",
-                "pl_radj_reflink": "R_url",
+                "pl_radj_reflink": "r_url",
                 "pl_orbeccen_reflink": "e_url",
                 "pl_orbsmax_reflink": "a_url",
                 "pl_orbper_reflink": "p_url",
@@ -80,9 +82,15 @@ class Nasa(Catalog):
             }
         )
 
-        if "default_flag" in self.data.columns:
-            # this happens when you use PLANETARY SYSTEMS TABLE
-            self.data = self.data[self.data.default_flag == 1]
+        # if "default_flag" in self.data.columns:
+        #     # this happens when you use PLANETARY SYSTEMS TABLE
+        #     self.data = self.data[self.data.default_flag == 1]
+        self.data["mass"] = np.nan
+        self.data["mass_min"] = np.nan
+        self.data["mass_max"] = np.nan
+        self.data["msini"] = np.nan
+        self.data["msini_min"] = np.nan
+        self.data["msinis_max"] = np.nan
 
         if "bestmass" in self.data.columns:
             # this happens when you use PLANETARY COMPOSITE PARAMETERS TABLE
@@ -104,6 +112,7 @@ class Nasa(Catalog):
                 "Eclipse Timing Variations": "TTV",
                 "Pulsation Timing Variations": "Pulsar Timing",
                 "Orbital Brightness Modulation": "Other",
+                "Disk Kinematics": "Other",
             }
         )
 
@@ -169,7 +178,7 @@ class Nasa(Catalog):
 
         for item in ["e", "mass", "msini", "i", "a", "p", "r"]:
             for i in self.data.index:
-                # filter finite values by checking if x == x (false for nan, inf)
+                # filter finite values by checking if x == x (false for nan, inf). If finite value, replace the string with only the bibcode, else empty string
                 if self.data.at[i, item + "_url"] == self.data.at[i, item + "_url"]:
                     url = self.data.at[i, item + "_url"]
                     link = r.findall(url)
@@ -220,7 +229,7 @@ class Nasa(Catalog):
     def remove_theoretical_masses(self):
         """
         The remove_theoretical_masses function removes mass and radius estimates calculated through M-R relationships.
-        It does this by removing all rows where the mass_url, msini_url, and R_url columns contain
+        It does this by removing all rows where the mass_url, msini_url, and r_url columns contain
         the word "Calculated".
 
 
@@ -247,6 +256,6 @@ class Nasa(Catalog):
             ] = np.nan
 
             self.data.loc[
-                self.data["R_url"].str.contains("Calculated", na=False), "R" + value
+                self.data["r_url"].str.contains("Calculated", na=False), "r" + value
             ] = np.nan
         logging.info("Theoretical masses/radii removed.")

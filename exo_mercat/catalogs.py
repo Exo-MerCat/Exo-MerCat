@@ -1,13 +1,16 @@
 import glob
+import logging
 import re
-import pandas as pd
-import numpy as np
-from exo_mercat.configurations import *
 from datetime import date
 from pathlib import Path
 from typing import Union
+
+import numpy as np
+import pandas as pd
+import requests
 import unidecode
-import logging
+
+from exo_mercat.configurations import *
 
 
 def uniform_string(name: str) -> str:
@@ -23,7 +26,7 @@ def uniform_string(name: str) -> str:
 
     """
     name = name.replace("'", "").replace('"', "")
-    if "K0" in name[2:]:
+    if "K0" in name[:2]:
         name = "KOI-" + name.lstrip("K").lstrip("0")
     if not str(re.match("2M[\d ]", name, re.M)) == "None":
         name = "2MASS J" + name[2:].lstrip()
@@ -33,11 +36,13 @@ def uniform_string(name: str) -> str:
     if not str(re.match("VHS \d", name, re.M)) == "None":
         name = name.replace("VHS ", "VHS J")
     if "Gl " in name:
-        name = name.replace("Gl  ", "GJ ")
+        name = name.replace("Gl ", "GJ ")
     if "KMT-" in name:
         name = name.rstrip("L")
     if "MOA-" in name:
         name = name.replace("MOA-", "MOA ").rstrip("L")
+    if "OGLE--" in name:
+        name = name.replace("OGLE--", "OGLE ").rstrip("L")
     if "OGLE" in name:
         name = name.replace("OGLE-", "OGLE ").rstrip("L")
     if "KMT-" in name:
@@ -59,8 +64,7 @@ class Catalog:
         self.data = None
         self.name = "catalog"
 
-
-    def download_catalog(self, url: str, filename: str) -> Path:
+    def download_catalog(self, url: str, filename: str, timeout: float = None) -> Path:
         """
         The download_catalog function downloads the catalog from a given url and saves it to a file.
             If the file already exists, it will not be downloaded again.
@@ -69,36 +73,49 @@ class Catalog:
             self: Represent the instance of the class
             url: str: Specify the url of the catalog to be downloaded
             filename: str: Specify the name of the file to be downloaded
-
+            timeout: float: Specify the timeout
         Returns:
             The string of the file path of the catalog
 
         """
-        file_path = filename + date.today().strftime("%m-%d-%Y") + '.csv'
-        if os.path.exists(file_path):
+        file_path_str = filename + date.today().strftime("%m-%d-%Y") + ".csv"
+        if os.path.exists(file_path_str):
             logging.info("Reading existing file")
         else:
             try:
-                os.system(
-                    'wget "'
-                    + url
-                    + '" -O "'
-                    + file_path
-                    +'"'
-                )
+                result = requests.get(url, timeout=timeout)
+                with open(file_path_str, "wb") as f:
+                    f.write(result.content)
 
-            except BaseException:
-                file_path = glob.glob(filename + "*.csv")[0]
-                logging.warning(
-                    "Error fetching the catalog, taking a local copy:",file_path
-                )
+            except (
+                OSError,
+                IOError,
+                FileNotFoundError,
+                ConnectionError,
+                ValueError,
+                TypeError,
+                TimeoutError,
+                requests.exceptions.ConnectionError,
+                requests.exceptions.SSLError,
+                requests.exceptions.Timeout,
+                requests.exceptions.ConnectTimeout,
+                requests.exceptions.HTTPError,
+            ) as e:
+                if len(glob.glob(filename + "*.csv")) > 0:
+                    file_path_str = glob.glob(filename + "*.csv")[0]
+
+                    logging.warning(
+                        "Error fetching the catalog, taking a local copy: %s",
+                        file_path_str,
+                    )
+                else:
+                    raise ValueError("Could not find previous catalogs")
         logging.info("Catalog downloaded.")
 
-        return Path(file_path)
+        return Path(file_path_str)
 
-    def read_csv_catalog(self, file_path_str: str) -> None:
-
-        self.data = pd.read_csv(file_path_str, low_memory= False)
+    def read_csv_catalog(self, file_path_str: Union[Path, str]) -> None:
+        self.data = pd.read_csv(file_path_str, low_memory=False)
 
     def convert_datatypes(self) -> None:
         """
@@ -115,6 +132,7 @@ class Catalog:
         """
         keep = [
             "name",
+            "catalog_name",
             "discovery_method",
             "ra",
             "dec",
@@ -154,7 +172,11 @@ class Catalog:
             "status",
             "catalog",
         ]
-        self.data = self.data[keep]
+        try:
+            self.data = self.data[keep]
+        # check that all columns exist, otherwise raise an error
+        except KeyError:
+            raise KeyError("Not all columns exist")
         logging.info("Selected columns to keep.")
 
     def identify_brown_dwarfs(self) -> None:
@@ -165,11 +187,15 @@ class Catalog:
             The function excludes KOI-like objects by avoid the patterns ".0d" with d being a digit.
         """
         for i in self.data.index:
-            if not str(re.search("\d$", self.data.at[i, "name"], re.M)) == "None":
-                if self.data.at[i, "name"][-3:-1] != ".0":
+            if not "PSR B1257+12" in self.data.at[i, "name"]:  # known weird candidates
+                if not str(re.search("\d$", self.data.at[i, "name"], re.M)) == "None":
+                    if self.data.at[i, "name"][-3:-1] != ".0":
+                        self.data.at[i, "letter"] = "BD"
+                if (
+                    not str(re.search("[aABCD]$", self.data.at[i, "name"], re.M))
+                    == "None"
+                ):
                     self.data.at[i, "letter"] = "BD"
-            if not str(re.search("[aABCD]$", self.data.at[i, "name"], re.M)) == "None":
-                self.data.at[i, "letter"] = "BD"
         logging.info("Identified possible Brown Dwarfs (no letter for planet name).")
 
     def replace_known_mistakes(self) -> None:
@@ -187,6 +213,7 @@ class Catalog:
         for name in config_name.keys():
             if len(self.data[self.data.name == name]) == 0:
                 f.write("NAME: " + name + "\n")
+
         for host in config_host.keys():
             if len(self.data[self.data.host == host]) == 0:
                 f.write("HOST: " + host + "\n")
@@ -224,33 +251,33 @@ class Catalog:
 
         f.close()
 
-        f = open("Logs/performed_replacements.txt", "a")
-        f.write("****" + self.name + "****\n")
+        # f = open("Logs/performed_replacements.txt", "a")
+        # f.write("****" + self.name + "****\n")
         for j in self.data.index:
             for i in const.keys():
                 if i in self.data.loc[j, "name"]:
                     self.data.loc[j, "name"] = self.data.loc[j, "name"].replace(
                         i, const[i]
                     )
-                    f.write("NAME: " + i + " to " + const[i] + "\n")
+                    # f.write("NAME: " + i + " to " + const[i] + "\n")
             for i in const.keys():
                 if i in self.data.loc[j, "host"]:
                     self.data.loc[j, "host"] = self.data.loc[j, "host"].replace(
                         i, const[i]
                     )
-                    f.write("HOST: " + i + " to " + const[i] + "\n")
+                    # f.write("HOST: " + i + " to " + const[i] + "\n")
             for i in config_name.keys():
                 if i in self.data.loc[j, "name"]:
                     self.data.loc[j, "name"] = self.data.loc[j, "name"].replace(
                         i, config_name[i]
                     )
-                    f.write("NAME: " + i + " to " + config_name[i] + "\n")
+                    # f.write("NAME: " + i + " to " + config_name[i] + "\n")
             for i in config_host.keys():
                 if i in self.data.loc[j, "host"]:
                     self.data.loc[j, "host"] = self.data.loc[j, "host"].replace(
                         i, config_host[i]
                     )
-                    f.write("HOST: " + i + " to " + config_host[i] + "\n")
+                    # f.write("HOST: " + i + " to " + config_host[i] + "\n")
 
         for repl_searchname in ["ra", "dec"]:
             config_replace = read_config_replacements(repl_searchname)
@@ -259,7 +286,7 @@ class Catalog:
                     self.data.loc[self.data.host == name, repl_searchname] = float(
                         change
                     )
-                    f.write(repl_searchname + ": " + name + " to " + change + "\n")
+                    # f.write(repl_searchname + ": " + name + " to " + change + "\n")
                 except BaseException:
                     pass
 
@@ -269,9 +296,9 @@ class Catalog:
                 self.data = self.data[
                     ~(self.data[check].str.contains(drop.strip(), na=False))
                 ]
-                f.write("DROP: " + check + ":" + drop + "\n")
+                # f.write("DROP: " + check + ":" + drop + "\n")
 
-        f.close()
+        # f.close()
         self.data["name"] = self.data["name"].apply(unidecode.unidecode)
         self.data["name"] = self.data.name.apply(lambda x: " ".join(x.split()))
         self.data = self.data.reset_index(drop=True)
@@ -298,12 +325,12 @@ class Catalog:
                     f.write("BINARY ALREADY PRESENT: " + binary + "\n")
         f.close()
 
-        f = open("Logs/performed_replacements.txt", "a")
+        # f = open("Logs/performed_replacements.txt", "a")
         for name in config_binary.keys():
             self.data.loc[self.data.name == name, "binary"] = config_binary[
                 name
             ].replace("NaN", "")
-            f.write("BINARY: " + name + " to " + config_binary[name] + "\n")
+            # f.write("BINARY: " + name + " to " + config_binary[name] + "\n")
         f.close()
 
     def remove_theoretical_masses(self):
@@ -311,21 +338,21 @@ class Catalog:
         The remove_theoretical_masses function removes the theoretical masses from the dataframe.
         It is not implemented here because it is catalog-dependent.
         """
-        return NotImplementedError
+        raise NotImplementedError
 
     def handle_reference_format(self):
         """
         The handle_reference_format function is used to create a url for each reference in the references list.
         It is not implemented here because it is catalog-dependent.
         """
-        return NotImplementedError
+        raise NotImplementedError
 
     def uniform_catalog(self):
         """
         The uniform_catalog function is used to standardize the dataframe columns and values.
         It is not implemented here because it is catalog-dependent.
         """
-        return NotImplementedError
+        raise NotImplementedError
 
     def remove_known_brown_dwarfs(self, print_flag: bool) -> None:
         """
@@ -347,8 +374,9 @@ class Catalog:
                     .astype(float)
                     > 20.0
                 )
-                | (self.data.letter == "BD")
+                #   | (self.data.letter == "BD")
             ].to_csv("UniformSources/" + self.name + "_brown_dwarfs.csv")
+
         self.data = self.data[
             (
                 self.data.mass.fillna(self.data.msini.fillna(0))
@@ -356,8 +384,11 @@ class Catalog:
                 .astype(float)
                 <= 20.0
             )
-            & (self.data.letter != "BD")
+            #    & (self.data.letter != "BD")
         ]
+        self.data[(self.data.letter == "BD")].to_csv(
+            "UniformSources/" + self.name + "_possible_brown_dwarfs.csv"
+        )
 
     def make_errors_absolute(self) -> None:
         """
@@ -398,6 +429,10 @@ class Catalog:
         self.data["host"] = self.data.host.replace("", np.nan).fillna(self.data.name)
 
         for identifier in self.data.loc[ind, "host"]:
+            if not str(re.search("(\.0)\\d$", identifier, re.M)) == "None":
+                self.data.loc[self.data.host == identifier, "host"] = identifier[
+                    :-3
+                ].strip()
             if not str(re.search(" [b-z]$", identifier, re.M)) == "None":
                 self.data.loc[self.data.host == identifier, "host"] = identifier[
                     :-1
@@ -408,34 +443,40 @@ class Catalog:
             polished_alias = ""
             for al in self.data.at[i, "alias"].split(","):
                 if not str(re.search(" [b-z]$", al, re.M)) == "None":
-                    al = al[:-1].strip()
+                    al = al[:-1]
+                if not str(re.search("(\.0)\\d$", al, re.M)) == "None":
+                    al = al[:-3]
                 if al != "":
-                    polished_alias = polished_alias + "," + uniform_string(al)
+                    polished_alias = (
+                        polished_alias + "," + uniform_string(al.lstrip().rstrip())
+                    )
             self.data.at[i, "alias"] = polished_alias.lstrip(",")
 
         for identifier in self.data.name:
             if not str(re.search("(\.0)\\d$", identifier, re.M)) == "None":
-                self.data.loc[self.data.name == identifier, "letter"] = (
-                    identifier[-1:]
-                    .replace("1", "b")
-                    .replace("2", "c")
-                    .replace("3", "d")
-                    .replace("4", "e")
-                    .replace("5", "f")
-                    .replace("6", "g")
-                    .replace("7", "h")
-                    .replace("8", "i")
-                )
-                self.data.loc[self.data.name == identifier, "name"] = (
-                    identifier.replace(".01", " b")
-                    .replace(".02", " c")
-                    .replace(".03", " d")
-                    .replace(".04", " e")
-                    .replace(".05", " f")
-                    .replace(".06", " g")
-                    .replace(".07", " h")
-                    .replace(".08", " i")
-                )
+                self.data.loc[self.data.name == identifier, "letter"] = identifier[-3:]
+
+                # self.data.loc[self.data.name == identifier, "letter"] = (
+                #     identifier[-1:]
+                #     .replace("1", "b")
+                #     .replace("2", "c")
+                #     .replace("3", "d")
+                #     .replace("4", "e")
+                #     .replace("5", "f")
+                #     .replace("6", "g")
+                #     .replace("7", "h")
+                #     .replace("8", "i")
+                # )
+                # self.data.loc[self.data.name == identifier, "name"] = (
+                #     identifier.replace(".01", " b")
+                #     .replace(".02", " c")
+                #     .replace(".03", " d")
+                #     .replace(".04", " e")
+                #     .replace(".05", " f")
+                #     .replace(".06", " g")
+                #     .replace(".07", " h")
+                #     .replace(".08", " i")
+                # )
             else:
                 self.data.loc[self.data.name == identifier, "letter"] = identifier[-1:]
                 # self.data.loc[self.data.name == identifier, "host"] = identifier[:-3].strip()
@@ -447,7 +488,7 @@ class Catalog:
         The assign_status function assigns a status to each planet based on the status column.
         It is not implemented here because it is catalog-dependent.
         """
-        return NotImplementedError
+        raise NotImplementedError
 
     def check_koiepic_tables(self, table_path: str) -> None:
         """
@@ -465,13 +506,19 @@ class Catalog:
             final_alias_total = self.data.at[index, "alias"].split(",")
             sub = tab[tab.aliasplanet.str.contains(name + ",")]
             sub = sub.drop_duplicates().reset_index()
-
             if len(sub) > 0:
-                self.data.at[index, "status"] = sub.at[0, "disposition"]
-                if not list(sub.name)[0] == "":
-                    self.data.at[index, "name"] = sub.at[0, "name"]
-                if self.data.at[index, "discovery_method"] == "nan":
-                    self.data.at[index, "discovery_method"] = sub.at[0, "discoverymethod"]
+                if self.data.at[index, "status"] != sub.at[0, "disposition"]:
+                    self.data.at[index, "status"] = sub.at[0, "disposition"]
+                # if not list(sub.name)[0] == "":
+                #     self.data.at[index, "name"] = sub.at[0, "name"]
+                if self.data.at[index, "discovery_method"] in [
+                    "nan",
+                    "Unknown",
+                    "Default",
+                ]:
+                    self.data.at[index, "discovery_method"] = sub.at[
+                        0, "discoverymethod"
+                    ]
 
                 for internal_alias in sub.alias:
                     for internal_al in internal_alias.split(","):
@@ -482,14 +529,17 @@ class Catalog:
             letter = self.data.at[index, "letter"]
             # check hosts
             sub = tab[tab.alias.str.contains(host + ",")]
-            sub = sub[sub.LETTER == letter]
+            sub = sub[sub.letter == letter]
             sub = sub.drop_duplicates().reset_index()
             if len(sub) > 0:
-                self.data.at[index, "status"] = sub.at[0, "disposition"]
-                if not list(sub.name)[0] == "":
-                    self.data.at[index, "name"] = sub.at[0, "name"]
+                if self.data.at[index, "status"] != sub.at[0, "disposition"]:
+                    self.data.at[index, "status"] = sub.at[0, "disposition"]
+                # if not list(sub.name)[0] == "":
+                #     self.data.at[index, "name"] = sub.at[0, "name"]
                 if self.data.at[index, "discovery_method"] == "nan":
-                    self.data.at[index, "discovery_method"] = sub.at[0, "discoverymethod"]
+                    self.data.at[index, "discovery_method"] = sub.at[
+                        0, "discoverymethod"
+                    ]
 
                 for internal_alias in sub.alias:
                     for internal_al in internal_alias.split(","):
@@ -531,7 +581,7 @@ class Catalog:
         for i in self.data.index:
             # protect in case planet name in host column
             if (
-                not str(re.search(r"([ABCNLS\d][a-z])$", self.data.at[i, "host"]))
+                not str(re.search(r"([ABCNLS][\s\d][a-z])$", self.data.at[i, "host"]))
                 == "None"
             ):
                 self.data.at[i, "host"] = self.data.at[i, "host"][:-1].strip()
@@ -616,7 +666,8 @@ class Catalog:
             final_alias = ""
 
             for al in group.alias:
-                final_alias = final_alias + "," + al
+                if al not in [np.nan, "NaN", "nan"]:
+                    final_alias = final_alias + "," + al
             self.data.loc[self.data.host == host, "alias"] = ",".join(
                 [uniform_string(x) for x in set(final_alias.split(",")) if x]
             )
@@ -628,6 +679,25 @@ class Catalog:
         It is not implemented here because it is catalog-dependent.
         """
         raise NotImplementedError
+
+    def fill_nan_on_coordinates(self) -> None:
+        """
+        The coordinates function takes the RA and Dec columns of a dataframe,
+        and converts them to decimal degrees. It replaces any
+        missing values with NaN. Finally, it uses SkyCoord to convert from hour angles and
+        degrees into decimal degrees.
+        Currently only used for Open Exoplanet Catalogue, KOI catalogs.
+        UPDATE: EPIC now has degrees already.
+        """
+
+        self.data["ra"] = pd.to_numeric(
+            self.data.ra.replace("nan", np.nan).replace("", np.nan)
+        )
+        self.data["dec"] = pd.to_numeric(
+            self.data.dec.replace("nan", np.nan).replace("", np.nan)
+        )
+
+        logging.info("Filled empty coordinates with nan.")
 
     def print_catalog(self, filename: Union[str, Path]) -> None:
         """
@@ -641,6 +711,6 @@ class Catalog:
 
 
         """
-        self.data = self.data.sort_values(by="name")
-        self.data.to_csv(filename,index=None)
+        # self.data = self.data.sort_values(by="exo_mercat_name")
+        self.data.to_csv(filename, index=None)
         logging.info("Printed catalog.")

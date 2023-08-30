@@ -8,8 +8,8 @@ import logging
 class Koi(Catalog):
     def __init__(self) -> None:
         """
-        The __init__ function is called when the class is instantiated.
-        It sets up the instance of the class, and defines any variables that will be used by all instances of this class.
+        The __init__ function is called when the class is instantiated. It sets up the instance of the class,
+        and defines any variables that will be used by all instances of this class.
         """
         super().__init__()
         self.name = "koi"
@@ -47,39 +47,43 @@ class Koi(Catalog):
         self.data["KOI"] = self.data["kepoi_name"].apply(
             lambda x: "KOI-" + x.lstrip("K").lstrip("0")
         )
-        self.data["KOIHOST"] = self.data["KOI"].apply(
+        self.data["KOI_host"] = self.data["KOI"].apply(
             lambda x: x[:-3] + x[-3:].rstrip(".01234567")
         )
-        self.data["KEPHOST"] = self.data.apply(
+        self.data["Kepler_host"] = self.data.apply(
             lambda row: row["kepler_name"].rstrip(" bcdefghi")
             if not str(row.kepler_name) == "nan"
             else "nan",
             axis=1,
         )
-        self.data["KICHOST"] = self.data["kepid"].apply(lambda x: "KIC " + str(x))
-        self.data["KOILETTER"] = self.data.apply(
-            lambda row: row.KOI.replace(".01", " b")
-            .replace(".02", " c")
-            .replace(".03", " d")
-            .replace(".04", " e")
-            .replace(".05", " f")
-            .replace(".06", " g")
-            .replace(".07", " h")
-            .replace(".08", " i"),
+        self.data["KIC_host"] = self.data["kepid"].apply(lambda x: "KIC " + str(x))
+        # self.data["KOI_letter"] = self.data.apply(
+        #     lambda row: row.KOI.replace(".01", " b")
+        #     .replace(".02", " c")
+        #     .replace(".03", " d")
+        #     .replace(".04", " e")
+        #     .replace(".05", " f")
+        #     .replace(".06", " g")
+        #     .replace(".07", " h")
+        #     .replace(".08", " i"),
+        #     axis=1,
+        # )
+        self.data["letter"] = self.data.apply(
+            lambda row: row["kepler_name"][-1:]
+            if not str(row.kepler_name) == "nan"
+            else row["kepoi_name"][-3:],
             axis=1,
         )
-
-        self.data["LETTER"] = self.data.KOILETTER.apply(lambda row: row[-1:])
-        self.data["KIC"] = self.data["KICHOST"] + " " + self.data["LETTER"]
+        self.data["KIC"] = self.data["KIC_host"] + " " + self.data["letter"]
         self.data = self.data.rename(columns={"ra_str": "ra", "dec_str": "dec"})
 
         for i in self.data.index:
             self.data.at[i, "alias"] = (
-                str(self.data.at[i, "KOIHOST"])
+                str(self.data.at[i, "KOI_host"])
                 + ","
-                + str(self.data.at[i, "KEPHOST"])
+                + str(self.data.at[i, "Kepler_host"])
                 + ","
-                + str(self.data.at[i, "KICHOST"])
+                + str(self.data.at[i, "KIC_host"])
             )
 
             self.data.at[i, "alias"] = (
@@ -92,8 +96,6 @@ class Koi(Catalog):
             self.data.at[i, "aliasplanet"] = (
                 str(self.data.at[i, "KOI"])
                 + ","
-                + str(self.data.at[i, "KOILETTER"])
-                + ","
                 + str(self.data.at[i, "KIC"])
                 + ","
                 + str(self.data.at[i, "kepler_name"])
@@ -102,14 +104,18 @@ class Koi(Catalog):
                 ",".join(
                     [
                         x
-                        for x in set(self.data.at[i, "aliasplanet"].split(","))
+                        for x in set(
+                            self.data.at[i, "aliasplanet"]
+                            .replace(" .0", ".0")
+                            .split(",")
+                        )
                         if x != "nan"
                     ]
                 )
                 + ","
             )
 
-        self.data["name"] = self.data["KOILETTER"]
+        self.data["name"] = self.data["KOI"]
         self.data["disposition"] = self.data["koi_disposition"]
         self.data["discoverymethod"] = "Transit"
         logging.info("Catalog uniformed.")

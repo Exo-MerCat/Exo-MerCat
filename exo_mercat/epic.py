@@ -1,15 +1,15 @@
-from exo_mercat.catalogs import Catalog
-from astropy.coordinates import SkyCoord
-import astropy.units as u
-import numpy as np
 import logging
+
+import numpy as np
+
+from exo_mercat.catalogs import Catalog
 
 
 class Epic(Catalog):
     def __init__(self) -> None:
         """
-        The __init__ function is called when the class is instantiated.
-        It sets up the instance of the class, and defines any variables that will be used by other functions in the class.
+        The __init__ function is called when the class is instantiated. It sets up the instance of the class,
+        and defines any variables that will be used by other functions in the class.
         """
         super().__init__()
         self.name = "epic"
@@ -35,34 +35,39 @@ class Epic(Catalog):
                 "ra",
                 "dec",
                 "discoverymethod",
+                "default_flag",
             ]
         ]
-        self.data = self.data.drop_duplicates()
-        self.data["KEPHOST"] = self.data.k2_name
-        self.data["KEPHOST"].fillna(self.data["hostname"], inplace=True)
-        self.data["KEPHOST"] = self.data.apply(
-            lambda row: row["KEPHOST"].rstrip(" bcdefghi"), axis=1
+        self.data = self.data[self.data.default_flag == 1]
+        self.data["Kepler_host"] = self.data.k2_name
+        self.data["Kepler_host"].fillna(self.data["hostname"], inplace=True)
+        self.data["Kepler_host"] = self.data.apply(
+            lambda row: row["Kepler_host"].rstrip(" bcdefghi"), axis=1
         )
+        # self.data["EPIC_letter"] = self.data.apply(
+        #     lambda row: row.pl_name.replace(".01", " b")
+        #     .replace(".02", " c")
+        #     .replace(".03", " d")
+        #     .replace(".04", " e")
+        #     .replace(".05", " f")
+        #     .replace(".06", " g")
+        #     .replace(".07", " h")
+        #     .replace(".08", " i"),
+        #     axis=1,
+        # )
+        #
+        self.data["name"] = self.data["pl_name"]
 
-        self.data["EPICLETTER"] = self.data.apply(
-            lambda row: row.pl_name.replace(".01", " b")
-            .replace(".02", " c")
-            .replace(".03", " d")
-            .replace(".04", " e")
-            .replace(".05", " f")
-            .replace(".06", " g")
-            .replace(".07", " h")
-            .replace(".08", " i"),
-            axis=1,
+        self.data["letter"] = self.data.pl_letter.replace("", np.nan).fillna(
+            self.data.pl_name.apply(lambda row: row[-3:])
         )
-
-        self.data["name"] = self.data["EPICLETTER"]
-
-        self.data["LETTER"] = self.data.EPICLETTER.apply(lambda row: row[-1:])
-        self.data["HDLETTER"] = self.data.hd_name + " " + self.data.LETTER
-        self.data["HIPLETTER"] = self.data.hip_name + " " + self.data.LETTER
-        self.data["TICLETTER"] = self.data.tic_id + " " + self.data.LETTER
-        self.data["GAIALETTER"] = self.data.gaia_id + " " + self.data.LETTER
+        self.data.k2_name = self.data.k2_name.fillna(
+            self.data.hostname + " " + self.data.letter
+        )
+        self.data["HD_letter"] = self.data.hd_name + " " + self.data.letter
+        self.data["HIP_letter"] = self.data.hip_name + " " + self.data.letter
+        self.data["TIC_letter"] = self.data.tic_id + " " + self.data.letter
+        self.data["GAIA_letter"] = self.data.gaia_id + " " + self.data.letter
         self.data[["hd_name", "hip_name", "tic_id", "gaia_id"]] = self.data[
             ["hd_name", "hip_name", "tic_id", "gaia_id"]
         ].fillna("")
@@ -76,7 +81,7 @@ class Epic(Catalog):
                 + ","
                 + str(self.data.at[i, "gaia_id"])
                 + ","
-                + str(self.data.at[i, "KEPHOST"])
+                + str(self.data.at[i, "Kepler_host"])
             )
             self.data.at[i, "alias"] = (
                 ",".join(
@@ -85,13 +90,13 @@ class Epic(Catalog):
                 + ","
             )
             self.data.at[i, "aliasplanet"] = (
-                str(self.data.at[i, "TICLETTER"])
+                str(self.data.at[i, "TIC_letter"])
                 + ","
-                + str(self.data.at[i, "HDLETTER"])
+                + str(self.data.at[i, "HD_letter"])
                 + ","
-                + str(self.data.at[i, "HIPLETTER"])
+                + str(self.data.at[i, "HIP_letter"])
                 + ","
-                + str(self.data.at[i, "GAIALETTER"])
+                + str(self.data.at[i, "GAIA_letter"])
                 + ","
                 + str(self.data.at[i, "k2_name"])
             )
@@ -99,12 +104,17 @@ class Epic(Catalog):
                 ",".join(
                     [
                         x
-                        for x in set(self.data.at[i, "aliasplanet"].split(","))
+                        for x in set(
+                            self.data.at[i, "aliasplanet"]
+                            .replace(" .0", ".0")
+                            .split(",")
+                        )
                         if x != "nan"
                     ]
                 )
                 + ","
             )
+
         logging.info("Catalog uniformed.")
 
     def convert_coordinates(self) -> None:
@@ -113,27 +123,7 @@ class Epic(Catalog):
         and converts them to decimal degrees. It replaces any
         missing values with NaN. Finally, it uses SkyCoord to convert from hour angles and
         degrees into decimal degrees.
-        Currently only used for Open Exoplanet Catalogue, KOI and EPIC catalogs.
+        Currently only used for Open Exoplanet Catalogue, KOI catalogs.
+        UPDATE: EPIC now has degrees already.
         """
-
-        self.data["ra"] = self.data.ra.fillna("").replace("nan", "").replace(np.nan, "")
-        self.data["dec"] = (
-            self.data.dec.fillna("").replace("nan", "").replace(np.nan, "")
-        )
-        self.data["ra"] = self.data.apply(
-            lambda row: SkyCoord(
-                str(row["ra"]) + " " + str(row["dec"]), unit=(u.hourangle, u.deg)
-            ).ra.degree
-            if not str(row.ra) == ""
-            else np.nan,
-            axis=1,
-        )
-        self.data["dec"] = self.data.apply(
-            lambda row: SkyCoord(
-                str(row["ra"]) + " " + str(row["dec"]), unit=(u.hourangle, u.deg)
-            ).dec.degree
-            if not str(row.dec) == ""
-            else np.nan,
-            axis=1,
-        )
-        logging.info("Converted coordinates from hourangle to deg.")
+        pass

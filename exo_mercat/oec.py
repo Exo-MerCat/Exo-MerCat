@@ -4,6 +4,8 @@ import xml.etree.ElementTree as ET
 import gzip
 import pandas as pd
 import numpy as np
+import requests
+from pathlib import Path, PosixPath
 from exo_mercat.configurations import *
 from exo_mercat.catalogs import Catalog
 from datetime import date
@@ -11,6 +13,7 @@ from astropy.coordinates import SkyCoord
 import astropy.units as u
 import logging
 from pathlib import Path
+from typing import Union
 
 
 def get_parameter(treeobject, parameter: str) -> str:
@@ -33,7 +36,7 @@ def get_parameter(treeobject, parameter: str) -> str:
     """
     if parameter == "alias":
         alias = treeobject.findall("*/name")
-        ret = ", ".join([a.text for a in alias])
+        ret = ",".join([a.text for a in alias])
     else:
         try:
             ret = treeobject.findtext("./" + parameter).strip()
@@ -63,10 +66,7 @@ def get_attribute(treeobject: ET.Element, parameter: str, attrib: str) -> str:
 
         A string containing the value of the attribute
     """
-    try:
-        retattr = treeobject.find("./" + parameter).attrib[attrib]
-    except BaseException:
-        retattr = ""
+    retattr = treeobject.find("./" + parameter).attrib[attrib]
     return retattr
 
 
@@ -88,15 +88,14 @@ def getParameter_all(treeobject: ET.Element, parameter: str) -> str:
 
         A list of all values in treeobject for the supplied parameter
     """
-    try:
-        ret = ", ".join([x.text for x in treeobject.iter(parameter)])
-    except Exception as err:
-        logging.error(err)
-        ret = ""
+    # try:
+    ret = ",".join([x.text for x in treeobject.iter(parameter)])
+    # except BaseException: #pragma: no cover
+    #     ret = "" # pragma: no cover
     return ret
 
 
-def convert_xmlfile_to_csvfile(file_path: Path) -> None:
+def convert_xmlfile_to_csvfile(file_path: Union[Path, str]) -> None:
     fields = [
         "name",
         "binaryflag",
@@ -147,9 +146,7 @@ def convert_xmlfile_to_csvfile(file_path: Path) -> None:
         "alias",
         "list",
     ]
-    input_file = gzip.open(
-        file_path, "r"
-    )
+    input_file = gzip.open(Path(file_path), "r")
     table = ET.parse(input_file)
     tab = pd.DataFrame()
 
@@ -176,13 +173,9 @@ def convert_xmlfile_to_csvfile(file_path: Path) -> None:
                 elif field == "masstype":
                     parameters[field] = get_attribute(planet, field[0:-4], "type")
                 elif field[-4:] == "_min":
-                    parameters[field] = get_attribute(
-                        planet, field[0:-4], "errorminus"
-                    )
+                    parameters[field] = get_attribute(planet, field[0:-4], "errorminus")
                 elif field[-4:] == "_max":
-                    parameters[field] = get_attribute(
-                        planet, field[0:-4], "errorplus"
-                    )
+                    parameters[field] = get_attribute(planet, field[0:-4], "errorplus")
 
             parameters.binaryflag = 0
             if planet in system.findall(".//binary/planet"):
@@ -197,7 +190,7 @@ def convert_xmlfile_to_csvfile(file_path: Path) -> None:
 
             tab = pd.concat([tab, parameters], sort=False)
 
-    new_file_path=Path(str(file_path[:-6]+'csv'))
+    new_file_path = Path(str(file_path[:-6] + "csv"))
     tab.to_csv(new_file_path)
 
 
@@ -215,23 +208,49 @@ class Oec(Catalog):
         super().__init__()
         self.name = "oec"
 
-    def download_catalog(self, url: str, filename: str) -> str:
+    def download_catalog(self, url: str, filename: str, timeout: float = None) -> Path:
+        file_path_str = filename + date.today().strftime("%m-%d-%Y") + ".csv"
+        file_path_xml_str = filename + date.today().strftime("%m-%d-%Y") + ".xml.gz"
 
-
-        file_path_str=filename + date.today().strftime("%m-%d-%Y") + ".csv"
         if os.path.exists(file_path_str):
             logging.info("Reading existing file")
 
         else:
-            file_path_xml_str = filename + date.today().strftime("%m-%d-%Y") + ".xml.gz"
             try:
-                os.system(
-                    'wget "'
-                    + url
-                    + '" -O "'
-                    + file_path_xml_str
-                    +'"'
-                )
+                result = requests.get(url, timeout=timeout)
+                with open(file_path_xml_str, "wb") as f:
+                    f.write(result.content)
+                logging.info("Convert from .xml to .csv")
+                convert_xmlfile_to_csvfile(file_path_xml_str)
+
+            except (
+                OSError,
+                IOError,
+                FileNotFoundError,
+                ConnectionError,
+                ValueError,
+                TypeError,
+                TimeoutError,
+                requests.exceptions.ConnectionError,
+                requests.exceptions.SSLError,
+                requests.exceptions.Timeout,
+                requests.exceptions.ConnectTimeout,
+                requests.exceptions.HTTPError,
+            ) as e:
+                if len(glob.glob(filename + "*.csv")) > 0:
+                    file_path_str = glob.glob(filename + "*.csv")[0]
+
+                    logging.warning(
+                        "Error fetching the catalog, taking a local copy: %s",
+                        file_path_str,
+                    )
+                else:
+                    raise ValueError("Could not find previous catalogs")
+
+            try:
+                result = requests.get(url, timeout=timeout)
+                with open(file_path_xml_str, "wb") as f:
+                    f.write(result.content)
                 logging.info("Convert from .xml to .csv")
                 convert_xmlfile_to_csvfile(file_path_xml_str)
 
@@ -242,14 +261,15 @@ class Oec(Catalog):
                 )
 
         logging.info("Catalog downloaded.")
-        return file_path_str
-
+        return Path(file_path_str)
 
     def uniform_catalog(self) -> None:
         """
         The uniform_catalog function is used to standardize the dataframe columns and values.
         """
         self.data["catalog"] = self.name
+        self.data["catalog_name"] = self.data["name"]
+
         self.data = self.data.replace({"None": np.nan})
         self.data = self.data.rename(
             columns={
@@ -271,16 +291,30 @@ class Oec(Catalog):
                 "radius_min": "r_min",
                 "radius_max": "r_max",
                 "discoveryyear": "discovery_year",
-                "mass": "M",
-                "mass_min": "M_min",
-                "mass_max": "M_max",
+                "mass": "mass",
+                "mass_min": "mass_min",
+                "mass_max": "mass_max",
                 "system_rightascension": "ra",
                 "system_declination": "dec",
             }
         )
         self.data = self.data.reset_index()
-        # import ipdb;ipdb.set_trace()
-        self.data["alias"] = self.data.alias.fillna('')
+        self.data["alias"] = self.data.alias.fillna("")
+        self.data["masstype"] = self.data.masstype.fillna("mass")
+
+        self.data["msini"] = np.nan
+        self.data["msini_min"] = np.nan
+        self.data["msinis_max"] = np.nan
+        for i in self.data.index:
+            if self.data.at[i, "masstype"] == "msini":
+                self.data.at[i, "msini"] = self.data.at[i, "mass"]
+                self.data.at[i, "msini_max"] = self.data.at[i, "mass_max"]
+                self.data.at[i, "msini_min"] = self.data.at[i, "mass_min"]
+
+                self.data.at[i, "mass"] = np.nan
+                self.data.at[i, "mass_max"] = np.nan
+                self.data.at[i, "mass_min"] = np.nan
+
         self.data["host"] = self.data.name.apply(lambda x: str(x[:-1]).strip())
 
         for ident in self.data.name:
@@ -302,36 +336,18 @@ class Oec(Catalog):
         logging.info("Catalog uniformed.")
 
     def remove_theoretical_masses(self) -> None:
-        # TODO wrong name at least
-        """
-        The remove_theoretical_masses function is used to remove
-        the theoretical masses from the dataframe.
-        It does this by replacing all of the values in mass and msini
-        with their corresponding M value, depending on whether or
-        not it is a msini mass.
-
-        Parameters
-        ----------
-            self
-                Represent the instance of the class
-
-        Returns
-        -------
-
-            None
-
-        Doc Author
-        ----------
-            Trelent
-        """
-        for value in ["", "_min", "_max"]:
-            self.data.loc[
-                self.data["masstype"] != "msini", "mass" + value
-            ] = self.data.loc[self.data["masstype"] != "msini", "M" + value]
-            self.data.loc[
-                self.data["masstype"] == "msini", "msini" + value
-            ] = self.data.loc[self.data["masstype"] == "msini", "M" + value]
-        logging.info("Theoretical masses/radii removed.")
+        pass  # does not have theoretical masses
+        # """
+        # """
+        # for value in ["", "_min", "_max"]:
+        #     #check if nan (nan != nan)
+        #     self.data.loc[
+        #         self.data["masstype"] != "msini", "mass" + value
+        #     ] = self.data.loc[self.data["masstype"] != "msini", "mass" + value]
+        #     self.data.loc[
+        #         self.data["masstype"] == "msini", "msini" + value
+        #     ] = self.data.loc[self.data["masstype"] == "msini", "mass" + value]
+        # logging.info("Theoretical masses/radii removed.")
 
     def assign_status(self) -> None:
         """
@@ -350,7 +366,7 @@ class Oec(Catalog):
                 self.data.at[i, "status"] = "FALSE POSITIVE"
             elif "Kepler Objects of Interest" in self.data.at[i, "list"]:
                 self.data.at[i, "status"] = "CANDIDATE"
-        logging.info("status column assigned.")
+        logging.info("Status column assigned.")
         logging.info("Updated status:")
         logging.info(self.data.status.value_counts())
 
@@ -360,7 +376,9 @@ class Oec(Catalog):
         Since the Open Exoplanet Catalog does not provide references, we just use "OEC" as a keyword.
         """
         for item in ["e", "mass", "msini", "i", "a", "p", "r"]:
-            self.data[item + "_url"] = self.name
+            self.data[item + "_url"] = self.data[item].apply(
+                lambda x: "" if pd.isna(x) or np.isinf(x) else "oec"
+            )
         logging.info("Reference columns uniformed.")
 
     def convert_coordinates(self) -> None:
