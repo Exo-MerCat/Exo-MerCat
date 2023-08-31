@@ -12,7 +12,7 @@ from exo_mercat.oec import Oec
 from exo_mercat.epic import Epic
 from exo_mercat.emc import Emc
 from exo_mercat.koi import Koi
-from exo_mercat.configurations import *
+from exo_mercat.utility_functions import *
 import socket
 import warnings
 import pandas as pd

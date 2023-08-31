@@ -8,278 +8,7 @@ import pyvo
 from astropy import units as u
 from astropy.coordinates import SkyCoord
 import logging
-
-
-def round_to_decimal(number: float) -> float:
-    """
-    Round a number to an appropriate number of decimal places based on its order of magnitude.
-
-    This function takes a numeric input 'number' and rounds it to an appropriate number of
-    decimal places based on its order of magnitude. The function calculates the order of
-    magnitude of the input number and determines the rounding strategy based on that.
-
-    Parameters
-    ----------
-    number : float
-        The number to be rounded.
-    """
-    order_of_magnitude = 10 ** np.floor(np.log10(abs(number)))
-    if order_of_magnitude <= 100:
-        rounded_number = round(number / order_of_magnitude, 0)
-    elif order_of_magnitude <= 1000:
-        rounded_number = round(number / order_of_magnitude, 1)
-    else:
-        rounded_number = round(number / order_of_magnitude, 2)
-    return rounded_number * order_of_magnitude
-
-
-def round_array_to_significant_digits(numbers: list) -> list:
-    """
-    Round an array of numbers to their significant digits with special handling for zero values.
-
-    This function takes an array of numeric inputs 'numbers' and rounds each number to its
-    appropriate significant digits using the round_to_decimal function. Zero values are
-    replaced with -1 to distinguish them from rounded numbers.
-
-    Parameters
-    ----------
-    numbers : list of float
-        The array of numbers to be rounded.
-
-    Returns
-    -------
-    list of float
-        The array of rounded numbers with special handling for zero values.
-    """
-    rounded_numbers = []
-    for num in numbers:
-        if num != 0:
-            rounded_num = round_to_decimal(num)
-            rounded_numbers.append(rounded_num)
-        else:
-            rounded_numbers.append(-1)
-    return rounded_numbers
-
-
-def round_parameter_bin(parameter_series: pd.Series) -> pd.Series:
-    """
-    Round values in a pandas Series to bins based on their order of magnitude.
-
-    This function takes a pandas Series 'parameter_series' containing numeric values and rounds
-    each value to a bin based on its order of magnitude. It calculates the order of magnitude
-    for each value, defines variable bins based on the calculated order of magnitude, and
-    assigns the corresponding bin label to each value.
-
-    Parameters
-    ----------
-    parameter_series : pd.Series
-        A pandas Series containing numeric values to be rounded to bins.
-
-    Returns
-    -------
-    pd.Series
-        A pandas Series with bin labels corresponding to each value's order of magnitude.
-
-    """
-
-    # Calculate the order of magnitude
-    order_of_magnitude = np.log10(parameter_series.fillna(0))
-
-    # Define variable bins based on the order of magnitude
-    # You can adjust these bins according to your specific needs
-    bins = np.linspace(
-        np.log10(parameter_series.min() * 0.9),
-        np.log10(1.1 * parameter_series.max()),
-        300,
-    )
-    # bin_labels = [f"[{10 ** bins[i]}, {10 ** bins[i + 1]})" for i in range(len(bins) - 1)]
-    # Apply pcut with variable bins
-    return pd.cut(order_of_magnitude, bins=bins, labels=False).fillna(-1)
-
-
-def merge_into_single_entry(
-    group: pd.DataFrame, mainid: str, binary: str, letter: str
-) -> pd.DataFrame:
-    """
-    The merge_into_single_entry function takes the dataframe and merges all entries
-    with the same main_id and letter (from the different catalogs) into a single entry.
-    It does this by grouping by main_id and letter, then iterating through each group.
-    It creates an empty dataframe called 'entry' and adds information to it from each group.
-    The final entry contains: the official SIMBAD ID and coordinates; the measurements
-    that have the smallest relative error with the corresponding reference; the preferred
-    name, the preferred status, the preferred binary letter (chosen as the most common
-    in the group); year of discovery, method of discovery, and final list of aliases.
-    The function then concatenates all of these entries together into a final catalog.
-
-    Parameters
-    ----------
-    group : pd.DataFrame
-        A pandas DataFrame containing the duplicate occurrences.
-    main_id: str
-        The main identifier of the group
-    binary: str
-        The binary identifier of the group
-    letter: str
-        The letter identifier of the group
-
-    Returns
-    -------
-    pd.Series
-        A pandas Series corresponding to the merged single entry.
-
-    """
-    # these are always going to be unique by definition
-    entry = pd.DataFrame([mainid], columns=["main_id"])
-    entry["binary"] = binary
-    entry["letter"] = letter
-
-    entry["host"] = list(set(group["host"]))[0]
-    entry["angular_separation"] = ",".join(map(str, group.angular_separation.unique()))
-
-    entry["ra_official"] = list(set(group.ra_simbad))[0]
-    entry["dec_official"] = list(set(group.dec_simbad))[0]
-
-    # save catalog name
-    entry["nasa_name"] = ""
-    entry["eu_name"] = ""
-    entry["oec_name"] = ""
-    for catalog in group["catalog"]:
-        if catalog == "nasa":
-            entry["nasa_name"] = group.loc[
-                group.catalog == catalog, "catalog_name"
-            ].tolist()[0]
-        elif catalog == "eu":
-            entry["eu_name"] = group.loc[
-                group.catalog == catalog, "catalog_name"
-            ].tolist()[0]
-        elif catalog == "oec":
-            entry["oec_name"] = group.loc[
-                group.catalog == catalog, "catalog_name"
-            ].tolist()[0]
-
-    # SELECT BEST MEASUREMENT
-    params = [
-        ["i_url", "i", "i_min", "i_max", "IREL"],
-        ["mass_url", "mass", "mass_min", "mass_max", "MASSREL"],
-        ["msini_url", "msini", "msini_min", "msini_max", "MSINIREL"],
-        ["r_url", "r", "r_min", "r_max", "RADREL"],
-        ["a_url", "a", "a_min", "a_max", "AREL"],
-        ["p_url", "p", "p_min", "p_max", "PERREL"],
-        ["e_url", "e", "e_min", "e_max", "EREL"],
-    ]
-    for p in params:
-        result = pd.DataFrame(columns=p)
-        result.loc[0, p] = np.nan
-        result.loc[0, p[0]] = ""
-
-        #                result.main_id=mainid
-        subgroup = group[p[:-1]]
-        subgroup[p[1:-1]] = subgroup[p[1:-1]].fillna(np.nan).replace("", np.nan)
-        subgroup = subgroup.dropna(subset=[p[1]])
-        subgroup = subgroup.dropna(subset=[p[3], p[2]])
-
-        if len(subgroup) > 0:
-            subgroup[p[1]] = subgroup[p[1]].astype("float")
-            subgroup["maxrel"] = subgroup[p[3]].astype("float") / subgroup[p[1]].astype(
-                "float"
-            )
-            subgroup["minrel"] = subgroup[p[2]].astype("float") / subgroup[p[1]].astype(
-                "float"
-            )
-            subgroup = subgroup.replace(np.inf, np.nan)
-            subgroup["maxrel"] = subgroup["maxrel"].fillna(subgroup[p[2]])
-            subgroup["minrel"] = subgroup["minrel"].fillna(subgroup[p[2]])
-            subgroup[p[-1]] = subgroup[["maxrel", "minrel"]].max(axis=1)
-
-            result = subgroup.loc[subgroup[p[-1]] == subgroup[p[-1]].min(), p]
-            result = result.sort_values(by=p[0]).head(1)
-
-            result = result.reset_index().drop(columns=["index"])
-
-        result = result[p]
-
-        entry = pd.concat([entry, result], axis=1)
-
-    # status
-
-    entry["status_string"] = ",".join(group.Catalogstatus).rstrip(",")
-
-    entry["confirmed"] = ",".join(set(group.Catalogstatus)).count("CONFIRMED")
-
-    if len(set(group.status)) == 1:
-        entry["status"] = group.status.unique()[0]
-    else:
-        entry["status"] = "CONTROVERSIAL"
-    # YEAR OF DISCOVERY
-    if len(sorted(group.discovery_year.dropna().astype("int").unique())) == 1:
-        entry["discovery_year"] = sorted(
-            group.discovery_year.dropna().astype("int").unique()
-        )[0]
-    elif len(sorted(group.discovery_year.dropna().astype("int").unique())) > 1:
-        entry["discovery_year"] = sorted(
-            group.discovery_year.dropna().astype("int").unique()
-        )[0]
-    else:
-        entry["discovery_year"] = ""
-    # discovery method
-    entry["discovery_method"] = ",".join(
-        list(set(group.discovery_method[group.discovery_method != "Default"].unique()))
-    )
-
-    entry["catalog"] = ",".join(list((sorted(group.catalog.unique())))).rstrip(",")
-
-    # final Alias
-    final_alias = ""
-    for al in group.final_alias:
-        final_alias = final_alias + "," + str(al)
-    entry["final_alias"] = ",".join(
-        [x for x in sorted(set(final_alias.split(","))) if x not in ["A", "B", ""]]
-    )
-
-    entry["potential_binary_mismatch"] = ",".join(
-        map(str, group.potential_binary_mismatch.unique())
-    ).rstrip(",")
-
-    entry["coordinate_mismatch"] = ",".join(
-        map(str, group.coordinate_mismatch.unique())
-    ).rstrip(",")
-
-    if "RA" in set(group.coordinate_mismatch.unique()) and "DEC" in set(
-        group.coordinate_mismatch.unique()
-    ):
-        entry["coordinate_mismatch_flag"] = 2
-    elif "RA" in set(group.coordinate_mismatch.unique()) or "DEC" in set(
-        group.coordinate_mismatch.unique()
-    ):
-        entry["coordinate_mismatch_flag"] = 1
-    else:
-        entry["coordinate_mismatch_flag"] = 0
-
-    entry["angular_separation_flag"] = (
-        len(list(set(group.angular_separation.unique()))) - 1
-    )
-    # Catalog
-
-    if len(group) > len(group.catalog.unique()):
-        f = open("Logs/duplicate_entries.txt", "a")
-
-        f.write(
-            "DUPLICATE ENTRY "
-            + mainid
-            + " "
-            + str(list(group.letter))
-            + " CATALOGS "
-            + str(list(group.catalog))
-            + " STATUS "
-            + str(list(group.status))
-            + "\n"
-        )
-        f.close()
-        entry["duplicate_flag"] = 1
-    else:
-        entry["duplicate_flag"] = 0
-
-    return entry
+from exo_mercat.utility_functions import UtilityFunctions as Utils
 
 
 class Emc(Catalog):
@@ -359,11 +88,7 @@ class Emc(Catalog):
         The simbad_list_host_search function takes a column name as an argument and searches for the host star
         in that column in SIMBAD. It then fills in the main_id, IDS, RA, and DEC columns with information from
         SIMBAD if it finds a match.
-
-        Parameters
-        ----------
-            column: str
-                The name of the column that contains the host star to search for (host or hostbinary)
+        :param column: The name of the column that contains the host star to search for (host or hostbinary)
         """
         list_of_hosts = list(
             self.data[self.data.main_id == ""][column].drop_duplicates()
@@ -411,11 +136,7 @@ class Emc(Catalog):
         each object in that column. The function first splits the string into a list of aliases, then iterates
         through each alias to search SIMBAD for its main ID. If it finds one, it will update the dataframe with
         that information.
-
-        Parameters
-        ----------
-            column: str
-                The name of the column that contains the host star to search for (alias or aliasbinary)
+        :param column: The name of the column that contains the host star to search for (alias or aliasbinary)
         """
 
         Simbad.add_votable_fields("typed_id", "ids", "ra", "dec")
@@ -581,7 +302,7 @@ class Emc(Catalog):
         )
         f.close()
 
-    def check_coordinates(self):
+    def check_coordinates(self) -> None:
         """
         The check_coordinates function checks for mismatches in the RA and DEC
         coordinates of a given host (for the targets that cannot rely on SIMBAD
@@ -631,7 +352,7 @@ class Emc(Catalog):
 
         logging.info(self.data.coordinate_mismatch.value_counts())
 
-    def get_coordinates_from_simbad(self):
+    def get_coordinates_from_simbad(self) -> None:
         """
         This function takes the dataframe and checks if there are any matches in Simbad for the coordinates of each
         object. It does this by querying Simbad with a circle around each coordinate, starting at 0.01 degrees and
@@ -917,8 +638,8 @@ class Emc(Catalog):
 
     def fix_letter_by_period(self) -> None:
         f1 = open("Logs/fixed_letters.txt", "a")
-        self.data["working_period_group"] = round_parameter_bin(self.data["p"])
-        self.data["working_sma_group"] = round_parameter_bin(self.data["a"])
+        self.data["working_period_group"] = Utils.round_parameter_bin(self.data["p"])
+        self.data["working_sma_group"] = Utils.round_parameter_bin(self.data["a"])
 
         grouped_df = self.data.groupby(["main_id", "binary"], sort=True, as_index=False)
         counter = 0
@@ -963,6 +684,183 @@ class Emc(Catalog):
 
         f1.close()
 
+    def merge_into_single_entry(self, group: pd.DataFrame, mainid: str, binary: str, letter: str) -> pd.DataFrame:
+        """
+        The merge_into_single_entry function takes the dataframe and merges all entries
+        with the same main_id and letter (from the different catalogs) into a single entry.
+        It does this by grouping by main_id and letter, then iterating through each group.
+        It creates an empty dataframe called 'entry' and adds information to it from each group.
+        The final entry contains: the official SIMBAD ID and coordinates; the measurements
+        that have the smallest relative error with the corresponding reference; the preferred
+        name, the preferred status, the preferred binary letter (chosen as the most common
+        in the group); year of discovery, method of discovery, and final list of aliases.
+        The function then concatenates all of these entries together into a final catalog.
+
+        :param group : A pandas DataFrame containing the duplicate occurrences.
+        :param mainid: The main identifier of the group
+        :param binary: The binary identifier of the group
+        :param letter: The letter identifier of the group
+        :return: A pandas Series corresponding to the merged single entry.
+        """
+        # these are always going to be unique by definition
+        entry = pd.DataFrame([mainid], columns=["main_id"])
+        entry["binary"] = binary
+        entry["letter"] = letter
+
+        entry["host"] = list(set(group["host"]))[0]
+        entry["angular_separation"] = ",".join(
+            map(str, group.angular_separation.unique())
+        )
+
+        entry["ra_official"] = list(set(group.ra_simbad))[0]
+        entry["dec_official"] = list(set(group.dec_simbad))[0]
+
+        # save catalog name
+        entry["nasa_name"] = ""
+        entry["eu_name"] = ""
+        entry["oec_name"] = ""
+        for catalog in group["catalog"]:
+            if catalog == "nasa":
+                entry["nasa_name"] = group.loc[
+                    group.catalog == catalog, "catalog_name"
+                ].tolist()[0]
+            elif catalog == "eu":
+                entry["eu_name"] = group.loc[
+                    group.catalog == catalog, "catalog_name"
+                ].tolist()[0]
+            elif catalog == "oec":
+                entry["oec_name"] = group.loc[
+                    group.catalog == catalog, "catalog_name"
+                ].tolist()[0]
+
+        # SELECT BEST MEASUREMENT
+        params = [
+            ["i_url", "i", "i_min", "i_max", "IREL"],
+            ["mass_url", "mass", "mass_min", "mass_max", "MASSREL"],
+            ["msini_url", "msini", "msini_min", "msini_max", "MSINIREL"],
+            ["r_url", "r", "r_min", "r_max", "RADREL"],
+            ["a_url", "a", "a_min", "a_max", "AREL"],
+            ["p_url", "p", "p_min", "p_max", "PERREL"],
+            ["e_url", "e", "e_min", "e_max", "EREL"],
+        ]
+        for p in params:
+            result = pd.DataFrame(columns=p)
+            result.loc[0, p] = np.nan
+            result.loc[0, p[0]] = ""
+
+            #                result.main_id=mainid
+            subgroup = group[p[:-1]]
+            subgroup[p[1:-1]] = subgroup[p[1:-1]].fillna(np.nan).replace("", np.nan)
+            subgroup = subgroup.dropna(subset=[p[1]])
+            subgroup = subgroup.dropna(subset=[p[3], p[2]])
+
+            if len(subgroup) > 0:
+                subgroup[p[1]] = subgroup[p[1]].astype("float")
+                subgroup["maxrel"] = subgroup[p[3]].astype("float") / subgroup[
+                    p[1]
+                ].astype("float")
+                subgroup["minrel"] = subgroup[p[2]].astype("float") / subgroup[
+                    p[1]
+                ].astype("float")
+                subgroup = subgroup.replace(np.inf, np.nan)
+                subgroup["maxrel"] = subgroup["maxrel"].fillna(subgroup[p[2]])
+                subgroup["minrel"] = subgroup["minrel"].fillna(subgroup[p[2]])
+                subgroup[p[-1]] = subgroup[["maxrel", "minrel"]].max(axis=1)
+
+                result = subgroup.loc[subgroup[p[-1]] == subgroup[p[-1]].min(), p]
+                result = result.sort_values(by=p[0]).head(1)
+
+                result = result.reset_index().drop(columns=["index"])
+
+            result = result[p]
+
+            entry = pd.concat([entry, result], axis=1)
+
+        # status
+
+        entry["status_string"] = ",".join(group.Catalogstatus).rstrip(",")
+
+        entry["confirmed"] = ",".join(set(group.Catalogstatus)).count("CONFIRMED")
+
+        if len(set(group.status)) == 1:
+            entry["status"] = group.status.unique()[0]
+        else:
+            entry["status"] = "CONTROVERSIAL"
+        # YEAR OF DISCOVERY
+        if len(sorted(group.discovery_year.dropna().astype("int").unique())) == 1:
+            entry["discovery_year"] = sorted(
+                group.discovery_year.dropna().astype("int").unique()
+            )[0]
+        elif len(sorted(group.discovery_year.dropna().astype("int").unique())) > 1:
+            entry["discovery_year"] = sorted(
+                group.discovery_year.dropna().astype("int").unique()
+            )[0]
+        else:
+            entry["discovery_year"] = ""
+        # discovery method
+        entry["discovery_method"] = ",".join(
+            list(
+                set(
+                    group.discovery_method[group.discovery_method != "Default"].unique()
+                )
+            )
+        )
+
+        entry["catalog"] = ",".join(list((sorted(group.catalog.unique())))).rstrip(",")
+
+        # final Alias
+        final_alias = ""
+        for al in group.final_alias:
+            final_alias = final_alias + "," + str(al)
+        entry["final_alias"] = ",".join(
+            [x for x in sorted(set(final_alias.split(","))) if x not in ["A", "B", ""]]
+        )
+
+        entry["potential_binary_mismatch"] = ",".join(
+            map(str, group.potential_binary_mismatch.unique())
+        ).rstrip(",")
+
+        entry["coordinate_mismatch"] = ",".join(
+            map(str, group.coordinate_mismatch.unique())
+        ).rstrip(",")
+
+        if "RA" in set(group.coordinate_mismatch.unique()) and "DEC" in set(
+            group.coordinate_mismatch.unique()
+        ):
+            entry["coordinate_mismatch_flag"] = 2
+        elif "RA" in set(group.coordinate_mismatch.unique()) or "DEC" in set(
+            group.coordinate_mismatch.unique()
+        ):
+            entry["coordinate_mismatch_flag"] = 1
+        else:
+            entry["coordinate_mismatch_flag"] = 0
+
+        entry["angular_separation_flag"] = (
+            len(list(set(group.angular_separation.unique()))) - 1
+        )
+        # Catalog
+
+        if len(group) > len(group.catalog.unique()):
+            f = open("Logs/duplicate_entries.txt", "a")
+
+            f.write(
+                "DUPLICATE ENTRY "
+                + mainid
+                + " "
+                + str(list(group.letter))
+                + " CATALOGS "
+                + str(list(group.catalog))
+                + " STATUS "
+                + str(list(group.status))
+                + "\n"
+            )
+            f.close()
+            entry["duplicate_flag"] = 1
+        else:
+            entry["duplicate_flag"] = 0
+
+        return entry
+
     def group_by_letter_check_period(self, verbose: bool) -> None:
         """
         The group_by_letter_check_period function groups the full catalog per main_id, binary, and letter. Then it
@@ -973,7 +871,6 @@ class Emc(Catalog):
         the entries together.
 
         :param verbose: boolean to allow printing of percentage
-        :return:
         """
         final_catalog = pd.DataFrame()
         f1 = open("Logs/contrasting_periods.txt", "a")
@@ -991,7 +888,7 @@ class Emc(Catalog):
             )
             if len(period_list) == 1:
                 # period in agreement (drop nan), regular merging
-                entry = merge_into_single_entry(group, mainid, binary, letter)
+                entry = self.merge_into_single_entry(group, mainid, binary, letter)
 
                 final_catalog = pd.concat(
                     [final_catalog, entry], sort=False
@@ -1011,7 +908,9 @@ class Emc(Catalog):
                 )
                 for pgroup in period_list:
                     subgroup = group[group.working_period_group == pgroup]
-                    entry = merge_into_single_entry(subgroup, mainid, binary, letter)
+                    entry = self.merge_into_single_entry(
+                        subgroup, mainid, binary, letter
+                    )
                     final_catalog = pd.concat(
                         [final_catalog, entry], sort=False
                     ).reset_index(drop=True)
@@ -1023,7 +922,7 @@ class Emc(Catalog):
 
                 if len(sma_list) == 1:
                     # sma in agreement (drop nan), regular merging
-                    entry = merge_into_single_entry(group, mainid, binary, letter)
+                    entry = self.merge_into_single_entry(group, mainid, binary, letter)
 
                     final_catalog = pd.concat(
                         [final_catalog, entry], sort=False
@@ -1043,7 +942,7 @@ class Emc(Catalog):
                     )
                     for agroup in sma_list:
                         subgroup = group[group.working_sma_group == agroup]
-                        entry = merge_into_single_entry(
+                        entry = self.merge_into_single_entry(
                             subgroup, mainid, binary, letter
                         )
                         final_catalog = pd.concat(
@@ -1055,7 +954,7 @@ class Emc(Catalog):
                         "FALLBACK, MERGE " + mainid + " " + binary + "" + letter + "\n"
                     )
                     # period in agreement (drop nan), regular merging
-                    entry = merge_into_single_entry(group, mainid, binary, letter)
+                    entry = self.merge_into_single_entry(group, mainid, binary, letter)
 
                     final_catalog = pd.concat(
                         [final_catalog, entry], sort=False

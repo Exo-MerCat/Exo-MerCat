@@ -19,20 +19,10 @@ class Koi(Catalog):
         """
         The uniform_catalog function takes the raw data from the NASA Exoplanet Archive and
         returns a pandas DataFrame with columns for each of the following:
-            - kepid (the Kepler ID)
-            - kepoi_name (the KOI name)
-            - kepler_name (the Kepler host star name, if available)
-            - koi_disposition (CANDIDATE, FALSE POSITIVE, NOT DISPOSITIONED OR CONFIRMED)
-
-        Parameters
-        ----------
-            self
-                Access variables that belong to the class and not to the function
-
-        Returns
-        -------
-
-            None
+        1. kepid (the Kepler ID)
+        2. kepoi_name (the KOI name)
+        3. kepler_name (the Kepler host star name, if available)
+        4. koi_disposition (CANDIDATE, FALSE POSITIVE, NOT DISPOSITIONED OR CONFIRMED)
         """
         self.data = self.data[
             [
@@ -57,17 +47,6 @@ class Koi(Catalog):
             axis=1,
         )
         self.data["KIC_host"] = self.data["kepid"].apply(lambda x: "KIC " + str(x))
-        # self.data["KOI_letter"] = self.data.apply(
-        #     lambda row: row.KOI.replace(".01", " b")
-        #     .replace(".02", " c")
-        #     .replace(".03", " d")
-        #     .replace(".04", " e")
-        #     .replace(".05", " f")
-        #     .replace(".06", " g")
-        #     .replace(".07", " h")
-        #     .replace(".08", " i"),
-        #     axis=1,
-        # )
         self.data["letter"] = self.data.apply(
             lambda row: row["kepler_name"][-1:]
             if not str(row.kepler_name) == "nan"

@@ -25,7 +25,7 @@ Compared to Alei+2020:
   - `exomercat/koi.py` for the Kepler Objects of Interest Catalog
   - `exomercat/epic.py` for the K2/EPIC Objects of Interest Catalog
   - `exomercat/emc.py` for the cumulative Exo-MerCat catalog object (EMC)
-- Added file `replacements.ini` that includes all replacements that must be made to help uniforming the targets. The user should keep filling this file, especially if any of the log files in `EMClogs/` are not empty. Ideally, correct replacement would allow the log files to be empty afterwards. The file is handles in `exomercat/configurations.py`.
+- Added file `replacements.ini` that includes all replacements that must be made to help uniforming the targets. The user should keep filling this file, especially if any of the log files in `EMClogs/` are not empty. Ideally, correct replacement would allow the log files to be empty afterwards. The file is handles in `exomercat/utilityfunctions.py`.
 - Ingestion of NASA Exoplanet Archive and Kepler objects of interest (KOI) catalog was changed from the source. Exo-Mercat was adapted accordingly. 
 - The K2 objects of interest (EPIC) catalog was ingested in addition to the KOI catalog.
   - Exo-MerCat now excludes all targets whose (minimum) mass is higher than 20 Jovian masses using `remove_known_brown_dwarfs(print=True)`. If `print=True` the brown dwarfs are printed separately and saved in `UniformSources/`.

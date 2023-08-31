@@ -44,18 +44,6 @@ class Epic(Catalog):
         self.data["Kepler_host"] = self.data.apply(
             lambda row: row["Kepler_host"].rstrip(" bcdefghi"), axis=1
         )
-        # self.data["EPIC_letter"] = self.data.apply(
-        #     lambda row: row.pl_name.replace(".01", " b")
-        #     .replace(".02", " c")
-        #     .replace(".03", " d")
-        #     .replace(".04", " e")
-        #     .replace(".05", " f")
-        #     .replace(".06", " g")
-        #     .replace(".07", " h")
-        #     .replace(".08", " i"),
-        #     axis=1,
-        # )
-        #
         self.data["name"] = self.data["pl_name"]
 
         self.data["letter"] = self.data.pl_letter.replace("", np.nan).fillna(

@@ -1,197 +1,16 @@
 import glob
-import re
-import xml.etree.ElementTree as ET
-import gzip
-import pandas as pd
+import os
 import numpy as np
+import re
+import pandas as pd
 import requests
-from pathlib import Path, PosixPath
-from exo_mercat.configurations import *
+from exo_mercat.utility_functions import UtilityFunctions as Utils
 from exo_mercat.catalogs import Catalog
 from datetime import date
 from astropy.coordinates import SkyCoord
 import astropy.units as u
 import logging
 from pathlib import Path
-from typing import Union
-
-
-def get_parameter(treeobject, parameter: str) -> str:
-    """
-    The getParameter function takes two arguments:
-        1. treeobject - an ElementTree object that is the root of a parsed XML file
-        2. parameter - a string representing the name of an element in the XML file
-
-    Parameters
-    ----------
-        treeobject
-            Get the parameter from a tree object
-        parameter: str
-            Get the parameter from the xml file
-
-    Returns
-    -------
-
-        A string containing the parameter value
-    """
-    if parameter == "alias":
-        alias = treeobject.findall("*/name")
-        ret = ",".join([a.text for a in alias])
-    else:
-        try:
-            ret = treeobject.findtext("./" + parameter).strip()
-        except BaseException:
-            ret = ""
-    return ret
-
-
-def get_attribute(treeobject: ET.Element, parameter: str, attrib: str) -> str:
-    """
-    The getAttribute function takes three arguments:
-        1. treeobject - an ElementTree object, which is the root of a parsed XML file
-        2. parameter - a string representing the name of an element in the XML file
-        3. attrib - a string representing one of that element's attributes
-
-    Parameters
-    ----------
-        treeobject
-            Specify the tree object to be searched
-        parameter
-            Specify the parameter that is being searched for
-        attrib
-            Specify the attribute that is to be returned
-
-    Returns
-    -------
-
-        A string containing the value of the attribute
-    """
-    retattr = treeobject.find("./" + parameter).attrib[attrib]
-    return retattr
-
-
-def getParameter_all(treeobject: ET.Element, parameter: str) -> str:
-    """
-    The getParameter_all function takes two arguments:
-        1. treeobject - an ElementTree object, which is the root of a parsed XML file
-        2. parameter - a string containing the name of an element in the XML file
-
-    Parameters
-    ----------
-        treeobject
-            Find the parameter in the xml file
-        parameter
-            Specify which parameter to return
-
-    Returns
-    -------
-
-        A list of all values in treeobject for the supplied parameter
-    """
-    # try:
-    ret = ",".join([x.text for x in treeobject.iter(parameter)])
-    # except BaseException: #pragma: no cover
-    #     ret = "" # pragma: no cover
-    return ret
-
-
-def convert_xmlfile_to_csvfile(file_path: Union[Path, str]) -> None:
-    fields = [
-        "name",
-        "binaryflag",
-        "mass",
-        "masstype",
-        "mass_min",
-        "mass_max",
-        "radius",
-        "radius_min",
-        "radius_max",
-        "period",
-        "period_min",
-        "period_max",
-        "semimajoraxis",
-        "semimajoraxis_min",
-        "semimajoraxis_max",
-        "eccentricity",
-        "eccentricity_min",
-        "eccentricity_max",
-        "periastron",
-        "longitude",
-        "ascendingnode",
-        "inclination",
-        "inclination_min",
-        "inclination_max",
-        "temperature",
-        "age",
-        "discoverymethod",
-        "discoveryyear",
-        "lastupdate",
-        "system_rightascension",
-        "system_declination",
-        "system_distance",
-        "hoststar_mass",
-        "hoststar_radius",
-        "hoststar_metallicity",
-        "hoststar_temperature",
-        "hoststar_age",
-        "hoststar_magJ",
-        "hoststar_magI",
-        "hoststar_magU",
-        "hoststar_magR",
-        "hoststar_magB",
-        "hoststar_magV",
-        "hoststar_magH",
-        "hoststar_magK",
-        "hoststar_spectraltype",
-        "alias",
-        "list",
-    ]
-    input_file = gzip.open(Path(file_path), "r")
-    table = ET.parse(input_file)
-    tab = pd.DataFrame()
-
-    # read the catalog from XML to Pandas
-    for system in table.findall(".//system"):
-        planets = system.findall(".//planet")
-        stars = system.findall(".//star")
-
-        for planet in planets:
-            parameters = pd.DataFrame(
-                [get_parameter(system, "alias")], columns=["alias"]
-            )
-
-            for field in fields:
-                parameters[field] = None
-                parameters[field] = get_parameter(planet, field)
-                parameters.alias = get_parameter(system, "alias")
-                if field[0:7] == "system_":
-                    parameters[field] = get_parameter(system, field[7:])
-                elif field[0:9] == "hoststar_":
-                    parameters[field] = get_parameter(stars, field[9:])
-                elif field == "list":
-                    parameters[field] = getParameter_all(planet, field)
-                elif field == "masstype":
-                    parameters[field] = get_attribute(planet, field[0:-4], "type")
-                elif field[-4:] == "_min":
-                    parameters[field] = get_attribute(planet, field[0:-4], "errorminus")
-                elif field[-4:] == "_max":
-                    parameters[field] = get_attribute(planet, field[0:-4], "errorplus")
-
-            parameters.binaryflag = 0
-            if planet in system.findall(".//binary/planet"):
-                # P type planets
-                parameters.binaryflag = 1
-            if planet in system.findall(".//binary/star/planet"):
-                # S type planets
-                parameters.binaryflag = 2
-            if len(stars) == 0:
-                # rogue planets
-                parameters.binaryflag = 3
-
-            tab = pd.concat([tab, parameters], sort=False)
-
-    new_file_path = Path(str(file_path[:-6] + "csv"))
-    tab.to_csv(new_file_path)
 
 
 class Oec(Catalog):
@@ -221,7 +40,7 @@ class Oec(Catalog):
                 with open(file_path_xml_str, "wb") as f:
                     f.write(result.content)
                 logging.info("Convert from .xml to .csv")
-                convert_xmlfile_to_csvfile(file_path_xml_str)
+                Utils.convert_xmlfile_to_csvfile(file_path_xml_str)
 
             except (
                 OSError,
@@ -236,7 +55,7 @@ class Oec(Catalog):
                 requests.exceptions.Timeout,
                 requests.exceptions.ConnectTimeout,
                 requests.exceptions.HTTPError,
-            ) as e:
+            ):
                 if len(glob.glob(filename + "*.csv")) > 0:
                     file_path_str = glob.glob(filename + "*.csv")[0]
 
@@ -252,7 +71,7 @@ class Oec(Catalog):
                 with open(file_path_xml_str, "wb") as f:
                     f.write(result.content)
                 logging.info("Convert from .xml to .csv")
-                convert_xmlfile_to_csvfile(file_path_xml_str)
+                Utils.convert_xmlfile_to_csvfile(file_path_xml_str)
 
             except BaseException:
                 file_path_str = glob.glob(filename + "*.csv")[0]

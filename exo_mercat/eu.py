@@ -1,17 +1,16 @@
 import glob
 import logging
-import urllib.request
 from datetime import date
 from pathlib import Path
-
+import os
 import numpy as np
 import pandas as pd
 import requests
 from astropy.io import ascii
 from astropy.io.votable import parse_single_table
 
-from exo_mercat.catalogs import Catalog, uniform_string
-from exo_mercat.configurations import *
+from exo_mercat.catalogs import Catalog
+from exo_mercat.utility_functions import UtilityFunctions as Utils
 
 
 class Eu(Catalog):
@@ -26,15 +25,11 @@ class Eu(Catalog):
     def download_catalog(self, url: str, filename: str, timeout=None) -> Path:
         """
         The download_catalog function downloads the catalog from a given url and saves it to a file.
-            If the file already exists, it will not be downloaded again.
+        If the file already exists, it will not be downloaded again.
 
-        Args:
-            self: Represent the instance of the class
-            url: str: Specify the url of the catalog to be downloaded
-            filename: str: Specify the name of the file to be downloaded
-
-        Returns:
-            The string of the file path of the catalog
+        :param url: Specify the url of the catalog to be downloaded
+        :param filename: Specify the name of the file to be downloaded
+        :return: The string of the file path of the catalog
 
         """
         file_path_str = filename + date.today().strftime("%m-%d-%Y") + ".csv"
@@ -118,7 +113,7 @@ class Eu(Catalog):
         for i in self.data.index:
             alias_polished = ""
             for al in self.data.at[i, "alias"].split(","):
-                al = uniform_string(al)
+                al = Utils.uniform_string(al)
                 # al = re.sub(".0\d$", "", al.rstrip())
                 # al = re.sub(" [b-i]$", "", al.rstrip())
                 # al = re.sub("^K0", "KOI-", al.lstrip())

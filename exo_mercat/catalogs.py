@@ -4,54 +4,13 @@ import re
 from datetime import date
 from pathlib import Path
 from typing import Union
-
+import os
 import numpy as np
 import pandas as pd
 import requests
 import unidecode
 
-from exo_mercat.configurations import *
-
-
-def uniform_string(name: str) -> str:
-    """
-    The uniform_string function takes a string as input and returns the same string with some common formatting
-    errors corrected. The function is used to correct for inconsistencies in the naming of exoplanets, which can be
-    caused by different sources using different naming conventions.
-
-    Parameters
-    ----------
-        name: str
-            Specify the string to uniform
-
-    """
-    name = name.replace("'", "").replace('"', "")
-    if "K0" in name[:2]:
-        name = "KOI-" + name.lstrip("K").lstrip("0")
-    if not str(re.match("2M[\d ]", name, re.M)) == "None":
-        name = "2MASS J" + name[2:].lstrip()
-        name = name.replace("JJ", "J").replace("J ", "J")
-    if "Gliese" in name:
-        name = name.replace("Gliese ", "GJ ")
-    if not str(re.match("VHS \d", name, re.M)) == "None":
-        name = name.replace("VHS ", "VHS J")
-    if "Gl " in name:
-        name = name.replace("Gl ", "GJ ")
-    if "KMT-" in name:
-        name = name.rstrip("L")
-    if "MOA-" in name:
-        name = name.replace("MOA-", "MOA ").rstrip("L")
-    if "OGLE--" in name:
-        name = name.replace("OGLE--", "OGLE ").rstrip("L")
-    if "OGLE" in name:
-        name = name.replace("OGLE-", "OGLE ").rstrip("L")
-    if "KMT-" in name:
-        name = name.split("/")[0]
-    if "CoRoT-" in name:
-        name = name.replace("-", " ")
-    if "2MASS" in name:
-        name = name.rstrip(" a")
-    return name
+from exo_mercat.utility_functions import UtilityFunctions as Utils
 
 
 class Catalog:
@@ -67,15 +26,13 @@ class Catalog:
     def download_catalog(self, url: str, filename: str, timeout: float = None) -> Path:
         """
         The download_catalog function downloads the catalog from a given url and saves it to a file.
-            If the file already exists, it will not be downloaded again.
+        If the file already exists, it will not be downloaded again.
 
-        Args:
-            self: Represent the instance of the class
-            url: str: Specify the url of the catalog to be downloaded
-            filename: str: Specify the name of the file to be downloaded
-            timeout: float: Specify the timeout
-        Returns:
-            The string of the file path of the catalog
+
+        :param url: Specify the url of the catalog to be downloaded
+        :param filename: Specify the name of the file to be downloaded
+        :param timeout:  Specify the timeout
+        :return: The string of the file path of the catalog
 
         """
         file_path_str = filename + date.today().strftime("%m-%d-%Y") + ".csv"
@@ -115,6 +72,12 @@ class Catalog:
         return Path(file_path_str)
 
     def read_csv_catalog(self, file_path_str: Union[Path, str]) -> None:
+        """
+        The read_csv_catalog function reads in a csv file and stores it as a pandas dataframe.
+
+        :param file_path_str: Specify the file path of the csv file
+        :return: A pandas dataframe
+        """
         self.data = pd.read_csv(file_path_str, low_memory=False)
 
     def convert_datatypes(self) -> None:
@@ -182,9 +145,9 @@ class Catalog:
     def identify_brown_dwarfs(self) -> None:
         """
         The identify_brown_dwarfs function identifies possible brown dwarfs in the dataframe.
-            It does this by checking if the last character of a planet name is a number or if it ends
-            with an uppercase letter. If so, it fills the letter cell with 'BD' to filter it out later.
-            The function excludes KOI-like objects by avoid the patterns ".0d" with d being a digit.
+        It does this by checking if the last character of a planet name is a number or if it ends
+        with an uppercase letter. If so, it fills the letter cell with 'BD' to filter it out later.
+        The function excludes KOI-like objects by avoid the patterns ".0d" with d being a digit.
         """
         for i in self.data.index:
             if not "PSR B1257+12" in self.data.at[i, "name"]:  # known weird candidates
@@ -202,9 +165,9 @@ class Catalog:
         """
         The replace function replaces the values in the dataframe with those specified in replacements.ini
         """
-        const = find_const()
-        config_name = read_config_replacements("NAME")
-        config_host = read_config_replacements("HOST")
+        const = Utils.find_const()
+        config_name = Utils.read_config_replacements("NAME")
+        config_host = Utils.read_config_replacements("HOST")
         # config_hd = read_config_replacements("HD")
 
         # check unused replacements
@@ -221,7 +184,7 @@ class Catalog:
         #     if len(self.data[self.data.name == hd])==0:
         #         f.write('HD: '+ hd+'\n')
         for coord in ["ra", "dec"]:
-            config_replace = read_config_replacements(coord)
+            config_replace = Utils.read_config_replacements(coord)
             for name in config_replace.keys():
                 if len(self.data.loc[self.data.host == name]) == 0:
                     f.write(coord + ": " + name + "\n")
@@ -280,7 +243,7 @@ class Catalog:
                     # f.write("HOST: " + i + " to " + config_host[i] + "\n")
 
         for repl_searchname in ["ra", "dec"]:
-            config_replace = read_config_replacements(repl_searchname)
+            config_replace = Utils.read_config_replacements(repl_searchname)
             for name, change in config_replace.items():
                 try:
                     self.data.loc[self.data.host == name, repl_searchname] = float(
@@ -290,7 +253,7 @@ class Catalog:
                 except BaseException:
                     pass
 
-        config_replace = read_config_replacements("DROP")
+        config_replace = Utils.read_config_replacements("DROP")
         for check, lis in config_replace.items():
             for drop in lis.split(","):
                 self.data = self.data[
@@ -307,11 +270,11 @@ class Catalog:
     def check_known_binary_mismatches(self) -> None:
         """
         The check_known_binary_mismatches function checks for known mismatches between the binary names in the
-            dataframe and those in the config file. If there is a mismatch, it will replace it with what is specified
-            in the config file. It also writes to two files: one that lists all of the replacements performed, and
-            another that lists all the replacements not used.
+        dataframe and those in the config file. If there is a mismatch, it will replace it with what is specified
+        in the config file. It also writes to two files: one that lists all of the replacements performed, and
+        another that lists all the replacements not used.
         """
-        config_binary = read_config_replacements("BINARY")
+        config_binary = Utils.read_config_replacements("BINARY")
         f = open("Logs/unused_replacements.txt", "a")
         # check unused replacements
         for binary in config_binary.keys():
@@ -361,10 +324,7 @@ class Catalog:
         then it will be removed from the dataframe. If print_flag is set to True, then a csv file will be created
         with all of these planets in them.
 
-        Parameters
-        ----------
-            print_flag: bool
-                Specify whether the function should print out a list of brown dwarfs
+        :param print_flag: Specify whether the function should print out a list of brown dwarfs
         """
         if print_flag:
             self.data[
@@ -424,7 +384,7 @@ class Catalog:
         The uniform_name_host_letter function uniforms the names, hosts, and aliases.
         """
 
-        self.data["name"] = self.data.name.apply(lambda x: uniform_string(x))
+        self.data["name"] = self.data.name.apply(lambda x: Utils.uniform_string(x))
         ind = self.data[self.data.host == ""].index
         self.data["host"] = self.data.host.replace("", np.nan).fillna(self.data.name)
 
@@ -437,7 +397,7 @@ class Catalog:
                 self.data.loc[self.data.host == identifier, "host"] = identifier[
                     :-1
                 ].strip()
-        self.data["host"] = self.data.host.apply(lambda x: uniform_string(x))
+        self.data["host"] = self.data.host.apply(lambda x: Utils.uniform_string(x))
 
         for i in self.data.index:
             polished_alias = ""
@@ -448,7 +408,9 @@ class Catalog:
                     al = al[:-3]
                 if al != "":
                     polished_alias = (
-                        polished_alias + "," + uniform_string(al.lstrip().rstrip())
+                        polished_alias
+                        + ","
+                        + Utils.uniform_string(al.lstrip().rstrip())
                     )
             self.data.at[i, "alias"] = polished_alias.lstrip(",")
 
@@ -490,15 +452,17 @@ class Catalog:
         """
         raise NotImplementedError
 
-    def check_koiepic_tables(self, table_path: str) -> None:
+    def check_koiepic_tables(self, table_path_str: str) -> None:
         """
         The check_epic_table function checks the dataframe for any objects that have a name
         that matches an entry in the KOI or EPIC catalogs. If there is a match, it will update the
         status of that object to whatever status is listed in the KOI and EPIC catalogs and update its coordinates
         if they are missing from the dataframe.
+
+        :param table_path_str: the string containing path to the table.
         """
 
-        tab = pd.read_csv(table_path)
+        tab = pd.read_csv(table_path_str)
         tab = tab.fillna("")
 
         for index in self.data.index:
@@ -544,7 +508,7 @@ class Catalog:
                 for internal_alias in sub.alias:
                     for internal_al in internal_alias.split(","):
                         internal_al = (
-                            uniform_string(internal_al)
+                            Utils.uniform_string(internal_al)
                             .replace(" b", "")
                             .replace(" c", "")
                             .replace(" d", "")
@@ -567,7 +531,7 @@ class Catalog:
                 [x for x in set(final_alias_total) if x != "nan"]
             )
 
-        logging.info("status from " + table_path + " checked.")
+        logging.info("status from " + table_path_str + " checked.")
 
     def fill_binary_column(self) -> None:
         """
@@ -655,7 +619,7 @@ class Catalog:
         self.data["Catalogstatus"] = self.data.catalog + ": " + self.data.status
         logging.info("Catalogstatus column created.")
 
-    def make_uniform_alias_list(self):
+    def make_uniform_alias_list(self) -> None:
         """
         The make_uniform_alias_list function takes in a dataframe and returns a list of aliases for each host.
         The function first groups the data by host, then creates a set of all the aliases associated with that
@@ -669,7 +633,7 @@ class Catalog:
                 if al not in [np.nan, "NaN", "nan"]:
                     final_alias = final_alias + "," + al
             self.data.loc[self.data.host == host, "alias"] = ",".join(
-                [uniform_string(x) for x in set(final_alias.split(",")) if x]
+                [Utils.uniform_string(x) for x in set(final_alias.split(",")) if x]
             )
         logging.info("Lists of aliases uniformed.")
 
@@ -704,10 +668,7 @@ class Catalog:
         The print_cat function prints the dataframe to a csv file.
         It takes one argument, filename, which is the name of the file you want to print it as.
 
-        Parameters
-        ----------
-            filename:Union[str, Path]
-                Specify the location of the file to be written
+        :param filename: The location of the file to be written
 
 
         """
