@@ -620,6 +620,7 @@ If the file already exists, it will not be downloaded again.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
+<li><p><strong>timeout</strong> – the timeout setting for the download</p></li>
 <li><p><strong>url</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Specify the url of the catalog to be downloaded</p></li>
 <li><p><strong>filename</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Specify the name of the file to be downloaded</p></li>
 </ul>
@@ -1170,13 +1171,16 @@ The function takes in a dataframe and returns a new dataframe with only the colu
 
 </dd></dl>
 
-<span class="target" id="module-exo_mercat.utility_functions"></span><dl class="py class">
+</section>
+<section id="module-exo_mercat.utility_functions">
+<span id="functions"></span><h1>Functions<a class="headerlink" href="#module-exo_mercat.utility_functions" title="Permalink to this heading">#</a></h1>
+<dl class="py class">
 <dt class="sig sig-object py" id="exo_mercat.utility_functions.UtilityFunctions">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">exo_mercat.utility_functions.</span></span><span class="sig-name descname"><span class="pre">UtilityFunctions</span></span><a class="headerlink" href="#exo_mercat.utility_functions.UtilityFunctions" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="exo_mercat.utility_functions.UtilityFunctions.service_files_initialization">
-<span class="sig-name descname"><span class="pre">service_files_initialization</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#exo_mercat.utility_functions.UtilityFunctions.service_files_initialization" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">service_files_initialization</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#exo_mercat.utility_functions.UtilityFunctions.service_files_initialization" title="Permalink to this definition">#</a></dt>
 <dd><p>The service_files_initialization function creates the Exo-MerCat, InputSources, UniformedSources and Logs
 folders if they do not exist, and deletes all files in the Logs folder.</p>
 <dl class="field-list simple">
@@ -1188,7 +1192,7 @@ folders if they do not exist, and deletes all files in the Logs folder.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="exo_mercat.utility_functions.UtilityFunctions.find_const">
-<span class="sig-name descname"><span class="pre">find_const</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#exo_mercat.utility_functions.UtilityFunctions.find_const" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">find_const</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#exo_mercat.utility_functions.UtilityFunctions.find_const" title="Permalink to this definition">#</a></dt>
 <dd><p>The find_const function takes a string and returns the same string with all of its
 constellation abbreviations replaced by their full names. The function uses a dictionary
 to map each abbreviation to its corresponding constellation name. The dictionary is
@@ -1207,19 +1211,20 @@ contains their corresponding full names.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="exo_mercat.utility_functions.UtilityFunctions.read_config">
-<span class="sig-name descname"><span class="pre">read_config</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#exo_mercat.utility_functions.UtilityFunctions.read_config" title="Permalink to this definition">#</a></dt>
-<dd><p>The read_config function reads the config.ini file and returns a dictionary of
-the configuration parameters.</p>
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">read_config</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#exo_mercat.utility_functions.UtilityFunctions.read_config" title="Permalink to this definition">#</a></dt>
+<dd><p>The read_config function reads the input_sources.ini file and returns a dictionary of
+the configuration parameters.
+:return a dictionary containing</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="exo_mercat.utility_functions.UtilityFunctions.read_config_replacements">
-<span class="sig-name descname"><span class="pre">read_config_replacements</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">section</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#exo_mercat.utility_functions.UtilityFunctions.read_config_replacements" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">read_config_replacements</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">section</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#exo_mercat.utility_functions.UtilityFunctions.read_config_replacements" title="Permalink to this definition">#</a></dt>
 <dd><p>The read_config_replacements function reads the replacements.ini file and returns a dictionary of
 replacement values for use in the replace_text function.</p>
 <dl class="field-list simple">
@@ -1237,7 +1242,7 @@ replacement values for use in the replace_text function.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="exo_mercat.utility_functions.UtilityFunctions.uniform_string">
-<span class="sig-name descname"><span class="pre">uniform_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#exo_mercat.utility_functions.UtilityFunctions.uniform_string" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">uniform_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#exo_mercat.utility_functions.UtilityFunctions.uniform_string" title="Permalink to this definition">#</a></dt>
 <dd><p>The uniform_string function takes a string as input and returns the same string with some common formatting
 errors corrected. The function is used to correct for inconsistencies in the naming of exoplanets, which can be
 caused by different sources using different naming conventions.</p>
@@ -1256,7 +1261,7 @@ caused by different sources using different naming conventions.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="exo_mercat.utility_functions.UtilityFunctions.round_to_decimal">
-<span class="sig-name descname"><span class="pre">round_to_decimal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">number</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#exo_mercat.utility_functions.UtilityFunctions.round_to_decimal" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">round_to_decimal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">number</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#exo_mercat.utility_functions.UtilityFunctions.round_to_decimal" title="Permalink to this definition">#</a></dt>
 <dd><p>Round a number to an appropriate number of decimal places based on its order of magnitude.</p>
 <p>This function takes a numeric input ‘number’ and rounds it to an appropriate number of
 decimal places based on its order of magnitude. The function calculates the order of
@@ -1296,7 +1301,7 @@ replaced with -1 to distinguish them from rounded numbers.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="exo_mercat.utility_functions.UtilityFunctions.round_parameter_bin">
-<span class="sig-name descname"><span class="pre">round_parameter_bin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parameter_series</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#exo_mercat.utility_functions.UtilityFunctions.round_parameter_bin" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">round_parameter_bin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parameter_series</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#exo_mercat.utility_functions.UtilityFunctions.round_parameter_bin" title="Permalink to this definition">#</a></dt>
 <dd><p>Round values in a pandas Series to bins based on their order of magnitude.</p>
 <p>This function takes a pandas Series ‘parameter_series’ containing numeric values and rounds
 each value to a bin based on its order of magnitude. It calculates the order of magnitude
@@ -1317,7 +1322,7 @@ assigns the corresponding bin label to each value.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="exo_mercat.utility_functions.UtilityFunctions.get_parameter">
-<span class="sig-name descname"><span class="pre">get_parameter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">treeobject</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameter</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#exo_mercat.utility_functions.UtilityFunctions.get_parameter" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_parameter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">treeobject</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameter</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#exo_mercat.utility_functions.UtilityFunctions.get_parameter" title="Permalink to this definition">#</a></dt>
 <dd><p>The getParameter parses a parameter from an XML ElementTree object.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -1337,7 +1342,7 @@ assigns the corresponding bin label to each value.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="exo_mercat.utility_functions.UtilityFunctions.get_attribute">
-<span class="sig-name descname"><span class="pre">get_attribute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">treeobject</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameter</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attrib</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#exo_mercat.utility_functions.UtilityFunctions.get_attribute" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_attribute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">treeobject</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameter</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attrib</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#exo_mercat.utility_functions.UtilityFunctions.get_attribute" title="Permalink to this definition">#</a></dt>
 <dd><p>The getAttribute function parses the ElementTree object for a parameter and gets the desired attribute.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -1357,8 +1362,8 @@ assigns the corresponding bin label to each value.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="exo_mercat.utility_functions.UtilityFunctions.getParameter_all">
-<span class="sig-name descname"><span class="pre">getParameter_all</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">treeobject</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameter</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#exo_mercat.utility_functions.UtilityFunctions.getParameter_all" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="exo_mercat.utility_functions.UtilityFunctions.get_parameter_all">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_parameter_all</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">treeobject</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameter</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#exo_mercat.utility_functions.UtilityFunctions.get_parameter_all" title="Permalink to this definition">#</a></dt>
 <dd><p>The getParameter_all function parses the ElementTree object for a list of parameters.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -1379,11 +1384,12 @@ assigns the corresponding bin label to each value.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="exo_mercat.utility_functions.UtilityFunctions.convert_xmlfile_to_csvfile">
 <span class="sig-name descname"><span class="pre">convert_xmlfile_to_csvfile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#exo_mercat.utility_functions.UtilityFunctions.convert_xmlfile_to_csvfile" title="Permalink to this definition">#</a></dt>
-<dd><p>The convert_xmlfile_to_csvfile function takes a file path to an XML file and converts it into a CSV file.
-The function uses the gzip library to open the XML files, which are compressed. The ET library is used to parse
-the XML files into tables that can be read by Pandas. A list of fields is created that will be used as column headers
-in the final CSV table. The input_file variable opens up the specified xml_file using gzip and reads it in as an object
-that can be parsed by ET’s parse method, which creates a tree structure from each element in the xml_file (elements</p>
+<dd><p>The convert_xmlfile_to_csvfile function takes a file path to an XML file and converts it into a CSV file. The
+function uses the gzip library to open the XML files, which are compressed. The ElementTree library is used
+to parse the XML files into tables that can be read by Pandas. A list of fields is created that will be used
+as column headers in the final CSV table. The input_file variable opens up the specified xml_file using gzip
+and reads it in as an object that can be parsed by ElementTree’s parse method, which creates a tree structure
+from each element in the xml_file (elements</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>file_path</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – The path to the file</p>
@@ -1514,6 +1520,9 @@ that can be parsed by ET’s parse method, which creates a tree structure from e
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#exo_mercat.emc.Emc.keep_columns"><code class="docutils literal notranslate"><span class="pre">Emc.keep_columns()</span></code></a></li>
 </ul>
 </li>
+</ul>
+</li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#module-exo_mercat.utility_functions">Functions</a><ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#exo_mercat.utility_functions.UtilityFunctions"><code class="docutils literal notranslate"><span class="pre">UtilityFunctions</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#exo_mercat.utility_functions.UtilityFunctions.service_files_initialization"><code class="docutils literal notranslate"><span class="pre">UtilityFunctions.service_files_initialization()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#exo_mercat.utility_functions.UtilityFunctions.find_const"><code class="docutils literal notranslate"><span class="pre">UtilityFunctions.find_const()</span></code></a></li>
@@ -1525,7 +1534,7 @@ that can be parsed by ET’s parse method, which creates a tree structure from e
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#exo_mercat.utility_functions.UtilityFunctions.round_parameter_bin"><code class="docutils literal notranslate"><span class="pre">UtilityFunctions.round_parameter_bin()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#exo_mercat.utility_functions.UtilityFunctions.get_parameter"><code class="docutils literal notranslate"><span class="pre">UtilityFunctions.get_parameter()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#exo_mercat.utility_functions.UtilityFunctions.get_attribute"><code class="docutils literal notranslate"><span class="pre">UtilityFunctions.get_attribute()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#exo_mercat.utility_functions.UtilityFunctions.getParameter_all"><code class="docutils literal notranslate"><span class="pre">UtilityFunctions.getParameter_all()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#exo_mercat.utility_functions.UtilityFunctions.get_parameter_all"><code class="docutils literal notranslate"><span class="pre">UtilityFunctions.get_parameter_all()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#exo_mercat.utility_functions.UtilityFunctions.convert_xmlfile_to_csvfile"><code class="docutils literal notranslate"><span class="pre">UtilityFunctions.convert_xmlfile_to_csvfile()</span></code></a></li>
 </ul>
 </li>

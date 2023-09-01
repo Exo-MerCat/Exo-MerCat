@@ -12,7 +12,7 @@ from exo_mercat.oec import Oec
 from exo_mercat.epic import Epic
 from exo_mercat.emc import Emc
 from exo_mercat.koi import Koi
-from exo_mercat.utility_functions import *
+from exo_mercat.utility_functions import UtilityFunctions as Utils
 import socket
 import warnings
 import pandas as pd
@@ -46,8 +46,8 @@ def main():
     The main function of this module.
 
     """
-    config_dict = read_config()
-    service_files_initialization()
+    config_dict = Utils.read_config()
+    Utils.service_files_initialization()
 
     emc = Emc()
     if args["local"]:
@@ -103,11 +103,7 @@ def main():
     emc.alias_as_host()
     emc.check_binary_mismatch(keyword="host")
     emc.get_host_info_from_simbad()
-    # logging.info("Check on other catalogs:")
-    # emc.tess_main_id()
-    # emc.gaia_main_id()
-    # emc.twomass_main_id()
-    # emc.epic_main_id()
+
     emc.check_coordinates()
     emc.get_coordinates_from_simbad()
     emc.polish_main_id()
@@ -115,7 +111,6 @@ def main():
     emc.set_common_host()
     emc.set_common_alias()
     emc.check_binary_mismatch(keyword="main_id")
-    # emc.check_duplicates_in_same_catalog()
     emc.cleanup_catalog()
     emc.fix_letter_by_period()
     emc.group_by_letter_check_period(verbose=args["verbose"])

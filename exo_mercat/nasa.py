@@ -157,7 +157,8 @@ class Nasa(Catalog):
 
         for item in ["e", "mass", "msini", "i", "a", "p", "r"]:
             for i in self.data.index:
-                # filter finite values by checking if x == x (false for nan, inf). If finite value, replace the string with only the bibcode, else empty string
+                # filter finite values by checking if x == x (false for nan, inf). If finite value, replace the
+                # string with only the bibcode, else empty string
                 if self.data.at[i, item + "_url"] == self.data.at[i, item + "_url"]:
                     url = self.data.at[i, item + "_url"]
                     link = r.findall(url)

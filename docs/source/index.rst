@@ -35,4 +35,7 @@ Classes
 
 .. automodule:: exo_mercat.emc
 
+
+Functions
+=========
 .. automodule:: exo_mercat.utility_functions

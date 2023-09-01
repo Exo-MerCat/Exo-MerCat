@@ -27,6 +27,7 @@ class Eu(Catalog):
         The download_catalog function downloads the catalog from a given url and saves it to a file.
         If the file already exists, it will not be downloaded again.
 
+        :param timeout: the timeout setting for the download
         :param url: Specify the url of the catalog to be downloaded
         :param filename: Specify the name of the file to be downloaded
         :return: The string of the file path of the catalog

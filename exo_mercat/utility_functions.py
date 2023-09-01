@@ -2,7 +2,7 @@ import os
 import configparser
 from pathlib import Path
 import re
-import xml.etree.ElementTree as ET
+import xml.etree.ElementTree as ElementTree
 import gzip
 import numpy as np
 import pandas as pd
@@ -13,7 +13,8 @@ class UtilityFunctions:
     def __init__(self):
         pass
 
-    def service_files_initialization(self) -> None:
+    @staticmethod
+    def service_files_initialization() -> None:
         """
         The service_files_initialization function creates the Exo-MerCat, InputSources, UniformedSources and Logs
         folders if they do not exist, and deletes all files in the Logs folder.
@@ -33,7 +34,8 @@ class UtilityFunctions:
             os.makedirs("Logs")
         os.system("rm Logs/*")
 
-    def find_const(self) -> dict:
+    @staticmethod
+    def find_const() -> dict:
         """
         The find_const function takes a string and returns the same string with all of its
         constellation abbreviations replaced by their full names. The function uses a dictionary
@@ -214,17 +216,20 @@ class UtilityFunctions:
 
         return constants
 
-    def read_config(self) -> None:
+    @staticmethod
+    def read_config() -> dict:
         """
-        The read_config function reads the config.ini file and returns a dictionary of
+        The read_config function reads the input_sources.ini file and returns a dictionary of
         the configuration parameters.
+        :return a dictionary containing
         """
         config = configparser.RawConfigParser(inline_comment_prefixes="#")
-        config.read("config.ini")
+        config.read("input_sources.ini")
+        output_dict = {s: dict(config.items(s)) for s in config.sections()}
+        return output_dict
 
-        return config
-
-    def read_config_replacements(self, section: str) -> dict:
+    @staticmethod
+    def read_config_replacements(section: str) -> dict:
         """
         The read_config_replacements function reads the replacements.ini file and returns a dictionary of
         replacement values for use in the replace_text function.
@@ -238,7 +243,8 @@ class UtilityFunctions:
         config_replace = dict(config.items(section))
         return config_replace
 
-    def uniform_string(self, name: str) -> str:
+    @staticmethod
+    def uniform_string(name: str) -> str:
         """
         The uniform_string function takes a string as input and returns the same string with some common formatting
         errors corrected. The function is used to correct for inconsistencies in the naming of exoplanets, which can be
@@ -275,7 +281,8 @@ class UtilityFunctions:
             name = name.rstrip(" a")
         return name
 
-    def round_to_decimal(self, number: float) -> float:
+    @staticmethod
+    def round_to_decimal(number: float) -> float:
         """
         Round a number to an appropriate number of decimal places based on its order of magnitude.
 
@@ -315,7 +322,8 @@ class UtilityFunctions:
                 rounded_numbers.append(-1)
         return rounded_numbers
 
-    def round_parameter_bin(self, parameter_series: pd.Series) -> pd.Series:
+    @staticmethod
+    def round_parameter_bin(parameter_series: pd.Series) -> pd.Series:
         """
         Round values in a pandas Series to bins based on their order of magnitude.
 
@@ -343,7 +351,8 @@ class UtilityFunctions:
         # Apply pcut with variable bins
         return pd.cut(order_of_magnitude, bins=bins, labels=False).fillna(-1)
 
-    def get_parameter(self, treeobject: ET.Element, parameter: str) -> str:
+    @staticmethod
+    def get_parameter(treeobject: ElementTree.Element, parameter: str) -> str:
         """
         The getParameter parses a parameter from an XML ElementTree object.
 
@@ -361,7 +370,8 @@ class UtilityFunctions:
                 ret = ""
         return ret
 
-    def get_attribute(self, treeobject: ET.Element, parameter: str, attrib: str) -> str:
+    @staticmethod
+    def get_attribute(treeobject: ElementTree.Element, parameter: str, attrib: str) -> str:
         """
         The getAttribute function parses the ElementTree object for a parameter and gets the desired attribute.
 
@@ -373,7 +383,8 @@ class UtilityFunctions:
         retattr = treeobject.find("./" + parameter).attrib[attrib]
         return retattr
 
-    def getParameter_all(self, treeobject: ET.Element, parameter: str) -> str:
+    @staticmethod
+    def get_parameter_all(treeobject: ElementTree.Element, parameter: str) -> str:
         """
         The getParameter_all function parses the ElementTree object for a list of parameters.
 
@@ -389,11 +400,12 @@ class UtilityFunctions:
 
     def convert_xmlfile_to_csvfile(self, file_path: Union[Path, str]) -> None:
         """
-        The convert_xmlfile_to_csvfile function takes a file path to an XML file and converts it into a CSV file.
-        The function uses the gzip library to open the XML files, which are compressed. The ET library is used to parse
-        the XML files into tables that can be read by Pandas. A list of fields is created that will be used as column headers
-        in the final CSV table. The input_file variable opens up the specified xml_file using gzip and reads it in as an object
-        that can be parsed by ET's parse method, which creates a tree structure from each element in the xml_file (elements
+        The convert_xmlfile_to_csvfile function takes a file path to an XML file and converts it into a CSV file. The
+        function uses the gzip library to open the XML files, which are compressed. The ElementTree library is used
+        to parse the XML files into tables that can be read by Pandas. A list of fields is created that will be used
+        as column headers in the final CSV table. The input_file variable opens up the specified xml_file using gzip
+        and reads it in as an object that can be parsed by ElementTree's parse method, which creates a tree structure
+        from each element in the xml_file (elements
 
         :param file_path: The path to the file
         """
@@ -448,7 +460,7 @@ class UtilityFunctions:
             "list",
         ]
         input_file = gzip.open(Path(file_path), "r")
-        table = ET.parse(input_file)
+        table = ElementTree.parse(input_file)
         tab = pd.DataFrame()
 
         # read the catalog from XML to Pandas
@@ -458,27 +470,27 @@ class UtilityFunctions:
 
             for planet in planets:
                 parameters = pd.DataFrame(
-                    [get_parameter(system, "alias")], columns=["alias"]
+                    [self.get_parameter(system, "alias")], columns=["alias"]
                 )
 
                 for field in fields:
                     parameters[field] = None
-                    parameters[field] = get_parameter(planet, field)
-                    parameters.alias = get_parameter(system, "alias")
+                    parameters[field] = self.get_parameter(planet, field)
+                    parameters.alias = self.get_parameter(system, "alias")
                     if field[0:7] == "system_":
-                        parameters[field] = get_parameter(system, field[7:])
+                        parameters[field] = self.get_parameter(system, field[7:])
                     elif field[0:9] == "hoststar_":
-                        parameters[field] = get_parameter(stars, field[9:])
+                        parameters[field] = self.get_parameter(stars, field[9:])
                     elif field == "list":
-                        parameters[field] = getParameter_all(planet, field)
+                        parameters[field] = self.get_parameter_all(planet, field)
                     elif field == "masstype":
-                        parameters[field] = get_attribute(planet, field[0:-4], "type")
+                        parameters[field] = self.get_attribute(planet, field[0:-4], "type")
                     elif field[-4:] == "_min":
-                        parameters[field] = get_attribute(
+                        parameters[field] = self.get_attribute(
                             planet, field[0:-4], "errorminus"
                         )
                     elif field[-4:] == "_max":
-                        parameters[field] = get_attribute(
+                        parameters[field] = self.get_attribute(
                             planet, field[0:-4], "errorplus"
                         )
 

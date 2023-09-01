@@ -57,7 +57,7 @@ class Catalog:
                 requests.exceptions.Timeout,
                 requests.exceptions.ConnectTimeout,
                 requests.exceptions.HTTPError,
-            ) as e:
+            ):
                 if len(glob.glob(filename + "*.csv")) > 0:
                     file_path_str = glob.glob(filename + "*.csv")[0]
 
@@ -166,8 +166,8 @@ class Catalog:
         The replace function replaces the values in the dataframe with those specified in replacements.ini
         """
         const = Utils.find_const()
-        config_name = Utils.read_config_replacements("NAME")
-        config_host = Utils.read_config_replacements("HOST")
+        config_name = Utils.read_config_replacements('NAME')
+        config_host = Utils.read_config_replacements('HOST')
         # config_hd = read_config_replacements("HD")
 
         # check unused replacements
