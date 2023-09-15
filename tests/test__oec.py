@@ -1,6 +1,6 @@
 import os
 from datetime import date
-from pathlib import PosixPath, Path
+from pathlib import Path
 from unittest.mock import MagicMock, patch, Mock
 
 import numpy as np
@@ -9,15 +9,7 @@ import pytest
 from testfixtures import LogCapture
 import gzip
 
-import unittest
-import xml.etree.ElementTree as ET
-from exo_mercat.oec import (
-    Oec,
-    convert_xmlfile_to_csvfile,
-    get_attribute,
-    get_parameter,
-    getParameter_all,
-)
+from exo_mercat.oec import Oec
 
 
 def fill_xml_string():
@@ -314,91 +306,6 @@ def test__download_catalog(tmp_path, instance) -> None:
                 result = instance.download_catalog(
                     url=url, filename=filename, timeout=0.00001
                 )
-
-
-def test__convert_xmlfile_to_csvfile():
-    xml_string = fill_xml_string()
-    # Parse the XML string and create an XML file
-    root = ET.fromstring(xml_string)
-    tree = ET.ElementTree(root)
-
-    # Write to a compressed XML file (output.xml.gz)
-    with gzip.open("output.xml.gz", "wb") as file:
-        tree.write(file, encoding="utf-8", xml_declaration=True)
-    convert_xmlfile_to_csvfile("output.xml.gz")
-    data = pd.read_csv("output.csv")
-    expected_columns = [
-        "name",
-        "binaryflag",
-        "mass",
-        "masstype",
-        "mass_min",
-        "mass_max",
-        "radius",
-        "radius_min",
-        "radius_max",
-        "period",
-        "period_min",
-        "period_max",
-        "semimajoraxis",
-        "semimajoraxis_min",
-        "semimajoraxis_max",
-        "eccentricity",
-        "eccentricity_min",
-        "eccentricity_max",
-        "periastron",
-        "longitude",
-        "ascendingnode",
-        "inclination",
-        "inclination_min",
-        "inclination_max",
-        "temperature",
-        "age",
-        "discoverymethod",
-        "discoveryyear",
-        "lastupdate",
-        "system_rightascension",
-        "system_declination",
-        "system_distance",
-        "hoststar_mass",
-        "hoststar_radius",
-        "hoststar_metallicity",
-        "hoststar_temperature",
-        "hoststar_age",
-        "hoststar_magJ",
-        "hoststar_magI",
-        "hoststar_magU",
-        "hoststar_magR",
-        "hoststar_magB",
-        "hoststar_magV",
-        "hoststar_magH",
-        "hoststar_magK",
-        "hoststar_spectraltype",
-        "alias",
-        "list",
-    ]
-    assert all(element in data.columns for element in expected_columns)
-    assert (
-        data.at[0, "alias"]
-        == "11 Com,11 Comae Berenices,HD 107383,HIP 60202,TYC 1445-2560-1,SAO 100053,HR 4697,BD+18 2592,2MASS J12204305+1747341,Gaia DR2 3946945413106333696"
-    )
-    assert data.at[0, "system_rightascension"] == "12 20 43.0255"
-    assert data.at[0, "system_distance"] == 88.9
-    assert data.at[0, "mass_min"] == 1.5
-    assert data.at[0, "list"] == "Confirmed planets"
-    assert "S-type" in data.at[1, "list"]
-    assert data.at[1, "binaryflag"] == 2
-    assert "P-type" in data.at[2, "list"]
-    assert data.at[2, "binaryflag"] == 1
-    assert data.at[3, "binaryflag"] == 3
-    os.remove("output.csv")
-    os.remove("output.xml.gz")
-    # Intentionally pass an invalid XML file path to the function
-    with pytest.raises(Exception) as e:
-        convert_xmlfile_to_csvfile("invalid_path_to_xml_file.xml.gz")
-
-    # Check if the logging.error is called and the message is logged
-    assert "No such file or directory" in str(e.value)
 
 
 def test__uniform_catalog(instance):

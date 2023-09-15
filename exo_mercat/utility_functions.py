@@ -221,7 +221,7 @@ class UtilityFunctions:
         """
         The read_config function reads the input_sources.ini file and returns a dictionary of
         the configuration parameters.
-        :return a dictionary containing
+        :return a dictionary containing the configuration parameters
         """
         config = configparser.RawConfigParser(inline_comment_prefixes="#")
         config.read("input_sources.ini")
@@ -302,7 +302,8 @@ class UtilityFunctions:
             rounded_number = round(number / order_of_magnitude, 2)
         return rounded_number * order_of_magnitude
 
-    def round_array_to_significant_digits(self, numbers: list) -> list:
+    @staticmethod
+    def round_array_to_significant_digits(numbers: list) -> list:
         """
         Round an array of numbers to their significant digits with special handling for zero values.
 
@@ -316,7 +317,7 @@ class UtilityFunctions:
         rounded_numbers = []
         for num in numbers:
             if num != 0:
-                rounded_num = self.round_to_decimal(num)
+                rounded_num = UtilityFunctions.round_to_decimal(num)
                 rounded_numbers.append(rounded_num)
             else:
                 rounded_numbers.append(-1)
@@ -371,7 +372,9 @@ class UtilityFunctions:
         return ret
 
     @staticmethod
-    def get_attribute(treeobject: ElementTree.Element, parameter: str, attrib: str) -> str:
+    def get_attribute(
+        treeobject: ElementTree.Element, parameter: str, attrib: str
+    ) -> str:
         """
         The getAttribute function parses the ElementTree object for a parameter and gets the desired attribute.
 
@@ -380,8 +383,13 @@ class UtilityFunctions:
         :param attrib: a string representing one of that element's attributes
         :returns: A string containing the value of the attribute
         """
-        retattr = treeobject.find("./" + parameter).attrib[attrib]
-        return retattr
+        if (
+            treeobject.find("./" + parameter) is not None
+            and attrib in treeobject.find("./" + parameter).attrib
+        ):
+            return treeobject.find("./" + parameter).attrib[attrib]
+        else:
+            return ""
 
     @staticmethod
     def get_parameter_all(treeobject: ElementTree.Element, parameter: str) -> str:
@@ -393,12 +401,14 @@ class UtilityFunctions:
         :returns: A list of all values in treeobject for the supplied parameter
         """
         # try:
+
         ret = ",".join([x.text for x in treeobject.iter(parameter)])
         # except BaseException: #pragma: no cover
         #     ret = "" # pragma: no cover
         return ret
 
-    def convert_xmlfile_to_csvfile(self, file_path: Union[Path, str]) -> None:
+    @staticmethod
+    def convert_xmlfile_to_csvfile(file_path: Union[Path, str]) -> None:
         """
         The convert_xmlfile_to_csvfile function takes a file path to an XML file and converts it into a CSV file. The
         function uses the gzip library to open the XML files, which are compressed. The ElementTree library is used
@@ -470,27 +480,35 @@ class UtilityFunctions:
 
             for planet in planets:
                 parameters = pd.DataFrame(
-                    [self.get_parameter(system, "alias")], columns=["alias"]
+                    [UtilityFunctions.get_parameter(system, "alias")], columns=["alias"]
                 )
 
                 for field in fields:
                     parameters[field] = None
-                    parameters[field] = self.get_parameter(planet, field)
-                    parameters.alias = self.get_parameter(system, "alias")
+                    parameters[field] = UtilityFunctions.get_parameter(planet, field)
+                    parameters.alias = UtilityFunctions.get_parameter(system, "alias")
                     if field[0:7] == "system_":
-                        parameters[field] = self.get_parameter(system, field[7:])
+                        parameters[field] = UtilityFunctions.get_parameter(
+                            system, field[7:]
+                        )
                     elif field[0:9] == "hoststar_":
-                        parameters[field] = self.get_parameter(stars, field[9:])
+                        parameters[field] = UtilityFunctions.get_parameter(
+                            stars, field[9:]
+                        )
                     elif field == "list":
-                        parameters[field] = self.get_parameter_all(planet, field)
+                        parameters[field] = UtilityFunctions.get_parameter_all(
+                            planet, field
+                        )
                     elif field == "masstype":
-                        parameters[field] = self.get_attribute(planet, field[0:-4], "type")
+                        parameters[field] = UtilityFunctions.get_attribute(
+                            planet, field[0:-4], "type"
+                        )
                     elif field[-4:] == "_min":
-                        parameters[field] = self.get_attribute(
+                        parameters[field] = UtilityFunctions.get_attribute(
                             planet, field[0:-4], "errorminus"
                         )
                     elif field[-4:] == "_max":
-                        parameters[field] = self.get_attribute(
+                        parameters[field] = UtilityFunctions.get_attribute(
                             planet, field[0:-4], "errorplus"
                         )
 

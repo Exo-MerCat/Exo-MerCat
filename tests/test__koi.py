@@ -1,18 +1,7 @@
-import unittest
-import io
 import numpy as np
 import pandas as pd
 import pytest
-import subprocess
-import os, glob
-from pathlib import Path, PosixPath
-import logging
-import requests.exceptions
 from testfixtures import LogCapture
-from exo_mercat.catalogs import uniform_string, Catalog
-from unittest.mock import patch, MagicMock, Mock
-from datetime import date
-
 from exo_mercat.koi import Koi
 
 

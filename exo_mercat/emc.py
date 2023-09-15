@@ -684,7 +684,9 @@ class Emc(Catalog):
 
         f1.close()
 
-    def merge_into_single_entry(self, group: pd.DataFrame, mainid: str, binary: str, letter: str) -> pd.DataFrame:
+    def merge_into_single_entry(
+        self, group: pd.DataFrame, mainid: str, binary: str, letter: str
+    ) -> pd.DataFrame:
         """
         The merge_into_single_entry function takes the dataframe and merges all entries
         with the same main_id and letter (from the different catalogs) into a single entry.

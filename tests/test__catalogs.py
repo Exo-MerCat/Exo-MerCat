@@ -8,38 +8,7 @@ import pandas as pd
 import pytest
 from testfixtures import LogCapture
 
-from exo_mercat.catalogs import uniform_string, Catalog
-
-
-# @pytest.fixture(scope="session") def fixture_catalog(tmpdir_factory): cat=Catalog() fn = tmpdir_factory.mktemp(
-# "catalog").join("test_catalog.csv") cat.download_catalog(url =
-# 'https://exoplanetarchive.ipac.caltech.edu/TAP/sync?query=select+TOP+100+*+from+pscomppars&format=csv',filename = fn)
-#
-#     return z
-
-
-@pytest.mark.parametrize(
-    ("string", "expected"),
-    [
-        ("2M 0219-39 b", "2MASS J0219-39 b"),
-        ("2M1510A b", "2MASS J1510A b"),
-        ("2MASS J0326-2102", "2MASS J0326-2102"),
-        ("2M1510A a", "2MASS J1510A"),
-        ("CoRoT-10 b", "CoRoT 10 b"),
-        ("Gliese 49 b", "GJ 49 b"),
-        ("Gl 378 b", "GJ 378 b"),
-        ("K00473.01", "KOI-473.01"),
-        ("VHS 1256-1257 b", "VHS J1256-1257 b"),
-        ("KMT-2017-BLG-0165L", "KMT-2017-BLG-0165"),
-        ("KMT-2019-BLG-1339/OGLE-2019/BLG-1019 b", "KMT-2019-BLG-1339"),
-        ("OGLE--2018-BLG-0516 b", "OGLE 2018-BLG-0516 b"),
-        ("OGLE-2005-071", "OGLE 2005-071"),
-        ("MOA-2016-BLG-339L", "MOA 2016-BLG-339"),
-        ("WASP-184 b", "WASP-184 b"),  # random general one that should not change
-    ],
-)
-def test__uniform_string(string, expected):
-    assert uniform_string(string) == expected
+from exo_mercat.catalogs import Catalog
 
 
 @pytest.fixture

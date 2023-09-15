@@ -7,13 +7,7 @@ import os
 from pandas._testing import assert_frame_equal
 from testfixtures import LogCapture
 
-from exo_mercat.emc import (
-    Emc,
-    round_to_decimal,
-    round_array_to_significant_digits,
-    merge_into_single_entry,
-    round_parameter_bin,
-)
+from exo_mercat.emc import Emc
 import pandas as pd
 
 
@@ -1586,59 +1580,7 @@ def test__keep_columns(instance):
         instance.keep_columns()
 
 
-def test__round_to_decimal():
-    # Test cases with various input values
-    test_cases = [
-        (12345, 12300.0),  # Test for an order of magnitude <= 100
-        (678.9, 700.0),  # Test for an order of magnitude between 100 and 1000
-        (0.012345, 0.01),  # Test for an order of magnitude > 1000
-        (1000, 1000),  # Test with number having an order of magnitude equal to 1
-    ]
-
-    for number, expected_output in test_cases:
-        result = round_to_decimal(number)
-        assert result == expected_output
-
-
-def test__round_array_to_significant_digits():
-    # Test cases with various input arrays
-    test_cases = [
-        (
-            [1.2345, 6.789, 0.012345, 0, 1000],
-            [1.0, 7.0, 0.01, -1, 1000.0],
-        ),  # Normal test case
-        (
-            [100, 200, 300, 0, 400],
-            [100.0, 200.0, 300.0, -1, 400.0],
-        ),  # Test with only integers
-        (
-            [0.00124, 0.00235, 0.00333],
-            [0.001, 0.002, 0.003],
-        ),  # Test with values having an order of magnitude < 1
-        (
-            [
-                103087,
-                5098779,
-            ],
-            [103000, 5100000],
-        ),  # Test with values requiring rounding to 2 significant digits
-        ([0], [-1]),  # Test with an array containing only 0
-        ([], []),  # Test with an empty array
-    ]
-
-    for numbers, expected_output in test_cases:
-        result = round_array_to_significant_digits(numbers)
-        assert result == expected_output
-
-
-def test__round_parameter_bin():
-    data = pd.Series([326.03, 52160.0, 3765.0, 0.59862739, 0.43, np.nan, 818000.0])
-    rounded_series = round_parameter_bin(data)
-    assert sorted(rounded_series.values) == [-1, 2, 8, 137, 187, 240, 297]
-
-
-#
-def test__merge_into_single_entry(tmp_path):
+def test__merge_into_single_entry(instance, tmp_path):
     original_dir = os.getcwd()
 
     os.chdir(tmp_path)  # Create a temporary in-memory configuration object
@@ -1772,7 +1714,7 @@ def test__merge_into_single_entry(tmp_path):
         "EREL": [0.4931506849315068],
     }
     expected_result = pd.DataFrame(expected_result)
-    result = merge_into_single_entry(data, "*   6 Lyn", "", "b")
+    result = instance.merge_into_single_entry(data, "*   6 Lyn", "", "b")
 
     assert sorted(result.columns) == sorted(expected_result.columns)
 
@@ -1825,7 +1767,7 @@ def test__merge_into_single_entry(tmp_path):
     # Update data_df with values from update_df
     expected_result.update(update_expected_df)
 
-    result = merge_into_single_entry(data, "*   6 Lyn", "", "b")
+    result = instance.merge_into_single_entry(data, "*   6 Lyn", "", "b")
 
     assert sorted(result.columns) == sorted(expected_result.columns)
 
@@ -1872,7 +1814,7 @@ def test__merge_into_single_entry(tmp_path):
     # Update data_df with values from update_df
     expected_result.update(update_expected_df)
 
-    result = merge_into_single_entry(data, "*   6 Lyn", "", "b")
+    result = instance.merge_into_single_entry(data, "*   6 Lyn", "", "b")
 
     assert sorted(result.columns) == sorted(expected_result.columns)
 

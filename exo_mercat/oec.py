@@ -40,7 +40,7 @@ class Oec(Catalog):
                 with open(file_path_xml_str, "wb") as f:
                     f.write(result.content)
                 logging.info("Convert from .xml to .csv")
-                Utils.convert_xmlfile_to_csvfile(file_path_xml_str)
+                Utils.convert_xmlfile_to_csvfile(file_path=file_path_xml_str)
 
             except (
                 OSError,
@@ -71,7 +71,7 @@ class Oec(Catalog):
                 with open(file_path_xml_str, "wb") as f:
                     f.write(result.content)
                 logging.info("Convert from .xml to .csv")
-                Utils.convert_xmlfile_to_csvfile(file_path_xml_str)
+                Utils.convert_xmlfile_to_csvfile(file_path=file_path_xml_str)
 
             except BaseException:
                 file_path_str = glob.glob(filename + "*.csv")[0]
