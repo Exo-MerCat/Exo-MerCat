@@ -66,19 +66,6 @@ class Oec(Catalog):
                 else:
                     raise ValueError("Could not find previous catalogs")
 
-            try:
-                result = requests.get(url, timeout=timeout)
-                with open(file_path_xml_str, "wb") as f:
-                    f.write(result.content)
-                logging.info("Convert from .xml to .csv")
-                Utils.convert_xmlfile_to_csvfile(file_path=file_path_xml_str)
-
-            except BaseException:
-                file_path_str = glob.glob(filename + "*.csv")[0]
-                logging.warning(
-                    "Error fetching the catalog, taking a local copy:", file_path_str
-                )
-
         logging.info("Catalog downloaded.")
         return Path(file_path_str)
 
@@ -142,16 +129,8 @@ class Oec(Catalog):
             elif not str(re.search("\\d$", ident, re.M)) == "None":
                 self.data.loc[self.data.name == ident, "host"] = ident
 
-        self.data = self.data.replace(
-            {
-                "astrometry": "Astrometry",
-                "microlensing": "Microlensing",
-                "imaging": "Imaging",
-                "transit": "Transit",
-                "timing": "Pulsar Timing",
-                "RV": "Radial Velocity",
-            }
-        )
+        self.data=Utils.convert_discovery_methods(self.data)
+
         logging.info("Catalog uniformed.")
 
     def remove_theoretical_masses(self) -> None:

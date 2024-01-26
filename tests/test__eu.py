@@ -138,8 +138,8 @@ def test__uniform_catalog(instance):
         "log_g": [np.nan],
         "publication": ["Published in a refereed paper"],
         "detection_type": ["Primary Transit#TTV"],
-        "mass_detection_type": ["Primary Transit"],
-        "radius_detection_type": ["Pulsar"],
+        "mass_detection_type": ["Theoretical"],
+        "radius_detection_type": ["Theoretical"],
         "alternate_names": ["Oph 1622-2405 b"],
         "molecules": ["None"],
         "star_name": ["11 Oph"],
@@ -219,8 +219,6 @@ def test__uniform_catalog(instance):
         for element in ["Oph 1622-2405 b", "Oph 1622-2405", "Oph 11A"]
     )
     assert instance.data.at[0, "discovery_method"] == "TTV"
-    assert instance.data.at[0, "MASSPROV"] == "Transit"
-    assert instance.data.at[0, "RADPROV"] == "Pulsar Timing"
 
 
 def test__remove_theoretical_masses(instance):

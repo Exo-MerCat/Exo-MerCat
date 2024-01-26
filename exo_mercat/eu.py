@@ -5,9 +5,9 @@ from pathlib import Path
 import os
 import numpy as np
 import pandas as pd
-import requests
-from astropy.io import ascii
-from astropy.io.votable import parse_single_table
+# import requests
+# from astropy.io import ascii
+# from astropy.io.votable import parse_single_table
 
 from exo_mercat.catalogs import Catalog
 from exo_mercat.utility_functions import UtilityFunctions as Utils
@@ -22,48 +22,48 @@ class Eu(Catalog):
         super().__init__()
         self.name = "eu"
 
-    def download_catalog(self, url: str, filename: str, timeout=None) -> Path:
-        """
-        The download_catalog function downloads the catalog from a given url and saves it to a file.
-        If the file already exists, it will not be downloaded again.
-
-        :param timeout: the timeout setting for the download
-        :param url: Specify the url of the catalog to be downloaded
-        :param filename: Specify the name of the file to be downloaded
-        :return: The string of the file path of the catalog
-
-        """
-        file_path_str = filename + date.today().strftime("%m-%d-%Y") + ".csv"
-        if os.path.exists(file_path_str):
-            logging.info("Reading existing file")
-        else:
-            try:
-                result = requests.get(url, timeout=timeout)
-                with open("votable.xml", "wb") as f:
-                    f.write(result.content)
-
-                table = parse_single_table("votable.xml").to_table()
-                ascii.write(
-                    table,
-                    file_path_str,
-                    format="csv",
-                    overwrite=True,
-                )
-                os.remove("votable.xml")
-
-            except:
-                if len(glob.glob(filename + "*.csv")) > 0:
-                    file_path_str = glob.glob(filename + "*.csv")[0]
-
-                    logging.warning(
-                        "Error fetching the catalog, taking a local copy: %s",
-                        file_path_str,
-                    )
-                else:
-                    raise ValueError("Could not find previous catalogs")
-
-        logging.info("Catalog downloaded.")
-        return Path(file_path_str)
+    # def download_catalog(self, url: str, filename: str, timeout=None) -> Path:
+    #     """
+    #     The download_catalog function downloads the catalog from a given url and saves it to a file.
+    #     If the file already exists, it will not be downloaded again.
+    #
+    #     :param timeout: the timeout setting for the download
+    #     :param url: Specify the url of the catalog to be downloaded
+    #     :param filename: Specify the name of the file to be downloaded
+    #     :return: The string of the file path of the catalog
+    #
+    #     """
+    #     file_path_str = filename + date.today().strftime("%m-%d-%Y") + ".csv"
+    #     if os.path.exists(file_path_str):
+    #         logging.info("Reading existing file")
+    #     else:
+    #         try:
+    #             result = requests.get(url, timeout=timeout)
+    #             with open("votable.xml", "wb") as f:
+    #                 f.write(result.content)
+    #
+    #             table = parse_single_table("votable.xml").to_table()
+    #             ascii.write(
+    #                 table,
+    #                 file_path_str,
+    #                 format="csv",
+    #                 overwrite=True,
+    #             )
+    #             os.remove("votable.xml")
+    #
+    #         except:
+    #             if len(glob.glob(filename + "*.csv")) > 0:
+    #                 file_path_str = glob.glob(filename + "*.csv")[0]
+    #
+    #                 logging.warning(
+    #                     "Error fetching the catalog, taking a local copy: %s",
+    #                     file_path_str,
+    #                 )
+    #             else:
+    #                 raise ValueError("Could not find previous catalogs")
+    #
+    #     logging.info("Catalog downloaded.")
+    #     return Path(file_path_str)
 
     def uniform_catalog(self) -> None:
         """
@@ -107,8 +107,12 @@ class Eu(Catalog):
             }
         )
         self.data["reference"] = self.name
+        self.data['alternate_names']=self.data['alternate_names'].fillna("")
+        self.data['star_alternate_names']=self.data['star_alternate_names'].fillna("")
+        self.data['host']=self.data['host'].fillna("")
+
         self.data["alias"] = self.data["alternate_names"].str.cat(
-            self.data[["star_alternate_names"]].fillna(""), sep=","
+            self.data[["star_alternate_names"]], sep=","
         )
 
         for i in self.data.index:
@@ -122,13 +126,9 @@ class Eu(Catalog):
 
             self.data.at[i, "alias"] = alias_polished.lstrip(",")
 
-        self.data = self.data.replace(
-            {
-                "Primary Transit#TTV": "TTV",
-                "Primary Transit": "Transit",
-                "Pulsar": "Pulsar Timing",
-            }
-        )
+        self.data=Utils.convert_discovery_methods(self.data)
+
+
         logging.info("Catalog uniformed.")
 
     def remove_theoretical_masses(self) -> None:

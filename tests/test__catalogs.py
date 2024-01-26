@@ -82,24 +82,24 @@ def test__read_csv_catalog(instance):
     assert isinstance(instance.data, pd.DataFrame)
 
 
-def test__convert_datatypes(instance):
-    # Test when DataFrame conversion is successful
-    # Create a sample DataFrame
-    data = {
-        "col1": [1.0, 2.0, 3.0],
-        "col2": ["A", "B", "C"],
-        "col3": [True, False, True],
-        "col4": [1.4, 2, 3],
-    }
-    instance.data = pd.DataFrame(data)
-
-    # Call the convert_datatypes function
-    instance.convert_datatypes()
-    assert instance.data["col1"].dtype.type == np.int64
-    assert instance.data["col2"].dtype.type == str
-    assert instance.data["col3"].dtype.type == np.bool_
-    assert instance.data["col4"].dtype.type == np.float64
-
+# def test__convert_datatypes(instance):
+#     # Test when DataFrame conversion is successful
+#     # Create a sample DataFrame
+#     data = {
+#         "col1": [1.0, 2.0, 3.0],
+#         "col2": ["A", "B", "C"],
+#         "col3": [True, False, True],
+#         "col4": [1.4, 2, 3],
+#     }
+#     instance.data = pd.DataFrame(data)
+#
+#     # Call the convert_datatypes function
+#     instance.convert_datatypes()
+#     assert instance.data["col1"].dtype.type == np.int64
+#     assert instance.data["col2"].dtype.type == str
+#     assert instance.data["col3"].dtype.type == np.bool_
+#     assert instance.data["col4"].dtype.type == np.float64
+#
 
 def test_keep_columns(instance):
     # Test the keep_columns function
@@ -107,7 +107,7 @@ def test_keep_columns(instance):
     # Create a sample DataFrame with some additional columns
     data = {
         "name": ["HD 114762 b"],
-        "catalog_name": ["OEC"],
+        "catalog_name": ["HD 114762 b"],
         "discovery_method": ["Radial Velocity"],
         "ra": [198.0791667],
         "dec": [17.51694444],
@@ -146,7 +146,8 @@ def test_keep_columns(instance):
         "letter": ["b"],
         "status": ["CONFIRMED"],
         "catalog": ["oec"],
-        "Catalogstatus": ["oec: CONFIRMED"],
+        "original_catalog_status": ["oec: CONFIRMED"],
+        "checked_catalog_status": ["oec: CONFIRMED"],
         "extra": ["extra"],
     }
 
@@ -198,12 +199,14 @@ def test_keep_columns(instance):
         "letter",
         "status",
         "catalog",
+        "original_catalog_status",
+        "checked_catalog_status",
     ]
     assert list(instance.data.columns) == expected_columns
 
     data = {
         "name": ["HD 114762 b"],
-        "catalog_name": ["OEC"],
+        "catalog_name": ["HD 114762 b"],
         "extra": ["extra"],
     }
     df = pd.DataFrame(data)
@@ -266,19 +269,22 @@ def test__replace_known_mistakes(tmp_path, instance):
         config_file.write("name = Trojan\n")
         config_file.write("[BINARY]\n")
         config_file.write("XO-2N c = A\n")
-
+        config_file.write("XO-2N b = A\n")
+        config_file.write("not present = A\n")
     data = {
         "name": [
             "alf Tau b",
             "K2-2016-BLG-0005L",
             "XO-2N c",
-            "Trojan",
             "Proxima Centauri b",
+            "test",
+            "XO-2N b",
+            "Trojan",
         ],
-        "host": ["gam1 Leo", "K2-2016-BLG-0005L", "", "", "Proxima Centauri"],
-        "ra": [0, 9, 0, 0, 1],
-        "dec": [0, 269.879166677, 0, 0, 1],
-        "binary": ["", "", "", "", ""],
+        "host": ["gam1 Leo", "K2-2016-BLG-0005L", "XO-2N",  "Proxima Centauri","test","XO-2N",""],
+        "ra": [0, 9, 0,  1,0,0,0],
+        "dec": [0, 269.879166677, 0,  1,0,0,0],
+        "binary": ["", "", "",  "","","A",""],
     }
     instance.data = pd.DataFrame(data)
 
@@ -290,48 +296,15 @@ def test__replace_known_mistakes(tmp_path, instance):
     assert instance.data["host"][0] == "gam01 Leo"
     assert instance.data["ra"][1] == 269.879166677
     assert instance.data["dec"][1] == 269.879166677
-    assert instance.data["binary"][2] == ""  # not executed in this function
+    assert instance.data["binary"][2] == "A"  # not executed in this function
+    assert instance.data["binary"][4] == ""
+    assert instance.data["binary"][5] == "A"
     assert "Trojan" not in instance.data.name.values
-    with open("Logs/unused_replacements.txt", "r") as file:
-        f = file.readlines()
-    assert "****catalog****\n" in f
-    assert "dec: K2-2016-BLG-0005L 0.0\n" in f
-    assert "NAME: not present\n" in f
-    assert "HOST: not present\n" in f
-    assert "ra: not present\n" in f
 
     os.chdir(original_dir)
 
 
-def test__check_known_binary_mismatches(tmp_path, instance):
-    original_dir = os.getcwd()
 
-    os.chdir(tmp_path)  # Create a temporary in-memory configuration object
-    os.mkdir("Logs/")
-    with open("Logs/unused_replacements.txt", "w") as file:
-        file.write("****catalog****\n")
-
-    # Create a temporary directory to store the fake_config.ini
-    with open("replacements.ini", "w") as config_file:
-        config_file.write("[BINARY]\n")
-        config_file.write("XO-2N c = A\n")
-        config_file.write("XO-2N b = A\n")
-        config_file.write("not present = A\n")
-    data = {"name": ["XO-2N c", "test", "XO-2N b"], "binary": ["", "", "A"]}
-    instance.data = pd.DataFrame(data)
-
-    instance.check_known_binary_mismatches()
-    #
-    assert instance.data["binary"][0] == "A"
-    assert instance.data["binary"][1] == ""
-    assert instance.data["binary"][2] == "A"
-    #
-    with open("Logs/unused_replacements.txt", "r") as file:
-        f = file.readlines()
-    assert "BINARY: not present\n" in f
-    assert "BINARY ALREADY PRESENT: XO-2N b\n" in f
-
-    os.chdir(original_dir)
 
 
 def test_remove_known_brown_dwarfs(tmp_path, instance):
@@ -460,7 +433,7 @@ def test__uniform_name_host_letter(instance):
     pd.testing.assert_frame_equal(instance.data, expected_df)
 
 
-def test__check_koiepic_tables(instance):
+def test__check_mission_tables(instance):
     koi_test = {
         "kepid": [6922244, 4055765],
         "kepoi_name": ["K00010.01", "K00100.01"],
@@ -501,8 +474,8 @@ def test__check_koiepic_tables(instance):
 
     with LogCapture() as log:
         # Call the uniform_name_host_letter function
-        instance.check_koiepic_tables(test_data_file)
-        assert "status from test_koi.csv checked" in log.actual()[0][-1]
+        instance.check_mission_tables(test_data_file)
+        assert "test_koi.csv checked" in log.actual()[0][-1]
 
     # Perform assertions to check if the data DataFrame is correctly updated
     assert instance.data.at[0, "status"] == "CONFIRMED"
@@ -614,23 +587,44 @@ def test__fill_binary_column(instance):
 
 
 def test__create_catalogstatus_string(instance):
+
+    #FIRST CALL, for ORIGINAL CATALOG STATUS
     data = pd.DataFrame(
         {
             "catalog": ["eu", "oec", "nasa"],
             "status": ["CANDIDATE", "CONFIRMED", "FALSE POSITIVE"],
+
         }
     )
     instance.data = data
     # Call the function with the sample input data
     with LogCapture() as log:
         # Call the uniform_name_host_letter function
-        instance.create_catalogstatus_string()
-        assert "Catalogstatus column created" in log.actual()[0][-1]
+        instance.create_catalogstatus_string("original_catalog_status")
+        assert "original_catalog_status column created" in log.actual()[0][-1]
 
-    assert instance.data.at[0, "Catalogstatus"] == "eu: CANDIDATE"
-    assert instance.data.at[1, "Catalogstatus"] == "oec: CONFIRMED"
-    assert instance.data.at[2, "Catalogstatus"] == "nasa: FALSE POSITIVE"
+    assert instance.data.at[0, "original_catalog_status"] == "eu: CANDIDATE"
+    assert instance.data.at[1, "original_catalog_status"] == "oec: CONFIRMED"
+    assert instance.data.at[2, "original_catalog_status"] == "nasa: FALSE POSITIVE"
 
+    ## SECOND CALL, FOR CHECKED STATUS
+    data = pd.DataFrame(
+        {
+            "catalog": ["eu", "oec", "nasa"],
+            "status": ["FALSE POSITIVE", "CONFIRMED", "FALSE POSITIVE"],
+
+        }
+    )
+    instance.data = data
+    # Call the function with the sample input data
+    with LogCapture() as log:
+        # Call the uniform_name_host_letter function
+        instance.create_catalogstatus_string("checked_catalog_status")
+        assert "checked_catalog_status column created" in log.actual()[0][-1]
+
+    assert instance.data.at[0, "checked_catalog_status"] == "eu: FALSE POSITIVE"
+    assert instance.data.at[1, "checked_catalog_status"] == "oec: CONFIRMED"
+    assert instance.data.at[2, "checked_catalog_status"] == "nasa: FALSE POSITIVE"
 
 def test__make_uniform_alias_list(instance):
     data = pd.DataFrame(

@@ -341,11 +341,6 @@ def test__uniform_catalog(instance):
         "temperature": [np.nan],
         "age": [np.nan],
         "discoverymethod": ["RV"],
-        "extra_discoverymethod": ["astrometry"],
-        "extra_discoverymethod1": ["microlensing"],
-        "extra_discoverymethod2": ["transit"],
-        "extra_discoverymethod3": ["imaging"],
-        "extra_discoverymethod4": ["timing"],
         "discoveryyear": [2009.0],
         "lastupdate": ["15/09/20"],
         "system_rightascension": ["15 17 05.88899"],
@@ -425,11 +420,7 @@ def test__uniform_catalog(instance):
         ]
     )
     assert instance.data.at[0, "discovery_method"] == "Radial Velocity"
-    assert instance.data.at[0, "extra_discoverymethod"] == "Astrometry"
-    assert instance.data.at[0, "extra_discoverymethod1"] == "Microlensing"
-    assert instance.data.at[0, "extra_discoverymethod3"] == "Imaging"
-    assert instance.data.at[0, "extra_discoverymethod2"] == "Transit"
-    assert instance.data.at[0, "extra_discoverymethod4"] == "Pulsar Timing"
+
     data = {
         "name": ["KOI-123.01", "Planet b", "Number9"],
         "alias": ["", "", ""],
@@ -437,6 +428,7 @@ def test__uniform_catalog(instance):
         "masstype": ["msini", "mass", "msini"],
         "mass_min": [0.245, 0.1, 0.1],
         "mass_max": [0.245, 0.1, 0.1],
+        "discovery_method":['RV',np.nan,'nan']
     }
     df = pd.DataFrame(data)
     instance.data = df
@@ -445,6 +437,9 @@ def test__uniform_catalog(instance):
     assert instance.data.at[0, "host"] == "KOI-123"
     assert instance.data.at[1, "host"] == "Planet"
     assert instance.data.at[2, "host"] == "Number9"
+    assert instance.data.at[0, "discovery_method"] == "Radial Velocity"
+    assert instance.data.at[1, "discovery_method"] == ""
+    assert instance.data.at[2, "discovery_method"] == ""
 
 
 def test__remove_theoretical_masses(instance):

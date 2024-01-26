@@ -70,11 +70,6 @@ def test__uniform_catalog(instance):
         "hip_name": ["hip_name"],
         "tic_id": ["tic_id,second_id"],
         "gaia_id": [np.nan],
-        "method_column": ["Transit Timing Variations"],
-        "method_column1": ["Eclipse Timing Variations"],
-        "method_column2": ["Pulsation Timing Variations"],
-        "method_column3": ["Orbital Brightness Modulation"],
-        "method_column4": ["Disk Kinematics"],
     }
 
     df = pd.DataFrame(data)
@@ -130,12 +125,6 @@ def test__uniform_catalog(instance):
     assert np.isnan(instance.data.at[0, "msini"])
 
     assert instance.data.at[0, "alias"] == "hd_name,hip_name,tic_id,second_id,"
-    assert instance.data.at[0, "method_column"] == "TTV"
-    assert instance.data.at[0, "method_column1"] == "TTV"
-    assert instance.data.at[0, "method_column2"] == "Pulsar Timing"
-    assert instance.data.at[0, "method_column3"] == "Other"
-    assert instance.data.at[0, "method_column4"] == "Other"
-    assert instance.data.at[0, "discovery_method"] == "Microlensing"
 
 
 def test__sort_best_mass_to_mass_or_msini(instance):

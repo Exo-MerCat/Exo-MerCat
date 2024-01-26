@@ -2,6 +2,7 @@ import re
 import numpy as np
 from exo_mercat.catalogs import Catalog
 import logging
+from exo_mercat.utility_functions import UtilityFunctions as Utils
 
 
 class Nasa(Catalog):
@@ -80,7 +81,7 @@ class Nasa(Catalog):
         self.data["mass_max"] = np.nan
         self.data["msini"] = np.nan
         self.data["msini_min"] = np.nan
-        self.data["msinis_max"] = np.nan
+        self.data["msini_max"] = np.nan
 
         if "bestmass" in self.data.columns:
             # this happens when you use PLANETARY COMPOSITE PARAMETERS TABLE
@@ -96,15 +97,8 @@ class Nasa(Catalog):
             .str.lstrip(",")
         )
 
-        self.data = self.data.replace(
-            {
-                "Transit Timing Variations": "TTV",
-                "Eclipse Timing Variations": "TTV",
-                "Pulsation Timing Variations": "Pulsar Timing",
-                "Orbital Brightness Modulation": "Other",
-                "Disk Kinematics": "Other",
-            }
-        )
+
+        self.data=Utils.convert_discovery_methods(self.data)
 
         logging.info("Catalog uniformed.")
 

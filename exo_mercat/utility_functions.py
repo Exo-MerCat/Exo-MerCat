@@ -117,6 +117,7 @@ class UtilityFunctions:
             "Arietis": "Ari",
             "Aurigae": "Aur",
             "Bootis": "Boo",
+            "Bo&ouml;": "Boo",
             "Caeli": "Cae",
             "Camelopardalis": "Cam",
             "Cancri": "Cnc",
@@ -256,6 +257,8 @@ class UtilityFunctions:
         name = name.replace("'", "").replace('"', "")
         if "K0" in name[:2]:
             name = "KOI-" + name.lstrip("K").lstrip("0")
+        if "TOI " in name[:4]:
+                name = "TOI-" + name[4:].lstrip(" ")
         if not str(re.match("2M[\d ]", name, re.M)) == "None":
             name = "2MASS J" + name[2:].lstrip()
             name = name.replace("JJ", "J").replace("J ", "J")
@@ -275,8 +278,8 @@ class UtilityFunctions:
             name = name.replace("OGLE-", "OGLE ").rstrip("L")
         if "KMT-" in name:
             name = name.split("/")[0]
-        if "CoRoT-" in name:
-            name = name.replace("-", " ")
+        # if "CoRoT-" in name:
+        #     name = name.replace("-", " ")
         if "2MASS" in name:
             name = name.rstrip(" a")
         return name
@@ -302,55 +305,71 @@ class UtilityFunctions:
             rounded_number = round(number / order_of_magnitude, 2)
         return rounded_number * order_of_magnitude
 
+    # @staticmethod
+    # def round_array_to_significant_digits(numbers: list) -> list:
+    #     """
+    #     Round an array of numbers to their significant digits with special handling for zero values.
+    #
+    #     This function takes an array of numeric inputs 'numbers' and rounds each number to its
+    #     appropriate significant digits using the round_to_decimal function. Zero values are
+    #     replaced with -1 to distinguish them from rounded numbers.
+    #
+    #     :param numbers: The array of numbers to be rounded.
+    #     :return: The array of rounded numbers with special handling for zero values.
+    #     """
+    #     rounded_numbers = []
+    #     for num in numbers:
+    #         if num != 0:
+    #             rounded_num = UtilityFunctions.round_to_decimal(num)
+    #             rounded_numbers.append(rounded_num)
+    #         else:
+    #             rounded_numbers.append(-1)
+    #     return rounded_numbers
+    #
+
     @staticmethod
-    def round_array_to_significant_digits(numbers: list) -> list:
-        """
-        Round an array of numbers to their significant digits with special handling for zero values.
+    def calculate_working_p_sma(group: pd.DataFrame,tolerance:float) -> pd.DataFrame:
+        ''' difference of 5%'''
+        group=group.sort_values(by='p')
+        group['working_p'] = np.nan
+        group['working_a'] = np.nan
+        for i in group.index:
+            if group.loc[i, 'working_p'] != group.loc[i, 'working_p']:
+                group.loc[abs(group.p - group.at[i, 'p']) <= tolerance * group.at[i, 'p'], 'working_p'] = group.at[i, 'p']
+            if group.loc[i, 'working_a'] != group.loc[i, 'working_a']:
+                group.loc[abs(group.a - group.at[i, 'a']) <= tolerance * group.at[i, 'a'], 'working_a'] = group.at[i, 'a']
+        group.loc[:, 'working_a'] = group.loc[:, 'working_a'].fillna(-1)
+        group.loc[:, 'working_p'] = group.loc[:, 'working_p'].fillna(-1)
+        return group
 
-        This function takes an array of numeric inputs 'numbers' and rounds each number to its
-        appropriate significant digits using the round_to_decimal function. Zero values are
-        replaced with -1 to distinguish them from rounded numbers.
-
-        :param numbers: The array of numbers to be rounded.
-        :return: The array of rounded numbers with special handling for zero values.
-        """
-        rounded_numbers = []
-        for num in numbers:
-            if num != 0:
-                rounded_num = UtilityFunctions.round_to_decimal(num)
-                rounded_numbers.append(rounded_num)
-            else:
-                rounded_numbers.append(-1)
-        return rounded_numbers
-
-    @staticmethod
-    def round_parameter_bin(parameter_series: pd.Series) -> pd.Series:
-        """
-        Round values in a pandas Series to bins based on their order of magnitude.
-
-        This function takes a pandas Series 'parameter_series' containing numeric values and rounds
-        each value to a bin based on its order of magnitude. It calculates the order of magnitude
-        for each value, defines variable bins based on the calculated order of magnitude, and
-        assigns the corresponding bin label to each value.
-
-        :param parameter_series: A pandas Series containing numeric values to be rounded to bins.
-        :return: A pandas Series with bin labels corresponding to each value's order of magnitude.
-
-        """
-
-        # Calculate the order of magnitude
-        order_of_magnitude = np.log10(parameter_series.fillna(0))
-
-        # Define variable bins based on the order of magnitude
-        # You can adjust these bins according to your specific needs
-        bins = np.linspace(
-            np.log10(parameter_series.min() * 0.9),
-            np.log10(1.1 * parameter_series.max()),
-            300,
-        )
-        # bin_labels = [f"[{10 ** bins[i]}, {10 ** bins[i + 1]})" for i in range(len(bins) - 1)]
-        # Apply pcut with variable bins
-        return pd.cut(order_of_magnitude, bins=bins, labels=False).fillna(-1)
+    # @staticmethod
+    # def round_parameter_bin(parameter_series: pd.Series) -> pd.Series:
+    #     """
+    #     Round values in a pandas Series to bins based on their order of magnitude.
+    #
+    #     This function takes a pandas Series 'parameter_series' containing numeric values and rounds
+    #     each value to a bin based on its order of magnitude. It calculates the order of magnitude
+    #     for each value, defines variable bins based on the calculated order of magnitude, and
+    #     assigns the corresponding bin label to each value.
+    #
+    #     :param parameter_series: A pandas Series containing numeric values to be rounded to bins.
+    #     :return: A pandas Series with bin labels corresponding to each value's order of magnitude.
+    #
+    #     """
+    #
+    #     # Calculate the order of magnitude
+    #     order_of_magnitude = np.log10(parameter_series.fillna(0))
+    #
+    #     # Define variable bins based on the order of magnitude
+    #     # You can adjust these bins according to your specific needs
+    #     bins = np.linspace(
+    #         np.log10(parameter_series.min() * 0.9),
+    #         np.log10(1.1 * parameter_series.max()),
+    #         300,
+    #     )
+    #     # bin_labels = [f"[{10 ** bins[i]}, {10 ** bins[i + 1]})" for i in range(len(bins) - 1)]
+    #     # Apply pcut with variable bins
+    #     return pd.cut(order_of_magnitude, bins=bins, labels=False).fillna(-1)
 
     @staticmethod
     def get_parameter(treeobject: ElementTree.Element, parameter: str) -> str:
@@ -527,3 +546,25 @@ class UtilityFunctions:
 
         new_file_path = Path(str(file_path[:-6] + "csv"))
         tab.to_csv(new_file_path)
+
+    @staticmethod
+    def convert_discovery_methods(data: pd.DataFrame) -> pd.DataFrame:
+        data['discovery_method'] = data['discovery_method'].fillna("").replace('nan','')
+        data.loc[data.discovery_method == "Primary Transit#TTV", 'discovery_method'] = "TTV"
+        data.loc[data.discovery_method == "Transit Timing Variations", 'discovery_method'] = "TTV"
+        data.loc[data.discovery_method == "Eclipse Timing Variations", 'discovery_method'] = "TTV"
+        data.loc[data.discovery_method == "Primary Transit", 'discovery_method'] = "Transit"
+        data.loc[data.discovery_method == "Pulsar", 'discovery_method'] = "Pulsar Timing"
+        data.loc[data.discovery_method == "Pulsation Timing Variations", 'discovery_method'] = "Pulsar Timing"
+        data.loc[data.discovery_method == "Timing", 'discovery_method'] = "Pulsar Timing"
+        data.loc[data.discovery_method == "disk kinematics", 'discovery_method'] = "Other"
+        data.loc[data.discovery_method == "Kinematic", 'discovery_method'] = "Other"
+        data.loc[data.discovery_method == "Disk Kinematics", 'discovery_method'] = "Other"
+        data.loc[data.discovery_method == "Orbital Brightness Modulation", 'discovery_method'] = "Other"
+        data.loc[data.discovery_method == "astrometry", 'discovery_method'] = "Astrometry"
+        data.loc[data.discovery_method == "microlensing", 'discovery_method'] = "Microlensing"
+        data.loc[data.discovery_method == "imaging", 'discovery_method'] = "Imaging"
+        data.loc[data.discovery_method == "transit", 'discovery_method'] = "Transit"
+        data.loc[data.discovery_method == "timing", 'discovery_method'] = "Pulsar Timing"
+        data.loc[data.discovery_method == "RV", 'discovery_method'] = "Radial Velocity"
+        return data

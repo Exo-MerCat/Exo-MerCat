@@ -32,23 +32,14 @@ def test__uniform_catalog(instance):
         assert "Catalog uniformed" in log.actual()[0][-1]
 
     assert list(instance.data.columns) == [
-        "kepid",
-        "kepoi_name",
-        "kepler_name",
-        "koi_disposition",
-        "ra",
-        "dec",
-        "KOI",
-        "KOI_host",
-        "Kepler_host",
-        "KIC_host",
-        "letter",
-        "KIC",
+        "name",
         "alias",
         "aliasplanet",
-        "name",
         "disposition",
         "discoverymethod",
+        "letter",
+        "ra",
+        "dec"
     ]
 
     assert (
@@ -58,7 +49,7 @@ def test__uniform_catalog(instance):
     assert data.at[0, "kepler_name"].rstrip(" bcdefghi") in instance.data.at[0, "alias"]
     assert (
         data.at[0, "kepler_name"].rstrip(" bcdefghi")
-        in instance.data.at[0, "Kepler_host"]
+        in instance.data.at[0, "alias"]
     )
     assert instance.data.at[0, "letter"] == "c"
 
@@ -71,7 +62,6 @@ def test__uniform_catalog(instance):
     assert "KOI-753," in instance.data.at[1, "alias"]  # KOI-753,KIC 10811496,
     assert "nan" not in instance.data.at[1, "alias"]
 
-    assert "nan" in instance.data.at[1, "Kepler_host"]
     assert instance.data.at[1, "letter"] == ".01"
 
     assert (

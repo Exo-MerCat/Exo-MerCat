@@ -97,6 +97,18 @@ class Koi(Catalog):
         self.data["name"] = self.data["KOI"]
         self.data["disposition"] = self.data["koi_disposition"]
         self.data["discoverymethod"] = "Transit"
+        self.data = self.data[
+            [
+                "name",
+                "alias",
+                "aliasplanet",
+                "disposition",
+                "discoverymethod",
+                "letter",
+                "ra",
+                "dec"
+            ]
+        ]
         logging.info("Catalog uniformed.")
 
     def convert_coordinates(self) -> None:

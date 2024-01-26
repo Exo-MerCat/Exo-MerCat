@@ -16,97 +16,131 @@ def test__init(instance):
 
 
 def test__uniform_catalog(instance):
-    data = {
-        "pl_name": ["HAT-P-56 b", "EPIC 201324549.01"],
-        "pl_letter": ["b", ""],
-        "default_flag": [1, 1],
-        "k2_name": ["K2-20 b", np.nan],
-        "epic_hostname": ["EPIC 202126852", "EPIC 201324549"],
-        "epic_candname": ["EPIC 202126852 b", ""],
-        "hostname": ["HAT-P-56", "EPIC 201324549"],
-        "hd_name": ["HD 262389", np.nan],
-        "hip_name": ["HIP 32209", np.nan],
-        "tic_id": ["TIC 84339983", "TIC 38161230"],
-        "gaia_id": ["Gaia DR2 3385777286999240576", "Gaia DR2 3796557953574638336"],
-        "discoverymethod": ["Transit", "Transit"],
-        "ra": [100.8480137, 171.2359519],
-        "dec": [27.2521823, -2.0851597],
-        "disposition": ["CONFIRMED", "FALSE POSITIVE"],
-    }
+    data = {'pl_name': ['EPIC 212099230.01','extra'],
+ 'discoverymethod': [ 'Transit','extra'],
+ 'pl_orbper': [7.11047482,0],
+ 'pl_orbpererr2': [np.nan,np.nan],
+ 'pl_orbpererr1': [np.nan,np.nan],
+ 'pl_orbsmax': [np.nan,np.nan],
+ 'pl_orbsmaxerr2': [np.nan,np.nan],
+ 'pl_orbsmaxerr1': [np.nan,np.nan],
+ 'pl_orbeccen': [np.nan,np.nan],
+ 'pl_orbeccenerr2': [np.nan,np.nan],
+ 'pl_orbeccenerr1': [np.nan,np.nan],
+ 'pl_orbincl': [np.nan,np.nan],
+ 'pl_orbinclerr2': [np.nan,np.nan],
+ 'pl_orbinclerr1': [np.nan,np.nan],
+ 'pl_radj': [np.nan,np.nan],
+ 'pl_radjerr2': [np.nan,np.nan],
+ 'pl_radjerr1': [np.nan,np.nan],
+ 'disc_year': [2016,np.nan],
+ 'rv_flag': [0,0],
+ 'tran_flag':[1,0],
+ 'ttv_flag': [0,0],
+ 'pl_massj': [np.nan,np.nan],
+ 'pl_massjerr2': [np.nan,np.nan],
+ 'pl_massjerr1': [np.nan,np.nan],
+ 'pl_msinij': [np.nan,np.nan],
+ 'pl_msinijerr2': [np.nan,np.nan],
+ 'pl_msinijerr1': [np.nan,np.nan],
+ 'hostname': ['EPIC 212099230',''],
+ 'st_age':[np.nan,np.nan],
+ 'st_ageerr1':  [np.nan,np.nan],
+ 'st_ageerr2': [np.nan,np.nan],
+ 'st_mass': [0.99,np.nan],
+ 'st_masserr1': [ 0.14,np.nan],
+ 'st_masserr2': [-0.11,np.nan],
+ 'pl_refname': ['<a refstr=BARROS_ET_AL__2016 href=https://ui.adsabs.harvard.edu/abs/2016A&A...594A.100B/abstract target=ref>Barros et al. 2016</a>',np.nan],
+ 'k2_name': ['',np.nan],
+ 'default_flag': [1,0],
+ 'pl_letter': ["",np.nan],
+ 'hd_name': ["",np.nan],
+  'hip_name': ["nan",np.nan],
+  'tic_id': ['TIC 178266267',np.nan],
+  'gaia_id': ['Gaia DR2 665640392382991360',np.nan]}
+
     data = pd.DataFrame(data)
     instance.data = data
 
+
+    expected_columns =['catalog','catalog_name','default_flag','name', 'discovery_method', 'p', 'p_min', 'p_max', 'a', 'a_min', 'a_max', 'e', 'e_min', 'e_max', 'i', 'i_min', 'i_max', 'r', 'r_min', 'r_max', 'discovery_year', 'RV', 'Transit', 'TTV', 'mass', 'mass_min', 'mass_max', 'msini', 'msini_min', 'msini_max', 'host', 'Age (Gyrs)', 'Age_max', 'Age_min', 'Mstar', 'Mstar_max', 'Mstar_min', 'reference','Kepler_host','letter',"hd_name", "hip_name", "tic_id", "gaia_id","pl_letter",'k2_name','alias']
     with LogCapture() as log:
         instance.uniform_catalog()
         assert "Catalog uniformed" in log.actual()[0][-1]
 
-    assert list(instance.data.columns) == [
-        "pl_name",
-        "pl_letter",
-        "k2_name",
-        "epic_hostname",
-        "hostname",
-        "hd_name",
-        "hip_name",
-        "tic_id",
-        "gaia_id",
-        "disposition",
-        "ra",
-        "dec",
-        "discoverymethod",
-        "default_flag",
-        "Kepler_host",
-        "name",
-        "letter",
-        "HD_letter",
-        "HIP_letter",
-        "TIC_letter",
-        "GAIA_letter",
-        "alias",
-        "aliasplanet",
-    ]
+    assert sorted(list(instance.data.columns)) == sorted(expected_columns)
+    assert len(instance.data)==1
     assert (
-        "K2-20," in instance.data.at[0, "alias"]
-    )  # 'HIP 32209,K2-20,TIC 84339983,HD 262389,Gaia DR2 3385777286999240576,'
+        data.at[0, "gaia_id"] + "," in instance.data.at[0, "alias"]
+    )
     assert "nan" not in instance.data.at[0, "alias"]
-    assert data.at[0, "tic_id"] + "," in instance.data.at[0, "alias"]
-    assert data.at[0, "hip_name"] + "," in instance.data.at[0, "alias"]
-    assert data.at[0, "hd_name"] + "," in instance.data.at[0, "alias"]
-    assert data.at[0, "gaia_id"] + "," in instance.data.at[0, "alias"]
-    assert "b" in instance.data.at[0, "letter"]
-    assert (
-        data.at[0, "k2_name"] + "," in instance.data.at[0, "aliasplanet"]
-    )  #'HD 262389 b,TIC 84339983 b,Gaia DR2 3385777286999240576 b,HIP 32209 b,K2-20 b,'
-    assert (
-        data.at[0, "tic_id"] + " " + data.at[0, "pl_letter"] + ","
-        in instance.data.at[0, "aliasplanet"]
-    )
-    assert (
-        data.at[0, "hip_name"] + " " + data.at[0, "pl_letter"] + ","
-        in instance.data.at[0, "aliasplanet"]
-    )
-    assert (
-        data.at[0, "hd_name"] + " " + data.at[0, "pl_letter"] + ","
-        in instance.data.at[0, "aliasplanet"]
-    )
-    assert (
-        data.at[0, "gaia_id"] + " " + data.at[0, "pl_letter"] + ","
-        in instance.data.at[0, "aliasplanet"]
-    )
 
-    assert (
-        "EPIC 201324549," in instance.data.at[1, "alias"]
-    )  # '',Gaia DR2 3796557953574638336,EPIC 201324549,TIC 38161230,'
-    assert data.at[1, "tic_id"] + "," in instance.data.at[1, "alias"]
-    assert "nan" not in instance.data.at[1, "alias"]
-    assert data.at[1, "gaia_id"] + "," in instance.data.at[1, "alias"]
-
-    assert ".01" in instance.data.at[1, "letter"]
-    assert (
-        data.at[1, "gaia_id"] + ".01," in instance.data.at[1, "aliasplanet"]
-    )  # Gaia DR2 3796557953574638336.01,EPIC 201324549.01,TIC 38161230.01,
-    assert data.at[1, "tic_id"] + ".01," in instance.data.at[1, "aliasplanet"]
+    assert (data.at[0, "gaia_id"]+',') in instance.data.at[0, "alias"] and (data.at[0, "tic_id"] +',') in instance.data.at[0, "alias"]
+    assert ".01" in instance.data.at[0, "letter"]
 
 
-def test_convert_coordinates(instance):
+def test__convert_coordinates(instance):
     assert instance.convert_coordinates() is None
+
+def test__remove_theoretical_masses(instance):
+    assert instance.remove_theoretical_masses() is None
+
+
+def test__handle_reference_format(instance):
+    data = {
+        "name": ["TOI-942 b", "nan"],
+        "reference": [
+            "<a refstr=CARLEO_ET_AL__2021 href=https://ui.adsabs.harvard.edu/abs/2021A&A...645A..71C/abstract target=ref>Carleo et al. 2021</a>",
+            "<a refstr=CARLEO_ET_AL__2021 href=https://ui.adsabs.harvard.edu/abs/2021A&A...645A..71C/abstract target=ref>Carleo et al. 2021</a>",
+        ],
+        "p": [4.32419, 2.2],
+        "p_url": [
+            "<a refstr=CARLEO_ET_AL__2021 href=https://ui.adsabs.harvard.edu/abs/2021A&A...645A..72C/abstract target=ref>Carleonew et al. 2021</a>",
+            np.nan,
+        ],
+        "e": [0, np.nan],
+        "a": [np.nan, np.nan],
+        "a_url": [
+            "<a refstr=CARLEO_ET_AL__2021 href=https://ui.adsabs.harvard.edu/abs/2021A&A...645A..72C/abstract target=ref>Carleonew et al. 2021</a>",
+            "<a refstr=CARLEO_ET_AL__2021 href=https://ui.adsabs.harvard.edu/abs/2021A&A...645A..72C/abstract target=ref>Carleonew et al. 2021</a>",
+        ],
+        "i": [89.97, np.nan],
+        "r": [0.429, np.nan],
+        "mass": [2.6, np.nan],
+        "msini": [np.nan, np.nan],
+    }
+    instance.data = pd.DataFrame(data)
+    with LogCapture() as log:
+        instance.handle_reference_format()
+        assert "Reference columns uniformed" in log.actual()[0][-1]
+    assert instance.data.at[0, "e_url"] == "2021A&A...645A..71C"
+    assert instance.data.at[0, "p_url"] == "2021A&A...645A..72C"
+    assert instance.data.at[0, "i_url"] == "2021A&A...645A..71C"
+    assert instance.data.at[0, "r_url"] == "2021A&A...645A..71C"
+    assert instance.data.at[0, "mass_url"] == "2021A&A...645A..71C"
+    assert instance.data.at[0, "a_url"] == ""
+    assert instance.data.at[0, "msini_url"] == ""
+    assert instance.data.at[1, "e_url"] == ""
+    assert instance.data.at[1, "p_url"] == ""  # originally nan
+    assert instance.data.at[1, "i_url"] == ""
+    assert (
+        instance.data.at[1, "a_url"] == ""
+    )  # despite being a_url originally non null, but the value is null
+    assert instance.data.at[1, "mass_url"] == ""
+    assert instance.data.at[1, "msini_url"] == ""
+
+
+def test__assign_status(instance):
+    # Create a sample DataFrame with some additional columns
+    data = {
+        "name": ["EPIC 212099230.01"],
+        "disposition":['CANDIDATE']
+    }
+    df = pd.DataFrame(data)
+    instance.data = df
+    with LogCapture() as log:
+        instance.assign_status()
+        assert "Status column assigned" in log.actual()[0][-1]
+        assert list(set(instance.data.status.values)) == ["CANDIDATE"]
+
+

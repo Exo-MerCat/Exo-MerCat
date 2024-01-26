@@ -121,6 +121,7 @@ def test__find_const(instance):
         "Arietis": "Ari",
         "Aurigae": "Aur",
         "Bootis": "Boo",
+        "Bo&ouml;": "Boo",
         "Caeli": "Cae",
         "Camelopardalis": "Cam",
         "Cancri": "Cnc",
@@ -290,10 +291,10 @@ def test__read_config_replacements(instance, tmp_path):
         ("2M1510A b", "2MASS J1510A b"),
         ("2MASS J0326-2102", "2MASS J0326-2102"),
         ("2M1510A a", "2MASS J1510A"),
-        ("CoRoT-10 b", "CoRoT 10 b"),
         ("Gliese 49 b", "GJ 49 b"),
         ("Gl 378 b", "GJ 378 b"),
         ("K00473.01", "KOI-473.01"),
+        ("TOI 1064.01", "TOI-1064.01"),
         ("VHS 1256-1257 b", "VHS J1256-1257 b"),
         ("KMT-2017-BLG-0165L", "KMT-2017-BLG-0165"),
         ("KMT-2019-BLG-1339/OGLE-2019/BLG-1019 b", "KMT-2019-BLG-1339"),
@@ -321,44 +322,44 @@ def test__round_to_decimal(instance):
         assert result == expected_output
 
 
-def test__round_array_to_significant_digits(instance):
-    # Test cases with various input arrays
-    test_cases = [
-        (
-            [1.2345, 6.789, 0.012345, 0, 1000],
-            [1.0, 7.0, 0.01, -1, 1000.0],
-        ),  # Normal test case
-        (
-            [100, 200, 300, 0, 400],
-            [100.0, 200.0, 300.0, -1, 400.0],
-        ),  # Test with only integers
-        (
-            [0.00124, 0.00235, 0.00333],
-            [0.001, 0.002, 0.003],
-        ),  # Test with values having an order of magnitude < 1
-        (
-            [
-                103087,
-                5098779,
-            ],
-            [103000, 5100000],
-        ),  # Test with values requiring rounding to 2 significant digits
-        ([0], [-1]),  # Test with an array containing only 0
-        ([], []),  # Test with an empty array
-    ]
-
-    for numbers, expected_output in test_cases:
-        result = instance.round_array_to_significant_digits(numbers=numbers)
-        assert result == expected_output
-
-
-def test__round_parameter_bin(instance):
-    data = pd.Series([326.03, 52160.0, 3765.0, 0.59862739, 0.43, np.nan, 818000.0])
-    rounded_series = instance.round_parameter_bin(data)
-    assert sorted(rounded_series.values) == [-1, 2, 8, 137, 187, 240, 297]
-
+# def test__round_array_to_significant_digits(instance):
+#     # Test cases with various input arrays
+#     test_cases = [
+#         (
+#             [1.2345, 6.789, 0.012345, 0, 1000],
+#             [1.0, 7.0, 0.01, -1, 1000.0],
+#         ),  # Normal test case
+#         (
+#             [100, 200, 300, 0, 400],
+#             [100.0, 200.0, 300.0, -1, 400.0],
+#         ),  # Test with only integers
+#         (
+#             [0.00124, 0.00235, 0.00333],
+#             [0.001, 0.002, 0.003],
+#         ),  # Test with values having an order of magnitude < 1
+#         (
+#             [
+#                 103087,
+#                 5098779,
+#             ],
+#             [103000, 5100000],
+#         ),  # Test with values requiring rounding to 2 significant digits
+#         ([0], [-1]),  # Test with an array containing only 0
+#         ([], []),  # Test with an empty array
+#     ]
+#
+#     for numbers, expected_output in test_cases:
+#         result = instance.round_array_to_significant_digits(numbers=numbers)
+#         assert result == expected_output
 
 #
+# def test__round_parameter_bin(instance):
+#     data = pd.Series([326.03, 52160.0, 3765.0, 0.59862739, 0.43, np.nan, 818000.0])
+#     rounded_series = instance.round_parameter_bin(data)
+#     assert sorted(rounded_series.values) == [-1, 2, 8, 137, 187, 240, 297]
+#
+#
+# #
 
 
 def fill_xml_string():
@@ -677,3 +678,60 @@ def test__convert_xmlfile_to_csvfile(instance):
 
     # Check if the logging.error is called and the message is logged
     assert "No such file or directory" in str(e.value)
+
+
+def test__convert_discovery_methods(instance):
+        # Sample data
+        data = pd.DataFrame({
+            'discovery_method': [
+                "Primary Transit#TTV",
+                "Transit Timing Variations",
+                "Eclipse Timing Variations",
+                "Primary Transit",
+                "Pulsar",
+                "Pulsation Timing Variations",
+                "Timing",
+                "disk kinematics",
+                "Kinematic",
+                "Disk Kinematics",
+                "Orbital Brightness Modulation",
+                "astrometry",
+                "microlensing",
+                "imaging",
+                "transit",
+                "timing",
+                "RV",
+                None
+            ]
+        })
+
+        expected_result = pd.DataFrame({
+            'discovery_method': [
+                "TTV",
+                "TTV",
+                "TTV",
+                "Transit",
+                "Pulsar Timing",
+                "Pulsar Timing",
+                "Pulsar Timing",
+                "Other",
+                "Other",
+                "Other",
+                "Other",
+                "Astrometry",
+                "Microlensing",
+                "Imaging",
+                "Transit",
+                "Pulsar Timing",
+                "Radial Velocity",
+                ""
+            ]
+        })
+
+        # Apply the conversion function
+        result = instance.convert_discovery_methods(data)
+
+        # Check if the result matches the expected output
+        assert (result.equals(expected_result))
+
+
