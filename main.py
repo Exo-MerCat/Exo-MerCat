@@ -78,7 +78,6 @@ def main():
                 config_per_cat["url"], config_per_cat["file"]
             )
             cat.read_csv_catalog(file_path)
-
             ### Uniforming catalogs
             cat.uniform_catalog()
             cat.convert_coordinates()
@@ -110,21 +109,24 @@ def main():
         #fix for toi catalog that only has ".0x" and it is read as a float
         emc.data.letter = emc.data.letter.astype(str)
         emc.data.letter = emc.data.letter.str[-3:]
-
     # emc.convert_datatypes()
     emc.data = emc.data.reset_index()
     emc.print_catalog("UniformSources/fullcatalog.csv")
-
     ### Matching with stellar catalogs
     emc.alias_as_host()
     emc.check_binary_mismatch(keyword="host")
+    emc.prepare_columns_for_mainid_search()
     emc.get_host_info_from_simbad()
-    emc.check_coordinates()
     emc.get_coordinates_from_simbad()
+    emc.get_host_info_from_tic()
+    emc.get_coordinates_from_tic()
+    emc.fill_missing_main_id()
+    emc.check_coordinates()
     emc.polish_main_id()
     emc.data.to_csv('all.csv')
-    emc.data[emc.data.missing_simbad_flag==1].to_csv('nomainid.csv')
+
     emc.check_same_host_different_id()
+
     emc.check_same_coords_different_id()
     emc.group_by_list_id_check_host()
     emc.group_by_main_id_set_final_alias()

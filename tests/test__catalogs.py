@@ -63,7 +63,8 @@ def test__download_catalog(tmp_path, instance) -> None:
             )
             assert "Catalog downloaded" in log.actual()[1][-1]
 
-            assert result != Path(expected_file_path)  # it gets another local file
+            # it gets another local file
+            assert result != Path(expected_file_path)
             assert "catalog" in str(result)  # it contains the filename
             assert "csv" in str(result)  # it is a csv file
         os.remove("cataloglocal_copy.csv")
@@ -101,6 +102,7 @@ def test__read_csv_catalog(instance):
 #     assert instance.data["col4"].dtype.type == np.float64
 #
 
+
 def test_keep_columns(instance):
     # Test the keep_columns function
 
@@ -108,6 +110,7 @@ def test_keep_columns(instance):
     data = {
         "name": ["HD 114762 b"],
         "catalog_name": ["HD 114762 b"],
+        "catalog_host": ["HD 114762"],
         "discovery_method": ["Radial Velocity"],
         "ra": [198.0791667],
         "dec": [17.51694444],
@@ -157,10 +160,12 @@ def test_keep_columns(instance):
         instance.keep_columns()
         assert "Selected columns to keep" in log.actual()[0][-1]
 
-    # Check if the DataFrame contains only the columns specified in the keep list
+    # Check if the DataFrame contains only the columns specified in the keep
+    # list
     expected_columns = [
         "name",
         "catalog_name",
+        "catalog_host",
         "discovery_method",
         "ra",
         "dec",
@@ -223,6 +228,7 @@ def test__identify_brown_dwarfs(instance):
             "MOA 2015-BLG-337 a",
             "KOI-123.01",
         ],
+        "binary": ["", "", "", ""],
         "letter": ["", "", "", ""],
     }
 
@@ -233,7 +239,8 @@ def test__identify_brown_dwarfs(instance):
         instance.identify_brown_dwarfs()
         assert "Identified possible Brown Dwarfs" in log.actual()[0][-1]
 
-    # Check if the 'letter' column is updated with 'BD' for relevant planet names
+    # Check if the 'letter' column is updated with 'BD' for relevant planet
+    # names
     expected_result = {
         "name": [
             "2MASS 0122-2439 B",
@@ -241,6 +248,7 @@ def test__identify_brown_dwarfs(instance):
             "MOA 2015-BLG-337 a",
             "KOI-123.01",
         ],
+        "binary": ["B", "", "a", ""],
         "letter": ["BD", "BD", "BD", ""],
     }
     expected_df = pd.DataFrame(expected_result)
@@ -254,10 +262,13 @@ def test__replace_known_mistakes(tmp_path, instance):
     os.mkdir("Logs/")
     # Create a temporary directory to store the fake_config.ini
     with open("replacements.ini", "w") as config_file:
-        config_file.write("[NAME]\n")
+        config_file.write("[NAMEtochangeNAME]\n")
         config_file.write("alf Tau b = Aldebaran b\n")
         config_file.write("not present = NOT PRESENT\n")
-        config_file.write("[HOST]\n")
+        config_file.write("[NAMEtochangeHOST]\n")
+        config_file.write("alf Tau b = gam1 Leo\n")
+        config_file.write("2MASS 0359+2009 b = 2MASS J03590986+2009361\n")
+        config_file.write("[HOSTtochangeHOST]\n")
         config_file.write("gam1 Leo = gam01 Leo\n")
         config_file.write("not present = NOT PRESENT\n")
         config_file.write("[ra]\n")
@@ -267,7 +278,7 @@ def test__replace_known_mistakes(tmp_path, instance):
         config_file.write("K2-2016-BLG-0005L = 269.879166677\n")
         config_file.write("[DROP]\n")
         config_file.write("name = Trojan\n")
-        config_file.write("[BINARY]\n")
+        config_file.write("[NAMEtochangeBINARY]\n")
         config_file.write("XO-2N c = A\n")
         config_file.write("XO-2N b = A\n")
         config_file.write("not present = A\n")
@@ -279,12 +290,22 @@ def test__replace_known_mistakes(tmp_path, instance):
             "Proxima Centauri b",
             "test",
             "XO-2N b",
+            "2MASS 0359+2009 b",
             "Trojan",
         ],
-        "host": ["gam1 Leo", "K2-2016-BLG-0005L", "XO-2N",  "Proxima Centauri","test","XO-2N",""],
-        "ra": [0, 9, 0,  1,0,0,0],
-        "dec": [0, 269.879166677, 0,  1,0,0,0],
-        "binary": ["", "", "",  "","","A",""],
+        "host": [
+            "gam1 Leo",
+            "K2-2016-BLG-0005L",
+            "XO-2N",
+            "Proxima Centauri",
+            "test",
+            "XO-2N",
+            "nametochangeHost",
+            "",
+        ],
+        "ra": [0, 9, 0, 1, 0, 0, 0, 0],
+        "dec": [0, 269.879166677, 0, 1, 0, 0, 0, 0],
+        "binary": ["", "", "", "", "", "A", "", ""],
     }
     instance.data = pd.DataFrame(data)
 
@@ -300,11 +321,9 @@ def test__replace_known_mistakes(tmp_path, instance):
     assert instance.data["binary"][4] == ""
     assert instance.data["binary"][5] == "A"
     assert "Trojan" not in instance.data.name.values
+    assert instance.data["host"][6] == "2MASS J03590986+2009361"
 
     os.chdir(original_dir)
-
-
-
 
 
 def test_remove_known_brown_dwarfs(tmp_path, instance):
@@ -422,7 +441,8 @@ def test__uniform_name_host_letter(instance):
         instance.uniform_name_host_letter()
         assert "name, host, letter columns uniformed" in log.actual()[0][-1]
 
-    # Check if name, host, and letter columns are uniformly modified as expected
+    # Check if name, host, and letter columns are uniformly modified as
+    # expected
     expected_result = {
         "name": ["planet1 b", "planet2 b", "planet3.01", "planet4.02"],
         "host": ["host1", "planet2", "host3", "planet4"],
@@ -587,13 +607,11 @@ def test__fill_binary_column(instance):
 
 
 def test__create_catalogstatus_string(instance):
-
-    #FIRST CALL, for ORIGINAL CATALOG STATUS
+    # FIRST CALL, for ORIGINAL CATALOG STATUS
     data = pd.DataFrame(
         {
             "catalog": ["eu", "oec", "nasa"],
             "status": ["CANDIDATE", "CONFIRMED", "FALSE POSITIVE"],
-
         }
     )
     instance.data = data
@@ -607,12 +625,11 @@ def test__create_catalogstatus_string(instance):
     assert instance.data.at[1, "original_catalog_status"] == "oec: CONFIRMED"
     assert instance.data.at[2, "original_catalog_status"] == "nasa: FALSE POSITIVE"
 
-    ## SECOND CALL, FOR CHECKED STATUS
+    # SECOND CALL, FOR CHECKED STATUS
     data = pd.DataFrame(
         {
             "catalog": ["eu", "oec", "nasa"],
             "status": ["FALSE POSITIVE", "CONFIRMED", "FALSE POSITIVE"],
-
         }
     )
     instance.data = data
@@ -625,6 +642,7 @@ def test__create_catalogstatus_string(instance):
     assert instance.data.at[0, "checked_catalog_status"] == "eu: FALSE POSITIVE"
     assert instance.data.at[1, "checked_catalog_status"] == "oec: CONFIRMED"
     assert instance.data.at[2, "checked_catalog_status"] == "nasa: FALSE POSITIVE"
+
 
 def test__make_uniform_alias_list(instance):
     data = pd.DataFrame(
@@ -692,7 +710,8 @@ def test_print_catalog(instance):
     # Expected output (DataFrame sorted by "name")
     expected_output = """name,host,alias\nKOI-1,Kepler-1,KOI-1\nKOI-2,Kepler-2,Kepler-2 b\nKOI-3,Kepler-3,KOI-3\n"""
 
-    # Perform assertion to check if the content of the file matches the expected output
+    # Perform assertion to check if the content of the file matches the
+    # expected output
     assert file_content == expected_output
     # Clean up: Remove the temporary CSV file
     if os.path.exists(temp_file):

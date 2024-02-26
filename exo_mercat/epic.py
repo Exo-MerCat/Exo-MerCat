@@ -3,6 +3,7 @@ import re
 import numpy as np
 import pandas as pd
 from exo_mercat.catalogs import Catalog
+from exo_mercat.utility_functions import UtilityFunctions as Utils
 
 
 class Epic(Catalog):
@@ -22,6 +23,7 @@ class Epic(Catalog):
         """
         self.data["catalog"] = self.name
         self.data["catalog_name"] = self.data["pl_name"]
+        self.data["catalog_host"] = self.data["hostname"]
 
         self.data = self.data.rename(
             columns={
@@ -59,10 +61,9 @@ class Epic(Catalog):
                 "st_mass": "Mstar",
                 "st_masserr1": "Mstar_max",
                 "st_masserr2": "Mstar_min",
-                "pl_refname":"reference"
+                "pl_refname": "reference",
             }
         )
-
 
         self.data = self.data[self.data.default_flag == 1]
         self.data["Kepler_host"] = self.data.k2_name
@@ -80,28 +81,18 @@ class Epic(Catalog):
         self.data[["hd_name", "hip_name", "tic_id", "gaia_id"]] = self.data[
             ["hd_name", "hip_name", "tic_id", "gaia_id"]
         ].fillna("")
-        self.data["alias"] =  self.data[[ 'tic_id','hip_name','hd_name','gaia_id','Kepler_host']].agg(','.join, axis=1)
+        self.data["alias"] = self.data[
+            ["tic_id", "hip_name", "hd_name", "gaia_id", "Kepler_host"]
+        ].agg(",".join, axis=1)
         for i in self.data.index:
-            self.data.at[i, "alias"]=self.data.at[i, "alias"] .replace('nan,','').replace(',,',',').lstrip(',')
+            self.data.at[i, "alias"] = (
+                self.data.at[i, "alias"]
+                .replace("nan,", "")
+                .replace(",,", ",")
+                .lstrip(",")
+            )
 
-        self.data['discovery_method'] = self.data['discovery_method'].fillna("").replace('nan','')
-        self.data.loc[self.data.discovery_method == "Primary Transit#TTV", 'discovery_method'] = "TTV"
-        self.data.loc[self.data.discovery_method == "Transit Timing Variations", 'discovery_method'] = "TTV"
-        self.data.loc[self.data.discovery_method == "Eclipse Timing Variations", 'discovery_method'] = "TTV"
-        self.data.loc[self.data.discovery_method == "Primary Transit", 'discovery_method'] = "Transit"
-        self.data.loc[self.data.discovery_method == "Pulsar", 'discovery_method'] = "Pulsar Timing"
-        self.data.loc[self.data.discovery_method == "Pulsation Timing Variations", 'discovery_method'] = "Pulsar Timing"
-        self.data.loc[self.data.discovery_method == "Timing", 'discovery_method'] = "Pulsar Timing"
-        self.data.loc[self.data.discovery_method == "disk kinematics", 'discovery_method'] = "Other"
-        self.data.loc[self.data.discovery_method == "Kinematic", 'discovery_method'] = "Other"
-        self.data.loc[self.data.discovery_method == "Disk Kinematics", 'discovery_method'] = "Other"
-        self.data.loc[self.data.discovery_method == "Orbital Brightness Modulation", 'discovery_method'] = "Other"
-        self.data.loc[self.data.discovery_method == "astrometry", 'discovery_method'] = "Astrometry"
-        self.data.loc[self.data.discovery_method == "microlensing", 'discovery_method'] = "Microlensing"
-        self.data.loc[self.data.discovery_method == "imaging", 'discovery_method'] = "Imaging"
-        self.data.loc[self.data.discovery_method == "transit", 'discovery_method'] = "Transit"
-        self.data.loc[self.data.discovery_method == "timing", 'discovery_method'] = "Pulsar Timing"
-        self.data.loc[self.data.discovery_method == "RV", 'discovery_method'] = "Radial Velocity"
+        self.data = Utils.convert_discovery_methods(self.data)
 
         logging.info("Catalog uniformed.")
 
@@ -116,9 +107,8 @@ class Epic(Catalog):
         """
         pass
 
-
     def remove_theoretical_masses(self) -> None:
-        ''' there are no masses here in the first place'''
+        """there are no masses here in the first place"""
         pass
 
     def handle_reference_format(self) -> None:
@@ -159,10 +149,8 @@ class Epic(Catalog):
         logging.info("Reference columns uniformed.")
 
     def assign_status(self):
-
-        self.data['status']=self.data['disposition']
+        self.data["status"] = self.data["disposition"]
 
         logging.info("Status column assigned.")
         logging.info("Updated Status:")
         logging.info(self.data.status.value_counts())
-

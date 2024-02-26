@@ -151,10 +151,10 @@ if len(emc[emc.discovery_year.isna() ])>0:
         error_string = error_string + "CHECK discovery_year.a (known issue)\n"
 
 '''
-CHECK final_alias: final_alias should never be null.
+CHECK final_alias: final_alias should never be null (except when it is null from the source files).
 '''
 if len(emc[emc.final_alias.isna() ])>0:
-        error_string = error_string + "CHECK final_alias.a\n"
+        error_string = error_string + "CHECK final_alias.a (known issue)\n"
 
 
 

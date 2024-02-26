@@ -4,7 +4,10 @@ import xml.etree.ElementTree as ET
 
 import numpy as np
 import pandas as pd
+from pandas._testing import assert_frame_equal
 
+import pyvo
+from astropy.table import Table
 from exo_mercat.utility_functions import UtilityFunctions
 import pytest
 
@@ -204,18 +207,18 @@ def test__find_const(instance):
         "Virginis": "Vir",
         "Volantis": "Vol",
         "Vulpeculae": "Vul",
-        "2M ": "2MASS ",
+        # "2M ": "2MASS ",
         "KOI ": "KOI-",
         "Kepler ": "Kepler-",
         "BD ": "BD",
-        "OGLE-": "OGLE ",
-        "MOA-": "MOA ",
-        "gam 1 ": "gam ",
-        "EPIC-": "EPIC ",
-        "Pr 0": "Pr ",
-        "TOI ": "TOI-",
+        # "OGLE-": "OGLE ",
+        # "MOA-": "MOA ",
+        # "gam 1 ": "gam ",
+        # "EPIC-": "EPIC ",
+        # "Pr 0": "Pr ",
+        # "TOI ": "TOI-",
         "kepler": "Kepler",
-        "Gliese": "GJ",
+        # "Gliese": "GJ",
         "p ": "pi ",
     }
 
@@ -242,7 +245,8 @@ def test__read_config(instance, tmp_path):
     assert isinstance(config, dict)
 
     # Assert that specific configuration parameters exist
-    # Example: Assuming your input_sources.ini has a [General] section with a 'timeout' parameter
+    # Example: Assuming your input_sources.ini has a [General] section with a
+    # 'timeout' parameter
     assert "nasa" in config.keys()
     assert "url" in config["nasa"].keys()
     assert "file" in config["nasa"].keys()
@@ -301,7 +305,8 @@ def test__read_config_replacements(instance, tmp_path):
         ("OGLE--2018-BLG-0516 b", "OGLE 2018-BLG-0516 b"),
         ("OGLE-2005-071", "OGLE 2005-071"),
         ("MOA-2016-BLG-339L", "MOA 2016-BLG-339"),
-        ("WASP-184 b", "WASP-184 b"),  # random general one that should not change
+        # random general one that should not change
+        ("WASP-184 b", "WASP-184 b"),
     ],
 )
 def test__uniform_string(instance, string, expected):
@@ -360,6 +365,28 @@ def test__round_to_decimal(instance):
 #
 #
 # #
+
+
+def test__calculate_working_p_sma(instance):
+    group = pd.DataFrame(
+        {
+            "name": ["same planet", "same planet", "same planet", "null planet"],
+            "p": [9886, 1572, 1500, np.nan],
+            "a": [2.5, 1.9, 2, np.nan],
+        }
+    )
+    returned_group = UtilityFunctions.calculate_working_p_sma(group, tolerance=0.1)
+    expected_group = pd.DataFrame(
+        {
+            "name": ["same planet", "same planet", "same planet", "null planet"],
+            "p": [9886, 1572, 1500, np.nan],
+            "a": [2.5, 1.9, 2.0, np.nan],
+            "working_p": [9886.0, 1500.0, 1500.0, -1.0],
+            "working_a": [2.5, 2.0, 2.0, -1.0],
+        }
+    )
+    expected_group = expected_group.sort_values(by="p")
+    assert_frame_equal(returned_group, expected_group)
 
 
 def fill_xml_string():
@@ -681,9 +708,10 @@ def test__convert_xmlfile_to_csvfile(instance):
 
 
 def test__convert_discovery_methods(instance):
-        # Sample data
-        data = pd.DataFrame({
-            'discovery_method': [
+    # Sample data
+    data = pd.DataFrame(
+        {
+            "discovery_method": [
                 "Primary Transit#TTV",
                 "Transit Timing Variations",
                 "Eclipse Timing Variations",
@@ -701,12 +729,14 @@ def test__convert_discovery_methods(instance):
                 "transit",
                 "timing",
                 "RV",
-                None
+                None,
             ]
-        })
+        }
+    )
 
-        expected_result = pd.DataFrame({
-            'discovery_method': [
+    expected_result = pd.DataFrame(
+        {
+            "discovery_method": [
                 "TTV",
                 "TTV",
                 "TTV",
@@ -724,14 +754,217 @@ def test__convert_discovery_methods(instance):
                 "Transit",
                 "Pulsar Timing",
                 "Radial Velocity",
-                ""
+                "",
             ]
-        })
+        }
+    )
 
-        # Apply the conversion function
-        result = instance.convert_discovery_methods(data)
+    # Apply the conversion function
+    result = instance.convert_discovery_methods(data)
 
-        # Check if the result matches the expected output
-        assert (result.equals(expected_result))
+    # Check if the result matches the expected output
+    assert result.equals(expected_result)
 
 
+def test__perform_query(instance):
+    # SEARCH ON NAME (host+ + binary, host+binary, pure host)
+    expected = pd.DataFrame(
+        {
+            "hostbinary": ["16 Cyg B", "21 HerAB", "EPIC 203868608"],
+            "main_id": ["*  16 Cyg B", "* o Her", "2MASS J16171898-2437186"],
+            "ra_2": [295.46655282394, 246.04511980308, 244.32909535559997],
+            "dec_2": [50.51752473081, 6.94821049715, -24.6218720689],
+            "ids": [
+                "GJ 765.1 B|HIP 96901|Gaia DR3 2135550755683407232|TIC 27533327|TYC 3565-1525-1|ASCC  271120|2MASS J19415198+5031032|USNO-B1.0 1405-00322540|*  16 Cyg B|ADS 12815 B|AG+50 1408|BD+50  2848|CCDM J19418+5031B|GC 27285|GCRV 12084|GEN# +1.00186427|HD 186427|HIC  96901|HR  7504|IDS 19392+5017 B|LTT 15751|NLTT 48138|PPM  37673|ROT  2840|SAO  31899|SKY# 36807|SPOCS  855|UBV   16780|UBV M  24082|USNO 890|YZ  50  6150|Gaia DR2 2135550755683407232|LSPM J1941+5031E|WDS J19418+5032B|AKARI-IRC-V1 J1941518+503102|** STF 4046B|WISEA J194151.82+503102.2|Gaia DR1 2135550854464294784|WEB 17005|KIC 12069449",
+                "HIP 80351|Gaia DR3 4439556480967874432|TIC 369080491|SBC9 901|*  21 Her|* o Her|AG+07 2044|BD+07  3164|FK5 1429|GC 22058|GCRV  9437|GEN# +1.00147869|GSC 00381-01598|HD 147869|HIC  80351|HR  6111|N30 3675|PMC 90-93  1008|PPM 162584|SAO 121568|SBC7   573|SKY# 29573|TD1 19139|TYC  381-1598-1|UBV   21316|UBV M  21407|YZ   7  7306|uvby98 100147869|Renson 41690|2MASS J16241083+0656534|Gaia DR1 4439556476666646528|WEB 13596|Gaia DR2 4439556480967874432",
+                "Gaia DR3 6049656638390048896|TIC 98231712|2MASS J16171898-2437186|UGCS J161718.97-243718.7|WISEA J161718.97-243718.9|EPIC 203868608|Gaia DR2 6049656638390048896",
+            ],
+            "angsep": [0.0, 0.0, 0.0],
+        }
+    )
+
+    list_of_hosts = pd.DataFrame()
+    list_of_hosts["hostbinary"] = ["16 Cyg B", "21 HerAB", "EPIC 203868608"]
+    service = pyvo.dal.TAPService("http://simbad.u-strasbg.fr:80/simbad/sim-tap")
+
+    t2 = Table.from_pandas(list_of_hosts)
+    query = """SELECT t.*, basic.main_id, basic.ra as ra_2,basic.dec as dec_2, ids.ids as ids FROM TAP_UPLOAD.tab as t LEFT OUTER JOIN ident ON ident.id = t.hostbinary LEFT OUTER JOIN basic ON ident.oidref = basic.oid LEFT OUTER JOIN ids ON basic.oid = ids.oidref"""
+    table = UtilityFunctions.perform_query(service, query, uploads_dict={"tab": t2})
+
+    assert set(table.columns) == set(expected.columns)
+    assert_frame_equal(table, expected)
+
+    # SEARCH ON ALIAS (alias+ + binary, alias+binary,pure alias)
+    expected = pd.DataFrame(
+        {
+            "ind": [0, 1, 2],
+            "alias": ["WDS J23596-3502 A", "94 CetA", "Kepler-451"],
+            "main_id": ["CD-35 16019", "*  94 Cet", "Kepler-451"],
+            "ra_2": [359.90029661347, 48.19348569878, 294.63588492334],
+            "dec_2": [-35.03136767178, -1.1960988358299998, 46.066426453320005],
+            "ids": [
+                "Gaia DR3 2312679845530628096|SPOCS 3245|Gaia DR2 2312679845530628096|** B 2511A|CCDM J23596-3502A|WDS J23596-3502A|TYC 7522-505-1|Gaia DR1 2312679841235149440|CD-35 16019A|WASP-8|CD-35 16019|CPC 18 12094|CPD-35  9465|GSC 07522-00505|PPM 304426|SAO 214901|UCAC2  16954660|UCAC3 110-468375|2MASS J23593607-3501530|IDS 23544-3535 A|UCAC4 275-215468|TIC 183532609|TOI-191",
+                "GJ 128|HIP 14954|Gaia DR3 3265335443260522112|TIC 49845357|PLX  663|*  94 Cet|AG-01  300|BD-01   457|CSI-01   457  1|FK5  116|GC  3838|GCRV  1775|HD  19994|HIC  14954|HR   962|LTT  1515|N30  656|NLTT 10224|PMC 90-93    84|PPM 175267|ROT   431|SAO 130355|SKY#  4813|SPOCS  155|TD1  1984|UBV    3104|YZ  91   684|YZ   0  3372|CCDM J03128-0112A|ADS  2406 A|WDS J03128-0112A|** HJ  663A|GEN# +1.00019994|IDS 03077-0134 A|Gaia DR2 3265335443260522112|TYC 4708-1423-1|IRAS 03102-0122|AKARI-IRC-V1 J0312465-011146|CSI-01   457  3|[RHG95]   572|UCAC3 178-9414|UCAC4 445-004277|2MASS J03124644-0111458|CSI-01   457  2|WISEA J031246.58-011146.4|uvby98 100019994|WEB  2887",
+                "LAMOST J193832.60+460359.1|LAMOST J193832.62+460359.1|LAMOST J193832.61+460359.1|Gaia DR3 2080063931448749824|ATO J294.6359+46.0664|TIC 271164763|GSC 03556-03568|UCAC3 273-158867|2MASS J19383260+4603591|USNO-B1.0 1360-00318562|GSC2 N0303123803|GSC2.3 N2JF000803|TYC 3556-3568-1|ASAS J193833+4604.0|NSVS   5629361|Gaia DR2 2080063931448749824|Kepler-451|EQ J1938+4603|KIC 9472174",
+            ],
+            "angsep": [0.0, 0.0, 0.0],
+        }
+    )
+    alias_df = pd.DataFrame(columns=["ind", "alias"])
+    alias_df["ind"] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 2]
+    alias_df["alias"] = [
+        "2MASS J23593607-3501530 A",
+        "Gaia DR2 2312679845530628096 A",
+        "TIC 183532609 A",
+        "TIC-183532609 A",
+        "TOI-191 A",
+        "TYC 7522-00505-1 A",
+        "UCAC4 275-215468 A",
+        "WDS J23596-3502 A",
+        "WISE J235936.16-350153.1 A",
+        "94 CetA",
+        "94 Cet AA",
+        "Gaia DR2 3265335443260522112A",
+        "HIP 14954A",
+        "TIC 49845357A",
+        "Kepler-451",
+    ]
+
+    t2 = Table.from_pandas(alias_df)
+    query = (
+        """SELECT t.*, basic.main_id, basic.ra as ra_2,basic.dec as dec_2, ids.ids FROM TAP_UPLOAD.tab as t LEFT OUTER JOIN ident ON ident.id = t.alias LEFT OUTER JOIN basic ON ident.oidref = basic.oid LEFT OUTER JOIN ids ON basic.oid = ids.oidref""",
+    )
+    table = UtilityFunctions.perform_query(service, query, uploads_dict={"tab": t2})
+    assert set(table.columns) == set(expected.columns)
+    table = table.reset_index(drop=True)
+
+    assert_frame_equal(table, expected)
+
+    # SELECT EXTRA ALIAS
+
+    query = """SELECT  basic.main_id, basic.ra as ra_2,basic.dec as dec_2, ids.ids
+        FROM ident JOIN basic ON ident.oidref = basic.oid LEFT OUTER JOIN ids ON basic.oid = ids.oidref
+        WHERE id = '*  16 Cyg B'"""
+
+    table = UtilityFunctions.perform_query(service, query)
+    expected = pd.DataFrame(
+        {
+            "main_id": ["*  16 Cyg B"],
+            "ra_2": [295.46655282394],
+            "dec_2": [50.51752473081],
+            "ids": [
+                "GJ 765.1 B|HIP 96901|Gaia DR3 2135550755683407232|TIC 27533327|TYC 3565-1525-1|ASCC  271120|2MASS J19415198+5031032|USNO-B1.0 1405-00322540|*  16 Cyg B|ADS 12815 B|AG+50 1408|BD+50  2848|CCDM J19418+5031B|GC 27285|GCRV 12084|GEN# +1.00186427|HD 186427|HIC  96901|HR  7504|IDS 19392+5017 B|LTT 15751|NLTT 48138|PPM  37673|ROT  2840|SAO  31899|SKY# 36807|SPOCS  855|UBV   16780|UBV M  24082|USNO 890|YZ  50  6150|Gaia DR2 2135550755683407232|LSPM J1941+5031E|WDS J19418+5032B|AKARI-IRC-V1 J1941518+503102|** STF 4046B|WISEA J194151.82+503102.2|Gaia DR1 2135550854464294784|WEB 17005|KIC 12069449",
+            ],
+            "angsep": [0.0],
+        }
+    )
+
+    assert set(table.columns) == set(expected.columns)
+    assert_frame_equal(table, expected)
+
+    #     # SEARCH ON COORDINATES
+    expected = pd.DataFrame(
+        {
+            "main_id": ["*  51 Peg"],
+            "dec_2": [20.768832511140005],
+            "ra_2": [344.36658535524],
+            "type": ["PM*"],
+            "hostbinary": ["51 Peg"],
+            "ra": [344.3667],
+            "dec": [20.7689],
+            "angsep": [0.45601200000000003],
+            "selected": [1],
+        }
+    )
+
+    data = {
+        "hostbinary": ["51 Peg"],
+        "ra": [344.3667],
+        "dec": [20.7689],
+    }
+    tolerance = 1 / 3600  # arcsec in degrees
+    t2 = Table.from_pandas(pd.DataFrame(data))
+    query = (
+        """SELECT basic.main_id, basic.dec as dec_2,basic.ra as ra_2, basic.otype as type, t.hostbinary, t.ra, t.dec FROM basic JOIN TAP_UPLOAD.tab AS t
+             on 1=CONTAINS(POINT('ICRS',basic.ra, basic.dec),   CIRCLE('ICRS', t.ra, t.dec,"""
+        + str(tolerance)
+        + """)) """
+    )
+    table = UtilityFunctions.perform_query(service, query, uploads_dict={"tab": t2})
+    assert set(table.columns) == set(expected.columns)
+    assert_frame_equal(table, expected)
+
+    #
+    #     # SEARCH ON TIC
+    expected = pd.DataFrame(
+        {
+            "ra_2": ["306.50116406605"],
+            "dec_2": ["-48.92035980163"],
+            "GAIA": ["Gaia DR2 6668227036766532864"],
+            "UCAC4": ["UCAC4 206-182296"],
+            "2MASS": ["2MASS J20260027-4855132"],
+            "WISEA": ["WISE J202600.26-485513.4"],
+            "TIC": ["100263315"],
+            "KIC": [""],
+            "HIP": [""],
+            "TYC": [""],
+            "host": ["100263315"],
+            "main_id": ["TIC 100263315"],
+            "ids": [
+                "UCAC4 206-182296,2MASS J20260027-4855132,WISE J202600.26-485513.4,Gaia DR2 6668227036766532864"
+            ],
+            "angsep": [0.0],
+        }
+    )
+    service = pyvo.dal.TAPService(" http://TAPVizieR.u-strasbg.fr/TAPVizieR/tap/")
+    list_of_hosts = pd.DataFrame()
+    list_of_hosts["host"] = [100263315]
+    t2 = Table.from_pandas(list_of_hosts)
+    query = """SELECT tic.RAJ2000 as ra_2, tic.DEJ2000 as dec_2,tic.GAIA, tic.UCAC4, tic."2MASS", tic.WISEA, tic.TIC, tic.KIC, tic.HIP, tic.TYC, t.*  FROM "IV/38/tic" as tic JOIN TAP_UPLOAD.tab as t ON tic.TIC = t.host"""
+
+    table = UtilityFunctions.perform_query(service, query, uploads_dict={"tab": t2})
+    assert set(table.columns) == set(expected.columns)
+    assert_frame_equal(table, expected)
+
+    #
+    #     # SEARCH ON TIC COORDINATES
+    data = pd.DataFrame(
+        {
+            "hostbinary": ["EPIC 251345848"],
+            "ra": [140.405406],
+            "dec": [20.727007],
+        }
+    )
+    expected = pd.DataFrame(
+        {
+            "ra_2": ["140.40548276307"],
+            "dec_2": ["20.72704944739"],
+            "GAIA": ["Gaia DR2 637589853596386560"],
+            "UCAC4": ["UCAC4 554-044757"],
+            "2MASS": ["2MASS J09213732+2043373"],
+            "WISEA": ["WISE J092137.30+204337.2"],
+            "TIC": ["86119727"],
+            "KIC": [""],
+            "HIP": [""],
+            "TYC": [""],
+            "hostbinary": ["EPIC 251345848"],
+            "ra": ["140.405406"],
+            "dec": ["20.727007"],
+            "main_id": ["TIC 86119727"],
+            "ids": [
+                "UCAC4 554-044757,2MASS J09213732+2043373,WISE J092137.30+204337.2,Gaia DR2 637589853596386560"
+            ],
+            "angsep": [0.30024],
+            "selected": [1],
+        }
+    )
+    t2 = Table.from_pandas(data)
+    query = (
+        """SELECT tic.RAJ2000 as ra_2, tic.DEJ2000 as dec_2,tic.GAIA, tic.UCAC4, tic."2MASS", tic.WISEA, tic.TIC, tic.KIC, tic.HIP, tic.TYC, t.hostbinary, t.ra, t.dec  FROM "IV/38/tic" as tic JOIN TAP_UPLOAD.tab AS t on 1=CONTAINS(POINT('ICRS',tic.RAJ2000, tic.DEJ2000),   CIRCLE('ICRS',t.ra, t.dec,"""
+        + str(tolerance)
+        + """))"""
+    )
+
+    table = UtilityFunctions.perform_query(service, query, uploads_dict={"tab": t2})
+    assert set(table.columns) == set(expected.columns)
+    assert_frame_equal(table, expected)

@@ -21,7 +21,6 @@ class Nasa(Catalog):
         and adding new columns that are necessary for the catalog.
         """
         self.data["catalog"] = self.name
-        self.data["catalog_name"] = self.data["pl_name"]
 
         self.data = self.data.rename(
             columns={
@@ -72,6 +71,8 @@ class Nasa(Catalog):
                 "pl_bmassj_reflink": "bestmass_url",
             }
         )
+        self.data["catalog_name"] = self.data["name"]
+        self.data["catalog_host"] = self.data["host"]
 
         # if "default_flag" in self.data.columns:
         #     # this happens when you use PLANETARY SYSTEMS TABLE
@@ -97,8 +98,7 @@ class Nasa(Catalog):
             .str.lstrip(",")
         )
 
-
-        self.data=Utils.convert_discovery_methods(self.data)
+        self.data = Utils.convert_discovery_methods(self.data)
 
         logging.info("Catalog uniformed.")
 

@@ -74,7 +74,6 @@ class Oec(Catalog):
         The uniform_catalog function is used to standardize the dataframe columns and values.
         """
         self.data["catalog"] = self.name
-        self.data["catalog_name"] = self.data["name"]
 
         self.data = self.data.replace({"None": np.nan})
         self.data = self.data.rename(
@@ -104,6 +103,11 @@ class Oec(Catalog):
                 "system_declination": "dec",
             }
         )
+
+        self.data["host"] = self.data.name.apply(lambda x: str(x[:-1]).strip())
+        self.data["catalog_name"] = self.data["name"]
+        self.data["catalog_host"] = self.data["host"]
+
         self.data = self.data.reset_index()
         self.data["alias"] = self.data.alias.fillna("")
         self.data["masstype"] = self.data.masstype.fillna("mass")
@@ -121,15 +125,13 @@ class Oec(Catalog):
                 self.data.at[i, "mass_max"] = np.nan
                 self.data.at[i, "mass_min"] = np.nan
 
-        self.data["host"] = self.data.name.apply(lambda x: str(x[:-1]).strip())
-
         for ident in self.data.name:
-            if not str(re.search("(\.0)\\d$", ident, re.M)) == "None":
+            if not str(re.search("(\\.0)\\d$", ident, re.M)) == "None":
                 self.data.loc[self.data.name == ident, "host"] = ident[:-3].strip()
             elif not str(re.search("\\d$", ident, re.M)) == "None":
                 self.data.loc[self.data.name == ident, "host"] = ident
 
-        self.data=Utils.convert_discovery_methods(self.data)
+        self.data = Utils.convert_discovery_methods(self.data)
 
         logging.info("Catalog uniformed.")
 

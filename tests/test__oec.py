@@ -274,7 +274,8 @@ def test__download_catalog(tmp_path, instance) -> None:
         with patch("requests.get", MagicMock()) as mock_run:
             mock_response = Mock()
             mock_response.status_code = 200
-            # Gzip the content using gzip.compress before setting it to mock_response.content
+            # Gzip the content using gzip.compress before setting it to
+            # mock_response.content
             xml_content = fill_xml_string().encode("utf-8")
             gzipped_content = gzip.compress(xml_content)
             mock_response.content = gzipped_content
@@ -295,7 +296,8 @@ def test__download_catalog(tmp_path, instance) -> None:
                 url=url, filename=filename, timeout=0.00000001
             )
 
-            assert result != Path(expected_file_path)  # it gets another local file
+            # it gets another local file
+            assert result != Path(expected_file_path)
             assert "catalog" in str(result)  # it contains the filename
             assert "csv" in str(result)  # it is a csv file
         os.remove("cataloglocal_copy.csv")
@@ -428,7 +430,7 @@ def test__uniform_catalog(instance):
         "masstype": ["msini", "mass", "msini"],
         "mass_min": [0.245, 0.1, 0.1],
         "mass_max": [0.245, 0.1, 0.1],
-        "discovery_method":['RV',np.nan,'nan']
+        "discovery_method": ["RV", np.nan, "nan"],
     }
     df = pd.DataFrame(data)
     instance.data = df

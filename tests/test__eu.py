@@ -58,7 +58,8 @@ def test__download_catalog(tmp_path, instance) -> None:
             )
             assert "Catalog downloaded" in log.actual()[-1][-1]
 
-            assert result != Path(expected_file_path)  # it gets another local file
+            # it gets another local file
+            assert result != Path(expected_file_path)
             assert "catalog" in str(result)  # it contains the filename
             assert "csv" in str(result)  # it is a csv file
         os.remove("cataloglocal_copy.csv")

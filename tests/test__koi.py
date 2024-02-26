@@ -39,7 +39,7 @@ def test__uniform_catalog(instance):
         "discoverymethod",
         "letter",
         "ra",
-        "dec"
+        "dec",
     ]
 
     assert (
@@ -47,10 +47,7 @@ def test__uniform_catalog(instance):
     )  # KOI-752,KIC 10797460,Kepler-227,
     assert "nan" not in instance.data.at[0, "alias"]
     assert data.at[0, "kepler_name"].rstrip(" bcdefghi") in instance.data.at[0, "alias"]
-    assert (
-        data.at[0, "kepler_name"].rstrip(" bcdefghi")
-        in instance.data.at[0, "alias"]
-    )
+    assert data.at[0, "kepler_name"].rstrip(" bcdefghi") in instance.data.at[0, "alias"]
     assert instance.data.at[0, "letter"] == "c"
 
     assert (

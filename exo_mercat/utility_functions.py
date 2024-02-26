@@ -7,6 +7,9 @@ import gzip
 import numpy as np
 import pandas as pd
 from typing import Union
+from astropy.coordinates import SkyCoord
+from astropy.table import Table
+from astropy import units as u
 
 
 class UtilityFunctions:
@@ -37,12 +40,6 @@ class UtilityFunctions:
     @staticmethod
     def find_const() -> dict:
         """
-        The find_const function takes a string and returns the same string with all of its
-        constellation abbreviations replaced by their full names. The function uses a dictionary
-        to map each abbreviation to its corresponding constellation name. The dictionary is
-        created using the find_const() function, which creates a dataframe containing two columns:
-        the first column contains all possible constellation abbreviations, while the second column
-        contains their corresponding full names.
 
         :return: A dictionary containing all possible abbreviations and all possible full names.
         """
@@ -200,18 +197,18 @@ class UtilityFunctions:
             "Virginis": "Vir",
             "Volantis": "Vol",
             "Vulpeculae": "Vul",
-            "2M ": "2MASS ",
+            # "2M ": "2MASS ",
             "KOI ": "KOI-",
             "Kepler ": "Kepler-",
             "BD ": "BD",
-            "OGLE-": "OGLE ",
-            "MOA-": "MOA ",
-            "gam 1 ": "gam ",
-            "EPIC-": "EPIC ",
-            "Pr 0": "Pr ",
-            "TOI ": "TOI-",
+            # "OGLE-": "OGLE ",
+            # "MOA-": "MOA ",
+            # "gam 1 ": "gam ",
+            # "EPIC-": "EPIC ",
+            # "Pr 0": "Pr ",
+            # "TOI ": "TOI-",
             "kepler": "Kepler",
-            "Gliese": "GJ",
+            # "Gliese": "GJ",
             "p ": "pi ",
         }
 
@@ -224,7 +221,9 @@ class UtilityFunctions:
         the configuration parameters.
         :return a dictionary containing the configuration parameters
         """
-        config = configparser.RawConfigParser(inline_comment_prefixes="#")
+        config = configparser.RawConfigParser(
+            inline_comment_prefixes="#", delimiters=("=")
+        )
         config.read("input_sources.ini")
         output_dict = {s: dict(config.items(s)) for s in config.sections()}
         return output_dict
@@ -258,18 +257,18 @@ class UtilityFunctions:
         if "K0" in name[:2]:
             name = "KOI-" + name.lstrip("K").lstrip("0")
         if "TOI " in name[:4]:
-                name = "TOI-" + name[4:].lstrip(" ")
-        if not str(re.match("2M[\d ]", name, re.M)) == "None":
+            name = "TOI-" + name[4:].lstrip(" ")
+        if not str(re.match("2M[\\d ]", name, re.M)) == "None":
             name = "2MASS J" + name[2:].lstrip()
             name = name.replace("JJ", "J").replace("J ", "J")
         if "Gliese" in name:
             name = name.replace("Gliese ", "GJ ")
-        if not str(re.match("VHS \d", name, re.M)) == "None":
+        if not str(re.match("VHS \\d", name, re.M)) == "None":
             name = name.replace("VHS ", "VHS J")
         if "Gl " in name:
             name = name.replace("Gl ", "GJ ")
         if "KMT-" in name:
-            name = name.rstrip("L")
+            name = name.rstrip("L").replace(":", "-")
         if "MOA-" in name:
             name = name.replace("MOA-", "MOA ").rstrip("L")
         if "OGLE--" in name:
@@ -328,18 +327,24 @@ class UtilityFunctions:
     #
 
     @staticmethod
-    def calculate_working_p_sma(group: pd.DataFrame,tolerance:float) -> pd.DataFrame:
-        ''' difference of 5%'''
-        group=group.sort_values(by='p')
-        group['working_p'] = np.nan
-        group['working_a'] = np.nan
+    def calculate_working_p_sma(group: pd.DataFrame, tolerance: float) -> pd.DataFrame:
+        """difference of 10%"""
+        group = group.sort_values(by="p")
+        group["working_p"] = np.nan
+        group["working_a"] = np.nan
         for i in group.index:
-            if group.loc[i, 'working_p'] != group.loc[i, 'working_p']:
-                group.loc[abs(group.p - group.at[i, 'p']) <= tolerance * group.at[i, 'p'], 'working_p'] = group.at[i, 'p']
-            if group.loc[i, 'working_a'] != group.loc[i, 'working_a']:
-                group.loc[abs(group.a - group.at[i, 'a']) <= tolerance * group.at[i, 'a'], 'working_a'] = group.at[i, 'a']
-        group.loc[:, 'working_a'] = group.loc[:, 'working_a'].fillna(-1)
-        group.loc[:, 'working_p'] = group.loc[:, 'working_p'].fillna(-1)
+            if group.loc[i, "working_p"] != group.loc[i, "working_p"]:
+                group.loc[
+                    abs(group.p - group.at[i, "p"]) <= tolerance * group.at[i, "p"],
+                    "working_p",
+                ] = group.at[i, "p"]
+            if group.loc[i, "working_a"] != group.loc[i, "working_a"]:
+                group.loc[
+                    abs(group.a - group.at[i, "a"]) <= tolerance * group.at[i, "a"],
+                    "working_a",
+                ] = group.at[i, "a"]
+        group.loc[:, "working_a"] = group.loc[:, "working_a"].fillna(-1)
+        group.loc[:, "working_p"] = group.loc[:, "working_p"].fillna(-1)
         return group
 
     # @staticmethod
@@ -549,22 +554,120 @@ class UtilityFunctions:
 
     @staticmethod
     def convert_discovery_methods(data: pd.DataFrame) -> pd.DataFrame:
-        data['discovery_method'] = data['discovery_method'].fillna("").replace('nan','')
-        data.loc[data.discovery_method == "Primary Transit#TTV", 'discovery_method'] = "TTV"
-        data.loc[data.discovery_method == "Transit Timing Variations", 'discovery_method'] = "TTV"
-        data.loc[data.discovery_method == "Eclipse Timing Variations", 'discovery_method'] = "TTV"
-        data.loc[data.discovery_method == "Primary Transit", 'discovery_method'] = "Transit"
-        data.loc[data.discovery_method == "Pulsar", 'discovery_method'] = "Pulsar Timing"
-        data.loc[data.discovery_method == "Pulsation Timing Variations", 'discovery_method'] = "Pulsar Timing"
-        data.loc[data.discovery_method == "Timing", 'discovery_method'] = "Pulsar Timing"
-        data.loc[data.discovery_method == "disk kinematics", 'discovery_method'] = "Other"
-        data.loc[data.discovery_method == "Kinematic", 'discovery_method'] = "Other"
-        data.loc[data.discovery_method == "Disk Kinematics", 'discovery_method'] = "Other"
-        data.loc[data.discovery_method == "Orbital Brightness Modulation", 'discovery_method'] = "Other"
-        data.loc[data.discovery_method == "astrometry", 'discovery_method'] = "Astrometry"
-        data.loc[data.discovery_method == "microlensing", 'discovery_method'] = "Microlensing"
-        data.loc[data.discovery_method == "imaging", 'discovery_method'] = "Imaging"
-        data.loc[data.discovery_method == "transit", 'discovery_method'] = "Transit"
-        data.loc[data.discovery_method == "timing", 'discovery_method'] = "Pulsar Timing"
-        data.loc[data.discovery_method == "RV", 'discovery_method'] = "Radial Velocity"
+        data["discovery_method"] = (
+            data["discovery_method"].fillna("").replace("nan", "")
+        )
+        data.loc[
+            data.discovery_method == "Primary Transit#TTV", "discovery_method"
+        ] = "TTV"
+        data.loc[
+            data.discovery_method == "Transit Timing Variations", "discovery_method"
+        ] = "TTV"
+        data.loc[
+            data.discovery_method == "Eclipse Timing Variations", "discovery_method"
+        ] = "TTV"
+        data.loc[
+            data.discovery_method == "Primary Transit", "discovery_method"
+        ] = "Transit"
+        data.loc[
+            data.discovery_method == "Pulsar", "discovery_method"
+        ] = "Pulsar Timing"
+        data.loc[
+            data.discovery_method == "Pulsation Timing Variations", "discovery_method"
+        ] = "Pulsar Timing"
+        data.loc[
+            data.discovery_method == "Timing", "discovery_method"
+        ] = "Pulsar Timing"
+        data.loc[
+            data.discovery_method == "disk kinematics", "discovery_method"
+        ] = "Other"
+        data.loc[data.discovery_method == "Kinematic", "discovery_method"] = "Other"
+        data.loc[
+            data.discovery_method == "Disk Kinematics", "discovery_method"
+        ] = "Other"
+        data.loc[
+            data.discovery_method == "Orbital Brightness Modulation", "discovery_method"
+        ] = "Other"
+        data.loc[
+            data.discovery_method == "astrometry", "discovery_method"
+        ] = "Astrometry"
+        data.loc[
+            data.discovery_method == "microlensing", "discovery_method"
+        ] = "Microlensing"
+        data.loc[data.discovery_method == "imaging", "discovery_method"] = "Imaging"
+        data.loc[data.discovery_method == "transit", "discovery_method"] = "Transit"
+        data.loc[
+            data.discovery_method == "timing", "discovery_method"
+        ] = "Pulsar Timing"
+        data.loc[data.discovery_method == "RV", "discovery_method"] = "Radial Velocity"
         return data
+
+    @staticmethod
+    def perform_query(service, query, uploads_dict=None):
+        if uploads_dict is None:
+            uploads_dict = {}
+        table = service.run_sync(query, uploads=uploads_dict, timeout=None)
+
+        table = table.to_table().to_pandas()
+        # table=table[table.otype.str.contains('\*')] # IF DECOMMENTED, ADD
+        # OTYPE BACK IN THE QUERY
+        if "TIC" in table.columns:
+            table = table.astype(str)
+            table["main_id"] = "TIC " + table["TIC"].replace("", "<NA>")
+            table["UCAC4"] = "UCAC4 " + table["UCAC4"].replace("", "<NA>")
+            table["2MASS"] = "2MASS J" + table["2MASS"].replace("", "<NA>")
+            table["WISEA"] = "WISE " + table["WISEA"].replace("", "<NA>")
+            table["GAIA"] = "Gaia DR2 " + table["GAIA"].replace("", "<NA>")
+            table["KIC"] = "KIC " + table["KIC"].replace("", "<NA>")
+            table["HIP"] = "HIP " + table["HIP"].replace("", "<NA>")
+            table["TYC"] = "TYC " + table["TYC"].replace("", "<NA>")
+            for col in table.columns:
+                table.loc[table[col].str.contains("<NA>"), col] = ""
+            table["ids"] = table[
+                ["UCAC4", "2MASS", "WISEA", "GAIA", "KIC", "HIP", "TYC"]
+            ].agg(",".join, axis=1)
+            table["ids"] = table["ids"].map(lambda x: x.lstrip(",").rstrip(","))
+
+        if "ra" in table.columns:  # it means it has been searching for coordinates
+            # selects the one that has the smallest angular separation
+            for row in table.iterrows():
+                r = row[1]
+                c1 = SkyCoord(
+                    r["ra"],
+                    r["dec"],
+                    frame="icrs",
+                    unit=(u.degree, u.degree),
+                )
+                c2 = SkyCoord(r.ra_2, r.dec_2, frame="icrs", unit=(u.degree, u.degree))
+                angsep = c2.separation(c1).degree
+                table.at[row[0], "angsep"] = angsep
+
+            table["selected"] = 0
+
+            table["angsep"] = table["angsep"].map(
+                lambda x: np.round(float(x), 8) * 3600
+            )
+
+            for hostbin, group in table.groupby("hostbinary"):
+                if len(group) > 1:
+                    # if you find more than one, remove the planet entries
+                    for i in group.index:
+                        if (
+                            str(re.search("[\\s\\d][b-i]$", group.main_id[i], re.M))
+                            != "None"
+                        ):
+                            group = group.drop(i)
+
+                    selected = group[group.angsep == min(group.angsep)].head(1)
+
+                else:
+                    selected = group.copy()
+                table.loc[selected.index, "selected"] = 1
+
+            table = table[table.selected == 1]
+        else:  # doesn't look for coordinates
+            table["angsep"] = 0.0
+
+        table = table[table.main_id != ""]
+
+        return table

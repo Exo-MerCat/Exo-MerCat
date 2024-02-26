@@ -106,7 +106,7 @@ class Koi(Catalog):
                 "discoverymethod",
                 "letter",
                 "ra",
-                "dec"
+                "dec",
             ]
         ]
         logging.info("Catalog uniformed.")

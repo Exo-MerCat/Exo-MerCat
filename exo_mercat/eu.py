@@ -5,6 +5,7 @@ from pathlib import Path
 import os
 import numpy as np
 import pandas as pd
+
 # import requests
 # from astropy.io import ascii
 # from astropy.io.votable import parse_single_table
@@ -71,7 +72,6 @@ class Eu(Catalog):
         The function also adds in columns for aliases, discovery methods, and references.
         """
         self.data["catalog"] = self.name
-        self.data["catalog_name"] = self.data["name"]
 
         self.data = self.data.replace("None", "").replace("nan", np.nan)
         self.data = self.data.rename(
@@ -106,10 +106,13 @@ class Eu(Catalog):
                 "star_name": "host",
             }
         )
+        self.data["catalog_name"] = self.data["name"]
+        self.data["catalog_host"] = self.data["host"]
+
         self.data["reference"] = self.name
-        self.data['alternate_names']=self.data['alternate_names'].fillna("")
-        self.data['star_alternate_names']=self.data['star_alternate_names'].fillna("")
-        self.data['host']=self.data['host'].fillna("")
+        self.data["alternate_names"] = self.data["alternate_names"].fillna("")
+        self.data["star_alternate_names"] = self.data["star_alternate_names"].fillna("")
+        self.data["host"] = self.data["host"].fillna("")
 
         self.data["alias"] = self.data["alternate_names"].str.cat(
             self.data[["star_alternate_names"]], sep=","
@@ -126,8 +129,7 @@ class Eu(Catalog):
 
             self.data.at[i, "alias"] = alias_polished.lstrip(",")
 
-        self.data=Utils.convert_discovery_methods(self.data)
-
+        self.data = Utils.convert_discovery_methods(self.data)
 
         logging.info("Catalog uniformed.")
 
