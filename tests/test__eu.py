@@ -1,7 +1,7 @@
 import os
 from datetime import date
-from pathlib import PosixPath, Path
-from unittest.mock import MagicMock, patch, Mock
+from pathlib import Path
+from unittest.mock import MagicMock, patch
 
 import numpy as np
 import pandas as pd
@@ -53,8 +53,8 @@ def test__download_catalog(tmp_path, instance) -> None:
                 url=url, filename=filename, timeout=0.00001
             )
             assert (
-                "Error fetching the catalog, taking a local copy: cataloglocal_copy.csv"
-                in log.actual()[1][-1]
+                    "Error fetching the catalog, taking a local copy: cataloglocal_copy.csv"
+                    in log.actual()[1][-1]
             )
             assert "Catalog downloaded" in log.actual()[-1][-1]
 

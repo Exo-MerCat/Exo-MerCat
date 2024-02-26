@@ -1,14 +1,11 @@
+import logging
+
+import numpy as np
 import pandas as pd
+import pyvo
+from astropy import constants as const
 
 from exo_mercat.catalogs import Catalog
-from astropy.coordinates import SkyCoord
-import astropy.units as u
-from astropy.table import Table
-from astropy import constants as const
-import numpy as np
-import logging
-import pyvo
-import pathlib
 
 tap_service = pyvo.dal.TAPService(" http://TAPVizieR.u-strasbg.fr/TAPVizieR/tap/")
 

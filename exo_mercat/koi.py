@@ -1,8 +1,8 @@
-from exo_mercat.catalogs import Catalog
-from astropy.coordinates import SkyCoord
+import logging
 import astropy.units as u
 import numpy as np
-import logging
+from astropy.coordinates import SkyCoord
+from exo_mercat.catalogs import Catalog
 
 
 class Koi(Catalog):
@@ -58,40 +58,40 @@ class Koi(Catalog):
 
         for i in self.data.index:
             self.data.at[i, "alias"] = (
-                str(self.data.at[i, "KOI_host"])
-                + ","
-                + str(self.data.at[i, "Kepler_host"])
-                + ","
-                + str(self.data.at[i, "KIC_host"])
+                    str(self.data.at[i, "KOI_host"])
+                    + ","
+                    + str(self.data.at[i, "Kepler_host"])
+                    + ","
+                    + str(self.data.at[i, "KIC_host"])
             )
 
             self.data.at[i, "alias"] = (
-                ",".join(
-                    [x for x in set(self.data.at[i, "alias"].split(",")) if x != "nan"]
-                )
-                + ","
+                    ",".join(
+                        [x for x in set(self.data.at[i, "alias"].split(",")) if x != "nan"]
+                    )
+                    + ","
             )
 
             self.data.at[i, "aliasplanet"] = (
-                str(self.data.at[i, "KOI"])
-                + ","
-                + str(self.data.at[i, "KIC"])
-                + ","
-                + str(self.data.at[i, "kepler_name"])
+                    str(self.data.at[i, "KOI"])
+                    + ","
+                    + str(self.data.at[i, "KIC"])
+                    + ","
+                    + str(self.data.at[i, "kepler_name"])
             )
             self.data.at[i, "aliasplanet"] = (
-                ",".join(
-                    [
-                        x
-                        for x in set(
+                    ",".join(
+                        [
+                            x
+                            for x in set(
                             self.data.at[i, "aliasplanet"]
                             .replace(" .0", ".0")
                             .split(",")
                         )
-                        if x != "nan"
-                    ]
-                )
-                + ","
+                            if x != "nan"
+                        ]
+                    )
+                    + ","
             )
 
         self.data["name"] = self.data["KOI"]

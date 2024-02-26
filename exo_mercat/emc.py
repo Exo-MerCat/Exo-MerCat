@@ -13,6 +13,8 @@ from exo_mercat.catalogs import Catalog
 from exo_mercat.utility_functions import UtilityFunctions as Utils
 
 
+
+
 class Emc(Catalog):
     def __init__(self) -> None:
         """
@@ -51,10 +53,10 @@ class Emc(Catalog):
                 alias_list = str(alias).split(",")
                 for item in alias_list:
                     if (
-                        not pd.isnull(item)
-                        and item != "nan"
-                        and item not in final_alias
-                        and item != host
+                            not pd.isnull(item)
+                            and item != "nan"
+                            and item not in final_alias
+                            and item != host
                     ):
                         final_alias.add(item)
 
@@ -108,14 +110,14 @@ class Emc(Catalog):
                     for i in group[group.binary == "S-type"].index:
                         for j in group[group.binary != "S-type"].index:
                             if (
-                                abs(group.at[i, "ra"] - group.at[j, "ra"]) > 0.01
-                                and abs(group.at[i, "dec"] - group.at[j, "dec"]) > 0.01
+                                    abs(group.at[i, "ra"] - group.at[j, "ra"]) > 0.01
+                                    and abs(group.at[i, "dec"] - group.at[j, "dec"]) > 0.01
                             ):
                                 warning = (
-                                    " WARNING, Coordinate Mismatch (potential_binary_mismatch 1) RA: "
-                                    + str(list(group.ra))
-                                    + " DEC:"
-                                    + str(list(group.dec))
+                                        " WARNING, Coordinate Mismatch (potential_binary_mismatch 1) RA: "
+                                        + str(list(group.ra))
+                                        + " DEC:"
+                                        + str(list(group.dec))
                                 )
                                 self.data.loc[i, "potential_binary_mismatch"] = 1
                                 with pd.option_context("display.max_columns", 2000):
@@ -149,14 +151,14 @@ class Emc(Catalog):
                     for i in group[group.binary == ""].index:
                         for j in group[group.binary != ""].index:
                             if (
-                                abs(group.at[i, "ra"] - group.at[j, "ra"]) > 0.01
-                                and abs(group.at[i, "dec"] - group.at[j, "dec"]) > 0.01
+                                    abs(group.at[i, "ra"] - group.at[j, "ra"]) > 0.01
+                                    and abs(group.at[i, "dec"] - group.at[j, "dec"]) > 0.01
                             ):
                                 warning = (
-                                    " WARNING, Coordinate Mismatch (potential_binary_mismatch 1) RA: "
-                                    + str(list(group.ra))
-                                    + " DEC:"
-                                    + str(list(group.dec))
+                                        " WARNING, Coordinate Mismatch (potential_binary_mismatch 1) RA: "
+                                        + str(list(group.ra))
+                                        + " DEC:"
+                                        + str(list(group.dec))
                                 )
                                 self.data.loc[i, "potential_binary_mismatch"] = 1
                                 with pd.option_context("display.max_columns", 2000):
@@ -186,7 +188,8 @@ class Emc(Catalog):
         f.write(
             "\n****"
             + keyword
-            + "+letter THAT ARE INCONSISTENTLY LABELED (Potential Mismatch 2). They could be complex systems. If not, they should be treated manually in replacements.ini ****\n\n"
+            + "+letter THAT ARE INCONSISTENTLY LABELED (Potential Mismatch 2). They could be complex systems. If not, "
+              "they should be treated manually in replacements.ini ****\n\n"
         )
         for (key, letter), group in self.data.groupby(by=[keyword, "letter"]):
             if len(set(group.binary)) > 1:
@@ -210,12 +213,12 @@ class Emc(Catalog):
         )
         for i in self.data.index:
             if (
-                not str(re.search(r"([\s\d][ABCNS])$", self.data.at[i, keyword]))
-                == "None"
+                    not str(re.search(r"([\s\d][ABCNS])$", self.data.at[i, keyword]))
+                        == "None"
             ):
                 if (
-                    not self.data.at[i, keyword][-1:].strip()
-                    == self.data.at[i, "binary"]
+                        not self.data.at[i, keyword][-1:].strip()
+                            == self.data.at[i, "binary"]
                 ):
                     f.write(
                         "MISSED POTENTIAL BINARY Key:"
@@ -236,13 +239,13 @@ class Emc(Catalog):
 
     def prepare_columns_for_mainid_search(self):
         self.data["hostbinary"] = (
-            self.data["host"].astype(str)
-            + " "
-            + self.data["binary"]
-            .astype(str)
-            .replace("nan", "")
-            .replace("Rogue", "")
-            .replace("S-type", "")
+                self.data["host"].astype(str)
+                + " "
+                + self.data["binary"]
+                .astype(str)
+                .replace("nan", "")
+                .replace("Rogue", "")
+                .replace("S-type", "")
         )
         self.data["hostbinary"] = self.data.hostbinary.str.rstrip()
 
@@ -317,9 +320,10 @@ class Emc(Catalog):
 
         t2 = Table.from_pandas(list_of_hosts)
         query = (
-            """SELECT t.*, basic.main_id, basic.ra as ra_2,basic.dec as dec_2, ids.ids as ids FROM TAP_UPLOAD.tab as t LEFT OUTER JOIN ident ON ident.id = t."""
-            + typed_id
-            + """ LEFT OUTER JOIN basic ON ident.oidref = basic.oid LEFT OUTER JOIN ids ON basic.oid = ids.oidref"""
+                """SELECT t.*, basic.main_id, basic.ra as ra_2,basic.dec as dec_2, ids.ids as ids FROM TAP_UPLOAD.tab as 
+            t LEFT OUTER JOIN ident ON ident.id = t."""
+                + typed_id
+                + """ LEFT OUTER JOIN basic ON ident.oidref = basic.oid LEFT OUTER JOIN ids ON basic.oid = ids.oidref"""
         )
         table = Utils.perform_query(service, query, uploads_dict={"tab": t2})
 
@@ -380,7 +384,8 @@ class Emc(Catalog):
         service = pyvo.dal.TAPService("http://simbad.u-strasbg.fr:80/simbad/sim-tap")
         t2 = Table.from_pandas(alias_df)
         query = (
-            """SELECT t.*, basic.main_id, basic.ra as ra_2,basic.dec as dec_2, ids.ids FROM TAP_UPLOAD.tab as t LEFT OUTER JOIN ident ON ident.id = t."""
+            """SELECT t.*, basic.main_id, basic.ra as ra_2,basic.dec as dec_2, ids.ids FROM TAP_UPLOAD.tab as t LEFT 
+            OUTER JOIN ident ON ident.id = t."""
             + column
             + """ LEFT OUTER JOIN basic ON ident.oidref = basic.oid LEFT OUTER JOIN ids ON basic.oid = ids.oidref""",
         )
@@ -488,16 +493,18 @@ class Emc(Catalog):
             self.data[self.data.main_id == ""][["hostbinary", "ra", "dec"]]
         )
         query = (
-            """SELECT basic.main_id, basic.dec as dec_2,basic.ra as ra_2, basic.otype as type, t.hostbinary, t.ra, t.dec FROM basic JOIN TAP_UPLOAD.tab AS t
-             on 1=CONTAINS(POINT('ICRS',basic.ra, basic.dec),   CIRCLE('ICRS', t.ra, t.dec,"""
-            + str(tolerance)
-            + """)) """
+                """SELECT basic.main_id, basic.dec as dec_2,basic.ra as ra_2, basic.otype as type, t.hostbinary, t.ra, 
+            t.dec FROM basic JOIN TAP_UPLOAD.tab AS t on 1=CONTAINS(POINT('ICRS',basic.ra, basic.dec),   
+            CIRCLE('ICRS', t.ra, t.dec,"""
+                + str(tolerance)
+                + """)) """
         )
         table = Utils.perform_query(service, query, uploads_dict={"tab": t2})
 
         # collect ids too from the previous table
         t2 = Table.from_pandas(table)
-        query = """SELECT t.*, ids.ids as ids FROM TAP_UPLOAD.tab as t LEFT OUTER JOIN ident ON ident.id = t.main_id LEFT OUTER JOIN basic ON ident.oidref = basic.oid LEFT OUTER JOIN ids ON basic.oid = ids.oidref"""
+        query = """SELECT t.*, ids.ids as ids FROM TAP_UPLOAD.tab as t LEFT OUTER JOIN ident ON ident.id = t.main_id 
+        LEFT OUTER JOIN basic ON ident.oidref = basic.oid LEFT OUTER JOIN ids ON basic.oid = ids.oidref"""
         table = Utils.perform_query(service, query, uploads_dict={"tab": t2})
 
         for host in table["hostbinary"]:
@@ -555,7 +562,8 @@ class Emc(Catalog):
         service = pyvo.dal.TAPService("http://TAPVizieR.u-strasbg.fr/TAPVizieR/tap/")
 
         t2 = Table.from_pandas(list_of_hosts)
-        query = """SELECT tic.RAJ2000 as ra_2, tic.DEJ2000 as dec_2,tic.GAIA, tic.UCAC4, tic."2MASS", tic.WISEA, tic.TIC, tic.KIC, tic.HIP, tic.TYC, t.*  FROM "IV/38/tic" as tic JOIN TAP_UPLOAD.tab as t ON tic.TIC = t.host"""
+        query = """SELECT tic.RAJ2000 as ra_2, tic.DEJ2000 as dec_2,tic.GAIA, tic.UCAC4, tic."2MASS", tic.WISEA, 
+        tic.TIC, tic.KIC, tic.HIP, tic.TYC, t.*  FROM "IV/38/tic" as tic JOIN TAP_UPLOAD.tab as t ON tic.TIC = t.host"""
 
         table = Utils.perform_query(service, query, uploads_dict={"tab": t2})
 
@@ -601,7 +609,9 @@ class Emc(Catalog):
 
         alias_df = alias_df[["host", "tic_alias"]]
         t2 = Table.from_pandas(alias_df)
-        query = """SELECT tic.RAJ2000 as ra_2, tic.DEJ2000 as dec_2,tic.GAIA, tic.UCAC4, tic."2MASS", tic.WISEA, tic.TIC, tic.KIC, tic.HIP, tic.TYC, t.*  FROM "IV/38/tic" as tic JOIN TAP_UPLOAD.tab as t ON tic.TIC = t.tic_alias"""
+        query = """SELECT tic.RAJ2000 as ra_2, tic.DEJ2000 as dec_2,tic.GAIA, tic.UCAC4, tic."2MASS", tic.WISEA, 
+        tic.TIC, tic.KIC, tic.HIP, tic.TYC, t.*  FROM "IV/38/tic" as tic JOIN TAP_UPLOAD.tab as t ON tic.TIC = 
+        t.tic_alias"""
 
         table = Utils.perform_query(service, query, uploads_dict={"tab": t2})
 
@@ -643,9 +653,12 @@ class Emc(Catalog):
             self.data[self.data.main_id == ""][["hostbinary", "ra", "dec"]]
         )
         query = (
-            """SELECT tic.RAJ2000 as ra_2, tic.DEJ2000 as dec_2,tic.GAIA, tic.UCAC4, tic."2MASS", tic.WISEA, tic.TIC, tic.KIC, tic.HIP, tic.TYC, t.hostbinary, t.ra, t.dec  FROM "IV/38/tic" as tic JOIN TAP_UPLOAD.tab AS t on 1=CONTAINS(POINT('ICRS',tic.RAJ2000, tic.DEJ2000),   CIRCLE('ICRS',t.ra, t.dec,"""
-            + str(tolerance)
-            + """))"""
+                """SELECT tic.RAJ2000 as ra_2, tic.DEJ2000 as dec_2,tic.GAIA, tic.UCAC4, tic."2MASS", tic.WISEA, 
+                tic.TIC, tic.KIC, tic.HIP, tic.TYC, t.hostbinary, t.ra, t.dec  FROM "IV/38/tic" as tic JOIN 
+                TAP_UPLOAD.tab AS t on 1=CONTAINS(POINT('ICRS',tic.RAJ2000, tic.DEJ2000),   CIRCLE('ICRS',t.ra, 
+                t.dec,"""
+                + str(tolerance)
+                + """))"""
         )
 
         table = Utils.perform_query(service, query, uploads_dict={"tab": t2})
@@ -765,11 +778,11 @@ class Emc(Catalog):
         service = pyvo.dal.TAPService("http://simbad.u-strasbg.fr:80/simbad/sim-tap")
 
         query = (
-            """SELECT  basic.main_id, basic.ra as ra_2,basic.dec as dec_2, ids.ids
+                """SELECT  basic.main_id, basic.ra as ra_2,basic.dec as dec_2, ids.ids
     FROM ident JOIN basic ON ident.oidref = basic.oid LEFT OUTER JOIN ids ON basic.oid = ids.oidref
     WHERE id = '"""
-            + new_identifier
-            + """'"""
+                + new_identifier
+                + """'"""
         )
 
         table = Utils.perform_query(service, query, uploads_dict={})
@@ -817,7 +830,7 @@ class Emc(Catalog):
                 self.replace_old_new_identifier(identifier, new_identifier)
 
                 if (
-                    self.data.loc[self.data.main_id == new_identifier, "binary"] != "AB"
+                        self.data.loc[self.data.main_id == new_identifier, "binary"] != "AB"
                 ).any():
                     f = open("Logs/polish_main_id.txt", "a")
                     f.write(
@@ -838,7 +851,7 @@ class Emc(Catalog):
                 self.replace_old_new_identifier(identifier, new_identifier)
 
                 if (
-                    self.data.loc[self.data.main_id == new_identifier, "binary"] != "AB"
+                        self.data.loc[self.data.main_id == new_identifier, "binary"] != "AB"
                 ).any():
                     f = open("Logs/polish_main_id.txt", "a")
 
@@ -863,8 +876,8 @@ class Emc(Catalog):
                 self.replace_old_new_identifier(identifier, new_identifier)
 
                 if (
-                    self.data.loc[self.data.main_id == new_identifier, "binary"]
-                    != identifier[-1:]
+                        self.data.loc[self.data.main_id == new_identifier, "binary"]
+                        != identifier[-1:]
                 ).any():
                     f = open("Logs/polish_main_id.txt", "a")
 
@@ -904,7 +917,7 @@ class Emc(Catalog):
             self.data["main_id_dec"].replace("", np.nan).fillna(self.data["dec"])
         ).astype(float)
         self.data["angular_separation"] = (
-            self.data["catalog"] + ": " + self.data.angsep.astype(str)
+                self.data["catalog"] + ": " + self.data.angsep.astype(str)
         )
 
     def check_same_host_different_id(self) -> None:
@@ -947,7 +960,7 @@ class Emc(Catalog):
             sub = self.data.copy()
             sub = self.data[
                 self.data.main_id_ra < (self.data.at[i, "main_id_ra"] + 100 / 3600)
-            ]
+                ]
             sub = sub[sub.main_id_ra > (sub.at[i, "main_id_ra"] - 100 / 3600)]
             sub = sub[sub.main_id_dec > (sub.at[i, "main_id_dec"] - 100 / 3600)]
             sub = sub[sub.main_id_ra < (sub.at[i, "main_id_dec"] + 100 / 3600)]
@@ -1038,8 +1051,8 @@ class Emc(Catalog):
         f1.write("TOTAL NUMBER OF GROUPS: " + str(grouped_df.ngroups) + "\n")
         counter = 0
         for (
-            mainid,
-            binary,
+                mainid,
+                binary,
         ), group in grouped_df:
             if len(group) > 1:  # there are multiple planets in the system
                 group = Utils.calculate_working_p_sma(group, tolerance=0.1)
@@ -1052,20 +1065,20 @@ class Emc(Catalog):
                         # try to fix the letter if it is different
                         if len(list(set(subgroup.letter))) > 1:
                             warning = (
-                                "INCONSISTENT LETTER FOR SAME PERIOD \n"
-                                + str(
-                                    subgroup[
-                                        [
-                                            "main_id",
-                                            "binary",
-                                            "letter",
-                                            "catalog",
-                                            "catalog_name",
-                                            "p",
-                                        ]
+                                    "INCONSISTENT LETTER FOR SAME PERIOD \n"
+                                    + str(
+                                subgroup[
+                                    [
+                                        "main_id",
+                                        "binary",
+                                        "letter",
+                                        "catalog",
+                                        "catalog_name",
+                                        "p",
                                     ]
-                                )
-                                + "\n\n"
+                                ]
+                            )
+                                    + "\n\n"
                             )
                             adjusted_letter = [
                                 l
@@ -1086,20 +1099,20 @@ class Emc(Catalog):
                             # try to fix the letter if it is different
                             if len(list(set(subsubgroup.letter))) > 1:
                                 warning = (
-                                    "INCONSISTENT LETTER FOR SAME SMA \n"
-                                    + str(
-                                        subsubgroup[
-                                            [
-                                                "main_id",
-                                                "binary",
-                                                "letter",
-                                                "catalog",
-                                                "catalog_name",
-                                                "a",
-                                            ]
+                                        "INCONSISTENT LETTER FOR SAME SMA \n"
+                                        + str(
+                                    subsubgroup[
+                                        [
+                                            "main_id",
+                                            "binary",
+                                            "letter",
+                                            "catalog",
+                                            "catalog_name",
+                                            "a",
                                         ]
-                                    )
-                                    + "\n\n"
+                                    ]
+                                )
+                                        + "\n\n"
                                 )
 
                                 adjusted_letter = [
@@ -1120,8 +1133,9 @@ class Emc(Catalog):
                     f1.write(warning)
         f1.close()
 
+    @staticmethod
     def merge_into_single_entry(
-        self, group: pd.DataFrame, mainid: str, binary: str, letter: str
+            group: pd.DataFrame, mainid: str, binary: str, letter: str
     ) -> pd.DataFrame:
         """
         The merge_into_single_entry function takes the dataframe and merges all entries
@@ -1251,7 +1265,7 @@ class Emc(Catalog):
         # discovery method
 
         if len(list(set(group.discovery_method.unique()))) > 1 and "toi" in list(
-            set(group.catalog.unique())
+                set(group.catalog.unique())
         ):
             # if the method is not transit but transit shows because TOI was
             # forced to have transit as method, remove "transit"
@@ -1272,7 +1286,7 @@ class Emc(Catalog):
             ).rstrip(",")
         # fix for discovery methods that already have a , in it
         entry["discovery_method"] = ",".join(
-            [l.strip() for l in sorted(set(discovery_method.split(",")))]
+            [disc.strip() for disc in sorted(set(discovery_method.split(",")))]
         )
 
         entry["catalog"] = ",".join(list((sorted(group.catalog.unique())))).rstrip(",")
@@ -1294,11 +1308,11 @@ class Emc(Catalog):
         ).rstrip(",")
 
         if "RA" in set(group.coordinate_mismatch.unique()) and "DEC" in set(
-            group.coordinate_mismatch.unique()
+                group.coordinate_mismatch.unique()
         ):
             entry["coordinate_mismatch_flag"] = 2
         elif "RA" in set(group.coordinate_mismatch.unique()) or "DEC" in set(
-            group.coordinate_mismatch.unique()
+                group.coordinate_mismatch.unique()
         ):
             entry["coordinate_mismatch_flag"] = 1
         else:
@@ -1425,7 +1439,7 @@ class Emc(Catalog):
             )
             if len(period_list) == 1:
                 # (test) CASE 1: period in agreement (drop nan), regular merging
-                entry = self.merge_into_single_entry(group, mainid, binary, str(letter))
+                entry = Emc.merge_into_single_entry(group, mainid, binary, str(letter))
 
                 final_catalog = pd.concat(
                     [final_catalog, entry], sort=False
@@ -1450,7 +1464,7 @@ class Emc(Catalog):
                 )
                 for pgroup in period_list:
                     subgroup = group[group.working_p == pgroup]
-                    entry = self.merge_into_single_entry(
+                    entry = Emc.merge_into_single_entry(
                         subgroup, mainid, binary, str(letter)
                     )
                     final_catalog = pd.concat(
@@ -1464,7 +1478,7 @@ class Emc(Catalog):
 
                 if len(sma_list) == 1:
                     # (test) CASE 2: sma in agreement (drop nan), regular merging
-                    entry = self.merge_into_single_entry(
+                    entry = Emc.merge_into_single_entry(
                         group, mainid, binary, str(letter)
                     )
 
@@ -1491,7 +1505,7 @@ class Emc(Catalog):
                     )
                     for agroup in sma_list:
                         subgroup = group[group.working_a == agroup]
-                        entry = self.merge_into_single_entry(
+                        entry = Emc.merge_into_single_entry(
                             subgroup, mainid, binary, letter
                         )
                         final_catalog = pd.concat(
@@ -1515,7 +1529,7 @@ class Emc(Catalog):
                             )
                             + "\n\n"
                         )
-                    entry = self.merge_into_single_entry(
+                    entry = Emc.merge_into_single_entry(
                         group, mainid, binary, str(letter)
                     )
 
@@ -1601,13 +1615,13 @@ class Emc(Catalog):
         self.data["binary"] = self.data["binary"].replace("nan", "")
         self.data["exo_mercat_name"] = self.data.apply(
             lambda row: (
-                row["main_id"]
-                if str(re.search("[\\s\\d][ABCNS]$", row["main_id"], re.M)) == "None"
-                else row["main_id"][:-1].rstrip()
-            )
-            + (" " + str(row["binary"]) if not row["binary"] == "" else "")
-            + " "
-            + row["letter"],
+                            row["main_id"]
+                            if str(re.search("[\\s\\d][ABCNS]$", row["main_id"], re.M)) == "None"
+                            else row["main_id"][:-1].rstrip()
+                        )
+                        + (" " + str(row["binary"]) if not row["binary"] == "" else "")
+                        + " "
+                        + row["letter"],
             axis=1,
         )
         self.data = self.data.sort_values(by="exo_mercat_name").reset_index()
@@ -1746,11 +1760,11 @@ class Emc(Catalog):
     #     table=table[table.selected==1]
     #
     #
-    #     for host in table.hostbinary:
-    #         self.data.loc[self.data.hostbinary==host,'main_id_ra']=float(table.loc[table.hostbinary==host,'ra_2'].values[0])
-    #         self.data.loc[self.data.hostbinary==host,'main_id_dec']=float(table.loc[table.hostbinary==host,'dec_2'].values[0])
-    #         self.data.loc[self.data.hostbinary==host,'main_id']=table.loc[table.hostbinary==host,'main_id'].values[0]
-    #         self.data.loc[self.data.hostbinary==host, "angsep"] = np.round(table.loc[table.hostbinary==host,'angsep'].values[0],8)*3600
+    # for host in table.hostbinary: self.data.loc[self.data.hostbinary==host,'main_id_ra']=float(table.loc[
+    # table.hostbinary==host,'ra_2'].values[0]) self.data.loc[self.data.hostbinary==host,'main_id_dec']=float(
+    # table.loc[table.hostbinary==host,'dec_2'].values[0]) self.data.loc[self.data.hostbinary==host,
+    # 'main_id']=table.loc[table.hostbinary==host,'main_id'].values[0] self.data.loc[self.data.hostbinary==host,
+    # "angsep"] = np.round(table.loc[table.hostbinary==host,'angsep'].values[0],8)*3600
     #
     #         result_table = Simbad.query_object(table.loc[table.hostbinary==host,'main_id'].values[0])
     #         result_table = result_table.to_pandas()

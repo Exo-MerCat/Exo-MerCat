@@ -1,15 +1,15 @@
-import os
 import configparser
-from pathlib import Path
+import gzip
+import os
 import re
 import xml.etree.ElementTree as ElementTree
-import gzip
+from pathlib import Path
+from typing import Union
+
 import numpy as np
 import pandas as pd
-from typing import Union
-from astropy.coordinates import SkyCoord
-from astropy.table import Table
 from astropy import units as u
+from astropy.coordinates import SkyCoord
 
 
 class UtilityFunctions:
@@ -397,7 +397,7 @@ class UtilityFunctions:
 
     @staticmethod
     def get_attribute(
-        treeobject: ElementTree.Element, parameter: str, attrib: str
+            treeobject: ElementTree.Element, parameter: str, attrib: str
     ) -> str:
         """
         The getAttribute function parses the ElementTree object for a parameter and gets the desired attribute.
@@ -408,8 +408,8 @@ class UtilityFunctions:
         :returns: A string containing the value of the attribute
         """
         if (
-            treeobject.find("./" + parameter) is not None
-            and attrib in treeobject.find("./" + parameter).attrib
+                treeobject.find("./" + parameter) is not None
+                and attrib in treeobject.find("./" + parameter).attrib
         ):
             return treeobject.find("./" + parameter).attrib[attrib]
         else:
@@ -653,8 +653,8 @@ class UtilityFunctions:
                     # if you find more than one, remove the planet entries
                     for i in group.index:
                         if (
-                            str(re.search("[\\s\\d][b-i]$", group.main_id[i], re.M))
-                            != "None"
+                                str(re.search("[\\s\\d][b-i]$", group.main_id[i], re.M))
+                                != "None"
                         ):
                             group = group.drop(i)
 
@@ -670,4 +670,4 @@ class UtilityFunctions:
 
         table = table[table.main_id != ""]
 
-        return table
+        return table.reset_index(drop=True)

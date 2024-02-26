@@ -58,8 +58,8 @@ def test__download_catalog(tmp_path, instance) -> None:
                 url=url, filename=filename, timeout=0.00001
             )
             assert (
-                "Error fetching the catalog, taking a local copy: cataloglocal_copy.csv"
-                in log.actual()[0][-1]
+                    "Error fetching the catalog, taking a local copy: cataloglocal_copy.csv"
+                    in log.actual()[0][-1]
             )
             assert "Catalog downloaded" in log.actual()[1][-1]
 

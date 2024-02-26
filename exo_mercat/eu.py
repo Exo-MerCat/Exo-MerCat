@@ -1,14 +1,7 @@
-import glob
 import logging
-from datetime import date
-from pathlib import Path
-import os
+
 import numpy as np
 import pandas as pd
-
-# import requests
-# from astropy.io import ascii
-# from astropy.io.votable import parse_single_table
 
 from exo_mercat.catalogs import Catalog
 from exo_mercat.utility_functions import UtilityFunctions as Utils

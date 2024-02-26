@@ -1,10 +1,11 @@
 import glob
 import logging
+import os
 import re
 from datetime import date
 from pathlib import Path
 from typing import Union
-import os
+
 import numpy as np
 import pandas as pd
 import requests
@@ -45,18 +46,18 @@ class Catalog:
                     f.write(result.content)
 
             except (
-                OSError,
-                IOError,
-                FileNotFoundError,
-                ConnectionError,
-                ValueError,
-                TypeError,
-                TimeoutError,
-                requests.exceptions.ConnectionError,
-                requests.exceptions.SSLError,
-                requests.exceptions.Timeout,
-                requests.exceptions.ConnectTimeout,
-                requests.exceptions.HTTPError,
+                    OSError,
+                    IOError,
+                    FileNotFoundError,
+                    ConnectionError,
+                    ValueError,
+                    TypeError,
+                    TimeoutError,
+                    requests.exceptions.ConnectionError,
+                    requests.exceptions.SSLError,
+                    requests.exceptions.Timeout,
+                    requests.exceptions.ConnectTimeout,
+                    requests.exceptions.HTTPError,
             ):
                 if len(glob.glob(filename + "*.csv")) > 0:
                     file_path_str = glob.glob(filename + "*.csv")[0]
@@ -159,13 +160,13 @@ class Catalog:
                     if self.data.at[i, "name"][-3:-1] != ".0":
                         self.data.at[i, "letter"] = "BD"
                 if (
-                    not str(re.search("[aABCD]$", self.data.at[i, "name"], re.M))
-                    == "None"
+                        not str(re.search("[aABCD]$", self.data.at[i, "name"], re.M))
+                            == "None"
                 ):
                     self.data.at[i, "letter"] = "BD"
                     self.data.at[i, "binary"] = self.data.at[i, "name"][
-                        -1:
-                    ]  # so that we avoid binary systems to get merged
+                                                -1:
+                                                ]  # so that we avoid binary systems to get merged
         logging.info("Identified possible Brown Dwarfs (no letter for planet name).")
 
     def replace_known_mistakes(self) -> None:
@@ -284,20 +285,20 @@ class Catalog:
         if print_flag:
             self.data[
                 (
-                    self.data.mass.fillna(self.data.msini.fillna(0))
-                    .replace("", 0)
-                    .astype(float)
-                    > 20.0
+                        self.data.mass.fillna(self.data.msini.fillna(0))
+                        .replace("", 0)
+                        .astype(float)
+                        > 20.0
                 )
                 #   | (self.data.letter == "BD")
             ].to_csv("UniformSources/" + self.name + "_brown_dwarfs.csv")
 
         self.data = self.data[
             (
-                self.data.mass.fillna(self.data.msini.fillna(0))
-                .replace("", 0)
-                .astype(float)
-                <= 20.0
+                    self.data.mass.fillna(self.data.msini.fillna(0))
+                    .replace("", 0)
+                    .astype(float)
+                    <= 20.0
             )
             #    & (self.data.letter != "BD")
         ]
@@ -346,12 +347,12 @@ class Catalog:
         for identifier in self.data.loc[ind, "host"]:
             if not str(re.search("(\\.0)\\d$", identifier, re.M)) == "None":
                 self.data.loc[self.data.host == identifier, "host"] = identifier[
-                    :-3
-                ].strip()
+                                                                      :-3
+                                                                      ].strip()
             if not str(re.search(" [b-z]$", identifier, re.M)) == "None":
                 self.data.loc[self.data.host == identifier, "host"] = identifier[
-                    :-1
-                ].strip()
+                                                                      :-1
+                                                                      ].strip()
         self.data["host"] = self.data.host.apply(lambda x: Utils.uniform_string(x))
 
         for i in self.data.index:
@@ -363,9 +364,9 @@ class Catalog:
                     al = al[:-3]
                 if al != "":
                     polished_alias = (
-                        polished_alias
-                        + ","
-                        + Utils.uniform_string(al.lstrip().rstrip())
+                            polished_alias
+                            + ","
+                            + Utils.uniform_string(al.lstrip().rstrip())
                     )
             self.data.at[i, "alias"] = polished_alias.lstrip(",")
 
@@ -504,12 +505,12 @@ class Catalog:
         self.data["binary"] = ""
         for i in self.data.index:
             # specific for circumbinary planets (AB)
-            if len(re.findall(r"[\s\d](AB)[\s][a-z]$", self.data.at[i, "name"])) > 0:
+            if len(re.findall(r"[\s\d](AB)\s[a-z]$", self.data.at[i, "name"])) > 0:
                 self.data.at[i, "binary"] = "AB"
 
             if (
-                len(re.findall(r"[\s\d](\(AB\))[\s][a-z]$", self.data.at[i, "name"]))
-                > 0
+                    len(re.findall(r"[\s\d](\(AB\))\s[a-z]$", self.data.at[i, "name"]))
+                    > 0
             ):
                 self.data.at[i, "binary"] = "AB"
 
@@ -528,8 +529,8 @@ class Catalog:
 
             # strip the binary letter and put it in binary column
             if (
-                len(re.findall(r"[\s\d][ABCNS][\s\d][a-z]$", self.data.at[i, "name"]))
-                > 0
+                    len(re.findall(r"[\s\d][ABCNS][\s\d][a-z]$", self.data.at[i, "name"]))
+                    > 0
             ):
                 self.data.at[i, "binary"] = self.data.at[i, "name"][-3:-2]
 

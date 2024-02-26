@@ -1,16 +1,18 @@
 import glob
+import logging
 import os
-import numpy as np
 import re
+from datetime import date
+from pathlib import Path
+
+import astropy.units as u
+import numpy as np
 import pandas as pd
 import requests
-from exo_mercat.utility_functions import UtilityFunctions as Utils
-from exo_mercat.catalogs import Catalog
-from datetime import date
 from astropy.coordinates import SkyCoord
-import astropy.units as u
-import logging
-from pathlib import Path
+
+from exo_mercat.catalogs import Catalog
+from exo_mercat.utility_functions import UtilityFunctions as Utils
 
 
 class Oec(Catalog):
@@ -43,18 +45,18 @@ class Oec(Catalog):
                 Utils.convert_xmlfile_to_csvfile(file_path=file_path_xml_str)
 
             except (
-                OSError,
-                IOError,
-                FileNotFoundError,
-                ConnectionError,
-                ValueError,
-                TypeError,
-                TimeoutError,
-                requests.exceptions.ConnectionError,
-                requests.exceptions.SSLError,
-                requests.exceptions.Timeout,
-                requests.exceptions.ConnectTimeout,
-                requests.exceptions.HTTPError,
+                    OSError,
+                    IOError,
+                    FileNotFoundError,
+                    ConnectionError,
+                    ValueError,
+                    TypeError,
+                    TimeoutError,
+                    requests.exceptions.ConnectionError,
+                    requests.exceptions.SSLError,
+                    requests.exceptions.Timeout,
+                    requests.exceptions.ConnectTimeout,
+                    requests.exceptions.HTTPError,
             ):
                 if len(glob.glob(filename + "*.csv")) > 0:
                     file_path_str = glob.glob(filename + "*.csv")[0]

@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import pytest
 from testfixtures import LogCapture
+
 from exo_mercat.epic import Epic
 
 
@@ -127,7 +128,7 @@ def test__uniform_catalog(instance):
     assert "nan" not in instance.data.at[0, "alias"]
 
     assert (data.at[0, "gaia_id"] + ",") in instance.data.at[0, "alias"] and (
-        data.at[0, "tic_id"] + ","
+            data.at[0, "tic_id"] + ","
     ) in instance.data.at[0, "alias"]
     assert ".01" in instance.data.at[0, "letter"]
 
@@ -178,7 +179,7 @@ def test__handle_reference_format(instance):
     assert instance.data.at[1, "p_url"] == ""  # originally nan
     assert instance.data.at[1, "i_url"] == ""
     assert (
-        instance.data.at[1, "a_url"] == ""
+            instance.data.at[1, "a_url"] == ""
     )  # despite being a_url originally non null, but the value is null
     assert instance.data.at[1, "mass_url"] == ""
     assert instance.data.at[1, "msini_url"] == ""

@@ -1,7 +1,9 @@
-import re
-import numpy as np
-from exo_mercat.catalogs import Catalog
 import logging
+import re
+
+import numpy as np
+
+from exo_mercat.catalogs import Catalog
 from exo_mercat.utility_functions import UtilityFunctions as Utils
 
 
@@ -122,7 +124,7 @@ class Nasa(Catalog):
                 self.data.at[i, "msini_min"] = self.data.at[i, "bestmass_min"]
                 self.data.at[i, "msini_url"] = self.data.at[i, "bestmass_url"]
             elif (self.data.at[i, "bestmass_provenance"] == "M-R relationship") or (
-                self.data.at[i, "bestmass_provenance"] == "Msin(i)/sin(i)"
+                    self.data.at[i, "bestmass_provenance"] == "Msin(i)/sin(i)"
             ):
                 self.data.at[i, "msini"] = np.nan
                 self.data.at[i, "msini_max"] = np.nan

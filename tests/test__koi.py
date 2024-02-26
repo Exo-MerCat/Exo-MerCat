@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import pytest
 from testfixtures import LogCapture
+
 from exo_mercat.koi import Koi
 
 
@@ -43,7 +44,7 @@ def test__uniform_catalog(instance):
     ]
 
     assert (
-        "KOI-752," in instance.data.at[0, "alias"]
+            "KOI-752," in instance.data.at[0, "alias"]
     )  # KOI-752,KIC 10797460,Kepler-227,
     assert "nan" not in instance.data.at[0, "alias"]
     assert data.at[0, "kepler_name"].rstrip(" bcdefghi") in instance.data.at[0, "alias"]
@@ -51,7 +52,7 @@ def test__uniform_catalog(instance):
     assert instance.data.at[0, "letter"] == "c"
 
     assert (
-        "KOI-752.02" in instance.data.at[0, "aliasplanet"]
+            "KOI-752.02" in instance.data.at[0, "aliasplanet"]
     )  # 'KOI-752.02,KIC 10797460 c,Kepler-227 c,'
     assert "nan" not in instance.data.at[0, "aliasplanet"]
     assert data.at[0, "kepler_name"] in instance.data.at[0, "aliasplanet"]
@@ -62,7 +63,7 @@ def test__uniform_catalog(instance):
     assert instance.data.at[1, "letter"] == ".01"
 
     assert (
-        "KOI-753.01," in instance.data.at[1, "aliasplanet"]
+            "KOI-753.01," in instance.data.at[1, "aliasplanet"]
     )  # KIC 10811496.01,KOI-753.01,
     assert "nan" not in instance.data.at[1, "aliasplanet"]
 

@@ -1,7 +1,8 @@
 import logging
 import re
+
 import numpy as np
-import pandas as pd
+
 from exo_mercat.catalogs import Catalog
 from exo_mercat.utility_functions import UtilityFunctions as Utils
 
