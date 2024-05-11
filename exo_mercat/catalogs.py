@@ -24,7 +24,7 @@ class Catalog:
         self.data = None
         self.name = "catalog"
 
-    def download_catalog(self, url: str, filename: str, timeout: float = None) -> Path:
+    def download_catalog(self, url: str, filename: str, local_date: str = '', timeout: float = None) -> Path:
         """
         The download_catalog function downloads the catalog from a given url and saves it to a file.
         If the file already exists, it will not be downloaded again.
@@ -36,7 +36,14 @@ class Catalog:
         :return: The string of the file path of the catalog
 
         """
-        file_path_str = filename + date.today().strftime("%m-%d-%Y") + ".csv"
+        if local_date !='':
+            file_path_str = filename + local_date+ ".csv"
+            if len(glob.glob(file_path_str)) == 0:
+                raise ValueError("Could not find catalog with this specific date. Please check your date value.")
+            else:
+                logging.info('Reading specific version: '+local_date)
+        else:
+            file_path_str = filename + date.today().strftime("%m-%d-%Y") + ".csv"
         if os.path.exists(file_path_str):
             logging.info("Reading existing file")
         else:
@@ -167,6 +174,13 @@ class Catalog:
                     self.data.at[i, "binary"] = self.data.at[i, "name"][
                                                 -1:
                                                 ]  # so that we avoid binary systems to get merged
+
+                # 03/27/2024 add special case for problematic triple BD system DENIS J063001.4-184014 (bc)
+                # and all those whose name ends with parenthesis
+                if  len(re.findall(r'\(.*?\)$', self.data.at[i, "name"]))>0:
+                    self.data.at[i, "letter"] = "BD"
+                    self.data.at[i, "binary"] = re.findall(r'\(.*?\)$', self.data.at[i, "name"])[0].strip('(').strip(')')
+
         logging.info("Identified possible Brown Dwarfs (no letter for planet name).")
 
     def replace_known_mistakes(self) -> None:
@@ -273,38 +287,6 @@ class Catalog:
         """
         raise NotImplementedError
 
-    def remove_known_brown_dwarfs(self, print_flag: bool) -> None:
-        """
-        The remove_known_brown_dwarfs function removes all known brown dwarfs from the dataframe.
-        It does this by checking if the mass of a planet is less than 20 Mjup, and if it isn't,
-        then it will be removed from the dataframe. If print_flag is set to True, then a csv file will be created
-        with all of these planets in them.
-
-        :param print_flag: Specify whether the function should print out a list of brown dwarfs
-        """
-        if print_flag:
-            self.data[
-                (
-                        self.data.mass.fillna(self.data.msini.fillna(0))
-                        .replace("", 0)
-                        .astype(float)
-                        > 20.0
-                )
-                #   | (self.data.letter == "BD")
-            ].to_csv("UniformSources/" + self.name + "_brown_dwarfs.csv")
-
-        self.data = self.data[
-            (
-                    self.data.mass.fillna(self.data.msini.fillna(0))
-                    .replace("", 0)
-                    .astype(float)
-                    <= 20.0
-            )
-            #    & (self.data.letter != "BD")
-        ]
-        self.data[(self.data.letter == "BD")].to_csv(
-            "UniformSources/" + self.name + "_possible_brown_dwarfs.csv"
-        )
 
     def make_errors_absolute(self) -> None:
         """
@@ -504,41 +486,34 @@ class Catalog:
         self.data = self.data.reset_index()
         self.data["binary"] = ""
         for i in self.data.index:
-            # specific for circumbinary planets (AB)
-            if len(re.findall(r"[\s\d](AB)\s[a-z]$", self.data.at[i, "name"])) > 0:
-                self.data.at[i, "binary"] = "AB"
-
-            if (
-                    len(re.findall(r"[\s\d](\(AB\))\s[a-z]$", self.data.at[i, "name"]))
-                    > 0
-            ):
-                self.data.at[i, "binary"] = "AB"
-
-            # specific for circumbinary planets (AB)
-            if len(re.findall(r"[\s\d](AB)$", self.data.at[i, "host"])) > 0:
-                self.data.at[i, "binary"] = "AB"
-                self.data.at[i, "host"] = self.data.at[i, "host"][:-2].rstrip()
-
-            if len(re.findall(r"[\s\d](\(AB\))$", self.data.at[i, "host"])) > 0:
-                self.data.at[i, "binary"] = "AB"
-                self.data.at[i, "host"] = self.data.at[i, "host"][:-4].rstrip()
-
-            # protect in case planet name in host column
-            if len(re.findall(r"([ABCNLS][\s\d][a-z])$", self.data.at[i, "host"])) > 0:
+            #cleanup host if planet name is there
+            if len(re.findall(r"([\s\d][b-z])$", self.data.at[i, "host"])) > 0:
+                print('planet name in host', self.data.at[i,'host'])
                 self.data.at[i, "host"] = self.data.at[i, "host"][:-1].strip()
 
-            # strip the binary letter and put it in binary column
-            if (
-                    len(re.findall(r"[\s\d][ABCNS][\s\d][a-z]$", self.data.at[i, "name"]))
-                    > 0
-            ):
-                self.data.at[i, "binary"] = self.data.at[i, "name"][-3:-2]
+            if self.data.at[i,'binary']=='':
+                # CIRCUMBINARY NAME or HOST
+                if (len(re.findall(r"[\s\d](AB)\s[b-z]$", self.data.at[i,'name'])) > 0) or (
+                        len(re.findall(r"[\s\d](\(AB\))\s[b-z]$", self.data.at[i,'name'])) > 0) or (len(re.findall(r"[\s\d](AB)$", self.data.at[i,'host'])) > 0) or (
+                        len(re.findall(r"[\s\d](\(AB\))$", self.data.at[i,'host'])) > 0) or (
+                        len(re.findall(r"[\s\d](AB)$", self.data.at[i,'host'])) > 0):
+                    self.data.at[i,'binary'] = "AB"
+                    self.data.at[i, 'host'] = self.data.at[i, 'host'].replace('(AB)', '').replace('AB', '').strip()
 
-            # strip the binary letter and put it in binary column
-            if len(re.findall(r"[\d\s][ABCSN]$", self.data.at[i, "host"])) > 0:
-                self.data.at[i, "binary"] = self.data.at[i, "host"][-1:]
-                self.data.at[i, "host"] = self.data.at[i, "host"][:-1].strip()
+                # SIMPLE BINARY NAME
+                if (
+                        len(re.findall(r"[\s\d][ABCNS][\s\d][b-z]$", self.data.at[i,'name']))
+                        > 0
+                ):
+                    self.data.at[i,'binary'] = self.data.at[i,'name'][-3:-2]
 
+
+                # SIMPLE BINARY HOST
+                if len(re.findall(r"[\d\s][ABCSN]$", self.data.at[i,'host'])) > 0:
+                    self.data.at[i, 'binary'] =self.data.at[i,'host'][-1:].strip()
+                    self.data.at[i,'host'] = self.data.at[i,'host'][:-1].strip()
+
+       #clean the host column
         self.data["host"] = self.data.host.apply(
             lambda x: " ".join(x.strip().strip(".").strip(" (").split())
         )
@@ -561,6 +536,7 @@ class Catalog:
             self.data.loc[self.data.binaryflag == 3, "binary"] = self.data.loc[
                 self.data.binaryflag == 3, "binary"
             ].replace("", "Rogue")
+
         logging.info("Fixed planets orbiting binary stars.")
 
     def create_catalogstatus_string(self, string: str) -> None:

@@ -22,8 +22,28 @@ def test__init(instance):
 
 
 def test__download_catalog(tmp_path, instance) -> None:
+    original_dir = os.getcwd()
+
+    os.chdir(tmp_path)  # Create a temporary in-memory configuration object
     url = "https://example.com/catalog.csv"
     filename = "catalog"
+    # Read specific date
+    expected_file_path = filename + '01-02-2024.csv'
+    with LogCapture() as log:
+        with pytest.raises(ValueError):
+            result = instance.download_catalog(url=url, filename=filename,local_date='01-02-2024')
+            assert "Could not find catalog with this specific date. Please check your date value." in log.actual()[0][-1]
+
+    with patch("os.path.exists", MagicMock(return_value=True)):
+        open(expected_file_path, "w").close()
+        with LogCapture() as log:
+            result = instance.download_catalog(url=url, filename=filename,local_date='01-02-2024')
+            assert "Reading specific version: 01-02-2024" in log.actual()[0][-1]
+            assert "Reading existing file" in log.actual()[1][-1]
+            assert "Catalog downloaded" in log.actual()[2][-1]
+            assert result == PosixPath(expected_file_path)
+    os.remove(expected_file_path)
+
     expected_file_path = filename + date.today().strftime("%m-%d-%Y.csv")
 
     # Mock os.path.exists to simulate that the file already exists or not
@@ -36,6 +56,7 @@ def test__download_catalog(tmp_path, instance) -> None:
 
             assert result == PosixPath(expected_file_path)
 
+    os.remove(expected_file_path)
     with patch("os.path.exists", MagicMock(return_value=False)):
         # CASE 1: it downloads fine
         with patch("requests.get", MagicMock()) as mock_run:
@@ -75,7 +96,7 @@ def test__download_catalog(tmp_path, instance) -> None:
                 result = instance.download_catalog(
                     url=url, filename=filename, timeout=0.00001
                 )
-
+    os.chdir(original_dir)
 
 def test__read_csv_catalog(instance):
     # Create a temporary in-memory configuration object
@@ -227,9 +248,10 @@ def test__identify_brown_dwarfs(instance):
             "2MASS J0030-1450",
             "MOA 2015-BLG-337 a",
             "KOI-123.01",
+            "DENIS J063001.4-184014 (bc)"
         ],
-        "binary": ["", "", "", ""],
-        "letter": ["", "", "", ""],
+        "binary": ["", "", "", "",""],
+        "letter": ["", "", "", "",""],
     }
 
     df = pd.DataFrame(data)
@@ -247,9 +269,10 @@ def test__identify_brown_dwarfs(instance):
             "2MASS J0030-1450",
             "MOA 2015-BLG-337 a",
             "KOI-123.01",
+            "DENIS J063001.4-184014 (bc)"
         ],
-        "binary": ["B", "", "a", ""],
-        "letter": ["BD", "BD", "BD", ""],
+        "binary": ["B", "", "a", "","bc"],
+        "letter": ["BD", "BD", "BD", "","BD"],
     }
     expected_df = pd.DataFrame(expected_result)
     pd.testing.assert_frame_equal(df, expected_df)
@@ -325,46 +348,6 @@ def test__replace_known_mistakes(tmp_path, instance):
 
     os.chdir(original_dir)
 
-
-def test_remove_known_brown_dwarfs(tmp_path, instance):
-    # Test if the function removes known brown dwarfs correctly
-    original_dir = os.getcwd()
-
-    os.chdir(tmp_path)  # Create a temporary in-memory configuration object
-    os.mkdir("UniformSources/")
-    data = {
-        "name": ["Planet1", "Planet2", "Planet3", "Planet4"],
-        "mass": [15.0, 25.0, None, None],
-        "msini": [18.0, 25.0, None, 18.0],
-        "letter": ["A", "BD", "C", "BD"],
-    }
-
-    df = pd.DataFrame(data)
-    instance.data = df
-
-    instance.remove_known_brown_dwarfs(print_flag=True)
-
-    # Check if known brown dwarfs have been removed from the DataFrame
-    expected_result = {
-        "name": ["Planet1", "Planet3", "Planet4"],
-        "mass": [15.0, None, None],
-        "msini": [18.0, None, 18.0],
-        "letter": ["A", "C", "BD"],
-    }
-    expected_df = pd.DataFrame(expected_result)
-    pd.testing.assert_frame_equal(
-        instance.data.reset_index()[["name", "mass", "msini", "letter"]], expected_df
-    )
-
-    with open("UniformSources/catalog_brown_dwarfs.csv", "r") as file:
-        f = file.readlines()
-    assert "1,Planet2,25.0,25.0,BD\n" in f
-
-    with open("UniformSources/catalog_possible_brown_dwarfs.csv", "r") as file:
-        f = file.readlines()
-    assert "3,Planet4,,18.0,BD\n" in f
-
-    os.chdir(original_dir)
 
 
 def test__make_errors_absolute(instance):

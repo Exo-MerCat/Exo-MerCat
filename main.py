@@ -28,6 +28,9 @@ parser.add_argument("-w", "--warnings", action="store_true", help="show UserWarn
 parser.add_argument(
     "-l", "--local", action="store_false", help="load previously uniformed catalogs"
 )
+parser.add_argument(
+    "-d", "--date", help="load a specific date (MM-DD-YYYY)"
+)
 args = vars(parser.parse_args())
 
 if args["verbose"]:
@@ -36,6 +39,9 @@ if args["warnings"]:
     warnings.filterwarnings("once")
 else:
     warnings.filterwarnings("ignore")
+local_date = ''
+if args['date']:
+    local_date=args['date']
 
 
 timeout = 100000
@@ -51,6 +57,8 @@ def main():
     Utils.service_files_initialization()
 
     emc = Emc()
+
+    #
     if args["local"]:
         for cat in [Koi()]:
 
@@ -58,7 +66,7 @@ def main():
             logging.info("****** " + cat.name + " ******")
             config_per_cat = config_dict[cat.name]
             file_path_str = cat.download_catalog(
-                config_per_cat["url"], config_per_cat["file"]
+                config_per_cat["url"], config_per_cat["file"], local_date
             )
             cat.read_csv_catalog(file_path_str)
 
@@ -75,7 +83,7 @@ def main():
             logging.info("****** " + cat.name + " ******")
             config_per_cat = config_dict[cat.name]
             file_path = cat.download_catalog(
-                config_per_cat["url"], config_per_cat["file"]
+                config_per_cat["url"], config_per_cat["file"], local_date
             )
             cat.read_csv_catalog(file_path)
             ### Uniforming catalogs
@@ -123,12 +131,11 @@ def main():
     emc.fill_missing_main_id()
     emc.check_coordinates()
     emc.polish_main_id()
-    emc.data.to_csv('all.csv')
+    emc.data.to_csv('UniformSources/all.csv')
 
     emc.check_same_host_different_id()
-
     emc.check_same_coords_different_id()
-    emc.group_by_list_id_check_host()
+    emc.group_by_list_id_check_main_id()
     emc.group_by_main_id_set_final_alias()
     emc.check_binary_mismatch(keyword="main_id")
     emc.cleanup_catalog()
@@ -139,14 +146,11 @@ def main():
     emc.potential_duplicates_after_merging()
     emc.select_best_mass()
     emc.set_exo_mercat_name()
-    emc.keep_columns()
     # emc.convert_datatypes()
+    emc.fill_row_update(local_date)
+    emc.keep_columns()
+    emc.save_catalog(local_date,'_full')
     emc.remove_known_brown_dwarfs(print_flag=True)
-    emc.print_catalog(
-        "Exo-MerCat/exo-mercat" + date.today().strftime("%m-%d-%Y") + ".csv"
-    )
-    emc.print_catalog("Exo-MerCat/exo-mercat.csv")
-
-
+    emc.save_catalog(local_date,'')
 if __name__ == "__main__":
     main()

@@ -1,11 +1,12 @@
 import os
+from datetime import date
 
 import numpy as np
 import pandas as pd
 import pytest
 from pandas._testing import assert_frame_equal
 from testfixtures import LogCapture
-
+import socket
 from exo_mercat.emc import Emc
 
 
@@ -321,15 +322,7 @@ def test__prepare_columns_for_mainid_search(instance):
                 np.nan,
             ],
             "angsep": [
-                np.nan,
-                np.nan,
-                np.nan,
-                np.nan,
-                np.nan,
-                np.nan,
-                np.nan,
-                np.nan,
-                np.nan,
+                -1.,-1.,-1.,-1.,-1.,-1.,-1.,-1.,-1.
             ],
         }
     )
@@ -393,7 +386,7 @@ def test__simbad_list_host_search(tmp_path, instance):
             "list_id": ["", "", "", "", ""],
             "main_id_ra": ["", "", "", "", ""],
             "main_id_dec": ["", "", "", "", ""],
-            "angsep": [np.nan, np.nan, np.nan, np.nan, np.nan],
+            "angsep": [-1.,-1.,-1.,-1.,-1.],
         }
     )
 
@@ -454,7 +447,7 @@ def test__simbad_list_host_search(tmp_path, instance):
                 50.52544444444444,
                 "",
             ],
-            "angsep": [0.0, 0.0, 0.0, 0.0, np.nan],
+            "angsep": [0.0, 0.0, 0.0, 0.0, -1],
         }
     )
     # Assert the DataFrame content is as expected
@@ -483,7 +476,7 @@ def test__simbad_list_alias_search(tmp_path, instance):
             "list_id": ["", ""],
             "main_id_ra": ["", ""],
             "main_id_dec": ["", ""],
-            "angsep": [np.nan, np.nan],
+            "angsep": [-1.,-1.],
         }
     )
 
@@ -613,7 +606,7 @@ def test__get_host_info_from_simbad(instance):
         "list_id": ["", "", "", "", "", "", ""],
         "main_id_ra": [np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan],
         "main_id_dec": [np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan],
-        "angsep": [np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan],
+        "angsep": [-1.,-1.,-1.,-1.,-1.,-1.,-1.],
         "angular_separation": ["", "", "", "", "", "", ""],
         "main_id_provenance": ["", "", "", "", "", "", ""],
     }
@@ -673,7 +666,7 @@ def test__get_host_info_from_simbad(instance):
             "SKY#  4813,SPOCS  155,TD1  1984,TIC 49845357,TYC 4708-1423-1,UBV    3104,UCAC3 178-9414,"
             "UCAC4 445-004277,uvby98 100019994,WDS J03128-0112A,WEB  2887,WISEA J031246.58-011146.4,YZ  91   684,"
             "YZ   0  3372,[RHG95]   572,Gaia DR3 3265335443260522112,Gaia DR2 3265335443260522112",
-            "2MASS J16171898-2437186,EPIC 203868608,TIC 98231712,UGCS J161718.97-243718.7,WISEA J161718.97-243718.9,"
+            "2MASS J16171898-2437186,AP J16171898-2437186,EPIC 203868608,TIC 98231712,UGCS J161718.97-243718.7,WISEA J161718.97-243718.9,"
             "Gaia DR2 6049656638390048896,Gaia DR3 6049656638390048896",
             "TYC 3556-3568-1,ASAS J193833+4604.0,ATO J294.6359+46.0664,GSC2.3 N2JF000803,GSC2 N0303123803,GSC 03556-03568,Kepler-451,KIC 9472174,LAMOST J193832.60+460359.1,LAMOST J193832.62+460359.1,LAMOST J193832.61+460359.1,2MASS J19383260+4603591,NSVS   5629361,TIC 271164763,UCAC3 273-158867,USNO-B1.0 1360-00318562,EQ J1938+4603,Gaia DR3 2080063931448749824,Gaia DR2 2080063931448749824",
             "",
@@ -705,7 +698,7 @@ def test__get_host_info_from_simbad(instance):
             46.066426388888885,
             np.nan,
         ],
-        "angsep": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, np.nan],
+        "angsep": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -1],
         "angular_separation": ["", "", "", "", "", "", ""],
         "main_id_provenance": [
             "SIMBAD",
@@ -750,6 +743,7 @@ def test__get_coordinates_from_simbad(tmp_path, instance):
         "main_id_provenance": ["", ""],
         "main_id_ra": [np.nan, np.nan],
         "main_id_dec": [np.nan, np.nan],
+        "angsep":[-1.,-1.]
     }
     expected_df = pd.DataFrame(
         {
@@ -771,7 +765,7 @@ def test__get_coordinates_from_simbad(tmp_path, instance):
             "main_id_ra": [344.36658535524, np.nan],
             "main_id_dec": [20.768832511140005, np.nan],
             "main_id_provenance": ["SIMBADCOORD", ""],
-            "angsep": [0.45601200000000003, np.nan],
+            "angsep": [0.45601200000000003, -1.],
         }
     )
     instance.data = pd.DataFrame(data)
@@ -837,6 +831,7 @@ def test__get_host_info_from_tic(instance):
             "main_id_ra": [306.501164, 140.51471830658],
             "main_id_dec": [-48.92036, 15.80819282436],
             "main_id_provenance": ["TIC", "TIC"],
+            "angsep":[0.0,0.0]
         }
     )
 
@@ -855,6 +850,7 @@ def test__get_host_info_from_tic(instance):
         "main_id_ra": ["", ""],
         "main_id_dec": ["", ""],
         "main_id_provenance": ["", ""],
+        "angsep":[-1.,-1.]
     }
 
     instance.data = pd.DataFrame(data)
@@ -888,7 +884,7 @@ def test__get_coordinates_info_from_tic(instance):
             "main_id": [""],
             "list_id": [""],
             "main_id_provenance": [""],
-            "angsep": [np.nan],
+            "angsep": [-1],
         }
     )
     expected = pd.DataFrame(
@@ -999,15 +995,21 @@ def test__polish_main_id(tmp_path, instance):
     # Test data
     data = {
         "main_id": [
-            "HD 131977b",
-            "VB 10 b",
-            "*  51 Peg",
-            "FRB 20180916B",
-            "*  51 Peg AB",
-            "*  51 Peg (AB)",
-            "BD+13  2618C",
+            "NAME V672 Lyr b",
+            "BD+18  2050B",
+            "BD+18  2050 B", #already correct binary
+            "*  51 Peg (AB)", #test for (AB)
+            "* 51 PegAB", #test for AB and disagreement on binary
+            "*  30 Ari B"
         ],
-        "binary": ["", "", "", "", "", "", ""],
+        "main_id_ra":[286.041048,132.508398,132.508398,344.366585,344.366585,39.240606],
+        "main_id_dec":[36.632624, 17.874189,17.874189,20.768833,20.768833,24.648056],
+        "list_id":['TrES-1,TOI-1236b,TOI-1236.01,HIDDEN NAME TrES-1b,NAME V672 Lyr b',''
+,'otherids','','ids',"unchanged id"],
+        "name":['TrES-1 b','EPIC 211839430.01','EPIC 211839430.01','51 Peg b','51 Peg b','30 Ari B b'],
+        "host":['TrES-1','EPIC 211839430','EPIC 211839430','51 Peg','51 Peg','30 Ari B'],
+        "catalog":['eu','epic','toi','nasa','oec','eu'],
+        "binary": ["","",'B',"S-type","B","B"],
     }
     instance.data = pd.DataFrame(data)
 
@@ -1020,51 +1022,64 @@ def test__polish_main_id(tmp_path, instance):
                 "Removed planet/binary letter from main_id. It happens 6 times."
                 in log["message"].tolist()
         )
+    expected_data= {
+        "main_id": [
+            "V* V672 Lyr",
+            "BD+18  2050",
+            "BD+18  2050",
+            "*  51 Peg", #test for (AB)
+            "*  51 Peg", #test for AB
+            "*  30 Ari B" #weird one
+        ],
+        "main_id_ra":[286.04104817344, 132.50595833333333, 132.50595833333333, 344.36658535524,344.36658535524,39.240606],
+        "main_id_dec":[36.63262407786001, 17.874583333333334, 17.874583333333334, 20.768832511140005,20.768832511140005,24.648056],
+        "list_id":['TIC 120757718,2MASS J19040985+3637574,GSC 02652-01324,TYC 2652-1324-1,NAME TrES-1 Parent Star,** ADM    4A,** FAE    1A,WDS J19042+3638A,Gaia DR3 2098964849867337856,Gaia DR1 2098964845566110720,V* V672 Lyr,TOI-1236,Gaia DR2 2098964849867337856,KIC 875283',
+                   'YZ  18  3535,BD+18  2050,CCDM J08500+1752AB,WDS J08500+1752AB,IDS 08444+1815 AB,** KU   33,ADS  7030 AB,CSI+18  2050  1'            ,
+                   'YZ  18  3535,BD+18  2050,CCDM J08500+1752AB,WDS J08500+1752AB,IDS 08444+1815 AB,** KU   33,ADS  7030 AB,CSI+18  2050  1,otherids',
+                   'NLTT 55385,HR  8729,Gaia DR3 2835207319109249920,BD+19  5036,PLX 5568.00,IRAS 22550+2030,NSV 14374,ROT  3341,LTT 16750,N30 5052,HD 217014,** RBR   21A,WDS J22575+2046A,PPM 114985,*  51 Peg,PLX 5568,YPAC 218,HIP 113357,UBV M  26734,UBV   19678,YZ   0  1227,YZ  20  9382,Gaia DR2 2835207319109249920,TIC 139298196,uvby98 100217014,TD1 29480,SPOCS  990,SKY# 43603,AKARI-IRC-V1 J2257280+204608,GEN# +1.00217014,JP11  3558,GJ 882,SAO  90896,AG+20 2595,LSPM J2257+2046,TYC 1717-2193-1,ASCC  826013,2MASS J22572795+2046077,USNO-B1.0 1107-00589893,NAME Helvetios,WEB 20165,HIC 113357,GC 32003,GCRV 14411,CSV 102222',
+                   'NLTT 55385,HR  8729,Gaia DR3 2835207319109249920,BD+19  5036,PLX 5568.00,IRAS 22550+2030,NSV 14374,ROT  3341,LTT 16750,N30 5052,HD 217014,** RBR   21A,WDS J22575+2046A,PPM 114985,*  51 Peg,PLX 5568,YPAC 218,HIP 113357,UBV M  26734,UBV   19678,YZ   0  1227,YZ  20  9382,Gaia DR2 2835207319109249920,TIC 139298196,uvby98 100217014,TD1 29480,SPOCS  990,SKY# 43603,AKARI-IRC-V1 J2257280+204608,GEN# +1.00217014,JP11  3558,GJ 882,SAO  90896,AG+20 2595,LSPM J2257+2046,TYC 1717-2193-1,ASCC  826013,2MASS J22572795+2046077,USNO-B1.0 1107-00589893,NAME Helvetios,WEB 20165,HIC 113357,GC 32003,GCRV 14411,CSV 102222,ids',
+                   'unchanged id'
+                   ],
+        "name":['TrES-1 b','EPIC 211839430.01','EPIC 211839430.01','51 Peg b','51 Peg b','30 Ari B b'],
+        "host":['TrES-1','EPIC 211839430','EPIC 211839430','51 Peg','51 Peg','30 Ari B'],
+        "catalog":['eu','epic','toi','nasa','oec','eu'],
+        "binary": ["","B","B","AB","B","B"],
+    }
+    assert_frame_equal(instance.data[['main_id','main_id_ra','main_id_dec','name','host','catalog','binary']],pd.DataFrame(expected_data)[['main_id','main_id_ra','main_id_dec','name','host','catalog','binary']])
 
-    # Assert the expected outputs
-    assert instance.data["main_id"].tolist() == [
-        "HD 131977",
-        "VB 10",
-        "*  51 Peg",
-        "FRB 20180916B",
-        "*  51 Peg",
-        "*  51 Peg",
-        "BD+13  2618",
-    ]
+    #check LIST_ID
+    for i in instance.data.index:
+        assert sorted(instance.data.at[i, "list_id"].split(",")) == sorted(
+            pd.DataFrame(expected_data).at[i,'list_id'].split(",")
+        )
 
     # Check if the log file was created and has the expected content
     assert os.path.exists("Logs/polish_main_id.txt")
     with open("Logs/polish_main_id.txt") as f:
         lines = f.readlines()
-
-    assert [
-               "MAINID corrected HD 131977b to HD 131977\n",
-               "\n",
-               "MAINID corrected VB 10 b to VB 10\n",
-               "\n",
-               "MAINID corrected *  51 Peg AB to *  51 Peg\n",
-               "\n",
-               " BINARY VALUE DOESN'T MATCH, PLEASE CHECK THE SYSTEM \n",
-               "     main_id binary\n",
-               "2  *  51 Peg       \n",
-               "4  *  51 Peg       \n",
-               "\n",
-               "MAINID corrected *  51 Peg (AB) to *  51 Peg\n",
-               "\n",
-               " BINARY VALUE DOESN'T MATCH, PLEASE CHECK THE SYSTEM \n",
-               "     main_id binary\n",
-               "2  *  51 Peg       \n",
-               "4  *  51 Peg       \n",
-               "5  *  51 Peg       \n",
-               "\n",
-               "Weird MAINID found: FRB 20180916B but cannot be found when FRB 20180916\n",
-               "\n",
-               "MAINID corrected BD+13  2618C to BD+13  2618\n",
-               "\n",
-               " BINARY VALUE DOESN'T MATCH, PLEASE CHECK THE SYSTEM \n",
-               "       main_id binary\n",
-               "6  BD+13  2618       \n",
-               "\n",
+    assert [ '***** CHECK FOR PLANET LETTER IN MAIN_ID *****\n',
+ 'MAINID corrected NAME V672 Lyr b to V672 Lyr.\n',
+ '\n',
+ '***** CHECK FOR BINARY LETTER IN MAIN_ID *****\n',
+ 'MAIN_ID: BD+18  2050B. Selected binary value: B. Value in catalog: \n',
+ '                name            host binary catalog\n',
+ '1  EPIC 211839430.01  EPIC 211839430           epic\n',
+ 'MAINID corrected BD+18  2050B to BD+18  2050. Binary value: B. Binary could '
+ 'be uniformed.\n',
+ '***\n',
+ 'MAINID corrected BD+18  2050 B to BD+18  2050. Binary value: B. Already correct.\n',
+ '***\n',
+'MAIN_ID: *  51 Peg (AB). Selected binary value: AB. Value in catalog: \n',
+'       name    host  binary catalog\n',
+'3  51 Peg b  51 Peg  S-type    nasa\n',
+'MAINID corrected *  51 Peg (AB) to *  51 Peg. Binary value: AB. Binary could be uniformed.\n',
+'***\n',
+'MAIN_ID: * 51 PegAB. Selected binary value: AB. Value in catalog: \n',
+'       name    host binary catalog\n',
+'4  51 Peg b  51 Peg      B     oec\n',
+'MAINID corrected * 51 PegAB to * 51 Peg. Binary value: AB. Binary value is not in agreement, please check.\n', '***\n',
+             'Weird MAINID found: *  30 Ari B but cannot be found when *  30 Ari. \n',
+             '***\n'
            ] == lines
 
     os.chdir(original_dir)
@@ -1076,7 +1091,7 @@ def test__fill_missing_mainid(instance):
             "main_id": ["*  51 Peg", ""],
             "main_id_ra": [344.366585, ""],
             "main_id_dec": [20.768833, ""],
-            "angsep": [0, np.nan],
+            "angsep": [0, -1.],
             "angular_separation": ["", ""],
             "main_id_provenance": ["SIMBAD", ""],
             "catalog": ["nasa", "eu"],
@@ -1091,8 +1106,8 @@ def test__fill_missing_mainid(instance):
             "main_id": ["*  51 Peg", "ZTFJ0407-00"],
             "main_id_ra": [344.366585, 61.954167],
             "main_id_dec": [20.768833, -0.121389],
-            "angsep": [0, np.nan],
-            "angular_separation": ["nasa: 0.0", "eu: nan"],
+            "angsep": [0, -1.],
+            "angular_separation": ["nasa: 0.0", "eu: -1.0"],
             "main_id_provenance": ["SIMBAD", "eu"],
             "catalog": ["nasa", "eu"],
             "host": ["51 Peg", "ZTFJ0407-00"],
@@ -1132,14 +1147,14 @@ def test__check_same_host_different_id(tmp_path, instance):
 
     # FIRST SET OF DATA, SHOULD BE AN ERROR ON HOST+BINARY
     assert lines[0:4] == [
-        "SAME HOST+BINARY DUPLICATE MAIN_ID\n",
+        "SAME HOST+BINARY DIFFERENT MAIN_ID\n",
         "           main_id binary catalog\n",
         "0     PSR B1620-26     AB      eu\n",
         "1  PSR B1620-26 AB     AB     oec\n",
     ]
     # SECOND SET, SAME HOST DIFFERENT MAIN_ID
     assert lines[4:8] == [
-        "SAME HOST DUPLICATE MAIN_ID\n",
+        "SAME HOST DIFFERENT MAIN_ID\n",
         "           main_id binary catalog\n",
         "0     PSR B1620-26     AB      eu\n",
         "1  PSR B1620-26 AB     AB     oec\n",
@@ -1197,17 +1212,16 @@ def test__check_same_coords_different_id(tmp_path, instance):
     os.chdir(original_dir)
 
 
-def test__group_by_list_id_check_host(tmp_path, instance):
+def test__group_by_list_id_check_main_id(tmp_path, instance):
     original_dir = os.getcwd()
 
     os.chdir(tmp_path)  # Create a temporary in-memory configuration object
     os.mkdir("Logs/")
     data = {
-        "host": ["51 Peg", "TYC 1717-2193-1"],
         "catalog": ["eu", "oec"],
         "status": ["CONFIRMED", "CONFIRMED"],
         "letter": ["b", "b"],
-        "main_id": ["*  51 Peg", "*  51 Peg"],
+        "main_id": ["*  51 Peg", "TYC 1717-2193-1"],
         "list_id": [
             "LTT 16750,*  51 Peg,** RBR   21A,AG+20 2595,AKARI-IRC-V1 J2257280+204608,ASCC  826013,BD+19  5036,"
             "CSV 102222,GC 32003,GCRV 14411,GEN# +1.00217014,GJ   882,HD 217014,HIC 113357,HIP 113357,HR  8729,"
@@ -1228,24 +1242,23 @@ def test__group_by_list_id_check_host(tmp_path, instance):
 
     instance.data = pd.DataFrame(data)
     with LogCapture() as log:
-        instance.group_by_list_id_check_host()
+        instance.group_by_list_id_check_main_id()
         log = pd.DataFrame(list(log), columns=["user", "info", "message"])
         assert (
-                "Planets that had a different host name but same SIMBAD alias: 1"
+                "Planets that had a different main_id name but same SIMBAD alias: 1"
                 in log["message"].tolist()
         )
 
-    assert list(instance.data.host) == ["51 Peg", "51 Peg"]
+    assert list(instance.data.main_id) == ["*  51 Peg", "*  51 Peg"]
 
-    assert os.path.exists("Logs/group_by_list_id_check_host.txt")
+    assert os.path.exists("Logs/group_by_list_id_check_main_id.txt")
 
-    with open("Logs/group_by_list_id_check_host.txt") as f:
+    with open("Logs/group_by_list_id_check_main_id.txt") as f:
         lines = f.readlines()
-        assert lines == [
-            "*** SAME LIST_ID *** \n",
-            "              host catalog     status letter    main_id\n",
-            "0           51 Peg      eu  CONFIRMED      b  *  51 Peg\n",
-            "1  TYC 1717-2193-1     oec  CONFIRMED      b  *  51 Peg\n",
+        assert lines == ['*** SAME LIST_ID, DIFFERENT MAIN_ID *** \n',
+ '  catalog     status letter          main_id\n',
+ '0      eu  CONFIRMED      b        *  51 Peg\n',
+ '1     oec  CONFIRMED      b  TYC 1717-2193-1\n'
         ]
 
     os.chdir(original_dir)
@@ -1256,7 +1269,7 @@ def test__group_by_main_id_set_final_alias(instance):
         "host": ["51 Peg", "TYC 1717-2193-1 b"],
         "alias": [
             "GJ 882,BD+19 5036,HIP 113357,HR 8729,HD 217014,51 Peg,Gaia DR2 2835207319109249920,Helvetios,SAO 90896,"
-            "TYC 1717-2193-1",
+            "TYC 1717-2193-1,nan",
             "51 Peg",
         ],
         "main_id": ["*  51 Peg", "*  51 Peg"],
@@ -2879,6 +2892,53 @@ def test__set_exo_mercat_name(instance):
         ]
 
 
+def test__fill_row_update(instance,tmp_path):
+    original_dir = os.getcwd()
+
+    os.chdir(tmp_path)  # Create a temporary in-memory configuration object
+    os.mkdir("Exo-MerCat/")
+
+    compar_data = {'exo_mercat_name': [ 'KMT-2019-BLG-2991 b','*   6 Lyn b'],
+ 'host': ['MOA 2019-BLG-421','6 Lyn'],
+ 'letter': [ 'b','b'],
+ 'main_id': ['KMT-2019-BLG-2991','*   6 Lyn'],
+ 'binary': ['',''],
+ 'ra_official': [271.54545,97.69628],
+ 'dec_official': [-27.485469, 58.16263],
+ 'mass': [ 0.54,2.01],
+ 'mass_max': [0.37,0.077],
+ 'mass_min': [0.37,0.077],
+ 'mass_url': ['eu','eu']}
+    compar_data=pd.DataFrame(compar_data)
+    # CASE: no other exomercats available
+
+    instance.data=compar_data.copy()
+    instance.fill_row_update( local_date='01-01-2020')
+    assert 'row_update' in instance.data.columns
+    assert instance.data.loc[0,'row_update']=='01-01-2020'
+    assert instance.data.loc[1,'row_update']=='01-01-2020'
+
+    # CASE: Data has changed
+
+    new_data = {'exo_mercat_name': ['KMT-2019-BLG-2991 b', '*   6 Lyn b'],
+                   'host': ['MOA 2019-BLG-421', '6 Lyn'],
+                   'letter': ['b', 'b'],
+                   'main_id': ['KMT-2019-BLG-2991', '*   6 Lyn'],
+                   'binary': ['', ''],
+                    'ra_official': [271.54545, 97.6962],
+                    'dec_official': [-27.485469, 58.1623],
+                   'mass': [0.54, 2.10],
+                   'mass_max': [0.37, 0.09],
+                   'mass_min': [0.37, 0.09],
+                   'mass_url': ['eu', 'nasa']}
+    new_data=pd.DataFrame(new_data)
+    pd.DataFrame(compar_data).to_csv('Exo-MerCat/exo-mercat_full01-01-2020.csv')
+    instance.data=new_data.copy()
+    instance.fill_row_update(local_date='')
+    assert 'row_update' in instance.data.columns
+    assert instance.data.loc[0,'row_update']=='01-01-2020'
+    assert instance.data.loc[1,'row_update']==date.today().strftime("%m-%d-%Y")
+    os.chdir(original_dir)
 def test__keep_columns(instance):
     # Test the keep_columns function
 
@@ -2962,6 +3022,7 @@ def test__keep_columns(instance):
         "exo_mercat_name": ["*   6 Lyn  b"],
         "emc_duplicate_entry_flag": [0],
         "main_id_provenance": ["SIMBAD"],
+        "row_update":['03-28-2024' ]
     }
 
     df = pd.DataFrame(data)
@@ -3035,6 +3096,7 @@ def test__keep_columns(instance):
         "duplicate_catalog_flag",
         "duplicate_names",
         "emc_duplicate_entry_flag",
+        "row_update"
     ]
     assert list(instance.data.columns) == expected_columns
 
@@ -3046,3 +3108,99 @@ def test__keep_columns(instance):
     instance.data = df
     with pytest.raises(KeyError):
         instance.keep_columns()
+def test_remove_known_brown_dwarfs(tmp_path, instance):
+    # Test if the function removes known brown dwarfs correctly
+    original_dir = os.getcwd()
+
+    os.chdir(tmp_path)  # Create a temporary in-memory configuration object
+    os.mkdir("Exo-MerCat/")
+    data = {
+        "name": ["Planet1", "Planet2", "Planet3", "Planet4"],
+        "mass": [15.0, 25.0, None, None],
+        "msini": [18.0, 25.0, None, 18.0],
+        "letter": ["A", "BD", "C", "BD"],
+    }
+
+    df = pd.DataFrame(data)
+    instance.data = df
+
+    instance.remove_known_brown_dwarfs(print_flag=True)
+
+    # Check if known brown dwarfs have been removed from the DataFrame
+    expected_result = {
+        "name": ["Planet1", "Planet3", "Planet4"],
+        "mass": [15.0, None, None],
+        "msini": [18.0, None, 18.0],
+        "letter": ["A", "C", "BD"],
+    }
+    expected_df = pd.DataFrame(expected_result)
+    pd.testing.assert_frame_equal(
+        instance.data.reset_index()[["name", "mass", "msini", "letter"]], expected_df
+    )
+
+    with open("Exo-MerCat/exo_mercat_brown_dwarfs.csv", "r") as file:
+        f = file.readlines()
+    assert "1,Planet2,25.0,25.0,BD\n" in f
+
+    with open("Exo-MerCat/exo_mercat_possible_brown_dwarfs.csv", "r") as file:
+        f = file.readlines()
+    assert "3,Planet4,,18.0,BD\n" in f
+
+    os.chdir(original_dir)
+
+
+def test_save_catalog(instance,tmp_path):
+    original_dir = os.getcwd()
+
+    os.chdir(tmp_path)  # Create a temporary in-memory configuration object
+    os.mkdir("Exo-MerCat/")
+    # Sample input data (DataFrame)
+    data = pd.DataFrame(
+        {
+            "name": ["KOI-1", "KOI-2", "KOI-3"],
+            "host": ["Kepler-1", "Kepler-2", "Kepler-3"],
+            "alias": ["KOI-1", "Kepler-2 b", "KOI-3"],
+        }
+    )
+    # Expected output (DataFrame sorted by "name")
+    expected_output = """name,host,alias\nKOI-1,Kepler-1,KOI-1\nKOI-2,Kepler-2,Kepler-2 b\nKOI-3,Kepler-3,KOI-3\n"""
+
+
+    instance.data = data
+    local_date='02-04-2023'
+    # Temporary in-memory file for testing
+    temp_file1 = "Exo-MerCat/exo-mercat_full02-04-2023.csv"
+    temp_file2 = 'Exo-MerCat/exo-mercat_full.csv'
+    # Call the function with the sample input data and temporary file
+    instance.save_catalog(local_date,'_full')
+    import glob
+    print(glob.glob("Exo-MerCat/*"))
+    assert os.path.exists(temp_file1)
+    assert os.path.exists(temp_file2)
+    file_content = open(temp_file1).read()
+    assert file_content == expected_output
+    file_content = open(temp_file2).read()
+    assert file_content == expected_output
+    # Clean up: Remove the temporary CSV file
+    os.remove(temp_file1)
+    os.remove(temp_file2)
+
+    local_date = '' #today
+    # Temporary in-memory file for testing
+    temp_file1 = "Exo-MerCat/exo-mercat"+date.today().strftime("%m-%d-%Y") + ".csv"
+    temp_file2 = 'Exo-MerCat/exo-mercat.csv'
+    # Call the function with the sample input data and temporary file
+    instance.save_catalog(local_date, '')
+    assert os.path.exists(temp_file1)
+    assert os.path.exists(temp_file2)
+    file_content = open(temp_file1).read()
+    assert file_content == expected_output
+    file_content = open(temp_file2).read()
+    assert file_content == expected_output
+    # Cleaxn up: Remove the temporary CSV file
+    os.remove(temp_file1)
+    os.remove(temp_file2)
+
+    os.chdir(original_dir)
+
+

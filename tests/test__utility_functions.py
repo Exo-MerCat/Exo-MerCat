@@ -773,6 +773,7 @@ def test__convert_discovery_methods(instance):
 
 
 def test__perform_query(instance):
+    #### SIMBAD #####
     # SEARCH ON NAME (host+ + binary, host+binary, pure host)
     expected = pd.DataFrame(
         {
@@ -793,8 +794,7 @@ def test__perform_query(instance):
                 "3675|PMC 90-93  1008|PPM 162584|SAO 121568|SBC7   573|SKY# 29573|TD1 19139|TYC  381-1598-1|UBV   "
                 "21316|UBV M  21407|YZ   7  7306|uvby98 100147869|Renson 41690|2MASS J16241083+0656534|Gaia DR1 "
                 "4439556476666646528|WEB 13596|Gaia DR2 4439556480967874432",
-                "Gaia DR3 6049656638390048896|TIC 98231712|2MASS J16171898-2437186|UGCS J161718.97-243718.7|WISEA "
-                "J161718.97-243718.9|EPIC 203868608|Gaia DR2 6049656638390048896",
+                "Gaia DR3 6049656638390048896|AP J16171898-2437186|TIC 98231712|2MASS J16171898-2437186|UGCS " "J161718.97-243718.7|WISEA J161718.97-243718.9|EPIC 203868608|Gaia DR2 6049656638390048896",
             ],
             "angsep": [0.0, 0.0, 0.0],
         }
@@ -811,7 +811,11 @@ def test__perform_query(instance):
     table = UtilityFunctions.perform_query(service, query, uploads_dict={"tab": t2})
 
     assert set(table.columns) == set(expected.columns)
-    assert_frame_equal(table, expected)
+    assert_frame_equal(table[['hostbinary','main_id','ra_2','dec_2','angsep']], expected[['hostbinary','main_id','ra_2','dec_2','angsep']])
+    for i in table.index:
+        assert sorted(table.at[i, "ids"].split("|")) == sorted(
+            expected.at[i, "ids"].split("|")
+        )
 
     # SEARCH ON ALIAS (alias+ + binary, alias+binary,pure alias)
     expected = pd.DataFrame(
@@ -872,7 +876,11 @@ def test__perform_query(instance):
     assert set(table.columns) == set(expected.columns)
     table = table.reset_index(drop=True)
 
-    assert_frame_equal(table, expected)
+    assert_frame_equal(table[['alias','main_id','ra_2','dec_2','angsep']], expected[['alias','main_id','ra_2','dec_2','angsep']])
+    for i in table.index:
+        assert sorted(table.at[i, "ids"].split("|")) == sorted(
+            expected.at[i, "ids"].split("|")
+        )
 
     # SELECT EXTRA ALIAS
 
@@ -900,7 +908,11 @@ def test__perform_query(instance):
     )
 
     assert set(table.columns) == set(expected.columns)
-    assert_frame_equal(table, expected)
+    assert_frame_equal(table[['main_id','ra_2','dec_2','angsep']], expected[['main_id','ra_2','dec_2','angsep']])
+    for i in table.index:
+        assert sorted(table.at[i, "ids"].split("|")) == sorted(
+            expected.at[i, "ids"].split("|")
+        )
 
     #     # SEARCH ON COORDINATES
     expected = pd.DataFrame(
@@ -932,11 +944,14 @@ def test__perform_query(instance):
             + """)) """
     )
     table = UtilityFunctions.perform_query(service, query, uploads_dict={"tab": t2})
+    #in this case must run also calculate_angsep
+    table = UtilityFunctions.calculate_angsep(table)
+
     assert set(table.columns) == set(expected.columns)
     print(table, expected)
     assert_frame_equal(table, expected)
 
-    #
+    ###### TIC #####
     #     # SEARCH ON TIC
     expected = pd.DataFrame(
         {
@@ -970,7 +985,7 @@ def test__perform_query(instance):
     assert_frame_equal(table, expected)
 
     #
-    #     # SEARCH ON TIC COORDINATES
+    #     # SEARCH ON TIC COORDINATES (upload of table is a bit buggy so we do without)
     data = pd.DataFrame(
         {
             "hostbinary": ["EPIC 251345848"],
@@ -980,8 +995,8 @@ def test__perform_query(instance):
     )
     expected = pd.DataFrame(
         {
-            "ra_2": ["140.40548276307"],
-            "dec_2": ["20.72704944739"],
+            "ra_2": [140.40548276307],
+            "dec_2": [20.72704944739],
             "GAIA": ["Gaia DR2 637589853596386560"],
             "UCAC4": ["UCAC4 554-044757"],
             "2MASS": ["2MASS J09213732+2043373"],
@@ -990,26 +1005,36 @@ def test__perform_query(instance):
             "KIC": [""],
             "HIP": [""],
             "TYC": [""],
-            "hostbinary": ["EPIC 251345848"],
-            "ra": ["140.405406"],
-            "dec": ["20.727007"],
             "main_id": ["TIC 86119727"],
             "ids": [
                 "UCAC4 554-044757,2MASS J09213732+2043373,WISE J092137.30+204337.2,Gaia DR2 637589853596386560"
             ],
             "angsep": [0.30024],
+            "hostbinary": ["EPIC 251345848"],
+            "ra": [140.405406],
+            "dec": [20.727007],
             "selected": [1],
         }
     )
-    t2 = Table.from_pandas(data)
-    query = (
-            """SELECT tic.RAJ2000 as ra_2, tic.DEJ2000 as dec_2,tic.GAIA, tic.UCAC4, tic."2MASS", tic.WISEA, tic.TIC, 
-            tic.KIC, tic.HIP, tic.TYC, t.hostbinary, t.ra, t.dec  FROM "IV/38/tic" as tic JOIN TAP_UPLOAD.tab AS t on 
-            1=CONTAINS(POINT('ICRS',tic.RAJ2000, tic.DEJ2000),   CIRCLE('ICRS',t.ra, t.dec,"""
-            + str(tolerance)
-            + """))"""
-    )
+    t2 = pd.DataFrame(data)
 
-    table = UtilityFunctions.perform_query(service, query, uploads_dict={"tab": t2})
+    table = pd.DataFrame()
+    for ind in t2.index:
+        query = (
+                """SELECT tic.RAJ2000 as ra_2, tic.DEJ2000 as dec_2,tic.GAIA, tic.UCAC4, tic."2MASS", tic.WISEA, 
+                tic.TIC, tic.KIC, tic.HIP, tic.TYC  FROM "IV/38/tic" as tic  WHERE 1=CONTAINS(POINT('ICRS',tic.RAJ2000, tic.DEJ2000),   CIRCLE('ICRS',""" + str(
+            t2.at[ind, 'ra']) + """,""" + str(t2.at[ind, 'dec']) + ""","""
+                + str(tolerance)
+                + """))"""
+        )
+        single_table = UtilityFunctions.perform_query(service, query, uploads_dict={})
+        single_table['hostbinary'] = t2.at[ind, 'hostbinary']
+        single_table['ra'] = t2.at[ind, 'ra']
+        single_table['dec'] = t2.at[ind, 'dec']
+        single_table = UtilityFunctions.calculate_angsep(single_table)
+
+        table = pd.concat([table, single_table])
+    table = table.drop_duplicates()
+
     assert set(table.columns) == set(expected.columns)
     assert_frame_equal(table, expected)

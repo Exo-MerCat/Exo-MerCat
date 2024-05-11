@@ -5,6 +5,7 @@ import re
 import xml.etree.ElementTree as ElementTree
 from pathlib import Path
 from typing import Union
+import socket
 
 import numpy as np
 import pandas as pd
@@ -604,70 +605,86 @@ class UtilityFunctions:
 
     @staticmethod
     def perform_query(service, query, uploads_dict=None):
+
+        timeout = 100000
+        socket.setdefaulttimeout(timeout)
+
         if uploads_dict is None:
             uploads_dict = {}
-        table = service.run_sync(query, uploads=uploads_dict, timeout=None)
+        table = service.run_sync(query, uploads=uploads_dict, timeout=timeout)
+        if len(table)>0:
+            table = table.to_table().to_pandas()
+            # table=table[table.otype.str.contains('\*')] # IF DECOMMENTED, ADD
+            # OTYPE BACK IN THE QUERY
+            if "TIC" in table.columns:
+                table = table.astype(str)
+                table["main_id"] = "TIC " + table["TIC"].replace("", "<NA>")
+                table["UCAC4"] = "UCAC4 " + table["UCAC4"].replace("", "<NA>")
+                table["2MASS"] = "2MASS J" + table["2MASS"].replace("", "<NA>")
+                table["WISEA"] = "WISE " + table["WISEA"].replace("", "<NA>")
+                table["GAIA"] = "Gaia DR2 " + table["GAIA"].replace("", "<NA>")
+                table["KIC"] = "KIC " + table["KIC"].replace("", "<NA>")
+                table["HIP"] = "HIP " + table["HIP"].replace("", "<NA>")
+                table["TYC"] = "TYC " + table["TYC"].replace("", "<NA>")
 
-        table = table.to_table().to_pandas()
-        # table=table[table.otype.str.contains('\*')] # IF DECOMMENTED, ADD
-        # OTYPE BACK IN THE QUERY
-        if "TIC" in table.columns:
-            table = table.astype(str)
-            table["main_id"] = "TIC " + table["TIC"].replace("", "<NA>")
-            table["UCAC4"] = "UCAC4 " + table["UCAC4"].replace("", "<NA>")
-            table["2MASS"] = "2MASS J" + table["2MASS"].replace("", "<NA>")
-            table["WISEA"] = "WISE " + table["WISEA"].replace("", "<NA>")
-            table["GAIA"] = "Gaia DR2 " + table["GAIA"].replace("", "<NA>")
-            table["KIC"] = "KIC " + table["KIC"].replace("", "<NA>")
-            table["HIP"] = "HIP " + table["HIP"].replace("", "<NA>")
-            table["TYC"] = "TYC " + table["TYC"].replace("", "<NA>")
-            for col in table.columns:
-                table.loc[table[col].str.contains("<NA>"), col] = ""
-            table["ids"] = table[
-                ["UCAC4", "2MASS", "WISEA", "GAIA", "KIC", "HIP", "TYC"]
-            ].agg(",".join, axis=1)
-            table["ids"] = table["ids"].map(lambda x: x.lstrip(",").rstrip(","))
+                for col in table.columns:
+                    table.loc[table[col].str.contains("<NA>"), col] = ""
+                    table["ids"] = table[
+                    ["UCAC4", "2MASS", "WISEA", "GAIA", "KIC", "HIP", "TYC"]
+                ].agg(",".join, axis=1)
+                    table["ids"] = table["ids"].map(lambda x: x.lstrip(",").rstrip(","))
+            table["angsep"] = 0.0 #default value
 
-        if "ra" in table.columns:  # it means it has been searching for coordinates
-            # selects the one that has the smallest angular separation
-            for row in table.iterrows():
-                r = row[1]
-                c1 = SkyCoord(
-                    r["ra"],
-                    r["dec"],
-                    frame="icrs",
-                    unit=(u.degree, u.degree),
-                )
-                c2 = SkyCoord(r.ra_2, r.dec_2, frame="icrs", unit=(u.degree, u.degree))
-                angsep = c2.separation(c1).degree
-                table.at[row[0], "angsep"] = angsep
+            table = table[table.main_id != ""]
 
-            table["selected"] = 0
+            return table.reset_index(drop=True)
+        else:
+            return pd.DataFrame()
 
-            table["angsep"] = table["angsep"].map(
-                lambda x: np.round(float(x), 8) * 3600
+    @staticmethod
+    def calculate_angsep(table):
+        table['ra']=table["ra"].map(
+            lambda x: float(x))
+        table['dec']=table['dec'].map(
+            lambda x: float(x))
+        table['ra_2']=table['ra_2'].map(
+            lambda x: float(x))
+        table['dec_2']=table['dec_2'].map(
+            lambda x: float(x))
+
+        for row in table.iterrows():
+            r = row[1]
+            c1 = SkyCoord(
+                float(r["ra"]),
+                float(r["dec"]),
+                frame="icrs",
+                unit=(u.degree, u.degree),
             )
+            c2 = SkyCoord(float(r.ra_2), float(r.dec_2), frame="icrs", unit=(u.degree, u.degree))
+            angsep = c2.separation(c1).degree
+            table.at[row[0], "angsep"] = angsep
 
-            for hostbin, group in table.groupby("hostbinary"):
-                if len(group) > 1:
-                    # if you find more than one, remove the planet entries
-                    for i in group.index:
-                        if (
-                                str(re.search("[\\s\\d][b-i]$", group.main_id[i], re.M))
-                                != "None"
-                        ):
-                            group = group.drop(i)
+        table["selected"] = 0
 
-                    selected = group[group.angsep == min(group.angsep)].head(1)
+        table["angsep"] = table["angsep"].map(
+            lambda x: np.round(float(x), 8) * 3600
+        )
 
-                else:
-                    selected = group.copy()
-                table.loc[selected.index, "selected"] = 1
+        for hostbin, group in table.groupby("hostbinary"):
+            if len(group) > 1:
+                # if you find more than one, remove the planet entries
+                for i in group.index:
+                    if (
+                            str(re.search("[\\s\\d][b-i]$", group.main_id[i], re.M))
+                            != "None"
+                    ):
+                        group = group.drop(i)
 
-            table = table[table.selected == 1]
-        else:  # doesn't look for coordinates
-            table["angsep"] = 0.0
+                selected = group[group.angsep == min(group.angsep)].head(1)
 
-        table = table[table.main_id != ""]
+            else:
+                selected = group.copy()
+            table.loc[selected.index, "selected"] = 1
 
-        return table.reset_index(drop=True)
+        table = table[table.selected == 1]
+        return table

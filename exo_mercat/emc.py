@@ -1,14 +1,16 @@
 import logging
+import os
 import re
 from statistics import mode
-
+from datetime import date, datetime
+import glob
 import numpy as np
 import pandas as pd
 import pyvo
 from astropy import units as u
 from astropy.coordinates import SkyCoord
 from astropy.table import Table
-
+import socket
 from exo_mercat.catalogs import Catalog
 from exo_mercat.utility_functions import UtilityFunctions as Utils
 
@@ -294,7 +296,7 @@ class Emc(Catalog):
         self.data["main_id_dec"] = np.nan
 
         self.data["angular_separation"] = ""
-        self.data["angsep"] = np.nan
+        self.data["angsep"] = -1.
 
         self.data["main_id_provenance"] = ""
 
@@ -506,6 +508,7 @@ class Emc(Catalog):
         query = """SELECT t.*, ids.ids as ids FROM TAP_UPLOAD.tab as t LEFT OUTER JOIN ident ON ident.id = t.main_id 
         LEFT OUTER JOIN basic ON ident.oidref = basic.oid LEFT OUTER JOIN ids ON basic.oid = ids.oidref"""
         table = Utils.perform_query(service, query, uploads_dict={"tab": t2})
+        table= Utils.calculate_angsep(table)
 
         for host in table["hostbinary"]:
             self.data.loc[self.data["hostbinary"] == host, "main_id_ra"] = float(
@@ -556,17 +559,22 @@ class Emc(Catalog):
             list_of_hosts["host"].str.findall(r"[^\x00-\x7F]+").str.len() == 0, "host"
         ]
         list_of_hosts["host"] = (
-            list_of_hosts["host"].str.replace("TIC ", "").astype(int)
+            list_of_hosts["host"].str.replace("TIC ", "")
         )
+        timeout = 100000
+        socket.setdefaulttimeout(timeout)
 
         service = pyvo.dal.TAPService("http://TAPVizieR.u-strasbg.fr/TAPVizieR/tap/")
 
-        t2 = Table.from_pandas(list_of_hosts)
-        query = """SELECT tic.RAJ2000 as ra_2, tic.DEJ2000 as dec_2,tic.GAIA, tic.UCAC4, tic."2MASS", tic.WISEA, 
-        tic.TIC, tic.KIC, tic.HIP, tic.TYC, t.*  FROM "IV/38/tic" as tic JOIN TAP_UPLOAD.tab as t ON tic.TIC = t.host"""
+        table=pd.DataFrame()
+        for host in list_of_hosts['host']:
+            query = """SELECT tic.RAJ2000 as ra_2, tic.DEJ2000 as dec_2,tic.GAIA, tic.UCAC4, tic."2MASS", tic.WISEA, 
+        tic.TIC, tic.KIC, tic.HIP, tic.TYC  FROM "IV/38/tic" as tic WHERE tic.TIC = """+str(host)
 
-        table = Utils.perform_query(service, query, uploads_dict={"tab": t2})
-
+            single_table = Utils.perform_query(service, query, uploads_dict={})
+            single_table['host']=host
+            table=pd.concat([table,single_table])
+        table=table.drop_duplicates()
         logging.info(
             "List of unique star names with a TIC host "
             + str(len(list_of_hosts))
@@ -586,6 +594,7 @@ class Emc(Catalog):
             self.data.loc[self.data["host"] == "TIC " + host, "list_id"] = (
                 table.loc[table["host"] == host, "ids"].values[0].replace("|", ",")
             )
+            self.data.loc[self.data["host"] == "TIC " + host, "angsep"] = 0.0
         self.data.main_id = self.data.main_id.fillna("")
         self.data.list_id = self.data.list_id.fillna("")
         self.data.main_id_ra = self.data.main_id_ra.fillna("")
@@ -604,16 +613,20 @@ class Emc(Catalog):
             tic_alias = alias_df.at[ind, "alias"].split(",")
             alias_df.at[ind, "tic_alias"] = [x for x in tic_alias if "TIC" in x][0]
         alias_df["tic_alias"] = (
-            alias_df["tic_alias"].str.replace("TIC ", "").astype(int)
+            alias_df["tic_alias"].str.replace("TIC ", "")
         )
 
         alias_df = alias_df[["host", "tic_alias"]]
-        t2 = Table.from_pandas(alias_df)
-        query = """SELECT tic.RAJ2000 as ra_2, tic.DEJ2000 as dec_2,tic.GAIA, tic.UCAC4, tic."2MASS", tic.WISEA, 
-        tic.TIC, tic.KIC, tic.HIP, tic.TYC, t.*  FROM "IV/38/tic" as tic JOIN TAP_UPLOAD.tab as t ON tic.TIC = 
-        t.tic_alias"""
 
-        table = Utils.perform_query(service, query, uploads_dict={"tab": t2})
+        table = pd.DataFrame()
+        for ind in alias_df.index:
+            query = """SELECT tic.RAJ2000 as ra_2, tic.DEJ2000 as dec_2,tic.GAIA, tic.UCAC4, tic."2MASS", tic.WISEA, 
+        tic.TIC, tic.KIC, tic.HIP, tic.TYC  FROM "IV/38/tic" as tic WHERE tic.TIC = """ + alias_df.at[ind,'tic_alias']
+
+            single_table = Utils.perform_query(service, query, uploads_dict={})
+            single_table['host']=alias_df.at[ind,'host']
+            table = pd.concat([table, single_table])
+        table=table.drop_duplicates()
 
         logging.info(
             "List of unique star names with a TIC alias "
@@ -634,6 +647,7 @@ class Emc(Catalog):
             self.data.loc[self.data["host"] == host, "list_id"] = (
                 table.loc[table["host"] == host, "ids"].values[0].replace("|", ",")
             )
+            self.data.loc[self.data["host"] == host, "angsep"] = 0.0
         self.data.main_id = self.data.main_id.fillna("")
         self.data.list_id = self.data.list_id.fillna("")
         self.data.main_id_ra = self.data.main_id_ra.fillna("")
@@ -649,19 +663,26 @@ class Emc(Catalog):
         # TIC
 
         service = pyvo.dal.TAPService(" http://TAPVizieR.u-strasbg.fr/TAPVizieR/tap/")
-        t2 = Table.from_pandas(
-            self.data[self.data.main_id == ""][["hostbinary", "ra", "dec"]]
-        )
-        query = (
-                """SELECT tic.RAJ2000 as ra_2, tic.DEJ2000 as dec_2,tic.GAIA, tic.UCAC4, tic."2MASS", tic.WISEA, 
-                tic.TIC, tic.KIC, tic.HIP, tic.TYC, t.hostbinary, t.ra, t.dec  FROM "IV/38/tic" as tic JOIN 
-                TAP_UPLOAD.tab AS t on 1=CONTAINS(POINT('ICRS',tic.RAJ2000, tic.DEJ2000),   CIRCLE('ICRS',t.ra, 
-                t.dec,"""
-                + str(tolerance)
-                + """))"""
-        )
+        t2 = self.data[self.data.main_id == ""][["hostbinary", "ra", "dec"]]
+        tolerance = 1 / 3600  # arcsec in degrees
 
-        table = Utils.perform_query(service, query, uploads_dict={"tab": t2})
+        table = pd.DataFrame()
+        for ind in t2.index:
+            query = (
+                    """SELECT tic.RAJ2000 as ra_2, tic.DEJ2000 as dec_2,tic.GAIA, tic.UCAC4, tic."2MASS", tic.WISEA, 
+                    tic.TIC, tic.KIC, tic.HIP, tic.TYC  FROM "IV/38/tic" as tic  WHERE 1=CONTAINS(POINT('ICRS',tic.RAJ2000, tic.DEJ2000),   CIRCLE('ICRS',"""+str(t2.at[ind,'ra'])+""","""+str(t2.at[ind,'dec'])+""","""
+                    + str(tolerance)
+                    + """))"""
+            )
+            single_table = Utils.perform_query(service, query, uploads_dict={})
+            if len(single_table)>0:
+                single_table['hostbinary']=t2.at[ind,'hostbinary']
+                single_table['ra']=t2.at[ind,'ra']
+                single_table['dec']=t2.at[ind,'dec']
+                single_table = Utils.calculate_angsep(single_table)
+
+                table = pd.concat([table, single_table])
+        table=table.drop_duplicates()
 
         for host in table["hostbinary"]:
             self.data.loc[self.data["hostbinary"] == host, "main_id_ra"] = float(
@@ -772,9 +793,8 @@ class Emc(Catalog):
 
         logging.info(self.data.coordinate_mismatch.value_counts())
 
-    def replace_old_new_identifier(self, identifier, new_identifier) -> None:
-        f = open("Logs/polish_main_id.txt", "a")
-
+    def replace_old_new_identifier(self, identifier, new_identifier,binary=None) -> str:
+        output_string=''
         service = pyvo.dal.TAPService("http://simbad.u-strasbg.fr:80/simbad/sim-tap")
 
         query = (
@@ -793,107 +813,99 @@ class Emc(Catalog):
             self.data.loc[self.data.main_id == identifier, "main_id_dec"] = float(
                 table.at[0, "dec_2"]
             )
+            if binary is not None:
+                 cumulative_alias= ','.join(
+                    self.data.loc[self.data.main_id == identifier, "list_id"].unique()) + ',' + table.loc[
+                                                                                0, "ids"
+                                                                            ].replace("|", ",")
+                 cumulative_alias=','.join([x for x in set(cumulative_alias.rstrip(',').lstrip(',').split(','))])
+                 self.data.loc[self.data.main_id == identifier, "list_id"] = cumulative_alias
+            else:
+                self.data.loc[self.data.main_id == identifier, "list_id"] = table.loc[
+                0, "ids"
+            ].replace("|", ",")
+            output_string="MAINID corrected " + identifier + " to " + new_identifier+'.'
+            if binary is not None:
+                output_string=output_string+ " Binary value: " +binary+"."
+                binary_catalog=self.data.loc[self.data.main_id == identifier, "binary"].copy()
+                if (binary_catalog.replace('S-type','') == '').all():
+                    self.data.loc[self.data.main_id == identifier, "binary"] = binary
+                    output_string=output_string+" Binary could be uniformed."
+                elif  (binary_catalog != binary).any():
+                    output_string=output_string+" Binary value is not in agreement, please check."
+                elif  (binary_catalog == binary).all():
+                    output_string=output_string+" Already correct."
+            else:
+                output_string=output_string+'\n'
+            #last thing to be changed since it changes the query
             self.data.loc[self.data.main_id == identifier, "main_id"] = table.at[
                 0, "main_id"
             ]
-            self.data.loc[self.data.main_id == identifier, "list_id"] = table.loc[
-                0, "ids"
-            ].replace("|", ",")
-
-            f.write("MAINID corrected " + identifier + " to " + new_identifier + "\n")
+            output_string=output_string
         elif len(table) == 0:
-            f.write(
-                "Weird MAINID found: "
-                + identifier
-                + " but cannot be found when "
-                + new_identifier
-                + "\n"
-            )
-        f.write("\n")
+           output_string= "Weird MAINID found: "+ identifier + " but cannot be found when " + new_identifier + ". "
 
-        f.close()
+        return output_string
 
     def polish_main_id(self) -> None:
         counter = 0
-
+        f = open("Logs/polish_main_id.txt", "a")
+        f.write('***** CHECK FOR PLANET LETTER IN MAIN_ID *****\n')
         for identifier in self.data.main_id:
-            if not str(re.search("[\\s\\d][b-i]$", identifier, re.M)) == "None":
+            # PLANET IN SIMBAD, WILL TRY TO LOOK FOR STAR IN SIMBAD AND REPLACE
+            if len(re.findall("[\s\d][b-i]$", identifier))>0:
                 new_identifier = identifier[:-1].strip().replace("NAME ", "")
                 counter += 1
-                self.replace_old_new_identifier(identifier, new_identifier)
-
+                output_string = self.replace_old_new_identifier(identifier, new_identifier,None)
+                f.write(output_string)
+        f.write('\n***** CHECK FOR BINARY LETTER IN MAIN_ID *****\n')
         for identifier in self.data.main_id:
-            # CHECK CIRCUMBINARY
-            if len(re.findall(r"[\s\d](AB)$", identifier)) > 0:
-                new_identifier = identifier[:-2].rstrip().replace("NAME ", "")
-                counter += 1
-                self.replace_old_new_identifier(identifier, new_identifier)
-
-                if (
-                        self.data.loc[self.data.main_id == new_identifier, "binary"] != "AB"
-                ).any():
-                    f = open("Logs/polish_main_id.txt", "a")
-                    f.write(
-                        " BINARY VALUE DOESN'T MATCH, PLEASE CHECK THE SYSTEM \n"
-                        + str(
-                            self.data.loc[
-                                self.data.main_id == new_identifier,
-                                ["main_id", "binary"],
-                            ]
-                        )
-                    )
-                    f.write("\n\n")
-                    f.close()
-
+            # CHECK CIRCUMBINARY, WILL TRY TO LOOK FOR HOST
             if len(re.findall(r"[\s\d](\(AB\))$", identifier)) > 0:
-                new_identifier = identifier[:-4].rstrip()
                 counter += 1
-                self.replace_old_new_identifier(identifier, new_identifier)
-
+                #it finds AB in main_id. Check if AB is already in binary
                 if (
-                        self.data.loc[self.data.main_id == new_identifier, "binary"] != "AB"
+                        self.data.loc[self.data.main_id == identifier, "binary"] != "AB"
                 ).any():
-                    f = open("Logs/polish_main_id.txt", "a")
+                    f.write('MAIN_ID: ' + identifier +". Selected binary value: AB"+
+                            ". Value in catalog: \n" +str(self.data.loc[self.data.main_id == identifier, ["name","host","binary","catalog"]])+'\n')
 
-                    f.write(
-                        " BINARY VALUE DOESN'T MATCH, PLEASE CHECK THE SYSTEM \n"
-                        + str(
-                            self.data.loc[
-                                self.data.main_id == new_identifier,
-                                ["main_id", "binary"],
-                            ]
-                        )
-                    )
+                new_identifier = identifier[:-4].rstrip().replace("NAME ", "")
+                output_string = self.replace_old_new_identifier(identifier, new_identifier,'AB')
+                f.write(output_string+"\n***\n")
 
-                    f.write("\n\n")
-                    f.close()
-        for identifier in self.data["main_id"]:
-            # REGULAR BINARY
-            if not str(re.search("[\\s\\d][ABCSN]$", identifier, re.M)) == "None":
-                new_identifier = identifier[:-1].strip()
+            if len(re.findall(
+                    r"[\[a-z](AB)$|\s(AB)$|\d(AB)$]", identifier)) > 0:
                 counter += 1
-
-                self.replace_old_new_identifier(identifier, new_identifier)
-
                 if (
-                        self.data.loc[self.data.main_id == new_identifier, "binary"]
+                        self.data.loc[self.data.main_id == identifier, "binary"] != "AB"
+                ).any():
+                    f.write('MAIN_ID: ' + identifier +". Selected binary value: AB"+
+                            ". Value in catalog: \n" +  str(self.data.loc[self.data.main_id == identifier, ["name","host","binary","catalog"]])+'\n')
+
+
+                new_identifier = identifier[:-2].rstrip()
+                output_string=self.replace_old_new_identifier(identifier, new_identifier,"AB")
+                f.write(output_string+"\n***\n")
+
+            # REGULAR BINARY
+            if len(re.findall("[\s\d][ABCSN]$", identifier)) >0:
+                counter += 1
+                if (
+                        self.data.loc[self.data.main_id == identifier, "binary"]
                         != identifier[-1:]
                 ).any():
-                    f = open("Logs/polish_main_id.txt", "a")
 
-                    f.write(
-                        " BINARY VALUE DOESN'T MATCH, PLEASE CHECK THE SYSTEM \n"
-                        + str(
-                            self.data.loc[
-                                self.data.main_id == new_identifier,
-                                ["main_id", "binary"],
-                            ]
-                        )
-                    )
+                    f.write('MAIN_ID: ' + identifier +". Selected binary value: "+identifier[-1:]+
+                            ". Value in catalog: \n" + str(
+                        self.data.loc[self.data.main_id == identifier, ["name", "host", "binary", "catalog"]])+'\n')
 
-                    f.write("\n\n")
-                    f.close()
 
+                new_identifier = identifier[:-1].strip()
+                output_string=self.replace_old_new_identifier(identifier, new_identifier, identifier[-1:])
+
+                f.write(output_string+"\n***\n")
+        f.close()
         logging.info(
             "Removed planet/binary letter from main_id. It happens "
             + str(counter)
@@ -931,13 +943,13 @@ class Emc(Catalog):
         for host, group in self.data.groupby("hostbinary"):
             if len(group.main_id.drop_duplicates()) > 1:
                 with pd.option_context("display.max_columns", 2000):
-                    f.write("SAME HOST+BINARY DUPLICATE MAIN_ID\n")
+                    f.write("SAME HOST+BINARY DIFFERENT MAIN_ID\n")
                     f.write(str(group[["main_id", "binary", "catalog"]]) + "\n")
 
         for host, group in self.data.groupby("host"):
             if len(group.main_id.drop_duplicates()) > 1:
                 with pd.option_context("display.max_columns", 2000):
-                    f.write("SAME HOST DUPLICATE MAIN_ID\n")
+                    f.write("SAME HOST DIFFERENT MAIN_ID\n")
                     f.write(str(group[["main_id", "binary", "catalog"]]) + "\n")
         logging.info("Checked if host is found under different main_ids.")
         f.close()
@@ -992,22 +1004,22 @@ class Emc(Catalog):
         logging.info("Checked if same coordinates found in main_ids")
         f.close()
 
-    def group_by_list_id_check_host(self) -> None:
+    def group_by_list_id_check_main_id(self) -> None:
         """ """
-        f = open("Logs/group_by_list_id_check_host.txt", "a")
+        f = open("Logs/group_by_list_id_check_main_id.txt", "a")
         count = 0
         for ids, group in self.data.groupby(by="list_id"):
-            if ids != "" and len(set(group.host)) > 1:
-                self.data.loc[self.data.list_id == ids, "host"] = list(group.host)[0]
+            if ids != "" and len(set(group.main_id)) > 1:
+                self.data.loc[self.data.list_id == ids, "main_id"] = list(group.main_id)[0]
                 with pd.option_context("display.max_columns", 2000):
                     f.write(
-                        "*** SAME LIST_ID *** \n"
-                        + str(group[["host", "catalog", "status", "letter", "main_id"]])
+                        "*** SAME LIST_ID, DIFFERENT MAIN_ID *** \n"
+                        + str(group[[ "catalog", "status", "letter", "main_id"]])
                         + "\n"
                     )
                 count = count + 1
         logging.info(
-            "Planets that had a different host name but same SIMBAD alias: "
+            "Planets that had a different main_id name but same SIMBAD alias: "
             + str(count)
         )
         f.close()
@@ -1025,9 +1037,12 @@ class Emc(Catalog):
                 final_alias = final_alias + "," + str(al)
             for al in group.list_id:
                 final_alias = final_alias + "," + str(al)
-            self.data.loc[self.data.main_id == host, "final_alias"] = ",".join(
+
+            final_alias=",".join(
                 [x for x in set(final_alias.split(",")) if x]
             )
+            final_alias=final_alias.replace('nan','').replace(',,',',')
+            self.data.loc[self.data.main_id == host, "final_alias"] = final_alias
 
     def cleanup_catalog(self) -> None:
         """
@@ -1694,6 +1709,7 @@ class Emc(Catalog):
             "duplicate_catalog_flag",
             "duplicate_names",
             "emc_duplicate_entry_flag",
+            "row_update"
         ]
         try:
             self.data = self.data[keep]
@@ -1701,73 +1717,92 @@ class Emc(Catalog):
             raise KeyError("Not all columns exist")
         logging.info("Selected columns to keep.")
 
-    # def search_on_tic(self):
-    #     tap_service = pyvo.dal.TAPService(" http://TAPVizieR.u-strasbg.fr/TAPVizieR/tap/")
-    #     t2 = Table.from_pandas(self.data[self.data.main_id == ''][['host2', 'ra_official', 'dec_official']])
-    #     tolerance=1/3600
-    #
-    #
-    #
-    #     ## TIC
-    #     table = tap_service.run_sync(
-    #         """SELECT tic.RAJ2000 as ra_2, tic.DEJ2000 as dec_2,tic.GAIA, tic.UCAC4, tic."2MASS", tic.WISEA, tic.TIC, tic.KIC, tic.HIP, tic.TYC, load.host2, load.ra_official, load.dec_official  FROM "IV/38/tic" as tic JOIN TAP_UPLOAD.tab AS load on 1=CONTAINS(POINT('ICRS',tic.RAJ2000, tic.DEJ2000),   CIRCLE('ICRS', load.ra_official, load.dec_official,""" + str(
-    #             tolerance) + """))""",
-    #         uploads={"tab": t2
-    #                  },timeout=None)
-    #
-    #
-    #     #2MASS
-    #     table = tap_service.run_sync(
-    #         """SELECT tic.RAJ2000 as ra_2, tic.DEJ2000 as dec_2,tic.GAIA, tic.UCAC4, tic."2MASS", tic.WISEA, tic.TIC, tic.KIC, tic.HIP, tic.TYC, load.host2, load.ra_official, load.dec_official  FROM "IV/38/tic" as tic JOIN TAP_UPLOAD.tab AS load on 1=CONTAINS(POINT('ICRS',tic.RAJ2000, tic.DEJ2000),   CIRCLE('ICRS', load.ra_official, load.dec_official,""" + str(
-    #             tolerance) + """))""",
-    #         uploads={"tab": t2
-    #                  },timeout=None)
-    #
-    #
-    #     # GAIA
-    #     table = tap_service.run_sync(
-    #         """SELECT load.host2, load.ra_official, load.dec_official, db.designation as main_id,  db.dec_epoch2000 as dec_2, db.ra_epoch2000 as ra_2   FROM "I/345/gaia2" AS db  JOIN TAP_UPLOAD.tab AS load on 1=CONTAINS(POINT('ICRS',db.ra_epoch2000, db.dec_epoch2000),   CIRCLE('ICRS', load.ra_official, load.dec_official,""" + str(
-    #             tolerance) + """))""",
-    #         uploads={"tab": t2
-    #                  },timeout=None)
-    #
-    #
-    #
-    #     table = table.to_table().to_pandas()
-    #     # table=table[table.type.str.contains('\*')]
-    #
-    #     for row in table.iterrows():
-    #                 r = row[1]
-    #                 c1 = SkyCoord(
-    #                         r['ra'],r['dec'],
-    #                     frame="icrs",
-    #                     unit=(u.degree, u.degree),
-    #                 )
-    #                 c2 = SkyCoord(
-    #                     r.ra_2, r.dec_2, frame="icrs", unit=(u.degree, u.degree)
-    #                 )
-    #                 angsep = c2.separation(c1).degree
-    #                 table.at[row[0], "angsep"] = angsep
-    #     table['selected']=0
-    #     for hostbin, group in table.groupby('hostbinary'):
-    #         if len(group)>1:
-    #                 selected = group[group.angsep == min(group.angsep)].head(1)
-    #
-    #         else:
-    #             selected=group.copy()
-    #         table.loc[selected.index, 'selected'] = 1
-    #
-    #     table=table[table.selected==1]
-    #
-    #
-    # for host in table.hostbinary: self.data.loc[self.data.hostbinary==host,'main_id_ra']=float(table.loc[
-    # table.hostbinary==host,'ra_2'].values[0]) self.data.loc[self.data.hostbinary==host,'main_id_dec']=float(
-    # table.loc[table.hostbinary==host,'dec_2'].values[0]) self.data.loc[self.data.hostbinary==host,
-    # 'main_id']=table.loc[table.hostbinary==host,'main_id'].values[0] self.data.loc[self.data.hostbinary==host,
-    # "angsep"] = np.round(table.loc[table.hostbinary==host,'angsep'].values[0],8)*3600
-    #
-    #         result_table = Simbad.query_object(table.loc[table.hostbinary==host,'main_id'].values[0])
-    #         result_table = result_table.to_pandas()
-    #         self.data.loc[self.data.hostbinary==host, "list_id"] = result_table.loc[0, "IDS"].replace(
-    #             "|", ","
-    #         )
+    def remove_known_brown_dwarfs(self, print_flag: bool) -> None:
+        """
+        The remove_known_brown_dwarfs function removes all known brown dwarfs from the dataframe.
+        It does this by checking if the mass of a planet is less than 20 Mjup, and if it isn't,
+        then it will be removed from the dataframe. If print_flag is set to True, then a csv file will be created
+        with all of these planets in them.
+
+        :param print_flag: Specify whether the function should print out a list of brown dwarfs
+        """
+        if print_flag:
+            self.data[
+                (
+                        self.data.mass.fillna(self.data.msini.fillna(0))
+                        .replace("", 0)
+                        .astype(float)
+                        > 20.0
+                )
+                #   | (self.data.letter == "BD")
+            ].to_csv("Exo-MerCat/" + self.name + "_brown_dwarfs.csv")
+
+        self.data = self.data[
+            (
+                    self.data.mass.fillna(self.data.msini.fillna(0))
+                    .replace("", 0)
+                    .astype(float)
+                    <= 20.0
+            )
+            #    & (self.data.letter != "BD")
+        ]
+        self.data[(self.data.letter == "BD")].to_csv(
+            "Exo-MerCat/" + self.name + "_possible_brown_dwarfs.csv"
+        )
+
+
+    def fill_row_update(self,local_date:str):
+        if local_date != '':
+            update_date = local_date
+        else:
+            update_date = date.today().strftime("%m-%d-%Y")
+
+        # find if there are older versions present
+        if len(glob.glob('Exo-MerCat/exo-mercat*-*.csv'))>0:
+            li = list(glob.glob('Exo-MerCat/exo-mercat_full*-*.csv'))
+            li = [re.search(r"\d\d-\d\d-\d\d\d\d", l)[0] for l in li]
+            li = [datetime.strptime(l, '%m-%d-%Y') for l in li]
+
+            #get the most recent compared to the current date. Get only the ones earlier than the date
+            li = [l for l in li if l < datetime.strptime(update_date, '%m-%d-%Y')]
+            compar_date=max(li).strftime('%m-%d-%Y')
+            right_merge=pd.read_csv('Exo-MerCat/exo-mercat_full'+compar_date+'.csv')
+            right_merge['old_index']=right_merge.index.copy().astype(int)
+            #in case the previous versions did not have this feature
+            if 'row_update' not in right_merge.columns:
+                right_merge['row_update']=compar_date
+
+
+            self.data['new_index']=self.data.index.copy().astype(int)
+            #print into csv to make sure that it reads the same way as right_merge
+            self.data.to_csv('temp.csv')
+            left_merge=pd.read_csv('temp.csv')
+            #cleanup
+            os.remove('temp.csv')
+
+            all = left_merge.fillna('').merge(right_merge.fillna(''), on=[x for x in right_merge.columns if
+                                                  x not in ['index','new_index', 'old_index', 'row_update']],
+                                  how='outer',
+                                  indicator=True)
+            all = all.dropna(subset=('new_index'))
+            #get the previous date for all the entries that did not change
+            self.data.loc[all.new_index, 'row_update'] = all.loc[all.new_index, 'row_update']
+            #fill the missing ones with the update date
+            self.data['row_update']=self.data['row_update'].fillna(update_date)
+            #clean up
+            self.data=self.data.drop('new_index',axis=1)
+        else:
+            self.data['row_update']=update_date
+
+
+    def save_catalog(self,local_date: str =='',postfix: str==''):
+
+        if local_date == '':
+            self.print_catalog(
+                "Exo-MerCat/exo-mercat" + postfix + date.today().strftime("%m-%d-%Y") + ".csv"
+            )
+        else:
+            self.print_catalog(
+                "Exo-MerCat/exo-mercat" + postfix + local_date + ".csv"
+            )
+        self.print_catalog("Exo-MerCat/exo-mercat"+postfix+".csv")
