@@ -6,10 +6,20 @@ from exo_mercat.catalogs import Catalog
 
 
 class Koi(Catalog):
+    """
+    The Koi class contains all methods and attributes related to the Kepler Objects of Interest catalog.
+    """
     def __init__(self) -> None:
         """
-        The __init__ function is called when the class is instantiated. It sets up the instance of the class,
-        and defines any variables that will be used by all instances of this class.
+        Initializes the Koi class object.
+
+        This function is automatically called when an instance of the Emc class is created.
+        It sets up the instance of the class by assigning a name.
+
+        :param self: The instance of the Koi class.
+        :type self: Koi
+        :return: None
+        :rtype: None
         """
         super().__init__()
         self.name = "koi"
@@ -17,13 +27,16 @@ class Koi(Catalog):
 
     def uniform_catalog(self) -> None:
         """
-        The uniform_catalog function takes the raw data from the NASA Exoplanet Archive and
-        returns a pandas DataFrame with columns for each of the following:
-        1. kepid (the Kepler ID)
-        2. kepoi_name (the KOI name)
-        3. kepler_name (the Kepler host star name, if available)
-        4. koi_disposition (CANDIDATE, FALSE POSITIVE, NOT DISPOSITIONED OR CONFIRMED)
+        This function uniforms the catalog data by selecting relevant columns, creating aliases, renaming columns,
+        and logging the uniformization process.
+
+        :param self: The instance of the Koi class.
+        :type self: Koi
+        :return: None
+        :rtype: None
         """
+
+        # Selecting relevant columns
         self.data = self.data[
             [
                 "kepid",
@@ -34,6 +47,7 @@ class Koi(Catalog):
                 "dec_str",
             ]
         ]
+        # Create KOI, KOI_host, Kepler_host, KIC_host columns
         self.data["KOI"] = self.data["kepoi_name"].apply(
             lambda x: "KOI-" + x.lstrip("K").lstrip("0")
         )
@@ -47,6 +61,8 @@ class Koi(Catalog):
             axis=1,
         )
         self.data["KIC_host"] = self.data["kepid"].apply(lambda x: "KIC " + str(x))
+
+        # Create letter column
         self.data["letter"] = self.data.apply(
             lambda row: row["kepler_name"][-1:]
             if not str(row.kepler_name) == "nan"
@@ -56,6 +72,7 @@ class Koi(Catalog):
         self.data["KIC"] = self.data["KIC_host"] + " " + self.data["letter"]
         self.data = self.data.rename(columns={"ra_str": "ra", "dec_str": "dec"})
 
+        # Put every alias in the alias/aliasplanet columns
         for i in self.data.index:
             self.data.at[i, "alias"] = (
                 str(self.data.at[i, "KOI_host"])
@@ -94,6 +111,7 @@ class Koi(Catalog):
                 + ","
             )
 
+        # Create name, disposition, discoverymethod columns
         self.data["name"] = self.data["KOI"]
         self.data["disposition"] = self.data["koi_disposition"]
         self.data["discoverymethod"] = "Transit"
@@ -109,15 +127,21 @@ class Koi(Catalog):
                 "dec",
             ]
         ]
+
+        # Logging
         logging.info("Catalog uniformed.")
 
     def convert_coordinates(self) -> None:
         """
-        The coordinates function takes the RA and Dec columns of a dataframe,
-        and converts them to decimal degrees. It replaces any
-        missing values with NaN. Finally, it uses SkyCoord to convert from hour angles and
-        degrees into decimal degrees.
-        Currently only used for Open Exoplanet Catalogue, KOI and EPIC catalogs.
+         Convert the right ascension (RA) and declination (Dec) columns of the dataframe to decimal degrees.
+
+        This function handles missing values by replacing them with empty strings, then converts the RA and Dec
+        values to decimal degrees using SkyCoord. If the values are empty strings, NaN is assigned.
+
+        :param self: An instance of class Koi
+        :type self: Koi
+        :return: None
+        :rtype: None
         """
 
         self.data["ra"] = self.data.ra.fillna("").replace("nan", "").replace(np.nan, "")
@@ -140,4 +164,6 @@ class Koi(Catalog):
             else np.nan,
             axis=1,
         )
+
+        # Logging
         logging.info("Converted coordinates from hourangle to deg.")

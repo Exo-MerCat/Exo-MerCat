@@ -15,6 +15,9 @@ from exo_mercat.utility_functions import UtilityFunctions as Utils
 
 
 class Catalog:
+    """
+    The Catalog class contains all methods and attributes that apply to all the other catalogs.
+    """
     def __init__(self) -> None:
         """
         This function is called when the class is instantiated. It sets up the object with a data attribute
@@ -46,7 +49,7 @@ class Catalog:
         :param local_date: The date of the catalog to download. Default is an empty string.
         :type local_date: str
         :param timeout: The maximum amount of time to wait for the download to complete. Default is None.
-        :type timeout: int
+        :type timeout: float
         :return: The path to the downloaded file.
         :rtype: Path
         """
@@ -367,6 +370,7 @@ class Catalog:
         """
         raise NotImplementedError
 
+
     def uniform_catalog(self) -> None:
         """
         Standardize the dataframe columns and values.
@@ -375,6 +379,7 @@ class Catalog:
         specific implementation for their respective catalog.
 
         :param self: An instance of class Catalog
+        :type self: Catalog
         :return: None
         :rtype: None
         :raises NotImplementedError: This method is not implemented in the base class.
@@ -749,7 +754,7 @@ class Catalog:
 
     def convert_coordinates(self) -> None:
         """
-        Convert the RA and Dec columns of the dataframe to decimal degrees.
+        Convert the `ra` and `dec columns of the dataframe to decimal degrees.
 
         This method is not implemented in the base class. Subclasses should override this method to provide the
         specific implementation for their respective catalog.
@@ -764,9 +769,7 @@ class Catalog:
 
     def fill_nan_on_coordinates(self) -> None:
         """
-        Fill missing values in the RA and Dec columns of the dataframe with NaN.
-
-        This function converts the RA and Dec columns from hour angles and degrees to decimal degrees.
+        Fill missing values in the `ra` and `dec` columns of the dataframe with NaN.
 
         :param self: An instance of class Catalog
         :type self: Catalog

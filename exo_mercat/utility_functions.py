@@ -600,7 +600,7 @@ class UtilityFunctions:
         return data
 
     @staticmethod
-    def perform_query(service, query, uploads_dict=None):
+    def perform_query(service, query, uploads_dict=None) -> pd.DataFrame:
         """
         Perform a query using the given service and query.
 
@@ -658,7 +658,7 @@ class UtilityFunctions:
             return pd.DataFrame()
 
     @staticmethod
-    def calculate_angsep(table):
+    def calculate_angsep(table) -> pd.DataFrame:
         """
         Calculates the angular separation between two points based on their coordinates.
 

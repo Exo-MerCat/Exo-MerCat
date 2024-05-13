@@ -10,8 +10,15 @@ from exo_mercat.utility_functions import UtilityFunctions as Utils
 class Epic(Catalog):
     def __init__(self) -> None:
         """
-        The __init__ function is called when the class is instantiated. It sets up the instance of the class,
-        and defines any variables that will be used by other functions in the class.
+        Initializes the Epic class object.
+
+        This function is automatically called when an instance of the Epic class is created.
+        It sets up the instance of the class by assigning a name and initializing data with an empty DataFrame.
+
+        :param self: The instance of the Epic class.
+        :type self: Epic
+        :return: None
+        :rtype: None
         """
         super().__init__()
         self.name = "epic"
@@ -19,13 +26,23 @@ class Epic(Catalog):
 
     def uniform_catalog(self) -> None:
         """
-        The uniform_catalog function takes the data from the K2targets catalog and creates a new table with only
-        the columns we need for our analysis. It also adds some useful columns that are derived from existing ones.
+        Uniforms the catalog by renaming columns and adding useful columns derived from existing ones.
+
+        This function takes the data from the K2/EPIC catalog and creates a new table with only the columns we need
+        for our analysis. It also adds some useful columns that are derived from existing ones.
+
+        :param self: The instance of the Epic class.
+        :type self: Epic
+        :return: None
+        :rtype: None
         """
+
+        # Set the catalog name and catalog name
         self.data["catalog"] = self.name
         self.data["catalog_name"] = self.data["pl_name"]
         self.data["catalog_host"] = self.data["hostname"]
 
+        # Rename columns
         self.data = self.data.rename(
             columns={
                 "pl_name": "name",
@@ -66,25 +83,34 @@ class Epic(Catalog):
             }
         )
 
+        # Filter data based on default_flag
         self.data = self.data[self.data.default_flag == 1]
+
+        # Add Kepler_host column
         self.data["Kepler_host"] = self.data.k2_name
         self.data["Kepler_host"].fillna(self.data["host"], inplace=True)
         self.data["Kepler_host"] = self.data.apply(
             lambda row: row["Kepler_host"].rstrip(" bcdefghi"), axis=1
         )
 
+        # Add letter column
         self.data["letter"] = self.data.pl_letter.replace("", np.nan).fillna(
             self.data.name.apply(lambda row: row[-3:])
         )
         self.data.k2_name = self.data.k2_name.fillna(
             self.data.host + " " + self.data.letter
         )
+        # Fill missing values in hd_name, hip_name, tic_id, and gaia_id columns
         self.data[["hd_name", "hip_name", "tic_id", "gaia_id"]] = self.data[
             ["hd_name", "hip_name", "tic_id", "gaia_id"]
         ].fillna("")
+
+        # Add alias column
         self.data["alias"] = self.data[
             ["tic_id", "hip_name", "hd_name", "gaia_id", "Kepler_host"]
         ].agg(",".join, axis=1)
+
+        # Remove nan from alias
         for i in self.data.index:
             self.data.at[i, "alias"] = (
                 self.data.at[i, "alias"]
@@ -93,38 +119,58 @@ class Epic(Catalog):
                 .lstrip(",")
             )
 
+        # Convert discovery methods
         self.data = Utils.convert_discovery_methods(self.data)
 
+        # Logging
         logging.info("Catalog uniformed.")
 
     def convert_coordinates(self) -> None:
         """
-        The coordinates function takes the RA and Dec columns of a dataframe,
-        and converts them to decimal degrees. It replaces any
-        missing values with NaN. Finally, it uses SkyCoord to convert from hour angles and
-        degrees into decimal degrees.
-        Currently only used for Open Exoplanet Catalogue, KOI catalogs.
-        UPDATE: EPIC now has degrees already.
+        Convert the right ascension (RA) and declination (Dec) columns of the dataframe to decimal degrees. This
+        function is not implemented as the Epic catalog already has coordinates in decimal degrees.
+
+        :param self: An instance of class Epic
+        :type self: Epic
+        :return: None
+        :rtype: None
+        :note: This function is not necessary for the EPIC catalog, as the coordinates are already in decimal degrees.
+
         """
         pass
 
     def remove_theoretical_masses(self) -> None:
-        """there are no masses here in the first place"""
+        """
+        Remove theoretical masses from the dataframe. Not used in the Epic catalog.
+
+        :param self: The instance of the Epic class.
+        :type self: Epic
+        :return: None
+        :rtype: None
+        :note: This function is not necessary for the Epic catalog.
+        """
         pass
 
     def handle_reference_format(self) -> None:
         """
-        The handle_reference_format function takes in a dataframe and replaces the reference column with
-        a url column. The function also adds columns for each of the seven parameters (e, mass, msini, i, a, P and R)
-        and sets them to be equal to the corresponding reference column. It then removes all rows where any of these
-        parameters are null.
+        This function takes in a dataframe and replaces the reference column with a url column. It also adds columns
+        for each of the seven parameters (e, mass, msini, i, a, P, and R) and sets them to be equal to the
+        corresponding reference column. It then removes all rows where any of these parameters are null.
+
+        :param self: The instance of the Epic class.
+        :type self: Epic
+        :return: None
+        :rtype: None
         """
+        # Add url column for each parameter
         for item in ["e", "mass", "msini", "i", "a", "p", "r"]:
             if item + "_url" not in self.data.columns:
                 self.data[item + "_url"] = self.data["reference"]
 
+        # Regular expression to extract url
         r = re.compile("href=(.*) target")
 
+        # Loop through each parameter and each row in the dataframe
         for item in ["e", "mass", "msini", "i", "a", "p", "r"]:
             for i in self.data.index:
                 # filter finite values by checking if x == x (false for nan, inf). If finite value, replace the
@@ -146,10 +192,21 @@ class Epic(Catalog):
 
                 else:
                     self.data.at[i, item + "_url"] = ""
+            # Set all null values to empty string
             self.data.loc[self.data[item].isnull(), item + "_url"] = ""
+
+        # Logging
         logging.info("Reference columns uniformed.")
 
-    def assign_status(self):
+    def assign_status(self) -> None:
+        """
+        Assigns the status of each row in the data DataFrame based on the value in the "disposition" column.
+
+        :param self: The instance of the Epic class.
+        :type self: Epic
+        :return: None
+        :rtype: None
+        """
         self.data["status"] = self.data["disposition"]
 
         logging.info("Status column assigned.")

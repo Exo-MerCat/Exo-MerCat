@@ -11,6 +11,9 @@ tap_service = pyvo.dal.TAPService(" http://TAPVizieR.u-strasbg.fr/TAPVizieR/tap/
 
 
 class Toi(Catalog):
+    """
+    The Toi class contains all methods and attributes related to the TESS Objects of Interest catalog.
+    """
     def __init__(self) -> None:
         """
         The __init__ function is called when the class is instantiated. It sets up the instance of the class,
@@ -21,8 +24,19 @@ class Toi(Catalog):
         self.data = None
 
     def uniform_catalog(self) -> None:
-        """ """
+        """
+        Standardize the dataframe columns and values. It assigns new columns to the dataframe. It runs the run_sync
+        method to gather the aliases of the TIC stars, to be added to the alias column. It assigns NaN to the missing
+        data columns in the dataframe. It calculates the radius and its uncertainties by converting from Earth units
+        to Jupiter units.
 
+        :param self: An instance of class Toi
+        :type self: Toi
+        :return: None
+        :rtype: None
+        """
+
+        # Create TOI, TOI_host, TIC_host columns
         self.data["catalog"] = self.name
         self.data["TOI"] = "TOI-" + self.data["toi"].astype(str)
 
@@ -38,6 +52,7 @@ class Toi(Catalog):
             ",".join, axis=1
         )
 
+        # Run the TAP query
         counter = -1
         for tid in self.data.tid.unique():
             counter += 1
@@ -73,6 +88,7 @@ class Toi(Catalog):
                 "alias_vizier"
             ][0]
 
+        # Save to aliases
         self.data["alias"] = self.data["alias"] + "," + self.data["alias_vizier"]
 
         for i in self.data.index:
@@ -91,6 +107,7 @@ class Toi(Catalog):
             }
         )
 
+        # Add missing columns
         self.data["mass"] = np.nan
         self.data["mass_min"] = np.nan
         self.data["mass_max"] = np.nan
@@ -113,29 +130,55 @@ class Toi(Catalog):
         self.data["Mstar_max"] = np.nan
         self.data["Mstar_min"] = np.nan
 
+        # Convert to correct units
         self.data["r"] = self.data["pl_rade"] * const.R_earth / const.R_jup
         self.data["r_min"] = self.data["pl_radeerr2"] * const.R_earth / const.R_jup
         self.data["r_max"] = self.data["pl_radeerr1"] * const.R_earth / const.R_jup
 
+        # Add discovery year and method
         self.data["discovery_year"] = self.data["toi_created"].str[:4]
 
         self.data["discovery_method"] = "Transit"
 
         self.data["reference"] = "toi"
 
+        # Logging
         logging.info("Catalog uniformed.")
 
     def convert_coordinates(self) -> None:
+        """
+        Convert the `ra` and `dec columns of the dataframe to decimal degrees. Not implemented for Toi.
+
+        :param self: An instance of class Toi
+        :type self: Toi
+        :return: None
+        :rtype: None
+        :note: This function is not necessary for the Toi catalog, as the coordinates are already in decimal degrees.
+
+        """
         pass
 
     def remove_theoretical_masses(self) -> None:
-        """there are no masses here in the first place"""
+        """
+        Remove theoretical masses from the dataframe. Not used for the Toi catalog, since there are no masses
+
+        :param self: The instance of the Toi class.
+        :type self: Toi
+        :return: None
+        :rtype: None
+        :note: This function is not necessary for the Toi catalog, since there are no masses.
+        """
         pass
 
     def handle_reference_format(self) -> None:
         """
-        The handle_reference_format function is used to create a url for each reference in the references list.
-        Since the TOI table does not provide references, we just use "TOI" as a keyword.
+        he handle_reference_format function is used to create a URL for each reference in the references list. Since
+        the Exoplanet Encyclopaedia table does not provide references, we just use "toi" as a keyword in the url.
+
+        :param self: An instance of class Toi
+        :type self: Toi
+        :return: None
+        :rtype: None
         """
         for item in ["e", "mass", "msini", "i", "a", "p", "r"]:
             self.data[item + "_url"] = self.data[item].apply(
@@ -144,7 +187,24 @@ class Toi(Catalog):
         logging.info("Reference columns uniformed.")
 
     def assign_status(self):
-        # DISPOSITION
+        """
+        Assigns status based on the disposition values.
+
+        The function uses a dictionary to map the disposition values to status categories.
+
+        Status Categories:
+        - "APC" -> "CONTROVERSIAL"
+        - "CP"  -> "CONFIRMED"
+        - "FA"  -> "FALSE POSITIVE"
+        - "FP"  -> "FALSE POSITIVE"
+        - "KP"  -> "CONFIRMED"
+        - "PC"  -> "CANDIDATE"
+        - ""    -> "UNKNOWN"
+
+        The function updates the 'status' column in the data attribute using the replace method.
+
+        Logging is used to inform about the assignment of the status column and to display the updated status counts.
+        """
         replace_dict = {
             "APC": "CONTROVERSIAL",
             "CP": "CONFIRMED",
@@ -155,6 +215,8 @@ class Toi(Catalog):
             "": "UNKNOWN",
         }
         self.data["status"] = self.data["tfopwg_disp"].replace(replace_dict)
+
+        # Logging
         logging.info("Status column assigned.")
         logging.info("Updated Status:")
         logging.info(self.data.status.value_counts())

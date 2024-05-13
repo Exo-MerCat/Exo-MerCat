@@ -8,22 +8,37 @@ from exo_mercat.utility_functions import UtilityFunctions as Utils
 
 
 class Nasa(Catalog):
+    """
+    The Nasa class contains all methods and attributes related to the NASA Exoplanet Archive catalog.
+    """
     def __init__(self) -> None:
         """
-        The __init__ function is called when the class is instantiated.
-        It sets up the instance of the class, and defines what attributes it has.
+        This function is called when the class is instantiated. It sets up the object with a name attribute that can
+        be used to refer to this particular instance of Nasa.
+
+        :param self: An instance of class Nasa
+        :type self: Nasa
+        :return: None
+        :rtype: None
         """
         super().__init__()
         self.name = "nasa"
 
     def uniform_catalog(self) -> None:
         """
-        The uniform_catalog function takes a dataframe and converts it to the format of a catalog.
-        The function do es this by renaming columns, changing column names to be more descriptive,
-        and adding new columns that are necessary for the catalog.
+        This function processes raw data from a catalog. It standardizes the data format, renames columns,
+        adds new columns like aliases, discovery methods, and references. Finally, it performs some string
+        manipulations on the data and converts discovery methods.
+
+        :param self: An instance of class Nasa
+        :type self: Nasa
+        :return: None
+        :rtype: None
         """
+        # Standardizing data format
         self.data["catalog"] = self.name
 
+        # Renaming columns
         self.data = self.data.rename(
             columns={
                 "pl_name": "name",
@@ -48,12 +63,6 @@ class Nasa(Catalog):
                 "rv_flag": "RV",
                 "tran_flag": "Transit",
                 "ttv_flag": "TTV",
-                # "pl_msinij": "msini",
-                # "pl_msinijerr2": "msini_min",
-                # "pl_msinijerr1": "msini_max",
-                # "pl_massj": "mass",
-                # "pl_massjerr2": "mass_min",
-                # "pl_massjerr1": "mass_max",
                 "pl_bmassj": "bestmass",
                 "pl_bmassjerr2": "bestmass_min",
                 "pl_bmassjerr1": "bestmass_max",
@@ -73,12 +82,16 @@ class Nasa(Catalog):
                 "pl_bmassj_reflink": "bestmass_url",
             }
         )
+
+        # Add new columns
         self.data["catalog_name"] = self.data["name"]
         self.data["catalog_host"] = self.data["host"]
 
         # if "default_flag" in self.data.columns:
         #     # this happens when you use PLANETARY SYSTEMS TABLE
         #     self.data = self.data[self.data.default_flag == 1]
+
+        # Split best mass into mass and msini
         self.data["mass"] = np.nan
         self.data["mass_min"] = np.nan
         self.data["mass_max"] = np.nan
@@ -90,6 +103,7 @@ class Nasa(Catalog):
             # this happens when you use PLANETARY COMPOSITE PARAMETERS TABLE
             self.sort_bestmass_to_mass_or_msini()
 
+        # String manipulations on alias
         self.data[["hd_name", "hip_name", "tic_id", "gaia_id"]] = self.data[
             ["hd_name", "hip_name", "tic_id", "gaia_id"]
         ].fillna("")
@@ -100,29 +114,44 @@ class Nasa(Catalog):
             .str.lstrip(",")
         )
 
+        # Convert discovery methods
         self.data = Utils.convert_discovery_methods(self.data)
 
+        # Logging
         logging.info("Catalog uniformed.")
 
     def sort_bestmass_to_mass_or_msini(self) -> None:
         """
-        The sort_bestmass_to_mass_or_msini function takes in a DataFrame and sorts the values of bestmass
-        into either mass or msini.If the value of bestmass is found to be a mass, then it will be sorted
-        into mass. If it is found to be an msini value, then it will instead go into msini. If neither
-        are true (i.e., if it's some other type of data, e.g. M-R relationship), then both mass and msini
-        are set to NaN for that row.
+        Sorts the values of 'bestmass' into either 'mass' or 'msini' based on the 'bestmass_provenance' column If
+        'bestmass' is found to be a mass, it is sorted into 'mass'. If it is found to be an 'msini' value,
+        it is sorted into 'msini'. If neither are true (e.g. theoretical mass), both 'mass' and 'msini' are set to
+        NaN for that row.
+
+        :param self: An instance of the Nasa class
+        :type self: Nasa
+        :raise ValueError: If 'bestmass' is not a mass or an 'msini'
+        :return: None
+        :rtype: None
         """
+
+        # Iterate over the rows of the dataframe
         for i in self.data.index:
+
+            # If 'bestmass' is a mass, sort it into 'mass'
             if self.data.at[i, "bestmass_provenance"] == "Mass":
                 self.data.at[i, "mass"] = self.data.at[i, "bestmass"]
                 self.data.at[i, "mass_max"] = self.data.at[i, "bestmass_max"]
                 self.data.at[i, "mass_min"] = self.data.at[i, "bestmass_min"]
                 self.data.at[i, "mass_url"] = self.data.at[i, "bestmass_url"]
+
+            # If 'bestmass' is an 'msini', sort it into 'msini'
             elif self.data.at[i, "bestmass_provenance"] == "Msini":
                 self.data.at[i, "msini"] = self.data.at[i, "bestmass"]
                 self.data.at[i, "msini_max"] = self.data.at[i, "bestmass_max"]
                 self.data.at[i, "msini_min"] = self.data.at[i, "bestmass_min"]
                 self.data.at[i, "msini_url"] = self.data.at[i, "bestmass_url"]
+
+            # If 'bestmass' is not a mass or an 'msini', set both 'mass' and 'msini' to NaN
             elif (self.data.at[i, "bestmass_provenance"] == "M-R relationship") or (
                 self.data.at[i, "bestmass_provenance"] == "Msin(i)/sin(i)"
             ):
@@ -134,23 +163,32 @@ class Nasa(Catalog):
                 self.data.at[i, "mass_max"] = np.nan
                 self.data.at[i, "mass_min"] = np.nan
                 self.data.at[i, "mass_url"] = np.nan
+
+            # If 'bestmass' is not a mass or an 'msini', raise an error
             else:
                 print(self.data.at[i, "bestmass_provenance"])
                 raise RuntimeError
 
     def handle_reference_format(self) -> None:
         """
-        The handle_reference_format function takes in a dataframe and replaces the reference column with
-        a url column. The function also adds columns for each of the seven parameters (e, mass, msini, i, a, P and R)
-        and sets them to be equal to the corresponding reference column. It then removes all rows where any of these
-        parameters are null.
+        This function takes in a dataframe and replaces the reference column with a url column. It also adds columns
+        for each of the seven parameters (e, mass, msini, i, a, P, and R) and sets them to be equal to the
+        corresponding reference column. It then removes all rows where any of these parameters are null.
+
+        :param self: The instance of the Nasa class.
+        :type self: Nasa
+        :return: None
+        :rtype: None
         """
+        # Add url column for each parameter
         for item in ["e", "mass", "msini", "i", "a", "p", "r"]:
             if item + "_url" not in self.data.columns:
                 self.data[item + "_url"] = self.data["reference"]
 
+        # Regular expression to extract url
         r = re.compile("href=(.*) target")
 
+        # Iterate over the rows of the dataframe
         for item in ["e", "mass", "msini", "i", "a", "p", "r"]:
             for i in self.data.index:
                 # filter finite values by checking if x == x (false for nan, inf). If finite value, replace the
@@ -169,47 +207,75 @@ class Nasa(Catalog):
                         .replace("https://ui.adsabs.harvard.edu/abs/", "")
                         .replace("/abstract", "")
                     )
-
+                # Set all null values to empty string
                 else:
                     self.data.at[i, item + "_url"] = ""
             self.data.loc[self.data[item].isnull(), item + "_url"] = ""
+
+        # Logging
         logging.info("Reference columns uniformed.")
 
     def assign_status(self) -> None:
         """
-        The assign_status function assigns the status of the candidate (CONFIRMED by DEFAULT for NASA).
+        This function sets the status of each planet in the data DataFrame based on the value in the planet_status
+        column. For Nasa, this is "CONFIRMED" by default.
+
+        :param self: An instance of the Nasa class.
+        :type self: Nasa
+        :return: None
+        :rtype: None
         """
+
+        # Set all planets with confirmed planets as CONFIRMED
         self.data["status"] = "CONFIRMED"
+
+        # Logging
         logging.info("Status column assigned.")
         logging.info("Updated Status:")
         logging.info(self.data.status.value_counts())
 
     def convert_coordinates(self) -> None:
-        """The coordinates function takes the RA and Dec columns of a dataframe,
-        and converts them to decimal degrees. It replaces any
-        missing values with NaN. Finally, it uses SkyCoord to convert from hour angles and
-        degrees into decimal degrees.
-        NOT NECESSARY since NASA already has coordinates in degrees"""
+        """
+        Convert the right ascension (RA) and declination (Dec) columns of the dataframe to decimal degrees. This
+        function is not necessary as the NASA Exoplanet Archive already has coordinates in decimal degrees.
+
+        :param self: An instance of class Nasa
+        :type self: Nasa
+        :return: None
+        :rtype: None
+        :note:  It is not necessary for Nasa, as the coordinates are already in decimal degrees.
+        """
         pass
 
     def remove_theoretical_masses(self) -> None:
         """
-        The remove_theoretical_masses function removes mass and radius estimates calculated through M-R relationships.
-        It does this by removing all rows where the mass_url, msini_url, and r_url columns contain
-        the word "Calculated".
+        Removes theoretical masses and radii calculated through M-R relationships. This function removes all rows
+        where the mass_url, msini_url, and r_url columns contain the word "Calculated".
+
+        :param self: An instance of the Nasa class.
+        :type self: Nasa
+        :return: None
+        :rtype: None
         """
+
+        # Iterate over different value suffixes
         for value in ["", "_min", "_max", "_url"]:
+            # Remove theoretical masses
             self.data.loc[
                 self.data["mass_url"].str.contains("Calculated", na=False),
                 "mass" + value,
             ] = np.nan
 
+            # Remove theoretical msini
             self.data.loc[
                 self.data["msini_url"].str.contains("Calculated", na=False),
                 "msini" + value,
             ] = np.nan
 
+            # Remove theoretical radii
             self.data.loc[
                 self.data["r_url"].str.contains("Calculated", na=False), "r" + value
             ] = np.nan
+
+        # Logging
         logging.info("Theoretical masses/radii removed.")

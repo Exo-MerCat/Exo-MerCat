@@ -16,6 +16,9 @@ from exo_mercat.utility_functions import UtilityFunctions as Utils
 
 
 class Emc(Catalog):
+    """
+    The EMC class contains all methods and attributes related to Exo-MerCat catalog.
+    """
     def __init__(self) -> None:
         """
         Initializes the Emc class object.
@@ -34,9 +37,8 @@ class Emc(Catalog):
 
     def convert_coordinates(self) -> None:
         """
-        Convert RA and Dec columns of a dataframe from hour angles and degrees to decimal degrees.
-
-        This function replaces any missing values with NaN. It uses the SkyCoord library to perform the conversion.
+        Convert the right ascension (RA) and declination (Dec) columns of the dataframe to decimal degrees. This
+        function is not implemented as the EMC already has coordinates in decimal degrees.
 
         :param self: The instance of the Emc class.
         :type self: Emc
@@ -49,7 +51,13 @@ class Emc(Catalog):
     def alias_as_host(self) -> None:
         """
 
-        The alias_as_host function takes the alias column of a dataframe and checks if any of the aliases are labeled as hosts in some other entry. If an alias is labeled as a host, it changes the host to be that of the original host. It then adds all aliases of both hosts into one list for each row. The method opens a file called "Logs/alias_as_host.txt" in append mode and writes information about the aliases that were changed to be hosts. Finally, it updates the dataframe with the new aliases and logs the number of times the aliases were changed to be hosts. It is okay if it happens multiple times, as long as it uniforms the host name and adds up all the aliases, SIMBAD will find them coherently.
+        The alias_as_host function takes the alias column of a dataframe and checks if any of the aliases are labeled
+        as hosts in some other entry. If an alias is labeled as a host, it changes the host to be that of the
+        original host. It then adds all aliases of both hosts into one list for each row. The method opens a file
+        called "Logs/alias_as_host.txt" in append mode and writes information about the aliases that were changed to
+        be hosts. Finally, it updates the dataframe with the new aliases and logs the number of times the aliases
+        were changed to be hosts. It is okay if it happens multiple times, as long as it uniforms the host name and
+        adds up all the aliases, SIMBAD will find them coherently.
 
         :param self: The instance of the Emc class.
         :type self: Emc
@@ -104,7 +112,9 @@ class Emc(Catalog):
 
     def check_binary_mismatch(self, keyword: str) -> None:
         """
-        The check_binary_mismatch function checks for binary mismatches in the data (planets that orbit a binary but arecontroversial in the various catalogs and/or SIMBAD). It also checks if the SIMBAD main_id labels the target as binary. Ideally, all of these issues should be fixed by a human for the code to work properly.
+        The check_binary_mismatch function checks for binary mismatches in the data (planets that orbit a binary but
+        arecontroversial in the various catalogs and/or SIMBAD). It also checks if the SIMBAD main_id labels the
+        target as binary. Ideally, all of these issues should be fixed by a human for the code to work properly.
 
         :param self: The instance of the Emc class.
         :type self: Emc
@@ -127,7 +137,6 @@ class Emc(Catalog):
             if len(set(group.binary)) > 1:
                 # Uniform only S-type
                 if len(group[group.binary == "S-type"]) > 0:
-                    warning = ""
                     for i in group[group.binary == "S-type"].index:
                         for j in group[group.binary != "S-type"].index:
                             if (
@@ -430,7 +439,7 @@ class Emc(Catalog):
             """SELECT t.*, basic.main_id, basic.ra as ra_2,basic.dec as dec_2, ids.ids FROM TAP_UPLOAD.tab as t LEFT 
             OUTER JOIN ident ON ident.id = t."""
             + column
-            + """ LEFT OUTER JOIN basic ON ident.oidref = basic.oid LEFT OUTER JOIN ids ON basic.oid = ids.oidref""",
+            + """ LEFT OUTER JOIN basic ON ident.oidref = basic.oid LEFT OUTER JOIN ids ON basic.oid = ids.oidref"""
         )
         table = Utils.perform_query(service, query, uploads_dict={"tab": t2})
 
