@@ -45,18 +45,18 @@ class Oec(Catalog):
                 Utils.convert_xmlfile_to_csvfile(file_path=file_path_xml_str)
 
             except (
-                    OSError,
-                    IOError,
-                    FileNotFoundError,
-                    ConnectionError,
-                    ValueError,
-                    TypeError,
-                    TimeoutError,
-                    requests.exceptions.ConnectionError,
-                    requests.exceptions.SSLError,
-                    requests.exceptions.Timeout,
-                    requests.exceptions.ConnectTimeout,
-                    requests.exceptions.HTTPError,
+                OSError,
+                IOError,
+                FileNotFoundError,
+                ConnectionError,
+                ValueError,
+                TypeError,
+                TimeoutError,
+                requests.exceptions.ConnectionError,
+                requests.exceptions.SSLError,
+                requests.exceptions.Timeout,
+                requests.exceptions.ConnectTimeout,
+                requests.exceptions.HTTPError,
             ):
                 if len(glob.glob(filename + "*.csv")) > 0:
                     file_path_str = glob.glob(filename + "*.csv")[0]

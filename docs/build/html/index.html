@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 
 
@@ -6,9 +7,9 @@
 
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>Welcome to Exo-MerCat’s documentation! &#8212; Exo-MerCat 2.0 documentation</title>
+    <title>Exo-MerCat: The Exoplanet Merged Catalog &#8212; Exo-MerCat 2.0 documentation</title>
   
   
   
@@ -28,18 +29,22 @@
 <link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
 
-    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=362ab14a" />
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" href="_static/styles/sphinx-book-theme.css?digest=14f4ca6b54d191a8c7657f6c759bf11a5fb86285" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="_static/custom.css" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
   <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
 <link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
 
-    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js?v=945a2fdd"></script>
-    <script src="_static/doctools.js?v=888ff710"></script>
-    <script src="_static/sphinx_highlight.js?v=4825356b"></script>
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/scripts/sphinx-book-theme.js?digest=5a5c038af52cf7bc1a1ec88eea08e6366ee68824"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'index';</script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Usage" href="usage.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -74,8 +79,8 @@
          class="form-control"
          name="q"
          id="search-input"
-         placeholder="Search the docs ..."
-         aria-label="Search the docs ..."
+         placeholder="Search..."
+         aria-label="Search..."
          autocomplete="off"
          autocorrect="off"
          autocapitalize="off"
@@ -85,14 +90,24 @@
   </div>
   
     <nav class="bd-header navbar navbar-expand-lg bd-navbar">
-<div class="bd-header__inner bd-page-width">
-  <label class="sidebar-toggle primary-toggle" for="__primary">
-    <span class="fa-solid fa-bars"></span>
-  </label>
+    </nav>
   
-  <div class="navbar-header-items__start">
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
     
-      <div class="navbar-item">
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
   
 
 <a class="navbar-brand logo" href="#">
@@ -100,127 +115,28 @@
   
   
   
+    
+    
+      
+    
+    
+    <img src="_static/Acquerello_scritta.png" class="logo__image only-light" alt="Logo image"/>
+    <script>document.write(`<img src="_static/Acquerello_scritta.png" class="logo__image only-dark" alt="Logo image"/>`);</script>
   
-    <p class="title logo__title">Exo-MerCat 2.0 documentation</p>
   
 </a></div>
-    
-  </div>
-  
-  
-  <div class="col-lg-9 navbar-header-items">
-    
-    <div class="me-auto navbar-header-items__center">
-      
-        <div class="navbar-item"><nav class="navbar-nav">
-  <p class="sidebar-header-items__title"
-     role="heading"
-     aria-level="1"
-     aria-label="Site Navigation">
-    Site Navigation
-  </p>
-  <ul class="bd-navbar-elements navbar-nav">
-    
-  </ul>
+        <div class="sidebar-primary-item"><nav class="bd-links" id="bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="classes.html">Classes</a></li>
+
+</ul>
+
+    </div>
 </nav></div>
-      
     </div>
-    
-    
-    <div class="navbar-header-items__end">
-      
-        <div class="navbar-item navbar-persistent--container">
-          
-<script>
-document.write(`
-  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <i class="fa-solid fa-magnifying-glass"></i>
-  </button>
-`);
-</script>
-        </div>
-      
-      
-        <div class="navbar-item">
-<script>
-document.write(`
-  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
-    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
-    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
-  </button>
-`);
-</script></div>
-      
-    </div>
-    
-  </div>
-  
-  
-    <div class="navbar-persistent--mobile">
-<script>
-document.write(`
-  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <i class="fa-solid fa-magnifying-glass"></i>
-  </button>
-`);
-</script>
-    </div>
-  
-
-  
-    <label class="sidebar-toggle secondary-toggle" for="__secondary">
-      <span class="fa-solid fa-outdent"></span>
-    </label>
-  
-</div>
-
-    </nav>
-  
-  <div class="bd-container">
-    <div class="bd-container__inner bd-page-width">
-      
-      <div class="bd-sidebar-primary bd-sidebar hide-on-wide">
-        
-
-  
-  <div class="sidebar-header-items sidebar-primary__section">
-    
-    
-      <div class="sidebar-header-items__center">
-        
-          <div class="navbar-item"><nav class="navbar-nav">
-  <p class="sidebar-header-items__title"
-     role="heading"
-     aria-level="1"
-     aria-label="Site Navigation">
-    Site Navigation
-  </p>
-  <ul class="bd-navbar-elements navbar-nav">
-    
-  </ul>
-</nav></div>
-        
-      </div>
-    
-    
-    
-      <div class="sidebar-header-items__end">
-        
-          <div class="navbar-item">
-<script>
-document.write(`
-  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
-    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
-    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
-  </button>
-`);
-</script></div>
-        
-      </div>
-    
-  </div>
   
   
   <div class="sidebar-primary-items__end sidebar-primary__section">
@@ -234,1179 +150,169 @@ document.write(`
       <main id="main-content" class="bd-main">
         
         
+
+<div class="sbt-scroll-pixel-helper"></div>
+
           <div class="bd-content">
             <div class="bd-article-container">
               
-              <div class="bd-header-article"></div>
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><label class="sidebar-toggle primary-toggle btn btn-sm" for="__primary" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</label></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="_sources/index.md" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.md</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+<script>
+document.write(`
+  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+  </button>
+`);
+</script>
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+  </button>
+`);
+</script>
+
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
               
               
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>Exo-MerCat: The Exoplanet Merged Catalog</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+        </div>
+    </div>
+</div>
+
               
                 
 <div id="searchbox"></div>
                 <article class="bd-article" role="main">
                   
-  <section id="welcome-to-exo-mercat-s-documentation">
-<h1>Welcome to Exo-MerCat’s documentation!<a class="headerlink" href="#welcome-to-exo-mercat-s-documentation" title="Permalink to this heading">#</a></h1>
+  <section id="exo-mercat-the-exoplanet-merged-catalog">
+<h1>Exo-MerCat: The Exoplanet Merged Catalog<a class="headerlink" href="#exo-mercat-the-exoplanet-merged-catalog" title="Permalink to this heading">#</a></h1>
+<p>Exo-MerCat collects data from the NASA Exoplanet Archive, the Exoplanet Encyclopaedia, the Open Exoplanet Catalog, the TESS Objects of Interest Catalog, and the Kepler/K2 Objects of Interest Catalog. It automatically identifies duplicated entries in the data and selects the most precise measurements for all the available planetary parameters.</p>
 <div class="toctree-wrapper compound">
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="classes.html">Classes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="classes.html#module-exo_mercat.utility_functions">Functions</a></li>
+</ul>
 </div>
-</section>
-<section id="indices-and-tables">
-<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this heading">#</a></h1>
-<ul class="simple">
-<li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
-<li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
-<li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
-</ul>
-</section>
-<section id="module-exo_mercat.catalogs">
-<span id="classes"></span><h1>Classes<a class="headerlink" href="#module-exo_mercat.catalogs" title="Permalink to this heading">#</a></h1>
-<dl class="py class">
-<dt class="sig sig-object py" id="exo_mercat.catalogs.Catalog">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">exo_mercat.catalogs.</span></span><span class="sig-name descname"><span class="pre">Catalog</span></span><a class="headerlink" href="#exo_mercat.catalogs.Catalog" title="Permalink to this definition">#</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<dl class="py method">
-<dt class="sig sig-object py" id="exo_mercat.catalogs.Catalog.download_catalog">
-<span class="sig-name descname"><span class="pre">download_catalog</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#exo_mercat.catalogs.Catalog.download_catalog" title="Permalink to this definition">#</a></dt>
-<dd><p>The download_catalog function downloads the catalog from a given url and saves it to a file.
-If the file already exists, it will not be downloaded again.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>url</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Specify the url of the catalog to be downloaded</p></li>
-<li><p><strong>filename</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Specify the name of the file to be downloaded</p></li>
-<li><p><strong>timeout</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]) – Specify the timeout</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code></p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>The string of the file path of the catalog</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="exo_mercat.catalogs.Catalog.read_csv_catalog">
-<span class="sig-name descname"><span class="pre">read_csv_catalog</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path_str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#exo_mercat.catalogs.Catalog.read_csv_catalog" title="Permalink to this definition">#</a></dt>
-<dd><p>The read_csv_catalog function reads in a csv file and stores it as a pandas dataframe.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>file_path_str</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Specify the file path of the csv file</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>A pandas dataframe</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="exo_mercat.catalogs.Catalog.convert_datatypes">
-<span class="sig-name descname"><span class="pre">convert_datatypes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#exo_mercat.catalogs.Catalog.convert_datatypes" title="Permalink to this definition">#</a></dt>
-<dd><p>The convert_datatypes function converts the data types of all columns in the DataFrame to more memory
-efficient types. This is done by iterating through each column and checking if it can be converted
-to a more space-efficient type. If so, then that conversion is made.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="exo_mercat.catalogs.Catalog.keep_columns">
-<span class="sig-name descname"><span class="pre">keep_columns</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#exo_mercat.catalogs.Catalog.keep_columns" title="Permalink to this definition">#</a></dt>
-<dd><p>The keep_columns function removes all columns from the dataframe except for those specified in the keep list.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="exo_mercat.catalogs.Catalog.identify_brown_dwarfs">
-<span class="sig-name descname"><span class="pre">identify_brown_dwarfs</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#exo_mercat.catalogs.Catalog.identify_brown_dwarfs" title="Permalink to this definition">#</a></dt>
-<dd><p>The identify_brown_dwarfs function identifies possible brown dwarfs in the dataframe.
-It does this by checking if the last character of a planet name is a number or if it ends
-with an uppercase letter. If so, it fills the letter cell with ‘BD’ to filter it out later.
-The function excludes KOI-like objects by avoid the patterns “.0d” with d being a digit.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="exo_mercat.catalogs.Catalog.replace_known_mistakes">
-<span class="sig-name descname"><span class="pre">replace_known_mistakes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#exo_mercat.catalogs.Catalog.replace_known_mistakes" title="Permalink to this definition">#</a></dt>
-<dd><p>The replace function replaces the values in the dataframe with those specified in replacements.ini</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="exo_mercat.catalogs.Catalog.check_known_binary_mismatches">
-<span class="sig-name descname"><span class="pre">check_known_binary_mismatches</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#exo_mercat.catalogs.Catalog.check_known_binary_mismatches" title="Permalink to this definition">#</a></dt>
-<dd><p>The check_known_binary_mismatches function checks for known mismatches between the binary names in the
-dataframe and those in the config file. If there is a mismatch, it will replace it with what is specified
-in the config file. It also writes to two files: one that lists all of the replacements performed, and
-another that lists all the replacements not used.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="exo_mercat.catalogs.Catalog.remove_theoretical_masses">
-<span class="sig-name descname"><span class="pre">remove_theoretical_masses</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#exo_mercat.catalogs.Catalog.remove_theoretical_masses" title="Permalink to this definition">#</a></dt>
-<dd><p>The remove_theoretical_masses function removes the theoretical masses from the dataframe.
-It is not implemented here because it is catalog-dependent.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="exo_mercat.catalogs.Catalog.handle_reference_format">
-<span class="sig-name descname"><span class="pre">handle_reference_format</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#exo_mercat.catalogs.Catalog.handle_reference_format" title="Permalink to this definition">#</a></dt>
-<dd><p>The handle_reference_format function is used to create a url for each reference in the references list.
-It is not implemented here because it is catalog-dependent.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="exo_mercat.catalogs.Catalog.uniform_catalog">
-<span class="sig-name descname"><span class="pre">uniform_catalog</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#exo_mercat.catalogs.Catalog.uniform_catalog" title="Permalink to this definition">#</a></dt>
-<dd><p>The uniform_catalog function is used to standardize the dataframe columns and values.
-It is not implemented here because it is catalog-dependent.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="exo_mercat.catalogs.Catalog.remove_known_brown_dwarfs">
-<span class="sig-name descname"><span class="pre">remove_known_brown_dwarfs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">print_flag</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#exo_mercat.catalogs.Catalog.remove_known_brown_dwarfs" title="Permalink to this definition">#</a></dt>
-<dd><p>The remove_known_brown_dwarfs function removes all known brown dwarfs from the dataframe.
-It does this by checking if the mass of a planet is less than 20 Mjup, and if it isn’t,
-then it will be removed from the dataframe. If print_flag is set to True, then a csv file will be created
-with all of these planets in them.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>print_flag</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – Specify whether the function should print out a list of brown dwarfs</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="exo_mercat.catalogs.Catalog.make_errors_absolute">
-<span class="sig-name descname"><span class="pre">make_errors_absolute</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#exo_mercat.catalogs.Catalog.make_errors_absolute" title="Permalink to this definition">#</a></dt>
-<dd><p>The make_errors_absolute function takes in a DataFrame and returns a DataFrame where all the columns related
-to errors are made absolute.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="exo_mercat.catalogs.Catalog.uniform_name_host_letter">
-<span class="sig-name descname"><span class="pre">uniform_name_host_letter</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#exo_mercat.catalogs.Catalog.uniform_name_host_letter" title="Permalink to this definition">#</a></dt>
-<dd><p>The uniform_name_host_letter function uniforms the names, hosts, and aliases.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="exo_mercat.catalogs.Catalog.assign_status">
-<span class="sig-name descname"><span class="pre">assign_status</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#exo_mercat.catalogs.Catalog.assign_status" title="Permalink to this definition">#</a></dt>
-<dd><p>The assign_status function assigns a status to each planet based on the status column.
-It is not implemented here because it is catalog-dependent.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="exo_mercat.catalogs.Catalog.check_koiepic_tables">
-<span class="sig-name descname"><span class="pre">check_koiepic_tables</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">table_path_str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#exo_mercat.catalogs.Catalog.check_koiepic_tables" title="Permalink to this definition">#</a></dt>
-<dd><p>The check_epic_table function checks the dataframe for any objects that have a name
-that matches an entry in the KOI or EPIC catalogs. If there is a match, it will update the
-status of that object to whatever status is listed in the KOI and EPIC catalogs and update its coordinates
-if they are missing from the dataframe.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>table_path_str</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – the string containing path to the table.</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="exo_mercat.catalogs.Catalog.fill_binary_column">
-<span class="sig-name descname"><span class="pre">fill_binary_column</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#exo_mercat.catalogs.Catalog.fill_binary_column" title="Permalink to this definition">#</a></dt>
-<dd><p>The fill_binary_column function fills the binary column of the dataframe with
-the appropriate values. It does this by checking if there is a binary letter at the end of that host
-column. If so, it strips out that letter and puts it into its own column called binary.
-If not, nothing happens.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="exo_mercat.catalogs.Catalog.create_catalogstatus_string">
-<span class="sig-name descname"><span class="pre">create_catalogstatus_string</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#exo_mercat.catalogs.Catalog.create_catalogstatus_string" title="Permalink to this definition">#</a></dt>
-<dd><p>The create_catalogstatus_string function creates a new column in the dataframe called “Catalogstatus”
-which is a concatenation of the Catalog and status columns. This function is used to create an additional
-column for use in creating plots.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="exo_mercat.catalogs.Catalog.make_uniform_alias_list">
-<span class="sig-name descname"><span class="pre">make_uniform_alias_list</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#exo_mercat.catalogs.Catalog.make_uniform_alias_list" title="Permalink to this definition">#</a></dt>
-<dd><p>The make_uniform_alias_list function takes in a dataframe and returns a list of aliases for each host.
-The function first groups the data by host, then creates a set of all the aliases associated with that
-host. The set is filtered to remove any None or NaN values, as well as removing the host name from this list.
-Finally, it iterates through each row in the groupby object and sets its alias value equal to this new list.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="exo_mercat.catalogs.Catalog.convert_coordinates">
-<span class="sig-name descname"><span class="pre">convert_coordinates</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#exo_mercat.catalogs.Catalog.convert_coordinates" title="Permalink to this definition">#</a></dt>
-<dd><p>The coordinates function takes the RA and Dec columns of a dataframe, and converts them to decimal degrees.
-It is not implemented here because it is catalog-dependent.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="exo_mercat.catalogs.Catalog.fill_nan_on_coordinates">
-<span class="sig-name descname"><span class="pre">fill_nan_on_coordinates</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#exo_mercat.catalogs.Catalog.fill_nan_on_coordinates" title="Permalink to this definition">#</a></dt>
-<dd><p>The coordinates function takes the RA and Dec columns of a dataframe,
-and converts them to decimal degrees. It replaces any
-missing values with NaN. Finally, it uses SkyCoord to convert from hour angles and
-degrees into decimal degrees.
-Currently only used for Open Exoplanet Catalogue, KOI catalogs.
-UPDATE: EPIC now has degrees already.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="exo_mercat.catalogs.Catalog.print_catalog">
-<span class="sig-name descname"><span class="pre">print_catalog</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#exo_mercat.catalogs.Catalog.print_catalog" title="Permalink to this definition">#</a></dt>
-<dd><p>The print_cat function prints the dataframe to a csv file.
-It takes one argument, filename, which is the name of the file you want to print it as.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>filename</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>]) – The location of the file to be written</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-<span class="target" id="module-exo_mercat.epic"></span><dl class="py class">
-<dt class="sig sig-object py" id="exo_mercat.epic.Epic">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">exo_mercat.epic.</span></span><span class="sig-name descname"><span class="pre">Epic</span></span><a class="headerlink" href="#exo_mercat.epic.Epic" title="Permalink to this definition">#</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#exo_mercat.catalogs.Catalog" title="exo_mercat.catalogs.Catalog"><code class="xref py py-class docutils literal notranslate"><span class="pre">Catalog</span></code></a></p>
-<dl class="py method">
-<dt class="sig sig-object py" id="exo_mercat.epic.Epic.uniform_catalog">
-<span class="sig-name descname"><span class="pre">uniform_catalog</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#exo_mercat.epic.Epic.uniform_catalog" title="Permalink to this definition">#</a></dt>
-<dd><p>The uniform_catalog function takes the data from the K2targets catalog and creates a new table with only
-the columns we need for our analysis. It also adds some useful columns that are derived from existing ones.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="exo_mercat.epic.Epic.convert_coordinates">
-<span class="sig-name descname"><span class="pre">convert_coordinates</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#exo_mercat.epic.Epic.convert_coordinates" title="Permalink to this definition">#</a></dt>
-<dd><p>The coordinates function takes the RA and Dec columns of a dataframe,
-and converts them to decimal degrees. It replaces any
-missing values with NaN. Finally, it uses SkyCoord to convert from hour angles and
-degrees into decimal degrees.
-Currently only used for Open Exoplanet Catalogue, KOI catalogs.
-UPDATE: EPIC now has degrees already.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-<span class="target" id="module-exo_mercat.koi"></span><dl class="py class">
-<dt class="sig sig-object py" id="exo_mercat.koi.Koi">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">exo_mercat.koi.</span></span><span class="sig-name descname"><span class="pre">Koi</span></span><a class="headerlink" href="#exo_mercat.koi.Koi" title="Permalink to this definition">#</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#exo_mercat.catalogs.Catalog" title="exo_mercat.catalogs.Catalog"><code class="xref py py-class docutils literal notranslate"><span class="pre">Catalog</span></code></a></p>
-<dl class="py method">
-<dt class="sig sig-object py" id="exo_mercat.koi.Koi.uniform_catalog">
-<span class="sig-name descname"><span class="pre">uniform_catalog</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#exo_mercat.koi.Koi.uniform_catalog" title="Permalink to this definition">#</a></dt>
-<dd><p>The uniform_catalog function takes the raw data from the NASA Exoplanet Archive and
-returns a pandas DataFrame with columns for each of the following:
-1. kepid (the Kepler ID)
-2. kepoi_name (the KOI name)
-3. kepler_name (the Kepler host star name, if available)
-4. koi_disposition (CANDIDATE, FALSE POSITIVE, NOT DISPOSITIONED OR CONFIRMED)</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="exo_mercat.koi.Koi.convert_coordinates">
-<span class="sig-name descname"><span class="pre">convert_coordinates</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#exo_mercat.koi.Koi.convert_coordinates" title="Permalink to this definition">#</a></dt>
-<dd><p>The coordinates function takes the RA and Dec columns of a dataframe,
-and converts them to decimal degrees. It replaces any
-missing values with NaN. Finally, it uses SkyCoord to convert from hour angles and
-degrees into decimal degrees.
-Currently only used for Open Exoplanet Catalogue, KOI and EPIC catalogs.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-<span class="target" id="module-exo_mercat.eu"></span><dl class="py class">
-<dt class="sig sig-object py" id="exo_mercat.eu.Eu">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">exo_mercat.eu.</span></span><span class="sig-name descname"><span class="pre">Eu</span></span><a class="headerlink" href="#exo_mercat.eu.Eu" title="Permalink to this definition">#</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#exo_mercat.catalogs.Catalog" title="exo_mercat.catalogs.Catalog"><code class="xref py py-class docutils literal notranslate"><span class="pre">Catalog</span></code></a></p>
-<dl class="py method">
-<dt class="sig sig-object py" id="exo_mercat.eu.Eu.download_catalog">
-<span class="sig-name descname"><span class="pre">download_catalog</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#exo_mercat.eu.Eu.download_catalog" title="Permalink to this definition">#</a></dt>
-<dd><p>The download_catalog function downloads the catalog from a given url and saves it to a file.
-If the file already exists, it will not be downloaded again.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>timeout</strong> – the timeout setting for the download</p></li>
-<li><p><strong>url</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Specify the url of the catalog to be downloaded</p></li>
-<li><p><strong>filename</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Specify the name of the file to be downloaded</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code></p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>The string of the file path of the catalog</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="exo_mercat.eu.Eu.uniform_catalog">
-<span class="sig-name descname"><span class="pre">uniform_catalog</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#exo_mercat.eu.Eu.uniform_catalog" title="Permalink to this definition">#</a></dt>
-<dd><p>The uniform_catalog function takes the raw data from a catalog and converts it into a uniform format.
-The function also adds in columns for aliases, discovery methods, and references.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="exo_mercat.eu.Eu.remove_theoretical_masses">
-<span class="sig-name descname"><span class="pre">remove_theoretical_masses</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#exo_mercat.eu.Eu.remove_theoretical_masses" title="Permalink to this definition">#</a></dt>
-<dd><p>The remove_theoretical_masses function removes theoretical masses from the dataframe.
-It does this by setting to NaN all the mass/msini values where the MASSPROV column contains
-“Theoretical” and the radii where the RADPROV column contains “Theoretical”.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="exo_mercat.eu.Eu.assign_status">
-<span class="sig-name descname"><span class="pre">assign_status</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#exo_mercat.eu.Eu.assign_status" title="Permalink to this definition">#</a></dt>
-<dd><p>The assign_status function assigns a status to each planet based on the
-planet_status column. The function first sets all planets with confirmed
-planets as CONFIRMED, then it looks for candidate and controversial planets,
-and sets them as CANDIDATE. Finally, it looks for retracted planets and sets them
-as FALSE POSITIVE.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="exo_mercat.eu.Eu.handle_reference_format">
-<span class="sig-name descname"><span class="pre">handle_reference_format</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#exo_mercat.eu.Eu.handle_reference_format" title="Permalink to this definition">#</a></dt>
-<dd><p>The handle_reference_format function is used to create a url for each reference in the references list.
-Since the Exoplanet Encyclopaedia table does not provide references, we just use “EU” as a keyword.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="exo_mercat.eu.Eu.convert_coordinates">
-<span class="sig-name descname"><span class="pre">convert_coordinates</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#exo_mercat.eu.Eu.convert_coordinates" title="Permalink to this definition">#</a></dt>
-<dd><p>The coordinates function takes the RA and Dec columns of a dataframe,
-and converts them to decimal degrees.
-Not necessary for EU.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-<span class="target" id="module-exo_mercat.oec"></span><dl class="py class">
-<dt class="sig sig-object py" id="exo_mercat.oec.Oec">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">exo_mercat.oec.</span></span><span class="sig-name descname"><span class="pre">Oec</span></span><a class="headerlink" href="#exo_mercat.oec.Oec" title="Permalink to this definition">#</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#exo_mercat.catalogs.Catalog" title="exo_mercat.catalogs.Catalog"><code class="xref py py-class docutils literal notranslate"><span class="pre">Catalog</span></code></a></p>
-<dl class="py method">
-<dt class="sig sig-object py" id="exo_mercat.oec.Oec.download_catalog">
-<span class="sig-name descname"><span class="pre">download_catalog</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#exo_mercat.oec.Oec.download_catalog" title="Permalink to this definition">#</a></dt>
-<dd><p>The download_catalog function downloads the catalog from a given url and saves it to a file.
-If the file already exists, it will not be downloaded again.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>url</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Specify the url of the catalog to be downloaded</p></li>
-<li><p><strong>filename</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Specify the name of the file to be downloaded</p></li>
-<li><p><strong>timeout</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]) – Specify the timeout</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code></p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>The string of the file path of the catalog</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="exo_mercat.oec.Oec.uniform_catalog">
-<span class="sig-name descname"><span class="pre">uniform_catalog</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#exo_mercat.oec.Oec.uniform_catalog" title="Permalink to this definition">#</a></dt>
-<dd><p>The uniform_catalog function is used to standardize the dataframe columns and values.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="exo_mercat.oec.Oec.remove_theoretical_masses">
-<span class="sig-name descname"><span class="pre">remove_theoretical_masses</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#exo_mercat.oec.Oec.remove_theoretical_masses" title="Permalink to this definition">#</a></dt>
-<dd><p>The remove_theoretical_masses function removes the theoretical masses from the dataframe.
-It is not implemented here because it is catalog-dependent.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="exo_mercat.oec.Oec.assign_status">
-<span class="sig-name descname"><span class="pre">assign_status</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#exo_mercat.oec.Oec.assign_status" title="Permalink to this definition">#</a></dt>
-<dd><p>The assign_status function takes the dataframe and assigns a status to each row, based on the value in
-“list” column. The function first checks if “Confirmed” is in the list column of that row, and if so,
-it assigns the status as “CONFIRMED”. If not, it then checks for “Controversial”, which would assign the
-status as “CANDIDATE”. If neither of those are true, then it will check for “Retracted” and assign
-“FALSE POSITIVE”. Kepler Objects of Interest will be assigned as candidates.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="exo_mercat.oec.Oec.handle_reference_format">
-<span class="sig-name descname"><span class="pre">handle_reference_format</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#exo_mercat.oec.Oec.handle_reference_format" title="Permalink to this definition">#</a></dt>
-<dd><p>The handle_reference_format function is used to create a url for each reference in the references list.
-Since the Open Exoplanet Catalog does not provide references, we just use “OEC” as a keyword.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="exo_mercat.oec.Oec.convert_coordinates">
-<span class="sig-name descname"><span class="pre">convert_coordinates</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#exo_mercat.oec.Oec.convert_coordinates" title="Permalink to this definition">#</a></dt>
-<dd><p>The coordinates function takes the RA and Dec columns of a dataframe,
-and converts them to decimal degrees. It replaces any
-missing values with NaN. Finally, it uses SkyCoord to convert from hour angles and
-degrees into decimal degrees.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-<span class="target" id="module-exo_mercat.nasa"></span><dl class="py class">
-<dt class="sig sig-object py" id="exo_mercat.nasa.Nasa">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">exo_mercat.nasa.</span></span><span class="sig-name descname"><span class="pre">Nasa</span></span><a class="headerlink" href="#exo_mercat.nasa.Nasa" title="Permalink to this definition">#</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#exo_mercat.catalogs.Catalog" title="exo_mercat.catalogs.Catalog"><code class="xref py py-class docutils literal notranslate"><span class="pre">Catalog</span></code></a></p>
-<dl class="py method">
-<dt class="sig sig-object py" id="exo_mercat.nasa.Nasa.uniform_catalog">
-<span class="sig-name descname"><span class="pre">uniform_catalog</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#exo_mercat.nasa.Nasa.uniform_catalog" title="Permalink to this definition">#</a></dt>
-<dd><p>The uniform_catalog function takes a dataframe and converts it to the format of a catalog.
-The function do es this by renaming columns, changing column names to be more descriptive,
-and adding new columns that are necessary for the catalog.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="exo_mercat.nasa.Nasa.sort_bestmass_to_mass_or_msini">
-<span class="sig-name descname"><span class="pre">sort_bestmass_to_mass_or_msini</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#exo_mercat.nasa.Nasa.sort_bestmass_to_mass_or_msini" title="Permalink to this definition">#</a></dt>
-<dd><p>The sort_bestmass_to_mass_or_msini function takes in a DataFrame and sorts the values of bestmass
-into either mass or msini.If the value of bestmass is found to be a mass, then it will be sorted
-into mass. If it is found to be an msini value, then it will instead go into msini. If neither
-are true (i.e., if it’s some other type of data, e.g. M-R relationship), then both mass and msini
-are set to NaN for that row.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="exo_mercat.nasa.Nasa.handle_reference_format">
-<span class="sig-name descname"><span class="pre">handle_reference_format</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#exo_mercat.nasa.Nasa.handle_reference_format" title="Permalink to this definition">#</a></dt>
-<dd><p>The handle_reference_format function takes in a dataframe and replaces the reference column with
-a url column. The function also adds columns for each of the seven parameters (e, mass, msini, i, a, P and R)
-and sets them to be equal to the corresponding reference column. It then removes all rows where any of these
-parameters are null.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="exo_mercat.nasa.Nasa.assign_status">
-<span class="sig-name descname"><span class="pre">assign_status</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#exo_mercat.nasa.Nasa.assign_status" title="Permalink to this definition">#</a></dt>
-<dd><p>The assign_status function assigns the status of the candidate (CONFIRMED by DEFAULT for NASA).</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="exo_mercat.nasa.Nasa.convert_coordinates">
-<span class="sig-name descname"><span class="pre">convert_coordinates</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#exo_mercat.nasa.Nasa.convert_coordinates" title="Permalink to this definition">#</a></dt>
-<dd><p>The coordinates function takes the RA and Dec columns of a dataframe,
-and converts them to decimal degrees. It replaces any
-missing values with NaN. Finally, it uses SkyCoord to convert from hour angles and
-degrees into decimal degrees.
-NOT NECESSARY since NASA already has coordinates in degrees</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="exo_mercat.nasa.Nasa.remove_theoretical_masses">
-<span class="sig-name descname"><span class="pre">remove_theoretical_masses</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#exo_mercat.nasa.Nasa.remove_theoretical_masses" title="Permalink to this definition">#</a></dt>
-<dd><p>The remove_theoretical_masses function removes mass and radius estimates calculated through M-R relationships.
-It does this by removing all rows where the mass_url, msini_url, and r_url columns contain
-the word “Calculated”.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-<span class="target" id="module-exo_mercat.emc"></span><dl class="py class">
-<dt class="sig sig-object py" id="exo_mercat.emc.Emc">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">exo_mercat.emc.</span></span><span class="sig-name descname"><span class="pre">Emc</span></span><a class="headerlink" href="#exo_mercat.emc.Emc" title="Permalink to this definition">#</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#exo_mercat.catalogs.Catalog" title="exo_mercat.catalogs.Catalog"><code class="xref py py-class docutils literal notranslate"><span class="pre">Catalog</span></code></a></p>
-<dl class="py method">
-<dt class="sig sig-object py" id="exo_mercat.emc.Emc.convert_coordinates">
-<span class="sig-name descname"><span class="pre">convert_coordinates</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#exo_mercat.emc.Emc.convert_coordinates" title="Permalink to this definition">#</a></dt>
-<dd><p>The coordinates function takes the RA and Dec columns of a dataframe,
-and converts them to decimal degrees. It replaces any
-missing values with NaN. Finally, it uses SkyCoord to convert from hour angles and
-degrees into decimal degrees.
-NOT NECESSARY since EMC already has coordinates in degrees</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="exo_mercat.emc.Emc.alias_as_host">
-<span class="sig-name descname"><span class="pre">alias_as_host</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#exo_mercat.emc.Emc.alias_as_host" title="Permalink to this definition">#</a></dt>
-<dd><p>The alias_as_host function takes the alias column and checks if any of the aliases are labeled as hosts in
-some other entry. If they are, it will change their host to be that of the original host. It will
-then add all aliases of both hosts into one list for each row. It is okay if it happens multiple times,
-as long as it uniforms the host name and adds up all the aliases, SIMBAD will find them coherently.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="exo_mercat.emc.Emc.simbad_list_host_search">
-<span class="sig-name descname"><span class="pre">simbad_list_host_search</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">column</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#exo_mercat.emc.Emc.simbad_list_host_search" title="Permalink to this definition">#</a></dt>
-<dd><p>The simbad_list_host_search function takes a column name as an argument and searches for the host star
-in that column in SIMBAD. It then fills in the main_id, IDS, RA, and DEC columns with information from
-SIMBAD if it finds a match.
-:type column: <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>
-:param column: The name of the column that contains the host star to search for (host or hostbinary)</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="exo_mercat.emc.Emc.simbad_list_alias_search">
-<span class="sig-name descname"><span class="pre">simbad_list_alias_search</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">column</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#exo_mercat.emc.Emc.simbad_list_alias_search" title="Permalink to this definition">#</a></dt>
-<dd><p>The simbad_list_alias_search function takes a column name as an argument and searches for the main ID of
-each object in that column. The function first splits the string into a list of aliases, then iterates
-through each alias to search SIMBAD for its main ID. If it finds one, it will update the dataframe with
-that information.
-:type column: <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>
-:param column: The name of the column that contains the host star to search for (alias or aliasbinary)</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="exo_mercat.emc.Emc.get_host_info_from_simbad">
-<span class="sig-name descname"><span class="pre">get_host_info_from_simbad</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#exo_mercat.emc.Emc.get_host_info_from_simbad" title="Permalink to this definition">#</a></dt>
-<dd><p>The get_host_info_from_simbad function takes the dataframe and extracts all
-unique host star names. It then queries Simbad for each of these names, and
-returns a table with the main ID, alias IDs, RA and DEC.The function merges
-this table with the original dataframe on host name (left join).If there are
-still rows missing main_id values in the merged table, it will query Simbad
-again using all aliases from those rows.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="exo_mercat.emc.Emc.set_common_alias">
-<span class="sig-name descname"><span class="pre">set_common_alias</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#exo_mercat.emc.Emc.set_common_alias" title="Permalink to this definition">#</a></dt>
-<dd><p>The set_common_alias function takes the alias and list_id columns from
-the dataframe,and combines them into a single column called final_alias.
-It then removes duplicates from this new column.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="exo_mercat.emc.Emc.set_common_host">
-<span class="sig-name descname"><span class="pre">set_common_host</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#exo_mercat.emc.Emc.set_common_host" title="Permalink to this definition">#</a></dt>
-<dd><p>The set_common_host function is used to set the host name for all planets
-in a given list_id group to be the same. This function is called by the
-check_alias function, which checks if there are any planets with different
-host names but  the same SIMBAD alias. If so, this function will set all
-of those planet’s hosts to be equal.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="exo_mercat.emc.Emc.check_coordinates">
-<span class="sig-name descname"><span class="pre">check_coordinates</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#exo_mercat.emc.Emc.check_coordinates" title="Permalink to this definition">#</a></dt>
-<dd><p>The check_coordinates function checks for mismatches in the RA and DEC
-coordinates of a given host (for the targets that cannot rely on SIMBAD
-MAIN_ID because the query was unsuccessful). It does this by grouping all
-entries with the same host name, then checking if any of those entries have
-an RA or DEC that is more than 0.01 degrees away from the mode value for that
-group. If so, it prints out information about those mismatched values
-to a log file called coord_errors.txt.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="exo_mercat.emc.Emc.get_coordinates_from_simbad">
-<span class="sig-name descname"><span class="pre">get_coordinates_from_simbad</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#exo_mercat.emc.Emc.get_coordinates_from_simbad" title="Permalink to this definition">#</a></dt>
-<dd><p>This function takes the dataframe and checks if there are any matches in Simbad for the coordinates of each
-object. It does this by querying Simbad with a circle around each coordinate, starting at 0.01 degrees and
-increasing to 0.5 degrees until it finds a match or gives up.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="exo_mercat.emc.Emc.check_same_host_different_id">
-<span class="sig-name descname"><span class="pre">check_same_host_different_id</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#exo_mercat.emc.Emc.check_same_host_different_id" title="Permalink to this definition">#</a></dt>
-<dd><p>The check_same_host_different_id function checks to see if there
-are any instances where the same host has multiple SIMBAD main IDs.
-This should _never_ happen unless the SIMBAD search is failing.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="exo_mercat.emc.Emc.polish_main_id">
-<span class="sig-name descname"><span class="pre">polish_main_id</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#exo_mercat.emc.Emc.polish_main_id" title="Permalink to this definition">#</a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="exo_mercat.emc.Emc.check_binary_mismatch">
-<span class="sig-name descname"><span class="pre">check_binary_mismatch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">keyword</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#exo_mercat.emc.Emc.check_binary_mismatch" title="Permalink to this definition">#</a></dt>
-<dd><p>The check_binary_mismatch function checks for binary mismatches in the data (planets that orbit a binary but are
-controversial in the various catalogs and/or SIMBAD). It also checks if the SIMBAD main_id labels the target as
-a binary. Ideally, all of these issues should be fixed by a human for the code to work properly.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="exo_mercat.emc.Emc.cleanup_catalog">
-<span class="sig-name descname"><span class="pre">cleanup_catalog</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#exo_mercat.emc.Emc.cleanup_catalog" title="Permalink to this definition">#</a></dt>
-<dd><p>The cleanup_catalog function is used to replace any rows in
-the catalog that have a value of 0 or inf for any of the
-columns i, mass, msini, a, p and e with NaN.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="exo_mercat.emc.Emc.fix_letter_by_period">
-<span class="sig-name descname"><span class="pre">fix_letter_by_period</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#exo_mercat.emc.Emc.fix_letter_by_period" title="Permalink to this definition">#</a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="exo_mercat.emc.Emc.merge_into_single_entry">
-<span class="sig-name descname"><span class="pre">merge_into_single_entry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">group</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mainid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">binary</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">letter</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#exo_mercat.emc.Emc.merge_into_single_entry" title="Permalink to this definition">#</a></dt>
-<dd><p>The merge_into_single_entry function takes the dataframe and merges all entries
-with the same main_id and letter (from the different catalogs) into a single entry.
-It does this by grouping by main_id and letter, then iterating through each group.
-It creates an empty dataframe called ‘entry’ and adds information to it from each group.
-The final entry contains: the official SIMBAD ID and coordinates; the measurements
-that have the smallest relative error with the corresponding reference; the preferred
-name, the preferred status, the preferred binary letter (chosen as the most common
-in the group); year of discovery, method of discovery, and final list of aliases.
-The function then concatenates all of these entries together into a final catalog.</p>
-<p>:param group : A pandas DataFrame containing the duplicate occurrences.
-:type mainid: <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>
-:param mainid: The main identifier of the group
-:type binary: <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>
-:param binary: The binary identifier of the group
-:type letter: <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>
-:param letter: The letter identifier of the group
-:rtype: <code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code>
-:return: A pandas Series corresponding to the merged single entry.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="exo_mercat.emc.Emc.group_by_letter_check_period">
-<span class="sig-name descname"><span class="pre">group_by_letter_check_period</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">verbose</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#exo_mercat.emc.Emc.group_by_letter_check_period" title="Permalink to this definition">#</a></dt>
-<dd><p>The group_by_letter_check_period function groups the full catalog per main_id, binary, and letter. Then it
-checks the periods. If the periods exist and are the same, it merges into a single entry. If the periods exist
-but are different it leaves the different entries unmerged. If the period does not exist, it checks for the
-semi-major axis: if the semi-major axes exist and are the same, it merges into a single entry. If the semi-major
-axis does not match, it leaves the entries unmerged. If also the semi-major axis does not exist, it merges all
-the entries together.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>verbose</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – boolean to allow printing of percentage</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="exo_mercat.emc.Emc.potential_duplicates_after_merging">
-<span class="sig-name descname"><span class="pre">potential_duplicates_after_merging</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#exo_mercat.emc.Emc.potential_duplicates_after_merging" title="Permalink to this definition">#</a></dt>
-<dd><p>The potential_duplicates_after_merging function finds the rows with the same main_id, binary, letter. If more
-than one occurs, then it assigns the “emc_duplicate_flag” to 1.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="exo_mercat.emc.Emc.select_best_mass">
-<span class="sig-name descname"><span class="pre">select_best_mass</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#exo_mercat.emc.Emc.select_best_mass" title="Permalink to this definition">#</a></dt>
-<dd><p>The select_best_mass function is used to select the best mass for each planet.
-The function first checks if the MASSREL value is greater than MSINIREL, and if so,
-it assigns the msini values to bestmass, bestmass_min and bestmass_max. If not,
-it assigns mass values to these columns instead.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="exo_mercat.emc.Emc.set_exo_mercat_name">
-<span class="sig-name descname"><span class="pre">set_exo_mercat_name</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#exo_mercat.emc.Emc.set_exo_mercat_name" title="Permalink to this definition">#</a></dt>
-<dd><p>The set_exo_mercat name creates the columns exo_mercat_name by joining the main_id, the binary (if any), and
-the letter.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="exo_mercat.emc.Emc.keep_columns">
-<span class="sig-name descname"><span class="pre">keep_columns</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#exo_mercat.emc.Emc.keep_columns" title="Permalink to this definition">#</a></dt>
-<dd><p>The keep_columns function is used to keep only the columns that are needed for the analysis.
-The function takes in a dataframe and returns a new dataframe with only the columns listed above.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-</section>
-<section id="module-exo_mercat.utility_functions">
-<span id="functions"></span><h1>Functions<a class="headerlink" href="#module-exo_mercat.utility_functions" title="Permalink to this heading">#</a></h1>
-<dl class="py class">
-<dt class="sig sig-object py" id="exo_mercat.utility_functions.UtilityFunctions">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">exo_mercat.utility_functions.</span></span><span class="sig-name descname"><span class="pre">UtilityFunctions</span></span><a class="headerlink" href="#exo_mercat.utility_functions.UtilityFunctions" title="Permalink to this definition">#</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<dl class="py method">
-<dt class="sig sig-object py" id="exo_mercat.utility_functions.UtilityFunctions.service_files_initialization">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">service_files_initialization</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#exo_mercat.utility_functions.UtilityFunctions.service_files_initialization" title="Permalink to this definition">#</a></dt>
-<dd><p>The service_files_initialization function creates the Exo-MerCat, InputSources, UniformedSources and Logs
-folders if they do not exist, and deletes all files in the Logs folder.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="exo_mercat.utility_functions.UtilityFunctions.find_const">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">find_const</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#exo_mercat.utility_functions.UtilityFunctions.find_const" title="Permalink to this definition">#</a></dt>
-<dd><p>The find_const function takes a string and returns the same string with all of its
-constellation abbreviations replaced by their full names. The function uses a dictionary
-to map each abbreviation to its corresponding constellation name. The dictionary is
-created using the find_const() function, which creates a dataframe containing two columns:
-the first column contains all possible constellation abbreviations, while the second column
-contains their corresponding full names.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>A dictionary containing all possible abbreviations and all possible full names.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="exo_mercat.utility_functions.UtilityFunctions.read_config">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">read_config</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#exo_mercat.utility_functions.UtilityFunctions.read_config" title="Permalink to this definition">#</a></dt>
-<dd><p>The read_config function reads the input_sources.ini file and returns a dictionary of
-the configuration parameters.
-:return a dictionary containing</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="exo_mercat.utility_functions.UtilityFunctions.read_config_replacements">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">read_config_replacements</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">section</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#exo_mercat.utility_functions.UtilityFunctions.read_config_replacements" title="Permalink to this definition">#</a></dt>
-<dd><p>The read_config_replacements function reads the replacements.ini file and returns a dictionary of
-replacement values for use in the replace_text function.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>section</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Specify which section of the replacements</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>A dictionary containing the custom replacements</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="exo_mercat.utility_functions.UtilityFunctions.uniform_string">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">uniform_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#exo_mercat.utility_functions.UtilityFunctions.uniform_string" title="Permalink to this definition">#</a></dt>
-<dd><p>The uniform_string function takes a string as input and returns the same string with some common formatting
-errors corrected. The function is used to correct for inconsistencies in the naming of exoplanets, which can be
-caused by different sources using different naming conventions.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>name</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Specify the string to uniform</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>The uniformed string</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="exo_mercat.utility_functions.UtilityFunctions.round_to_decimal">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">round_to_decimal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">number</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#exo_mercat.utility_functions.UtilityFunctions.round_to_decimal" title="Permalink to this definition">#</a></dt>
-<dd><p>Round a number to an appropriate number of decimal places based on its order of magnitude.</p>
-<p>This function takes a numeric input ‘number’ and rounds it to an appropriate number of
-decimal places based on its order of magnitude. The function calculates the order of
-magnitude of the input number and determines the rounding strategy based on that.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>number</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – The number to be rounded.</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>the rounded number</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="exo_mercat.utility_functions.UtilityFunctions.round_array_to_significant_digits">
-<span class="sig-name descname"><span class="pre">round_array_to_significant_digits</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">numbers</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#exo_mercat.utility_functions.UtilityFunctions.round_array_to_significant_digits" title="Permalink to this definition">#</a></dt>
-<dd><p>Round an array of numbers to their significant digits with special handling for zero values.</p>
-<p>This function takes an array of numeric inputs ‘numbers’ and rounds each number to its
-appropriate significant digits using the round_to_decimal function. Zero values are
-replaced with -1 to distinguish them from rounded numbers.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>numbers</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>) – The array of numbers to be rounded.</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>The array of rounded numbers with special handling for zero values.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="exo_mercat.utility_functions.UtilityFunctions.round_parameter_bin">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">round_parameter_bin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parameter_series</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#exo_mercat.utility_functions.UtilityFunctions.round_parameter_bin" title="Permalink to this definition">#</a></dt>
-<dd><p>Round values in a pandas Series to bins based on their order of magnitude.</p>
-<p>This function takes a pandas Series ‘parameter_series’ containing numeric values and rounds
-each value to a bin based on its order of magnitude. It calculates the order of magnitude
-for each value, defines variable bins based on the calculated order of magnitude, and
-assigns the corresponding bin label to each value.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>parameter_series</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Series</span></code>) – A pandas Series containing numeric values to be rounded to bins.</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Series</span></code></p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>A pandas Series with bin labels corresponding to each value’s order of magnitude.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="exo_mercat.utility_functions.UtilityFunctions.get_parameter">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_parameter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">treeobject</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameter</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#exo_mercat.utility_functions.UtilityFunctions.get_parameter" title="Permalink to this definition">#</a></dt>
-<dd><p>The getParameter parses a parameter from an XML ElementTree object.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>treeobject</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Element</span></code>) – An ElementTree object</p></li>
-<li><p><strong>parameter</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – a string representing the name of an element in the XML file</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>A string containing the parameter value</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="exo_mercat.utility_functions.UtilityFunctions.get_attribute">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_attribute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">treeobject</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameter</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attrib</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#exo_mercat.utility_functions.UtilityFunctions.get_attribute" title="Permalink to this definition">#</a></dt>
-<dd><p>The getAttribute function parses the ElementTree object for a parameter and gets the desired attribute.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>treeobject</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Element</span></code>) – an ElementTree object, which is the root of a parsed XML file</p></li>
-<li><p><strong>parameter</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – a string representing the name of an element in the XML file</p></li>
-<li><p><strong>attrib</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – a string representing one of that element’s attributes</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>A string containing the value of the attribute</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="exo_mercat.utility_functions.UtilityFunctions.get_parameter_all">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_parameter_all</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">treeobject</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameter</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#exo_mercat.utility_functions.UtilityFunctions.get_parameter_all" title="Permalink to this definition">#</a></dt>
-<dd><p>The getParameter_all function parses the ElementTree object for a list of parameters.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>treeobject</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Element</span></code>) – an ElementTree object, which is the root of a parsed XML file</p></li>
-<li><p><strong>parameter</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – a string representing the name of an element in the XML file</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>A list of all values in treeobject for the supplied parameter</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="exo_mercat.utility_functions.UtilityFunctions.convert_xmlfile_to_csvfile">
-<span class="sig-name descname"><span class="pre">convert_xmlfile_to_csvfile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#exo_mercat.utility_functions.UtilityFunctions.convert_xmlfile_to_csvfile" title="Permalink to this definition">#</a></dt>
-<dd><p>The convert_xmlfile_to_csvfile function takes a file path to an XML file and converts it into a CSV file. The
-function uses the gzip library to open the XML files, which are compressed. The ElementTree library is used
-to parse the XML files into tables that can be read by Pandas. A list of fields is created that will be used
-as column headers in the final CSV table. The input_file variable opens up the specified xml_file using gzip
-and reads it in as an object that can be parsed by ElementTree’s parse method, which creates a tree structure
-from each element in the xml_file (elements</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>file_path</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – The path to the file</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
+<p>Exo-MerCat is a Python program designed to merge various exoplanet catalogs. Standardizing the data is crucial, as it involves comparing entries from different catalogs, a task that requires careful selection of software tools. One major challenge is identifying aliases and verifying host star coordinates due to discrepancies in notation across catalogs.</p>
+<p>The program includes a Graphical User Interface for catalog filtering and automatic plotting. Dependencies include the pandas package for flexible data manipulation and astropy for handling astronomical coordinates and parameters. Additional packages like astroquery and pyvo are used for accessing and retrieving data from various sources conforming to International Virtual Observatory Alliance standards.</p>
+<p>The software utilizes the Table Access Protocol and Astronomical Data Query Language for querying and filtering catalogs, enabling spatial cross-matching and custom manipulations.</p>
+<p>Datasets from different sources are retrieved using varied methods, such as wget for some catalogs like the Exoplanet Orbit Database and NASA Exoplanet Archive. Specific columns are selected during retrieval to minimize data download and ensure essential information is included.</p>
+<p>There is a standardization process necessary to merge diverse exoplanet catalogs effectively. Key operations include selecting relevant columns, renaming columns for easy merging, handling aliases, removing unnecessary spaces, and standardizing target names. Notable steps include labeling planets within the same system and handling exceptions like Kepler Objects of Interest and binary systems.</p>
+<p>Additionally, it addresses the retrieval of calculated values, standardizing retrieval method names, and hierarchical indexing. The process includes checks for Kepler Objects of Interest status, updating with the official Kepler identifier if available.</p>
+<p>There are discrepancies in the status of confirmed, candidate, and false positive exoplanets across catalogs, potentially due to delays in updates or misinterpretations. The routine also addresses missing coordinates for some Kepler candidates and discusses plans to adapt the process for future TESS candidates.</p>
+<p>Initially, the function identifies potential aliases for host stars across the catalogs and standardizes them for consistency. It queries the SIMBAD database to confirm host star identities and resolves duplicate entries by selecting a common identifier. This process successfully resolves many alias inconsistencies but also encounters cases where no matches are found.</p>
+<p>Subsequently, the software checks the consistency of coordinates to avoid mismatches during merging. It identifies and corrects discrepancies in coordinates, flagging instances where differences exceed a certain threshold.</p>
+<p>Additionally, the function retrieves main identifiers for host stars by querying various astronomical databases such as SIMBAD, VizieR, and GAIA. This process significantly reduces the number of targets without identifiers, with remaining cases addressed through iterative queries with increasing tolerances. Duplicate entries within catalogs are automatically identified and logged for further review.</p>
+<p>Overall, these checks ensure the accuracy and completeness of host star identifiers and coordinates, facilitating the merging process.</p>
+<p>In catalog retrieval, the merged catalog is indexed hierarchically, and multiple entries for each planet are collapsed into a single entry based on measurement precision. Relative errors for each parameter are calculated, and the dataset with the smallest relative error is selected for each parameter. Host star and planet names are standardized and prioritized based on commonly known identifiers. Duplicate entries are collapsed into one row, with the original catalogs retained in a separate column. The status of each target is stored as a string indicating its presence, candidacy, or confirmation in various catalogs.</p>
+<p>The latest version of the catalog is made available through a dedicated TAP service, with subsequent versions generated as workflow runs.</p>
+<p>In the performance evaluation section, the software’s performance is assessed by comparing the results of two merging runs: one without any preprocessing (referred to as “Simple”) and one with the full suite of functions applied (referred to as “EMC”). By comparing the two runs, improvements in the final catalog achieved by the software are analyzed.</p>
+<p>Overall, the software effectively standardizes and merges multiple catalogs, improving the consistency and accuracy of the resulting merged catalog.</p>
+<p>For further info, check out <a class="reference internal" href="usage.html"><span class="doc">Usage</span></a>. Read installation instructions in <a class="reference internal" href="usage.html#installation"><span class="std std-ref">Installation</span></a>.</p>
 </section>
 
 
                 </article>
               
+
               
               
                 <footer class="bd-footer-article">
@@ -1415,6 +321,15 @@ from each element in the xml_file (elements</p>
   
     <div class="footer-article-item"><!-- Previous / next buttons -->
 <div class="prev-next-area">
+    <a class="right-next"
+       href="usage.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Usage</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
 </div></div>
   
 </div>
@@ -1425,141 +340,43 @@ from each element in the xml_file (elements</p>
             
             
               
-                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
-
-  <div class="sidebar-secondary-item">
-  <div class="page-toc tocsection onthispage">
-    <i class="fa-solid fa-list"></i> On this page
-  </div>
-  <nav class="bd-toc-nav page-toc">
-    <ul class="visible nav section-nav flex-column">
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#">Welcome to Exo-MerCat’s documentation!</a></li>
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#indices-and-tables">Indices and tables</a></li>
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#module-exo_mercat.catalogs">Classes</a><ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#exo_mercat.catalogs.Catalog"><code class="docutils literal notranslate"><span class="pre">Catalog</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#exo_mercat.catalogs.Catalog.download_catalog"><code class="docutils literal notranslate"><span class="pre">Catalog.download_catalog()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#exo_mercat.catalogs.Catalog.read_csv_catalog"><code class="docutils literal notranslate"><span class="pre">Catalog.read_csv_catalog()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#exo_mercat.catalogs.Catalog.convert_datatypes"><code class="docutils literal notranslate"><span class="pre">Catalog.convert_datatypes()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#exo_mercat.catalogs.Catalog.keep_columns"><code class="docutils literal notranslate"><span class="pre">Catalog.keep_columns()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#exo_mercat.catalogs.Catalog.identify_brown_dwarfs"><code class="docutils literal notranslate"><span class="pre">Catalog.identify_brown_dwarfs()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#exo_mercat.catalogs.Catalog.replace_known_mistakes"><code class="docutils literal notranslate"><span class="pre">Catalog.replace_known_mistakes()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#exo_mercat.catalogs.Catalog.check_known_binary_mismatches"><code class="docutils literal notranslate"><span class="pre">Catalog.check_known_binary_mismatches()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#exo_mercat.catalogs.Catalog.remove_theoretical_masses"><code class="docutils literal notranslate"><span class="pre">Catalog.remove_theoretical_masses()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#exo_mercat.catalogs.Catalog.handle_reference_format"><code class="docutils literal notranslate"><span class="pre">Catalog.handle_reference_format()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#exo_mercat.catalogs.Catalog.uniform_catalog"><code class="docutils literal notranslate"><span class="pre">Catalog.uniform_catalog()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#exo_mercat.catalogs.Catalog.remove_known_brown_dwarfs"><code class="docutils literal notranslate"><span class="pre">Catalog.remove_known_brown_dwarfs()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#exo_mercat.catalogs.Catalog.make_errors_absolute"><code class="docutils literal notranslate"><span class="pre">Catalog.make_errors_absolute()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#exo_mercat.catalogs.Catalog.uniform_name_host_letter"><code class="docutils literal notranslate"><span class="pre">Catalog.uniform_name_host_letter()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#exo_mercat.catalogs.Catalog.assign_status"><code class="docutils literal notranslate"><span class="pre">Catalog.assign_status()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#exo_mercat.catalogs.Catalog.check_koiepic_tables"><code class="docutils literal notranslate"><span class="pre">Catalog.check_koiepic_tables()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#exo_mercat.catalogs.Catalog.fill_binary_column"><code class="docutils literal notranslate"><span class="pre">Catalog.fill_binary_column()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#exo_mercat.catalogs.Catalog.create_catalogstatus_string"><code class="docutils literal notranslate"><span class="pre">Catalog.create_catalogstatus_string()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#exo_mercat.catalogs.Catalog.make_uniform_alias_list"><code class="docutils literal notranslate"><span class="pre">Catalog.make_uniform_alias_list()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#exo_mercat.catalogs.Catalog.convert_coordinates"><code class="docutils literal notranslate"><span class="pre">Catalog.convert_coordinates()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#exo_mercat.catalogs.Catalog.fill_nan_on_coordinates"><code class="docutils literal notranslate"><span class="pre">Catalog.fill_nan_on_coordinates()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#exo_mercat.catalogs.Catalog.print_catalog"><code class="docutils literal notranslate"><span class="pre">Catalog.print_catalog()</span></code></a></li>
-</ul>
-</li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#exo_mercat.epic.Epic"><code class="docutils literal notranslate"><span class="pre">Epic</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#exo_mercat.epic.Epic.uniform_catalog"><code class="docutils literal notranslate"><span class="pre">Epic.uniform_catalog()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#exo_mercat.epic.Epic.convert_coordinates"><code class="docutils literal notranslate"><span class="pre">Epic.convert_coordinates()</span></code></a></li>
-</ul>
-</li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#exo_mercat.koi.Koi"><code class="docutils literal notranslate"><span class="pre">Koi</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#exo_mercat.koi.Koi.uniform_catalog"><code class="docutils literal notranslate"><span class="pre">Koi.uniform_catalog()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#exo_mercat.koi.Koi.convert_coordinates"><code class="docutils literal notranslate"><span class="pre">Koi.convert_coordinates()</span></code></a></li>
-</ul>
-</li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#exo_mercat.eu.Eu"><code class="docutils literal notranslate"><span class="pre">Eu</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#exo_mercat.eu.Eu.download_catalog"><code class="docutils literal notranslate"><span class="pre">Eu.download_catalog()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#exo_mercat.eu.Eu.uniform_catalog"><code class="docutils literal notranslate"><span class="pre">Eu.uniform_catalog()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#exo_mercat.eu.Eu.remove_theoretical_masses"><code class="docutils literal notranslate"><span class="pre">Eu.remove_theoretical_masses()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#exo_mercat.eu.Eu.assign_status"><code class="docutils literal notranslate"><span class="pre">Eu.assign_status()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#exo_mercat.eu.Eu.handle_reference_format"><code class="docutils literal notranslate"><span class="pre">Eu.handle_reference_format()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#exo_mercat.eu.Eu.convert_coordinates"><code class="docutils literal notranslate"><span class="pre">Eu.convert_coordinates()</span></code></a></li>
-</ul>
-</li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#exo_mercat.oec.Oec"><code class="docutils literal notranslate"><span class="pre">Oec</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#exo_mercat.oec.Oec.download_catalog"><code class="docutils literal notranslate"><span class="pre">Oec.download_catalog()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#exo_mercat.oec.Oec.uniform_catalog"><code class="docutils literal notranslate"><span class="pre">Oec.uniform_catalog()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#exo_mercat.oec.Oec.remove_theoretical_masses"><code class="docutils literal notranslate"><span class="pre">Oec.remove_theoretical_masses()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#exo_mercat.oec.Oec.assign_status"><code class="docutils literal notranslate"><span class="pre">Oec.assign_status()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#exo_mercat.oec.Oec.handle_reference_format"><code class="docutils literal notranslate"><span class="pre">Oec.handle_reference_format()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#exo_mercat.oec.Oec.convert_coordinates"><code class="docutils literal notranslate"><span class="pre">Oec.convert_coordinates()</span></code></a></li>
-</ul>
-</li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#exo_mercat.nasa.Nasa"><code class="docutils literal notranslate"><span class="pre">Nasa</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#exo_mercat.nasa.Nasa.uniform_catalog"><code class="docutils literal notranslate"><span class="pre">Nasa.uniform_catalog()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#exo_mercat.nasa.Nasa.sort_bestmass_to_mass_or_msini"><code class="docutils literal notranslate"><span class="pre">Nasa.sort_bestmass_to_mass_or_msini()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#exo_mercat.nasa.Nasa.handle_reference_format"><code class="docutils literal notranslate"><span class="pre">Nasa.handle_reference_format()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#exo_mercat.nasa.Nasa.assign_status"><code class="docutils literal notranslate"><span class="pre">Nasa.assign_status()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#exo_mercat.nasa.Nasa.convert_coordinates"><code class="docutils literal notranslate"><span class="pre">Nasa.convert_coordinates()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#exo_mercat.nasa.Nasa.remove_theoretical_masses"><code class="docutils literal notranslate"><span class="pre">Nasa.remove_theoretical_masses()</span></code></a></li>
-</ul>
-</li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#exo_mercat.emc.Emc"><code class="docutils literal notranslate"><span class="pre">Emc</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#exo_mercat.emc.Emc.convert_coordinates"><code class="docutils literal notranslate"><span class="pre">Emc.convert_coordinates()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#exo_mercat.emc.Emc.alias_as_host"><code class="docutils literal notranslate"><span class="pre">Emc.alias_as_host()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#exo_mercat.emc.Emc.simbad_list_host_search"><code class="docutils literal notranslate"><span class="pre">Emc.simbad_list_host_search()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#exo_mercat.emc.Emc.simbad_list_alias_search"><code class="docutils literal notranslate"><span class="pre">Emc.simbad_list_alias_search()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#exo_mercat.emc.Emc.get_host_info_from_simbad"><code class="docutils literal notranslate"><span class="pre">Emc.get_host_info_from_simbad()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#exo_mercat.emc.Emc.set_common_alias"><code class="docutils literal notranslate"><span class="pre">Emc.set_common_alias()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#exo_mercat.emc.Emc.set_common_host"><code class="docutils literal notranslate"><span class="pre">Emc.set_common_host()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#exo_mercat.emc.Emc.check_coordinates"><code class="docutils literal notranslate"><span class="pre">Emc.check_coordinates()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#exo_mercat.emc.Emc.get_coordinates_from_simbad"><code class="docutils literal notranslate"><span class="pre">Emc.get_coordinates_from_simbad()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#exo_mercat.emc.Emc.check_same_host_different_id"><code class="docutils literal notranslate"><span class="pre">Emc.check_same_host_different_id()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#exo_mercat.emc.Emc.polish_main_id"><code class="docutils literal notranslate"><span class="pre">Emc.polish_main_id()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#exo_mercat.emc.Emc.check_binary_mismatch"><code class="docutils literal notranslate"><span class="pre">Emc.check_binary_mismatch()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#exo_mercat.emc.Emc.cleanup_catalog"><code class="docutils literal notranslate"><span class="pre">Emc.cleanup_catalog()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#exo_mercat.emc.Emc.fix_letter_by_period"><code class="docutils literal notranslate"><span class="pre">Emc.fix_letter_by_period()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#exo_mercat.emc.Emc.merge_into_single_entry"><code class="docutils literal notranslate"><span class="pre">Emc.merge_into_single_entry()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#exo_mercat.emc.Emc.group_by_letter_check_period"><code class="docutils literal notranslate"><span class="pre">Emc.group_by_letter_check_period()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#exo_mercat.emc.Emc.potential_duplicates_after_merging"><code class="docutils literal notranslate"><span class="pre">Emc.potential_duplicates_after_merging()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#exo_mercat.emc.Emc.select_best_mass"><code class="docutils literal notranslate"><span class="pre">Emc.select_best_mass()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#exo_mercat.emc.Emc.set_exo_mercat_name"><code class="docutils literal notranslate"><span class="pre">Emc.set_exo_mercat_name()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#exo_mercat.emc.Emc.keep_columns"><code class="docutils literal notranslate"><span class="pre">Emc.keep_columns()</span></code></a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#module-exo_mercat.utility_functions">Functions</a><ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#exo_mercat.utility_functions.UtilityFunctions"><code class="docutils literal notranslate"><span class="pre">UtilityFunctions</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#exo_mercat.utility_functions.UtilityFunctions.service_files_initialization"><code class="docutils literal notranslate"><span class="pre">UtilityFunctions.service_files_initialization()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#exo_mercat.utility_functions.UtilityFunctions.find_const"><code class="docutils literal notranslate"><span class="pre">UtilityFunctions.find_const()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#exo_mercat.utility_functions.UtilityFunctions.read_config"><code class="docutils literal notranslate"><span class="pre">UtilityFunctions.read_config()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#exo_mercat.utility_functions.UtilityFunctions.read_config_replacements"><code class="docutils literal notranslate"><span class="pre">UtilityFunctions.read_config_replacements()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#exo_mercat.utility_functions.UtilityFunctions.uniform_string"><code class="docutils literal notranslate"><span class="pre">UtilityFunctions.uniform_string()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#exo_mercat.utility_functions.UtilityFunctions.round_to_decimal"><code class="docutils literal notranslate"><span class="pre">UtilityFunctions.round_to_decimal()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#exo_mercat.utility_functions.UtilityFunctions.round_array_to_significant_digits"><code class="docutils literal notranslate"><span class="pre">UtilityFunctions.round_array_to_significant_digits()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#exo_mercat.utility_functions.UtilityFunctions.round_parameter_bin"><code class="docutils literal notranslate"><span class="pre">UtilityFunctions.round_parameter_bin()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#exo_mercat.utility_functions.UtilityFunctions.get_parameter"><code class="docutils literal notranslate"><span class="pre">UtilityFunctions.get_parameter()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#exo_mercat.utility_functions.UtilityFunctions.get_attribute"><code class="docutils literal notranslate"><span class="pre">UtilityFunctions.get_attribute()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#exo_mercat.utility_functions.UtilityFunctions.get_parameter_all"><code class="docutils literal notranslate"><span class="pre">UtilityFunctions.get_parameter_all()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#exo_mercat.utility_functions.UtilityFunctions.convert_xmlfile_to_csvfile"><code class="docutils literal notranslate"><span class="pre">UtilityFunctions.convert_xmlfile_to_csvfile()</span></code></a></li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-
-  </nav></div>
-
-  <div class="sidebar-secondary-item">
-  <div class="tocsection sourcelink">
-    <a href="_sources/index.rst.txt">
-      <i class="fa-solid fa-file-lines"></i> Show Source
-    </a>
-  </div>
-</div>
-
-</div></div>
-              
             
           </div>
           <footer class="bd-footer-content">
             
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Alei et al.
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  <p class="copyright">
+    
+      © Copyright 2024, Alei et al..
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
           </footer>
         
+
       </main>
     </div>
   </div>
@@ -1569,39 +386,6 @@ from each element in the xml_file (elements</p>
 <script src="_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52"></script>
 
   <footer class="bd-footer">
-<div class="bd-footer__inner bd-page-width">
-  
-    <div class="footer-items__start">
-      
-        <div class="footer-item">
-  <p class="copyright">
-    
-      © Copyright 2023, Alei et al..
-      <br/>
-    
-  </p>
-</div>
-      
-        <div class="footer-item">
-  <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.1.2.
-    <br/>
-  </p>
-</div>
-      
-    </div>
-  
-  
-    <div class="footer-items__end">
-      
-        <div class="footer-item"><p class="theme-version">
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.13.3.
-</p></div>
-      
-    </div>
-  
-</div>
-
   </footer>
   </body>
 </html>

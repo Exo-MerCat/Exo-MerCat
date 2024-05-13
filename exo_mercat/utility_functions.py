@@ -14,26 +14,41 @@ from astropy.coordinates import SkyCoord
 
 
 class UtilityFunctions:
-    def __init__(self):
+    """
+    This is a class that contains utility functions that can be used in other modules.
+    """
+
+    def __init__(self) -> None:
+        """
+        The __init__ function is called when the class is instantiated.
+        :param self: Represent the instance of the class
+        :type self: UtilityFunctions
+        :return: None
+        :rtype: None
+        """
         pass
 
     @staticmethod
     def service_files_initialization() -> None:
         """
-        The service_files_initialization function creates the Exo-MerCat, InputSources, UniformedSources and Logs
-        folders if they do not exist, and deletes all files in the Logs folder.
+        Creates the `Exo-MerCat`, `InputSources`, `UniformedSources`, and `Logs` folders if they do not exist,
+        and deletes all files in the `Logs` folder.
+        :return: None
+        :rtype: None
         """
-        # CREATE OUTPUT FOLDERS
+        # Create Exo-MerCat folder if it does not exist
         if not os.path.exists("Exo-MerCat/"):
             os.makedirs("Exo-MerCat")
 
+        # Create InputSources folder if it does not exist
         if not os.path.exists("InputSources/"):
             os.makedirs("InputSources")
 
+        # Create UniformSources folder if it does not exist
         if not os.path.exists("UniformSources/"):
             os.makedirs("UniformSources")
 
-        # CREATE LOG FOLDER
+        # Create Logs folder if it does not exist and remove all files
         if not os.path.exists("Logs/"):
             os.makedirs("Logs")
         os.system("rm Logs/*")
@@ -41,9 +56,12 @@ class UtilityFunctions:
     @staticmethod
     def find_const() -> dict:
         """
+        Returns a dictionary containing a mapping of common astronomical constants to their abbreviated forms.
 
-        :return: A dictionary containing all possible abbreviations and all possible full names.
+        :return: A dictionary with astronomical constants as keys and their abbreviated forms as values.
+        :rtype: dict
         """
+
         constants = {
             "alfa ": "alf ",
             "beta ": "bet ",
@@ -218,14 +236,17 @@ class UtilityFunctions:
     @staticmethod
     def read_config() -> dict:
         """
-        The read_config function reads the input_sources.ini file and returns a dictionary of
-        the configuration parameters.
-        :return a dictionary containing the configuration parameters
+        Reads the `input_sources.ini` file and returns a dictionary of the configuration parameters.
+        :return: A dictionary of the configuration parameters.
+        :rtype: dict
         """
+
+        # read the input_sources.ini file
         config = configparser.RawConfigParser(
             inline_comment_prefixes="#", delimiters=("=")
         )
         config.read("input_sources.ini")
+        #
         output_dict = {s: dict(config.items(s)) for s in config.sections()}
         return output_dict
 
@@ -238,9 +259,11 @@ class UtilityFunctions:
         :param section: Specify which section of the replacements
         :return: A dictionary containing the custom replacements
         """
+        # read the replacements.ini file
         config = configparser.RawConfigParser(inline_comment_prefixes="#")
         config.optionxform = str
         config.read("replacements.ini")
+        # return the section as a dictionary
         config_replace = dict(config.items(section))
         return config_replace
 
@@ -285,106 +308,57 @@ class UtilityFunctions:
         return name
 
     @staticmethod
-    def round_to_decimal(number: float) -> float:
-        """
-        Round a number to an appropriate number of decimal places based on its order of magnitude.
-
-        This function takes a numeric input 'number' and rounds it to an appropriate number of
-        decimal places based on its order of magnitude. The function calculates the order of
-        magnitude of the input number and determines the rounding strategy based on that.
-
-        :param number: The number to be rounded.
-        :return: the rounded number
-        """
-        order_of_magnitude = 10 ** np.floor(np.log10(abs(number)))
-        if order_of_magnitude <= 100:
-            rounded_number = round(number / order_of_magnitude, 0)
-        elif order_of_magnitude <= 1000:
-            rounded_number = round(number / order_of_magnitude, 1)
-        else:
-            rounded_number = round(number / order_of_magnitude, 2)
-        return rounded_number * order_of_magnitude
-
-    # @staticmethod
-    # def round_array_to_significant_digits(numbers: list) -> list:
-    #     """
-    #     Round an array of numbers to their significant digits with special handling for zero values.
-    #
-    #     This function takes an array of numeric inputs 'numbers' and rounds each number to its
-    #     appropriate significant digits using the round_to_decimal function. Zero values are
-    #     replaced with -1 to distinguish them from rounded numbers.
-    #
-    #     :param numbers: The array of numbers to be rounded.
-    #     :return: The array of rounded numbers with special handling for zero values.
-    #     """
-    #     rounded_numbers = []
-    #     for num in numbers:
-    #         if num != 0:
-    #             rounded_num = UtilityFunctions.round_to_decimal(num)
-    #             rounded_numbers.append(rounded_num)
-    #         else:
-    #             rounded_numbers.append(-1)
-    #     return rounded_numbers
-    #
-
-    @staticmethod
     def calculate_working_p_sma(group: pd.DataFrame, tolerance: float) -> pd.DataFrame:
-        """difference of 10%"""
+        """
+        Calculate working parameters 'working_p' and 'working_a' based on the input group DataFrame.
+
+        Sorts the group by column 'p', calculates 'working_p' and 'working_a' values based on tolerance.
+
+        :param group: The input DataFrame containing columns 'p' and 'a'.
+        :type group: pd.DataFrame
+        :param tolerance: The tolerance factor used in calculations.
+        :type tolerance: float
+        :return: The DataFrame with 'working_p' and 'working_a' values calculated.
+        :rtype: pd.DataFrame
+        """
+
+        # Sort the group by column 'p'
         group = group.sort_values(by="p")
+        # Initialize 'working_p' and 'working_a' columns with NaN values
         group["working_p"] = np.nan
         group["working_a"] = np.nan
+
         for i in group.index:
+            # Calculate 'working_p' based on tolerance
             if group.loc[i, "working_p"] != group.loc[i, "working_p"]:
                 group.loc[
                     abs(group.p - group.at[i, "p"]) <= tolerance * group.at[i, "p"],
                     "working_p",
                 ] = group.at[i, "p"]
+
+            # Calculate 'working_a' based on tolerance
             if group.loc[i, "working_a"] != group.loc[i, "working_a"]:
                 group.loc[
                     abs(group.a - group.at[i, "a"]) <= tolerance * group.at[i, "a"],
                     "working_a",
                 ] = group.at[i, "a"]
+
+        # Fill NaN values in 'working_a' and 'working_p' with -1
         group.loc[:, "working_a"] = group.loc[:, "working_a"].fillna(-1)
         group.loc[:, "working_p"] = group.loc[:, "working_p"].fillna(-1)
         return group
 
-    # @staticmethod
-    # def round_parameter_bin(parameter_series: pd.Series) -> pd.Series:
-    #     """
-    #     Round values in a pandas Series to bins based on their order of magnitude.
-    #
-    #     This function takes a pandas Series 'parameter_series' containing numeric values and rounds
-    #     each value to a bin based on its order of magnitude. It calculates the order of magnitude
-    #     for each value, defines variable bins based on the calculated order of magnitude, and
-    #     assigns the corresponding bin label to each value.
-    #
-    #     :param parameter_series: A pandas Series containing numeric values to be rounded to bins.
-    #     :return: A pandas Series with bin labels corresponding to each value's order of magnitude.
-    #
-    #     """
-    #
-    #     # Calculate the order of magnitude
-    #     order_of_magnitude = np.log10(parameter_series.fillna(0))
-    #
-    #     # Define variable bins based on the order of magnitude
-    #     # You can adjust these bins according to your specific needs
-    #     bins = np.linspace(
-    #         np.log10(parameter_series.min() * 0.9),
-    #         np.log10(1.1 * parameter_series.max()),
-    #         300,
-    #     )
-    #     # bin_labels = [f"[{10 ** bins[i]}, {10 ** bins[i + 1]})" for i in range(len(bins) - 1)]
-    #     # Apply pcut with variable bins
-    #     return pd.cut(order_of_magnitude, bins=bins, labels=False).fillna(-1)
-
     @staticmethod
     def get_parameter(treeobject: ElementTree.Element, parameter: str) -> str:
         """
-        The getParameter parses a parameter from an XML ElementTree object.
+        Parses a parameter from an XML ElementTree object.
 
-        :param treeobject: An ElementTree object
-        :param parameter: a string representing the name of an element in the XML file
-        :returns: A string containing the parameter value
+        :param treeobject: An ElementTree object.
+        :type treeobject: ElementTree.Element
+        :param parameter: A string representing the name of an element in the XML file.
+        :type parameter: str
+        :returns: A string containing the parameter value.
+        :rtype: str
         """
         if parameter == "alias":
             alias = treeobject.findall("*/name")
@@ -398,19 +372,23 @@ class UtilityFunctions:
 
     @staticmethod
     def get_attribute(
-            treeobject: ElementTree.Element, parameter: str, attrib: str
+        treeobject: ElementTree.Element, parameter: str, attrib: str
     ) -> str:
         """
-        The getAttribute function parses the ElementTree object for a parameter and gets the desired attribute.
+        Parses the ElementTree object for a parameter and gets the desired attribute.
 
-        :param treeobject: an ElementTree object, which is the root of a parsed XML file
-        :param parameter: a string representing the name of an element in the XML file
-        :param attrib: a string representing one of that element's attributes
-        :returns: A string containing the value of the attribute
+        :param treeobject: An ElementTree object, which is the root of a parsed XML file.
+        :type treeobject: ElementTree.Element
+        :param parameter: A string representing the name of an element in the XML file.
+        :type parameter: str
+        :param attrib: A string representing one of that element's attributes.
+        :type attrib: str
+        :returns: A string containing the value of the attribute.
+        :rtype: str
         """
         if (
-                treeobject.find("./" + parameter) is not None
-                and attrib in treeobject.find("./" + parameter).attrib
+            treeobject.find("./" + parameter) is not None
+            and attrib in treeobject.find("./" + parameter).attrib
         ):
             return treeobject.find("./" + parameter).attrib[attrib]
         else:
@@ -418,32 +396,32 @@ class UtilityFunctions:
 
     @staticmethod
     def get_parameter_all(treeobject: ElementTree.Element, parameter: str) -> str:
-        """
-        The getParameter_all function parses the ElementTree object for a list of parameters.
+        """ "
+        Parses the ElementTree object for a list of parameters.
 
-        :param treeobject: an ElementTree object, which is the root of a parsed XML file
-        :param parameter: a string representing the name of an element in the XML file
-        :returns: A list of all values in treeobject for the supplied parameter
+        :param treeobject: An ElementTree object, which is the root of a parsed XML file.
+        :type treeobject: ElementTree.Element
+        :param parameter: A string representing the name of an element in the XML file.
+        :type parameter: str
+        :returns: A string containing all values in `treeobject` for the supplied `parameter`.
+        :rtype: str
         """
-        # try:
 
         ret = ",".join([x.text for x in treeobject.iter(parameter)])
-        # except BaseException: #pragma: no cover
-        #     ret = "" # pragma: no cover
+
         return ret
 
     @staticmethod
     def convert_xmlfile_to_csvfile(file_path: Union[Path, str]) -> None:
         """
-        The convert_xmlfile_to_csvfile function takes a file path to an XML file and converts it into a CSV file. The
-        function uses the gzip library to open the XML files, which are compressed. The ElementTree library is used
-        to parse the XML files into tables that can be read by Pandas. A list of fields is created that will be used
-        as column headers in the final CSV table. The input_file variable opens up the specified xml_file using gzip
-        and reads it in as an object that can be parsed by ElementTree's parse method, which creates a tree structure
-        from each element in the xml_file (elements
+        Converts an XML file to a CSV file, extracting specific fields from the XML data.
 
-        :param file_path: The path to the file
+        :param file_path: The file path of the XML file to be converted.
+        :type file_path: Union[Path, str]
+        :returns: None
+        :rtype: None
         """
+        #
         fields = [
             "name",
             "binaryflag",
@@ -494,24 +472,31 @@ class UtilityFunctions:
             "alias",
             "list",
         ]
+
+        # Open the input file and parse it as XML
         input_file = gzip.open(Path(file_path), "r")
         table = ElementTree.parse(input_file)
+        # Create an empty DataFrame to store the extracted data
         tab = pd.DataFrame()
 
-        # read the catalog from XML to Pandas
+        # Iterate over each system in the XML file
         for system in table.findall(".//system"):
+            # Find all planets and stars in the system
             planets = system.findall(".//planet")
             stars = system.findall(".//star")
 
+            # Iterate over each planet in the system
             for planet in planets:
                 parameters = pd.DataFrame(
                     [UtilityFunctions.get_parameter(system, "alias")], columns=["alias"]
                 )
 
+                # Extract the specified fields from the planet element
                 for field in fields:
                     parameters[field] = None
                     parameters[field] = UtilityFunctions.get_parameter(planet, field)
                     parameters.alias = UtilityFunctions.get_parameter(system, "alias")
+
                     if field[0:7] == "system_":
                         parameters[field] = UtilityFunctions.get_parameter(
                             system, field[7:]
@@ -555,9 +540,19 @@ class UtilityFunctions:
 
     @staticmethod
     def convert_discovery_methods(data: pd.DataFrame) -> pd.DataFrame:
+        """
+        Convert the discovery methods in the DataFrame to standardized values.
+
+        :param data: The DataFrame containing the discovery methods.
+        :type data: pandas.DataFrame
+        :return: The DataFrame with the discovery methods converted.
+        :rtype: pandas.DataFrame
+        """
+        # Fill missing values with empty string and replace "nan" with empty string
         data["discovery_method"] = (
             data["discovery_method"].fillna("").replace("nan", "")
         )
+        # Convert specific discovery methods to standardized values
         data.loc[
             data.discovery_method == "Primary Transit#TTV", "discovery_method"
         ] = "TTV"
@@ -601,21 +596,40 @@ class UtilityFunctions:
             data.discovery_method == "timing", "discovery_method"
         ] = "Pulsar Timing"
         data.loc[data.discovery_method == "RV", "discovery_method"] = "Radial Velocity"
+
         return data
 
     @staticmethod
     def perform_query(service, query, uploads_dict=None):
+        """
+        Perform a query using the given service and query.
 
+        :param service: The service object used to perform the query.
+        :type service: object
+        :param query: The query string.
+        :type query: str
+        :param uploads_dict: A dictionary of uploads. Defaults to None.
+        :type uploads_dict: dict, optional
+
+        :return: The result of the query as a DataFrame.
+        :rtype: pandas.DataFrame
+        """
+        # Set socket timeout
         timeout = 100000
         socket.setdefaulttimeout(timeout)
 
+        # Perform the query
         if uploads_dict is None:
             uploads_dict = {}
         table = service.run_sync(query, uploads=uploads_dict, timeout=timeout)
-        if len(table)>0:
+
+        # Convert the table to a DataFrame
+        if len(table) > 0:
             table = table.to_table().to_pandas()
             # table=table[table.otype.str.contains('\*')] # IF DECOMMENTED, ADD
             # OTYPE BACK IN THE QUERY
+
+            # if TIC case, treat things differently
             if "TIC" in table.columns:
                 table = table.astype(str)
                 table["main_id"] = "TIC " + table["TIC"].replace("", "<NA>")
@@ -630,10 +644,12 @@ class UtilityFunctions:
                 for col in table.columns:
                     table.loc[table[col].str.contains("<NA>"), col] = ""
                     table["ids"] = table[
-                    ["UCAC4", "2MASS", "WISEA", "GAIA", "KIC", "HIP", "TYC"]
-                ].agg(",".join, axis=1)
+                        ["UCAC4", "2MASS", "WISEA", "GAIA", "KIC", "HIP", "TYC"]
+                    ].agg(",".join, axis=1)
                     table["ids"] = table["ids"].map(lambda x: x.lstrip(",").rstrip(","))
-            table["angsep"] = 0.0 #default value
+
+            # add default angsep if found via name and not by coordinates
+            table["angsep"] = 0.0  # default value
 
             table = table[table.main_id != ""]
 
@@ -643,15 +659,21 @@ class UtilityFunctions:
 
     @staticmethod
     def calculate_angsep(table):
-        table['ra']=table["ra"].map(
-            lambda x: float(x))
-        table['dec']=table['dec'].map(
-            lambda x: float(x))
-        table['ra_2']=table['ra_2'].map(
-            lambda x: float(x))
-        table['dec_2']=table['dec_2'].map(
-            lambda x: float(x))
+        """
+        Calculates the angular separation between two points based on their coordinates.
 
+        :param table: A pandas DataFrame containing columns 'ra', 'dec', 'ra_2', 'dec_2'.
+        :type table: pd.DataFrame
+        :return: A modified DataFrame with the angular separation calculated and selected rows.
+        :rtype: pd.DataFrame
+        """
+        # Convert ra and dec columns to float
+        table["ra"] = table["ra"].map(lambda x: float(x))
+        table["dec"] = table["dec"].map(lambda x: float(x))
+        table["ra_2"] = table["ra_2"].map(lambda x: float(x))
+        table["dec_2"] = table["dec_2"].map(lambda x: float(x))
+
+        # Calculate angular separation
         for row in table.iterrows():
             r = row[1]
             c1 = SkyCoord(
@@ -660,23 +682,26 @@ class UtilityFunctions:
                 frame="icrs",
                 unit=(u.degree, u.degree),
             )
-            c2 = SkyCoord(float(r.ra_2), float(r.dec_2), frame="icrs", unit=(u.degree, u.degree))
+            c2 = SkyCoord(
+                float(r.ra_2), float(r.dec_2), frame="icrs", unit=(u.degree, u.degree)
+            )
             angsep = c2.separation(c1).degree
             table.at[row[0], "angsep"] = angsep
 
+        # Initialize 'selected' column
         table["selected"] = 0
 
-        table["angsep"] = table["angsep"].map(
-            lambda x: np.round(float(x), 8) * 3600
-        )
+        # Convert 'angsep' values and scale
+        table["angsep"] = table["angsep"].map(lambda x: np.round(float(x), 8) * 3600)
 
+        # Group by 'hostbinary' and select closest entry
         for hostbin, group in table.groupby("hostbinary"):
             if len(group) > 1:
-                # if you find more than one, remove the planet entries
+                # If more than one entry, remove planet entries
                 for i in group.index:
                     if (
-                            str(re.search("[\\s\\d][b-i]$", group.main_id[i], re.M))
-                            != "None"
+                        str(re.search("[\\s\\d][b-i]$", group.main_id[i], re.M))
+                        != "None"
                     ):
                         group = group.drop(i)
 
@@ -686,5 +711,6 @@ class UtilityFunctions:
                 selected = group.copy()
             table.loc[selected.index, "selected"] = 1
 
+        # Filter out unselected rows
         table = table[table.selected == 1]
         return table

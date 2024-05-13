@@ -251,8 +251,8 @@ def test__read_config(instance, tmp_path):
     assert "url" in config["nasa"].keys()
     assert "file" in config["nasa"].keys()
     assert (
-            config["nasa"]["url"]
-            == "https://exoplanetarchive.ipac.caltech.edu/TAP/sync?query=select+*+from+pscomppars&format=csv"
+        config["nasa"]["url"]
+        == "https://exoplanetarchive.ipac.caltech.edu/TAP/sync?query=select+*+from+pscomppars&format=csv"
     )
     os.chdir(original_dir)
 
@@ -313,60 +313,6 @@ def test__uniform_string(instance, string, expected):
     assert instance.uniform_string(string) == expected
 
 
-def test__round_to_decimal(instance):
-    # Test cases with various input values
-    test_cases = [
-        (12345, 12300.0),  # Test for an order of magnitude <= 100
-        (678.9, 700.0),  # Test for an order of magnitude between 100 and 1000
-        (0.012345, 0.01),  # Test for an order of magnitude > 1000
-        (1000, 1000),  # Test with number having an order of magnitude equal to 1
-    ]
-
-    for number, expected_output in test_cases:
-        result = instance.round_to_decimal(number)
-        assert result == expected_output
-
-
-# def test__round_array_to_significant_digits(instance):
-#     # Test cases with various input arrays
-#     test_cases = [
-#         (
-#             [1.2345, 6.789, 0.012345, 0, 1000],
-#             [1.0, 7.0, 0.01, -1, 1000.0],
-#         ),  # Normal test case
-#         (
-#             [100, 200, 300, 0, 400],
-#             [100.0, 200.0, 300.0, -1, 400.0],
-#         ),  # Test with only integers
-#         (
-#             [0.00124, 0.00235, 0.00333],
-#             [0.001, 0.002, 0.003],
-#         ),  # Test with values having an order of magnitude < 1
-#         (
-#             [
-#                 103087,
-#                 5098779,
-#             ],
-#             [103000, 5100000],
-#         ),  # Test with values requiring rounding to 2 significant digits
-#         ([0], [-1]),  # Test with an array containing only 0
-#         ([], []),  # Test with an empty array
-#     ]
-#
-#     for numbers, expected_output in test_cases:
-#         result = instance.round_array_to_significant_digits(numbers=numbers)
-#         assert result == expected_output
-
-#
-# def test__round_parameter_bin(instance):
-#     data = pd.Series([326.03, 52160.0, 3765.0, 0.59862739, 0.43, np.nan, 818000.0])
-#     rounded_series = instance.round_parameter_bin(data)
-#     assert sorted(rounded_series.values) == [-1, 2, 8, 137, 187, 240, 297]
-#
-#
-# #
-
-
 def test__calculate_working_p_sma(instance):
     group = pd.DataFrame(
         {
@@ -390,240 +336,242 @@ def test__calculate_working_p_sma(instance):
 
 
 def fill_xml_string():
-    xml_string = ("<systems>\n"
-                  "            <system>\n"
-                  "            	<name>11 Com</name>\n"
-                  "            	<rightascension>12 20 43.0255</rightascension>\n"
-                  "            	<declination>+17 47 34.3392</declination>\n"
-                  "            	<distance errorminus=\"1.7\" errorplus=\"1.7\">88.9</distance>\n"
-                  "            	<star>\n"
-                  "            		<name>11 Com</name>\n"
-                  "            		<name>11 Comae Berenices</name>\n"
-                  "            		<name>HD 107383</name>\n"
-                  "            		<name>HIP 60202</name>\n"
-                  "            		<name>TYC 1445-2560-1</name>\n"
-                  "            		<name>SAO 100053</name>\n"
-                  "            		<name>HR 4697</name>\n"
-                  "            		<name>BD+18 2592</name>\n"
-                  "            		<name>2MASS J12204305+1747341</name>\n"
-                  "            		<name>Gaia DR2 3946945413106333696</name>\n"
-                  "            		<mass errorminus=\"0.3\" errorplus=\"0.3\">2.7</mass>\n"
-                  "            		<radius errorminus=\"2\" errorplus=\"2\">19</radius>\n"
-                  "            		<magV>4.74</magV>\n"
-                  "            		<magB errorminus=\"0.02\" errorplus=\"0.02\">5.74</magB>\n"
-                  "            		<magJ errorminus=\"0.334\" errorplus=\"0.334\">2.943</magJ>\n"
-                  "            		<magH errorminus=\"0.268\" errorplus=\"0.268\">2.484</magH>\n"
-                  "            		<magK errorminus=\"0.346\" errorplus=\"0.346\">2.282</magK>\n"
-                  "            		<temperature errorminus=\"100\" errorplus=\"100\">4742</temperature>\n"
-                  "            		<metallicity errorminus=\"0.09\" errorplus=\"0.09\">-0.35</metallicity>\n"
-                  "            		<spectraltype>G8 III</spectraltype>\n"
-                  "            		<planet>\n"
-                  "            			<name>11 Com b</name>\n"
-                  "            			<name>Gaia DR2 3946945413106333696 b</name>\n"
-                  "            			<name>HIP 60202 b</name>\n"
-                  "            			<name>HD 107383 b</name>\n"
-                  "            			<name>TYC 1445-2560-1 b</name>\n"
-                  "            			<list>Confirmed planets</list>\n"
-                  "            			<mass errorminus=\"1.5\" errorplus=\"1.5\" type=\"msini\">19.4</mass>\n"
-                  "            			<period errorminus=\"0.32\" errorplus=\"0.32\">326.03</period>\n"
-                  "            			<semimajoraxis errorminus=\"0.05\" errorplus=\"0.05\">1.29</semimajoraxis>\n"
-                  "            			<eccentricity errorminus=\"0.005\" errorplus=\"0.005\">0.231</eccentricity>\n"
-                  "            			<periastron errorminus=\"1.5\" errorplus=\"1.5\">94.8</periastron>\n"
-                  "            			<periastrontime errorminus=\"1.6\" errorplus=\"1.6\">2452899.6</periastrontime>\n"
-                  "<description>11 Com b is a brown dwarf-mass companion to the intermediate-mass star 11 Comae "
-                  "Berenices.</description>\n"
-                  "            			<discoverymethod>RV</discoverymethod>\n"
-                  "            			<lastupdate>15/09/20</lastupdate>\n"
-                  "            			<discoveryyear>2008</discoveryyear>\n"
-                  "            		</planet>\n"
-                  "            	</star>\n"
-                  "            	<videolink>http://youtu.be/qyJXJJDrEDo</videolink>\n"
-                  "            	<constellation>Coma Berenices</constellation>\n"
-                  "            </system>\n"
-                  "            <system>\n"
-                  "    	<name>16 Cygni</name>\n"
-                  "    	<rightascension>19 41 48.95343</rightascension>\n"
-                  "    	<declination>+50 31 30.2153</declination>\n"
-                  "    	<distance errorminus=\"0.016\" errorplus=\"0.016\">21.146</distance>\n"
-                  "    	<binary>\n"
-                  "    		<name>16 Cygni</name>\n"
-                  "    		<name>16 Cyg</name>\n"
-                  "    		<name>WDS J19418+5032</name>\n"
-                  "    		<separation unit=\"arcsec\">39.56</separation>\n"
-                  "    		<separation errorminus=\"0.6\" errorplus=\"0.6\" unit=\"AU\">836.5</separation>\n"
-                  "    		<positionangle>133.30</positionangle>\n"
-                  "    		<binary>\n"
-                  "    			<name>16 Cygni AC</name>\n"
-                  "    			<name>16 Cyg AC</name>\n"
-                  "    			<name>WDS J19418+5032 A</name>\n"
-                  "    			<separation unit=\"arcsec\">3.4</separation>\n"
-                  "    			<separation unit=\"AU\">72</separation>\n"
-                  "    			<positionangle>209</positionangle>\n"
-                  "    			<star>\n"
-                  "    				<name>16 Cygni A</name>\n"
-                  "    				<name>16 Cyg A</name>\n"
-                  "    				<name>HD 186408</name>\n"
-                  "    				<name>HIP 96895</name>\n"
-                  "    				<name>TYC 3565-1524-1</name>\n"
-                  "    				<name>SAO 31898</name>\n"
-                  "    				<name>HR 7503</name>\n"
-                  "    				<name>Gliese 765.1 A</name>\n"
-                  "    				<name>GJ 765.1 A</name>\n"
-                  "    				<name>BD+50 2847</name>\n"
-                  "    				<name>2MASS J19414896+5031305</name>\n"
-                  "    				<name>KIC 12069424</name>\n"
-                  "    				<name>WDS J19418+5032 Aa</name>\n"
-                  "    				<magB>6.59</magB>\n"
-                  "    				<magV>5.95</magV>\n"
-                  "    				<magJ>5.09</magJ>\n"
-                  "    				<magH>4.72</magH>\n"
-                  "    				<magK>4.43</magK>\n"
-                  "    				<spectraltype>G2V</spectraltype>\n"
-                  "    				<mass errorminus=\"0.02\" errorplus=\"0.02\">1.11</mass>\n"
-                  "    				<radius errorminus=\"0.008\" errorplus=\"0.008\">1.243</radius>\n"
-                  "    				<temperature errorminus=\"50\" errorplus=\"50\">5825</temperature>\n"
-                  "    				<metallicity errorminus=\"0.026\" errorplus=\"0.026\">0.096</metallicity>\n"
-                  "    				<age errorminus=\"0.4\" errorplus=\"0.4\">6.8</age>\n"
-                  "    			</star>\n"
-                  "    			<star>\n"
-                  "    				<name>16 Cygni C</name>\n"
-                  "    				<name>16 Cyg C</name>\n"
-                  "    				<name>WDS J19418+5032 Ab</name>\n"
-                  "    				<mass>0.17</mass>\n"
-                  "    				<magV>13</magV>\n"
-                  "    				<spectraltype>M</spectraltype>\n"
-                  "    			</star>\n"
-                  "    		</binary>\n"
-                  "    		<star>\n"
-                  "    			<name>16 Cygni B</name>\n"
-                  "    			<name>16 Cyg B</name>\n"
-                  "    			<name>HD 186427</name>\n"
-                  "    			<name>HIP 96901</name>\n"
-                  "    			<name>TYC 3565-1525-1</name>\n"
-                  "    			<name>SAO 31899</name>\n"
-                  "    			<name>HR 7504</name>\n"
-                  "    			<name>Gliese 765.1 B</name>\n"
-                  "    			<name>GJ 765.1 B</name>\n"
-                  "    			<name>BD+50 2848</name>\n"
-                  "    			<name>2MASS J19415198+5031032</name>\n"
-                  "    			<name>KIC 12069449</name>\n"
-                  "    			<mass errorminus=\"0.02\" errorplus=\"0.02\">1.07</mass>\n"
-                  "    			<radius errorminus=\"0.007\" errorplus=\"0.007\">1.127</radius>\n"
-                  "    			<magB>6.86</magB>\n"
-                  "    			<magV>6.20</magV>\n"
-                  "    			<magJ>4.99</magJ>\n"
-                  "    			<magH>4.70</magH>\n"
-                  "    			<magK>4.65</magK>\n"
-                  "    			<temperature errorminus=\"50\" errorplus=\"50\">5750</temperature>\n"
-                  "    			<metallicity errorminus=\"0.021\" errorplus=\"0.021\">0.052</metallicity>\n"
-                  "    			<spectraltype>G2V</spectraltype>\n"
-                  "    			<age errorminus=\"0.4\" errorplus=\"0.4\">6.8</age>\n"
-                  "    			<planet>\n"
-                  "    				<name>16 Cygni B b</name>\n"
-                  "    				<name>16 Cyg B b</name>\n"
-                  "    				<name>HD 186427 B b</name>\n"
-                  "    				<list>Confirmed planets</list>\n"
-                  "    				<mass errorminus=\"0.05\" errorplus=\"0.05\" type=\"msini\">1.77</mass>\n"
-                  "    				<period errorminus=\"0.6\" errorplus=\"0.6\">799.5</period>\n"
-                  "    				<semimajoraxis errorminus=\"0.01\" errorplus=\"0.01\">1.72</semimajoraxis>\n"
-                  "    				<eccentricity errorminus=\"0.011\" errorplus=\"0.011\">0.689</eccentricity>\n"
-                  "    				<periastron errorminus=\"2.1\" errorplus=\"2.1\">83.4</periastron>\n"
-                  "    				<periastrontime errorminus=\"1.6\" errorplus=\"1.6\">2450539.3</periastrontime>\n"
-                  "    				<inclination errorminus=\"1\" errorplus=\"1\">45</inclination>\n"
-                  "<description>16 Cygni is a hierarchical triple system. The star is in the Kepler field of view. In "
-                  "an active search for extra-terrestrial intelligence a radio message has been sent to this system "
-                  "on May 24 1999. It will reach the system in 2069.</description>\n"
-                  "    				<discoverymethod>RV</discoverymethod>\n"
-                  "    				<lastupdate>15/09/22</lastupdate>\n"
-                  "    				<discoveryyear>1996</discoveryyear>\n"
-                  "    				<list>Planets in binary systems, S-type</list>\n"
-                  "    			</planet>\n"
-                  "    		</star>\n"
-                  "    	</binary>\n"
-                  "    	<constellation>Cygnus</constellation>\n"
-                  "    </system>\n"
-                  "    <system>\n"
-                  "    	<name>2M 1938+4603</name>\n"
-                  "    	<name>Kepler-451</name>\n"
-                  "    	<name>KIC 9472174</name>\n"
-                  "    	<rightascension>19 38 32.6</rightascension>\n"
-                  "    	<declination>+46 03 59</declination>\n"
-                  "    	<distance errorminus=\"6.4\" errorplus=\"6.4\">400.8</distance>\n"
-                  "    	<binary>\n"
-                  "    		<name>2M 1938+4603</name>\n"
-                  "    		<name>Kepler-451</name>\n"
-                  "    		<name>KIC 9472174</name>\n"
-                  "    		<name>2MASS J19383260+4603591</name>\n"
-                  "    		<name>WISE J193832.61+460358.9</name>\n"
-                  "    		<name>TYC 3556-3568-1</name>\n"
-                  "    		<name>NSVS 5629361</name>\n"
-                  "    		<period errorminus=\"0.000000005\" errorplus=\"0.000000005\">0.125765282</period>\n"
-                  "    		<inclination errorminus=\"0.20\" errorplus=\"0.20\">69.45</inclination>\n"
-                  "<transittime errorminus=\"0.00003\" errorplus=\"0.00003\" unit=\"BJD\">2455276.60843</transittime>\n"
-                  "    		<semimajoraxis errorminus=\"0.00007\" errorplus=\"0.00007\">0.00414</semimajoraxis>\n"
-                  "    		<star>\n"
-                  "    			<name>2M 1938+4603 A</name>\n"
-                  "    			<name>Kepler-451 A</name>\n"
-                  "    			<name>KIC 9472174 A</name>\n"
-                  "    			<name>2MASS J19383260+4603591 A</name>\n"
-                  "    			<name>WISE J193832.61+460358.9 A</name>\n"
-                  "    			<name>TYC 3556-3568-1 A</name>\n"
-                  "    			<name>NSVS 5629361 A</name>\n"
-                  "    			<magB errorminus=\"0.10\" errorplus=\"0.10\">12.17</magB>\n"
-                  "    			<magV errorminus=\"0.24\" errorplus=\"0.24\">12.69</magV>\n"
-                  "    			<magR errorminus=\"0.08\" errorplus=\"0.08\">12.46</magR>\n"
-                  "    			<magI>12.399</magI>\n"
-                  "    			<magJ errorminus=\"0.022\" errorplus=\"0.022\">12.757</magJ>\n"
-                  "    			<magH errorminus=\"0.020\" errorplus=\"0.020\">12.889</magH>\n"
-                  "    			<magK errorminus=\"0.029\" errorplus=\"0.029\">12.955</magK>\n"
-                  "    			<spectraltype>sdBV</spectraltype>\n"
-                  "    			<mass errorminus=\"0.03\" errorplus=\"0.03\">0.48</mass>\n"
-                  "    			<temperature errorminus=\"106\" errorplus=\"106\">29564</temperature>\n"
-                  "    			<radius errorminus=\"0.004\" errorplus=\"0.004\">0.223</radius>\n"
-                  "    		</star>\n"
-                  "    		<star>\n"
-                  "    			<name>2M 1938+4603 B</name>\n"
-                  "    			<name>Kepler-451 B</name>\n"
-                  "    			<name>KIC 9472174 B</name>\n"
-                  "    			<name>2MASS J19383260+4603591 B</name>\n"
-                  "    			<name>WISE J193832.61+460358.9 B</name>\n"
-                  "    			<name>TYC 3556-3568-1 B</name>\n"
-                  "    			<name>NSVS 5629361 B</name>\n"
-                  "    			<spectraltype>M</spectraltype>\n"
-                  "    			<mass errorminus=\"0.01\" errorplus=\"0.01\">0.12</mass>\n"
-                  "    			<radius errorminus=\"0.003\" errorplus=\"0.003\">0.158</radius>\n"
-                  "    		</star>\n"
-                  "    		<planet>\n"
-                  "    			<name>2M 1938+4603 b</name>\n"
-                  "    			<name>2M 1938+4603 (AB) b</name>\n"
-                  "    			<name>Kepler-451 b</name>\n"
-                  "    			<name>Kepler-451 (AB) b</name>\n"
-                  "    			<name>KIC 9472174 b</name>\n"
-                  "    			<name>KIC 9472174 (AB) b</name>\n"
-                  "    			<period errorminus=\"2\" errorplus=\"2\">416</period>\n"
-                  "    			<semimajoraxis errorminus=\"0.02\" errorplus=\"0.02\">0.92</semimajoraxis>\n"
-                  "    			<mass errorminus=\"0.1\" errorplus=\"0.1\">1.9</mass>\n"
-                  "    			<discoverymethod>timing</discoverymethod>\n"
-                  "    			<discoveryyear>2015</discoveryyear>\n"
-                  "    			<lastupdate>15/06/11</lastupdate>\n"
-                  "<description>2M 1938+4603 is an eclipsing post-common envelope binary in the Kepler field."
-                  "Variations in the timing of the eclipses of the binary star have been used to infer the presence "
-                  "of a giant planet in a circumbinary orbit.</description>\n"
-                  "    			<list>Confirmed planets</list>\n"
-                  "    			<list>Planets in binary systems, P-type</list>\n"
-                  "    		</planet>\n"
-                  "    	</binary>\n"
-                  "    	<constellation>Cygnus</constellation>\n"
-                  "    </system>\n"
-                  "    <system>\n"
-                  "    		<planet>\n"
-                  "    			<name>Example of Rogue planet</name>\n"
-                  "    			<list>Confirmed planets</list>\n"
-                  "    			<list>Planets in binary systems, P-type</list>\n"
-                  "    		</planet>\n"
-                  "    	<constellation>Cygnus</constellation>\n"
-                  "    </system>\n"
-                  "            </systems>")
+    xml_string = (
+        "<systems>\n"
+        "            <system>\n"
+        "            	<name>11 Com</name>\n"
+        "            	<rightascension>12 20 43.0255</rightascension>\n"
+        "            	<declination>+17 47 34.3392</declination>\n"
+        '            	<distance errorminus="1.7" errorplus="1.7">88.9</distance>\n'
+        "            	<star>\n"
+        "            		<name>11 Com</name>\n"
+        "            		<name>11 Comae Berenices</name>\n"
+        "            		<name>HD 107383</name>\n"
+        "            		<name>HIP 60202</name>\n"
+        "            		<name>TYC 1445-2560-1</name>\n"
+        "            		<name>SAO 100053</name>\n"
+        "            		<name>HR 4697</name>\n"
+        "            		<name>BD+18 2592</name>\n"
+        "            		<name>2MASS J12204305+1747341</name>\n"
+        "            		<name>Gaia DR2 3946945413106333696</name>\n"
+        '            		<mass errorminus="0.3" errorplus="0.3">2.7</mass>\n'
+        '            		<radius errorminus="2" errorplus="2">19</radius>\n'
+        "            		<magV>4.74</magV>\n"
+        '            		<magB errorminus="0.02" errorplus="0.02">5.74</magB>\n'
+        '            		<magJ errorminus="0.334" errorplus="0.334">2.943</magJ>\n'
+        '            		<magH errorminus="0.268" errorplus="0.268">2.484</magH>\n'
+        '            		<magK errorminus="0.346" errorplus="0.346">2.282</magK>\n'
+        '            		<temperature errorminus="100" errorplus="100">4742</temperature>\n'
+        '            		<metallicity errorminus="0.09" errorplus="0.09">-0.35</metallicity>\n'
+        "            		<spectraltype>G8 III</spectraltype>\n"
+        "            		<planet>\n"
+        "            			<name>11 Com b</name>\n"
+        "            			<name>Gaia DR2 3946945413106333696 b</name>\n"
+        "            			<name>HIP 60202 b</name>\n"
+        "            			<name>HD 107383 b</name>\n"
+        "            			<name>TYC 1445-2560-1 b</name>\n"
+        "            			<list>Confirmed planets</list>\n"
+        '            			<mass errorminus="1.5" errorplus="1.5" type="msini">19.4</mass>\n'
+        '            			<period errorminus="0.32" errorplus="0.32">326.03</period>\n'
+        '            			<semimajoraxis errorminus="0.05" errorplus="0.05">1.29</semimajoraxis>\n'
+        '            			<eccentricity errorminus="0.005" errorplus="0.005">0.231</eccentricity>\n'
+        '            			<periastron errorminus="1.5" errorplus="1.5">94.8</periastron>\n'
+        '            			<periastrontime errorminus="1.6" errorplus="1.6">2452899.6</periastrontime>\n'
+        "<description>11 Com b is a brown dwarf-mass companion to the intermediate-mass star 11 Comae "
+        "Berenices.</description>\n"
+        "            			<discoverymethod>RV</discoverymethod>\n"
+        "            			<lastupdate>15/09/20</lastupdate>\n"
+        "            			<discoveryyear>2008</discoveryyear>\n"
+        "            		</planet>\n"
+        "            	</star>\n"
+        "            	<videolink>http://youtu.be/qyJXJJDrEDo</videolink>\n"
+        "            	<constellation>Coma Berenices</constellation>\n"
+        "            </system>\n"
+        "            <system>\n"
+        "    	<name>16 Cygni</name>\n"
+        "    	<rightascension>19 41 48.95343</rightascension>\n"
+        "    	<declination>+50 31 30.2153</declination>\n"
+        '    	<distance errorminus="0.016" errorplus="0.016">21.146</distance>\n'
+        "    	<binary>\n"
+        "    		<name>16 Cygni</name>\n"
+        "    		<name>16 Cyg</name>\n"
+        "    		<name>WDS J19418+5032</name>\n"
+        '    		<separation unit="arcsec">39.56</separation>\n'
+        '    		<separation errorminus="0.6" errorplus="0.6" unit="AU">836.5</separation>\n'
+        "    		<positionangle>133.30</positionangle>\n"
+        "    		<binary>\n"
+        "    			<name>16 Cygni AC</name>\n"
+        "    			<name>16 Cyg AC</name>\n"
+        "    			<name>WDS J19418+5032 A</name>\n"
+        '    			<separation unit="arcsec">3.4</separation>\n'
+        '    			<separation unit="AU">72</separation>\n'
+        "    			<positionangle>209</positionangle>\n"
+        "    			<star>\n"
+        "    				<name>16 Cygni A</name>\n"
+        "    				<name>16 Cyg A</name>\n"
+        "    				<name>HD 186408</name>\n"
+        "    				<name>HIP 96895</name>\n"
+        "    				<name>TYC 3565-1524-1</name>\n"
+        "    				<name>SAO 31898</name>\n"
+        "    				<name>HR 7503</name>\n"
+        "    				<name>Gliese 765.1 A</name>\n"
+        "    				<name>GJ 765.1 A</name>\n"
+        "    				<name>BD+50 2847</name>\n"
+        "    				<name>2MASS J19414896+5031305</name>\n"
+        "    				<name>KIC 12069424</name>\n"
+        "    				<name>WDS J19418+5032 Aa</name>\n"
+        "    				<magB>6.59</magB>\n"
+        "    				<magV>5.95</magV>\n"
+        "    				<magJ>5.09</magJ>\n"
+        "    				<magH>4.72</magH>\n"
+        "    				<magK>4.43</magK>\n"
+        "    				<spectraltype>G2V</spectraltype>\n"
+        '    				<mass errorminus="0.02" errorplus="0.02">1.11</mass>\n'
+        '    				<radius errorminus="0.008" errorplus="0.008">1.243</radius>\n'
+        '    				<temperature errorminus="50" errorplus="50">5825</temperature>\n'
+        '    				<metallicity errorminus="0.026" errorplus="0.026">0.096</metallicity>\n'
+        '    				<age errorminus="0.4" errorplus="0.4">6.8</age>\n'
+        "    			</star>\n"
+        "    			<star>\n"
+        "    				<name>16 Cygni C</name>\n"
+        "    				<name>16 Cyg C</name>\n"
+        "    				<name>WDS J19418+5032 Ab</name>\n"
+        "    				<mass>0.17</mass>\n"
+        "    				<magV>13</magV>\n"
+        "    				<spectraltype>M</spectraltype>\n"
+        "    			</star>\n"
+        "    		</binary>\n"
+        "    		<star>\n"
+        "    			<name>16 Cygni B</name>\n"
+        "    			<name>16 Cyg B</name>\n"
+        "    			<name>HD 186427</name>\n"
+        "    			<name>HIP 96901</name>\n"
+        "    			<name>TYC 3565-1525-1</name>\n"
+        "    			<name>SAO 31899</name>\n"
+        "    			<name>HR 7504</name>\n"
+        "    			<name>Gliese 765.1 B</name>\n"
+        "    			<name>GJ 765.1 B</name>\n"
+        "    			<name>BD+50 2848</name>\n"
+        "    			<name>2MASS J19415198+5031032</name>\n"
+        "    			<name>KIC 12069449</name>\n"
+        '    			<mass errorminus="0.02" errorplus="0.02">1.07</mass>\n'
+        '    			<radius errorminus="0.007" errorplus="0.007">1.127</radius>\n'
+        "    			<magB>6.86</magB>\n"
+        "    			<magV>6.20</magV>\n"
+        "    			<magJ>4.99</magJ>\n"
+        "    			<magH>4.70</magH>\n"
+        "    			<magK>4.65</magK>\n"
+        '    			<temperature errorminus="50" errorplus="50">5750</temperature>\n'
+        '    			<metallicity errorminus="0.021" errorplus="0.021">0.052</metallicity>\n'
+        "    			<spectraltype>G2V</spectraltype>\n"
+        '    			<age errorminus="0.4" errorplus="0.4">6.8</age>\n'
+        "    			<planet>\n"
+        "    				<name>16 Cygni B b</name>\n"
+        "    				<name>16 Cyg B b</name>\n"
+        "    				<name>HD 186427 B b</name>\n"
+        "    				<list>Confirmed planets</list>\n"
+        '    				<mass errorminus="0.05" errorplus="0.05" type="msini">1.77</mass>\n'
+        '    				<period errorminus="0.6" errorplus="0.6">799.5</period>\n'
+        '    				<semimajoraxis errorminus="0.01" errorplus="0.01">1.72</semimajoraxis>\n'
+        '    				<eccentricity errorminus="0.011" errorplus="0.011">0.689</eccentricity>\n'
+        '    				<periastron errorminus="2.1" errorplus="2.1">83.4</periastron>\n'
+        '    				<periastrontime errorminus="1.6" errorplus="1.6">2450539.3</periastrontime>\n'
+        '    				<inclination errorminus="1" errorplus="1">45</inclination>\n'
+        "<description>16 Cygni is a hierarchical triple system. The star is in the Kepler field of view. In "
+        "an active search for extra-terrestrial intelligence a radio message has been sent to this system "
+        "on May 24 1999. It will reach the system in 2069.</description>\n"
+        "    				<discoverymethod>RV</discoverymethod>\n"
+        "    				<lastupdate>15/09/22</lastupdate>\n"
+        "    				<discoveryyear>1996</discoveryyear>\n"
+        "    				<list>Planets in binary systems, S-type</list>\n"
+        "    			</planet>\n"
+        "    		</star>\n"
+        "    	</binary>\n"
+        "    	<constellation>Cygnus</constellation>\n"
+        "    </system>\n"
+        "    <system>\n"
+        "    	<name>2M 1938+4603</name>\n"
+        "    	<name>Kepler-451</name>\n"
+        "    	<name>KIC 9472174</name>\n"
+        "    	<rightascension>19 38 32.6</rightascension>\n"
+        "    	<declination>+46 03 59</declination>\n"
+        '    	<distance errorminus="6.4" errorplus="6.4">400.8</distance>\n'
+        "    	<binary>\n"
+        "    		<name>2M 1938+4603</name>\n"
+        "    		<name>Kepler-451</name>\n"
+        "    		<name>KIC 9472174</name>\n"
+        "    		<name>2MASS J19383260+4603591</name>\n"
+        "    		<name>WISE J193832.61+460358.9</name>\n"
+        "    		<name>TYC 3556-3568-1</name>\n"
+        "    		<name>NSVS 5629361</name>\n"
+        '    		<period errorminus="0.000000005" errorplus="0.000000005">0.125765282</period>\n'
+        '    		<inclination errorminus="0.20" errorplus="0.20">69.45</inclination>\n'
+        '<transittime errorminus="0.00003" errorplus="0.00003" unit="BJD">2455276.60843</transittime>\n'
+        '    		<semimajoraxis errorminus="0.00007" errorplus="0.00007">0.00414</semimajoraxis>\n'
+        "    		<star>\n"
+        "    			<name>2M 1938+4603 A</name>\n"
+        "    			<name>Kepler-451 A</name>\n"
+        "    			<name>KIC 9472174 A</name>\n"
+        "    			<name>2MASS J19383260+4603591 A</name>\n"
+        "    			<name>WISE J193832.61+460358.9 A</name>\n"
+        "    			<name>TYC 3556-3568-1 A</name>\n"
+        "    			<name>NSVS 5629361 A</name>\n"
+        '    			<magB errorminus="0.10" errorplus="0.10">12.17</magB>\n'
+        '    			<magV errorminus="0.24" errorplus="0.24">12.69</magV>\n'
+        '    			<magR errorminus="0.08" errorplus="0.08">12.46</magR>\n'
+        "    			<magI>12.399</magI>\n"
+        '    			<magJ errorminus="0.022" errorplus="0.022">12.757</magJ>\n'
+        '    			<magH errorminus="0.020" errorplus="0.020">12.889</magH>\n'
+        '    			<magK errorminus="0.029" errorplus="0.029">12.955</magK>\n'
+        "    			<spectraltype>sdBV</spectraltype>\n"
+        '    			<mass errorminus="0.03" errorplus="0.03">0.48</mass>\n'
+        '    			<temperature errorminus="106" errorplus="106">29564</temperature>\n'
+        '    			<radius errorminus="0.004" errorplus="0.004">0.223</radius>\n'
+        "    		</star>\n"
+        "    		<star>\n"
+        "    			<name>2M 1938+4603 B</name>\n"
+        "    			<name>Kepler-451 B</name>\n"
+        "    			<name>KIC 9472174 B</name>\n"
+        "    			<name>2MASS J19383260+4603591 B</name>\n"
+        "    			<name>WISE J193832.61+460358.9 B</name>\n"
+        "    			<name>TYC 3556-3568-1 B</name>\n"
+        "    			<name>NSVS 5629361 B</name>\n"
+        "    			<spectraltype>M</spectraltype>\n"
+        '    			<mass errorminus="0.01" errorplus="0.01">0.12</mass>\n'
+        '    			<radius errorminus="0.003" errorplus="0.003">0.158</radius>\n'
+        "    		</star>\n"
+        "    		<planet>\n"
+        "    			<name>2M 1938+4603 b</name>\n"
+        "    			<name>2M 1938+4603 (AB) b</name>\n"
+        "    			<name>Kepler-451 b</name>\n"
+        "    			<name>Kepler-451 (AB) b</name>\n"
+        "    			<name>KIC 9472174 b</name>\n"
+        "    			<name>KIC 9472174 (AB) b</name>\n"
+        '    			<period errorminus="2" errorplus="2">416</period>\n'
+        '    			<semimajoraxis errorminus="0.02" errorplus="0.02">0.92</semimajoraxis>\n'
+        '    			<mass errorminus="0.1" errorplus="0.1">1.9</mass>\n'
+        "    			<discoverymethod>timing</discoverymethod>\n"
+        "    			<discoveryyear>2015</discoveryyear>\n"
+        "    			<lastupdate>15/06/11</lastupdate>\n"
+        "<description>2M 1938+4603 is an eclipsing post-common envelope binary in the Kepler field."
+        "Variations in the timing of the eclipses of the binary star have been used to infer the presence "
+        "of a giant planet in a circumbinary orbit.</description>\n"
+        "    			<list>Confirmed planets</list>\n"
+        "    			<list>Planets in binary systems, P-type</list>\n"
+        "    		</planet>\n"
+        "    	</binary>\n"
+        "    	<constellation>Cygnus</constellation>\n"
+        "    </system>\n"
+        "    <system>\n"
+        "    		<planet>\n"
+        "    			<name>Example of Rogue planet</name>\n"
+        "    			<list>Confirmed planets</list>\n"
+        "    			<list>Planets in binary systems, P-type</list>\n"
+        "    		</planet>\n"
+        "    	<constellation>Cygnus</constellation>\n"
+        "    </system>\n"
+        "            </systems>"
+    )
     return xml_string
 
 
@@ -690,9 +638,9 @@ def test__convert_xmlfile_to_csvfile(instance):
     ]
     assert all(element in data.columns for element in expected_columns)
     assert (
-            data.at[0, "alias"]
-            == "11 Com,11 Comae Berenices,HD 107383,HIP 60202,TYC 1445-2560-1,SAO 100053,HR 4697,BD+18 2592,"
-               "2MASS J12204305+1747341,Gaia DR2 3946945413106333696"
+        data.at[0, "alias"]
+        == "11 Com,11 Comae Berenices,HD 107383,HIP 60202,TYC 1445-2560-1,SAO 100053,HR 4697,BD+18 2592,"
+        "2MASS J12204305+1747341,Gaia DR2 3946945413106333696"
     )
     assert data.at[0, "system_rightascension"] == "12 20 43.0255"
     assert data.at[0, "system_distance"] == 88.9
@@ -794,7 +742,8 @@ def test__perform_query(instance):
                 "3675|PMC 90-93  1008|PPM 162584|SAO 121568|SBC7   573|SKY# 29573|TD1 19139|TYC  381-1598-1|UBV   "
                 "21316|UBV M  21407|YZ   7  7306|uvby98 100147869|Renson 41690|2MASS J16241083+0656534|Gaia DR1 "
                 "4439556476666646528|WEB 13596|Gaia DR2 4439556480967874432",
-                "Gaia DR3 6049656638390048896|AP J16171898-2437186|TIC 98231712|2MASS J16171898-2437186|UGCS " "J161718.97-243718.7|WISEA J161718.97-243718.9|EPIC 203868608|Gaia DR2 6049656638390048896",
+                "Gaia DR3 6049656638390048896|AP J16171898-2437186|TIC 98231712|2MASS J16171898-2437186|UGCS "
+                "J161718.97-243718.7|WISEA J161718.97-243718.9|EPIC 203868608|Gaia DR2 6049656638390048896",
             ],
             "angsep": [0.0, 0.0, 0.0],
         }
@@ -811,7 +760,10 @@ def test__perform_query(instance):
     table = UtilityFunctions.perform_query(service, query, uploads_dict={"tab": t2})
 
     assert set(table.columns) == set(expected.columns)
-    assert_frame_equal(table[['hostbinary','main_id','ra_2','dec_2','angsep']], expected[['hostbinary','main_id','ra_2','dec_2','angsep']])
+    assert_frame_equal(
+        table[["hostbinary", "main_id", "ra_2", "dec_2", "angsep"]],
+        expected[["hostbinary", "main_id", "ra_2", "dec_2", "angsep"]],
+    )
     for i in table.index:
         assert sorted(table.at[i, "ids"].split("|")) == sorted(
             expected.at[i, "ids"].split("|")
@@ -876,7 +828,10 @@ def test__perform_query(instance):
     assert set(table.columns) == set(expected.columns)
     table = table.reset_index(drop=True)
 
-    assert_frame_equal(table[['alias','main_id','ra_2','dec_2','angsep']], expected[['alias','main_id','ra_2','dec_2','angsep']])
+    assert_frame_equal(
+        table[["alias", "main_id", "ra_2", "dec_2", "angsep"]],
+        expected[["alias", "main_id", "ra_2", "dec_2", "angsep"]],
+    )
     for i in table.index:
         assert sorted(table.at[i, "ids"].split("|")) == sorted(
             expected.at[i, "ids"].split("|")
@@ -908,7 +863,10 @@ def test__perform_query(instance):
     )
 
     assert set(table.columns) == set(expected.columns)
-    assert_frame_equal(table[['main_id','ra_2','dec_2','angsep']], expected[['main_id','ra_2','dec_2','angsep']])
+    assert_frame_equal(
+        table[["main_id", "ra_2", "dec_2", "angsep"]],
+        expected[["main_id", "ra_2", "dec_2", "angsep"]],
+    )
     for i in table.index:
         assert sorted(table.at[i, "ids"].split("|")) == sorted(
             expected.at[i, "ids"].split("|")
@@ -937,14 +895,14 @@ def test__perform_query(instance):
     tolerance = 1 / 3600  # arcsec in degrees
     t2 = Table.from_pandas(pd.DataFrame(data))
     query = (
-            """SELECT basic.main_id, basic.dec as dec_2,basic.ra as ra_2, basic.otype as type, t.hostbinary, t.ra, 
+        """SELECT basic.main_id, basic.dec as dec_2,basic.ra as ra_2, basic.otype as type, t.hostbinary, t.ra, 
             t.dec FROM basic JOIN TAP_UPLOAD.tab AS t on 1=CONTAINS(POINT('ICRS',basic.ra, basic.dec),   
             CIRCLE('ICRS', t.ra, t.dec,"""
-            + str(tolerance)
-            + """)) """
+        + str(tolerance)
+        + """)) """
     )
     table = UtilityFunctions.perform_query(service, query, uploads_dict={"tab": t2})
-    #in this case must run also calculate_angsep
+    # in this case must run also calculate_angsep
     table = UtilityFunctions.calculate_angsep(table)
 
     assert set(table.columns) == set(expected.columns)
@@ -1021,16 +979,19 @@ def test__perform_query(instance):
     table = pd.DataFrame()
     for ind in t2.index:
         query = (
-                """SELECT tic.RAJ2000 as ra_2, tic.DEJ2000 as dec_2,tic.GAIA, tic.UCAC4, tic."2MASS", tic.WISEA, 
-                tic.TIC, tic.KIC, tic.HIP, tic.TYC  FROM "IV/38/tic" as tic  WHERE 1=CONTAINS(POINT('ICRS',tic.RAJ2000, tic.DEJ2000),   CIRCLE('ICRS',""" + str(
-            t2.at[ind, 'ra']) + """,""" + str(t2.at[ind, 'dec']) + ""","""
-                + str(tolerance)
-                + """))"""
+            """SELECT tic.RAJ2000 as ra_2, tic.DEJ2000 as dec_2,tic.GAIA, tic.UCAC4, tic."2MASS", tic.WISEA, 
+                tic.TIC, tic.KIC, tic.HIP, tic.TYC  FROM "IV/38/tic" as tic  WHERE 1=CONTAINS(POINT('ICRS',tic.RAJ2000, tic.DEJ2000),   CIRCLE('ICRS',"""
+            + str(t2.at[ind, "ra"])
+            + ""","""
+            + str(t2.at[ind, "dec"])
+            + ""","""
+            + str(tolerance)
+            + """))"""
         )
         single_table = UtilityFunctions.perform_query(service, query, uploads_dict={})
-        single_table['hostbinary'] = t2.at[ind, 'hostbinary']
-        single_table['ra'] = t2.at[ind, 'ra']
-        single_table['dec'] = t2.at[ind, 'dec']
+        single_table["hostbinary"] = t2.at[ind, "hostbinary"]
+        single_table["ra"] = t2.at[ind, "ra"]
+        single_table["dec"] = t2.at[ind, "dec"]
         single_table = UtilityFunctions.calculate_angsep(single_table)
 
         table = pd.concat([table, single_table])
