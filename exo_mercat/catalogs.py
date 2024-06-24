@@ -18,6 +18,7 @@ class Catalog:
     """
     The Catalog class contains all methods and attributes that apply to all the other catalogs.
     """
+
     def __init__(self) -> None:
         """
         This function is called when the class is instantiated. It sets up the object with a data attribute
@@ -57,20 +58,22 @@ class Catalog:
         # If local_date is not empty, use that date, otherwise use today's date
         if local_date != "":
             file_path_str = filename + local_date + ".csv"
+            # Case 1
             if len(glob.glob(file_path_str)) == 0:
                 raise ValueError(
                     "Could not find catalog with this specific date. Please check your date value."
                 )
+            # Case 2
             else:
                 logging.info("Reading specific version: " + local_date)
         else:
             file_path_str = filename + date.today().strftime("%m-%d-%Y") + ".csv"
 
-        # Check if the file already exists
+        # Case 3: File already exists
         if os.path.exists(file_path_str):
             logging.info("Reading existing file")
         else:
-            # Download the file
+            # Case 4: Download the file
             try:
                 result = requests.get(url, timeout=timeout)
                 with open(file_path_str, "wb") as f:
@@ -90,7 +93,7 @@ class Catalog:
                 requests.exceptions.ConnectTimeout,
                 requests.exceptions.HTTPError,
             ):
-                # Check if there is a previous version
+                # Case 5: Download failed, try local copy
                 if len(glob.glob(filename + "*.csv")) > 0:
                     file_path_str = glob.glob(filename + "*.csv")[0]
 
@@ -98,6 +101,7 @@ class Catalog:
                         "Error fetching the catalog, taking a local copy: %s",
                         file_path_str,
                     )
+                # Case 6: Cannot find local copy
                 else:
                     raise ValueError("Could not find previous catalogs")
         logging.info("Catalog downloaded.")
@@ -191,8 +195,7 @@ class Catalog:
 
         - Excludes 'PSR B1257+12' which is a known weird candidate.
 
-        - Handles the special case for the problematic triple BD system DENIS J063001.4-184014 (bc) and names ending
-        with parenthesis.
+        - Handles the special case for the problematic triple BD system DENIS J063001.4-184014 (bc).
 
         :param self: An instance of class Catalog
         :type self: Catalog
@@ -370,7 +373,6 @@ class Catalog:
         """
         raise NotImplementedError
 
-
     def uniform_catalog(self) -> None:
         """
         Standardize the dataframe columns and values.
@@ -509,7 +511,7 @@ class Catalog:
     def check_mission_tables(self, table_path_str: str) -> None:
         """
         The check_mission_tables function checks the dataframe for any objects that have a name that matches an entry
-        in the KOI, TESS or EPIC catalogs.
+        in the KOI or EPIC catalogs.
 
         If there is a match, it will update the status of that object to whatever status is listed in the KOI,
         TESS and EPIC catalogs and update its coordinates if they are missing from the dataframe.
@@ -754,7 +756,7 @@ class Catalog:
 
     def convert_coordinates(self) -> None:
         """
-        Convert the `ra` and `dec columns of the dataframe to decimal degrees.
+        Convert the `ra` and `dec` columns of the dataframe to decimal degrees.
 
         This method is not implemented in the base class. Subclasses should override this method to provide the
         specific implementation for their respective catalog.

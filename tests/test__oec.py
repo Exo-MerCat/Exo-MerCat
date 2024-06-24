@@ -1,7 +1,7 @@
 import gzip
 import os
 from datetime import date
-from pathlib import Path
+from pathlib import Path, PosixPath
 from unittest.mock import MagicMock, patch, Mock
 
 import numpy as np
@@ -263,58 +263,108 @@ def test__init(instance):
 
 
 def test__download_catalog(tmp_path, instance) -> None:
+    original_dir = os.getcwd()
+
+    os.chdir(tmp_path)  # Create a temporary in-memory configuration object
+
     url = "https://example.com/catalog.xml.gz"
     filename = "catalog"
+
+    # local_date not null. Read specific date
+    expected_file_path = filename + "01-02-2024.csv"
+    expected_file_path_xml = filename + "01-02-2024.xml.gz"
+    # CASE 1: local date is invalid
+    with LogCapture() as log:
+        with pytest.raises(ValueError):
+            result = instance.download_catalog(
+                url=url, filename=filename, local_date="01-02-2024"
+            )
+            assert (
+                "Could not find catalog with this specific date. Please check your date value."
+                in log.actual()[0][-1]
+            )
+    # CASE 2: local date is valid
+    open(expected_file_path, "w").close()
+    open(expected_file_path_xml, "w").close()
+
+    with LogCapture() as log:
+        result = instance.download_catalog(
+            url=url, filename=filename, local_date="01-02-2024"
+        )
+        assert "Reading specific version: 01-02-2024" in log.actual()[0][-1]
+        assert "Reading existing file" in log.actual()[1][-1]
+        assert "Catalog downloaded" in log.actual()[2][-1]
+        assert result == PosixPath(expected_file_path)
+        assert os.path.isfile(expected_file_path)
+        assert os.path.isfile(expected_file_path_xml)
+
+    os.remove(expected_file_path)
+    os.remove(expected_file_path_xml)
+    #
+    # CASE 3: use today's value
     expected_file_path = filename + date.today().strftime("%m-%d-%Y.csv")
+    expected_file_path_xml = filename + date.today().strftime("%m-%d-%Y.xml.gz")
+    open(expected_file_path, "w").close()
+    open(expected_file_path_xml, "w").close()
 
-    # Mock os.path.exists to simulate that the file already exists or not
-    with patch("os.path.exists", MagicMock(return_value=True)):
-        with LogCapture() as log:
-            result = instance.download_catalog(url=url, filename=filename)
-            assert "Reading existing file" in log.actual()[0][-1]
-            assert "Catalog downloaded" in log.actual()[1][-1]
-
-            assert result == Path(expected_file_path)
-
-    with patch("os.path.exists", MagicMock(return_value=False)):
-        # CASE 1: it downloads fine
-        with patch("requests.get", MagicMock()) as mock_run:
-            mock_response = Mock()
-            mock_response.status_code = 200
-            # Gzip the content using gzip.compress before setting it to
-            # mock_response.content
-            xml_content = fill_xml_string().encode("utf-8")
-            gzipped_content = gzip.compress(xml_content)
-            mock_response.content = gzipped_content
-            mock_run.return_value = mock_response
-            mock_run.return_value.content = gzipped_content
-
-            with LogCapture() as log:
-                result = instance.download_catalog(url=url, filename=filename)
+    # file is found
+    with LogCapture() as log:
+        result = instance.download_catalog(url=url, filename=filename)
+        assert "Reading existing file" in log.actual()[0][-1]
+        assert "Catalog downloaded" in log.actual()[1][-1]
 
         assert result == Path(expected_file_path)
-        os.remove(expected_file_path)
-        os.remove(expected_file_path[:-3] + "xml.gz")
+        assert os.path.isfile(expected_file_path)
+        assert os.path.isfile(expected_file_path_xml)
 
-        open("cataloglocal_copy.csv", "w").close()
-        # CASE 2.A : errors in downloading, takes local copy
+    # file must be downloaded
+    # CASE 4: it downloads fine
+    os.remove(expected_file_path)
+    os.remove(expected_file_path_xml)
+    with patch("requests.get", MagicMock()) as mock_run:
+        mock_response = Mock()
+        mock_response.status_code = 200
+        # Gzip the content using gzip.compress before setting it to
+        # mock_response.content
+        xml_content = fill_xml_string().encode("utf-8")
+        gzipped_content = gzip.compress(xml_content)
+        mock_response.content = gzipped_content
+        mock_run.return_value = mock_response
+        mock_run.return_value.content = gzipped_content
+
         with LogCapture() as log:
-            result = instance.download_catalog(
-                url=url, filename=filename, timeout=0.00000001
-            )
+            result = instance.download_catalog(url=url, filename=filename)
+            log = pd.DataFrame(list(log), columns=["user", "info", "message"])
+        assert "Convert from .xml to .csv" in log["message"].tolist()
+        assert "Catalog downloaded." in log["message"].tolist()
 
-            # it gets another local file
-            assert result != Path(expected_file_path)
-            assert "catalog" in str(result)  # it contains the filename
-            assert "csv" in str(result)  # it is a csv file
+        assert result == Path(expected_file_path)
+        assert os.path.isfile(expected_file_path)
+        assert os.path.isfile(expected_file_path_xml)
+
+    os.remove(expected_file_path)
+    os.remove(expected_file_path_xml)
+
+    open("cataloglocal_copy.csv", "w").close()
+    # CASE 5 : errors in downloading, takes local copy
+    with LogCapture() as log:
+        result = instance.download_catalog(
+            url=url, filename=filename, timeout=0.00000001
+        )
+
+        # it gets another local file
+        assert result != Path(expected_file_path)
+        assert "catalog" in str(result)  # it contains the filename
+        assert "csv" in str(result)  # it is a csv file
         os.remove("cataloglocal_copy.csv")
         #
-        # CASE 2.B : errors in downloading, raises error because no local copy
-        with LogCapture() as log:
-            with pytest.raises(ValueError):
-                result = instance.download_catalog(
-                    url=url, filename=filename, timeout=0.00001
-                )
+    # CASE 6: errors in downloading, raises error because no local copy
+    with LogCapture() as log:
+        with pytest.raises(ValueError):
+            result = instance.download_catalog(
+                url=url, filename=filename, timeout=0.00001
+            )
+    os.chdir(original_dir)
 
 
 def test__uniform_catalog(instance):

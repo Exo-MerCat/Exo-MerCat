@@ -33,6 +33,7 @@ class UtilityFunctions:
         """
         Creates the `Exo-MerCat`, `InputSources`, `UniformedSources`, and `Logs` folders if they do not exist,
         and deletes all files in the `Logs` folder.
+
         :return: None
         :rtype: None
         """

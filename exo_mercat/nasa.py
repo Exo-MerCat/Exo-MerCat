@@ -11,6 +11,7 @@ class Nasa(Catalog):
     """
     The Nasa class contains all methods and attributes related to the NASA Exoplanet Archive catalog.
     """
+
     def __init__(self) -> None:
         """
         This function is called when the class is instantiated. It sets up the object with a name attribute that can
@@ -136,7 +137,6 @@ class Nasa(Catalog):
 
         # Iterate over the rows of the dataframe
         for i in self.data.index:
-
             # If 'bestmass' is a mass, sort it into 'mass'
             if self.data.at[i, "bestmass_provenance"] == "Mass":
                 self.data.at[i, "mass"] = self.data.at[i, "bestmass"]

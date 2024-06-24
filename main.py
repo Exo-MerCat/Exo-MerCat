@@ -58,7 +58,7 @@ def main():
     #
     if args["local"]:
         for cat in [Koi()]:
-            # Initializing catalogs
+            # Ingesting catalogs
             logging.info("****** " + cat.name + " ******")
             config_per_cat = config_dict[cat.name]
             file_path_str = cat.download_catalog(
@@ -74,7 +74,7 @@ def main():
 
         cat_types = [Eu(), Nasa(), Oec(), Toi(), Epic()]
         for cat in cat_types:
-            # Initializing catalogs
+            # Ingesting catalogs
             logging.info("****** " + cat.name + " ******")
             config_per_cat = config_dict[cat.name]
             file_path = cat.download_catalog(
@@ -112,35 +112,31 @@ def main():
         emc.data.letter = emc.data.letter.str[-3:]
 
     emc.data = emc.data.reset_index()
-    emc.print_catalog("UniformSources/fullcatalog.csv")
     # Matching with stellar catalogs
     emc.alias_as_host()
-    emc.check_binary_mismatch(keyword="host")
+    emc.check_binary_mismatch(keyword="host",tolerance=1./3600.)
     emc.prepare_columns_for_mainid_search()
     emc.get_host_info_from_simbad()
-    emc.get_coordinates_from_simbad()
     emc.get_host_info_from_tic()
-    emc.get_coordinates_from_tic()
+    emc.check_coordinates(tolerance=1./3600.)
+    emc.get_coordinates_from_simbad(tolerance=1. / 3600.)
+    emc.get_coordinates_from_tic(tolerance=1. / 3600.)
     emc.fill_missing_main_id()
-    emc.check_coordinates()
     emc.polish_main_id()
-    emc.check_same_host_different_id()
-    emc.check_same_coords_different_id()
-    emc.group_by_list_id_check_main_id()
-    emc.group_by_main_id_set_final_alias()
-    emc.check_binary_mismatch(keyword="main_id")
+    emc.post_main_id_query_checks(tolerance=1./3600.)
+    emc.group_by_main_id_set_main_id_aliases()
+    emc.check_binary_mismatch(keyword="main_id",tolerance=1./3600.)
     emc.cleanup_catalog()
 
     # Merging entries
     emc.group_by_period_check_letter()
     emc.group_by_letter_check_period(verbose=args["verbose"])
-    emc.potential_duplicates_after_merging()
     emc.select_best_mass()
     emc.set_exo_mercat_name()
     emc.fill_row_update(local_date)
     emc.keep_columns()
     emc.save_catalog(local_date, "_full")
-    emc.remove_known_brown_dwarfs(print_flag=True)
+    emc.remove_known_brown_dwarfs(local_date,print_flag=True,)
     emc.save_catalog(local_date, "")
 
 

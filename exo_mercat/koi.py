@@ -9,6 +9,7 @@ class Koi(Catalog):
     """
     The Koi class contains all methods and attributes related to the Kepler Objects of Interest catalog.
     """
+
     def __init__(self) -> None:
         """
         Initializes the Koi class object.

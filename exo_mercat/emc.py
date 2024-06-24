@@ -19,6 +19,7 @@ class Emc(Catalog):
     """
     The EMC class contains all methods and attributes related to Exo-MerCat catalog.
     """
+
     def __init__(self) -> None:
         """
         Initializes the Emc class object.
@@ -50,7 +51,6 @@ class Emc(Catalog):
 
     def alias_as_host(self) -> None:
         """
-
         The alias_as_host function takes the alias column of a dataframe and checks if any of the aliases are labeled
         as hosts in some other entry. If an alias is labeled as a host, it changes the host to be that of the
         original host. It then adds all aliases of both hosts into one list for each row. The method opens a file
@@ -69,7 +69,7 @@ class Emc(Catalog):
         host: str
         for host, group in self.data.groupby(by="host"):
             # Create an empty set to store unique values
-            final_alias = set()
+            main_id_aliases = set()
 
             # Iterate through the list and add non-NaN values to the set
             for alias in list(group.alias):
@@ -78,28 +78,28 @@ class Emc(Catalog):
                     if (
                         not pd.isnull(item)
                         and item != "nan"
-                        and item not in final_alias
+                        and item not in main_id_aliases
                         and item != host
                     ):
-                        final_alias.add(item)
+                        main_id_aliases.add(item)
 
-            final_alias_total = set(final_alias)
-            for al in final_alias:
+            main_id_aliases_total = set(main_id_aliases)
+            for al in main_id_aliases:
                 if len(self.data.loc[self.data.host == al]) > 0:
                     counter = counter + 1
                     for internal_alias in self.data.loc[self.data.host == al].alias:
                         alias_list = str(internal_alias).split(",")
 
                         for internal_al in alias_list:
-                            if internal_al not in final_alias_total:
-                                final_alias_total.add(internal_al.lstrip().rstrip())
+                            if internal_al not in main_id_aliases_total:
+                                main_id_aliases_total.add(internal_al.lstrip().rstrip())
                     self.data.loc[self.data.host == al, "host"] = host
                     f.write("ALIAS: " + al + " AS HOST:" + host + "\n")
 
-            final_alias_total = set(final_alias_total)
+            main_id_aliases_total = set(main_id_aliases_total)
 
             self.data.loc[self.data.host == host, "alias"] = (
-                ",".join(sorted(set(final_alias_total))).rstrip(",").lstrip(",")
+                ",".join(sorted(set(main_id_aliases_total))).rstrip(",").lstrip(",")
             )
 
         f.close()
@@ -110,131 +110,244 @@ class Emc(Catalog):
             + " times."
         )
 
-    def check_binary_mismatch(self, keyword: str) -> None:
+    def check_binary_mismatch(self, keyword: str, tolerance: float = 1 / 3600):
         """
-        The check_binary_mismatch function checks for binary mismatches in the data (planets that orbit a binary but
-        arecontroversial in the various catalogs and/or SIMBAD). It also checks if the SIMBAD main_id labels the
-        target as binary. Ideally, all of these issues should be fixed by a human for the code to work properly.
+        The check_binary_mismatch function is used to check for binary mismatches in the dataframe.
+        It checks if there are multiple values of binary for a given system (identified by name and letter).
+        If there are, it tries to replace the null or S-type binaries with the value of another non-null entry in that system.
+        If all entries have null or S-type binaries, it replaces them with 'S-type'.
+        If there are multiple non-null values of binary, it flags this as a complex system and does not try to correct anything.
+        It also flags systems where coordinates do not agree within a tolerance (by default 1 arcsecond).
 
         :param self: The instance of the Emc class.
         :type self: Emc
+        :param keyword: The keyword to search for in the dataframe.
+        :type keyword: str
+        :param tolerance: The tolerance to use for coordinate comparisons. (default is 1/3600)
+        :type tolerance: float
         :return: None
         :rtype: None
-        :param keyword: str: Identify the column in the dataframe that is being checked for binary mismatches
-        :return: None
         """
-
+        # Fill NaN values in 'binary' column with empty string
         self.data["binary"] = self.data["binary"].fillna("")
-        self.data["potential_binary_mismatch"] = 0
+
+        # Add 'binary_mismatch_flag' column if it doesn't exist
+        if "binary_mismatch_flag" not in self.data.columns:
+            self.data["binary_mismatch_flag"] = 0
+
+        # Open log file in append mode
         f = open("Logs/check_binary_mismatch.txt", "a")
-        f.write("****" + keyword + "****\n")
-        # f.write(
-        #     "\n****"
-        #     + keyword
-        #     + "+letter THAT COULD BE UNIFORMED (only if S-type or null)****\n"
-        # )
+        f.write("*************************************************\n")
+        f.write("**** CHECKING BINARIES USING: " + keyword + " ****\n")
+        f.write("*************************************************\n")
+
+        counter = 0  # Counter for the number of binary mismatches fixed
+
+        # Try to uniform the value of binary from the other entries of the same system.
         for (key, letter), group in self.data.groupby(by=[keyword, "letter"]):
-            if len(set(group.binary)) > 1:
-                # Uniform only S-type
-                if len(group[group.binary == "S-type"]) > 0:
-                    for i in group[group.binary == "S-type"].index:
-                        for j in group[group.binary != "S-type"].index:
-                            if (
-                                abs(group.at[i, "ra"] - group.at[j, "ra"]) > 0.01
-                                and abs(group.at[i, "dec"] - group.at[j, "dec"]) > 0.01
-                            ):
-                                warning = (
-                                    " WARNING, Coordinate Mismatch (potential_binary_mismatch 1) RA: "
-                                    + str(list(group.ra))
-                                    + " DEC:"
-                                    + str(list(group.dec))
-                                )
-                                self.data.loc[i, "potential_binary_mismatch"] = 1
-                                with pd.option_context("display.max_columns", 2000):
+            group.ra = np.round(group.ra.astype(float), 6)
+            group.dec = np.round(group.dec.astype(float), 6)
+            group.binary = group.binary.replace("", "null")
+            group["skycoord"] = SkyCoord(
+                ra=group.ra * u.degree, dec=group.dec * u.degree
+            )
+            # if len(set(group.binary))==1 there is no issue, the binary values agree with one another
+            if len(set(group.binary)) > 1:  # there is a discrepancy
+                f.write("\n")
+                # Separate null and non-null binaries
+                subgroup1 = group[group.binary.str.contains("S-type|null")]
+                subgroup2 = group[~group.binary.str.contains("S-type|null")]
+
+                if (
+                    len(set(subgroup2.binary)) == 0
+                ):  # there are no non-null values to replace.
+                    if (
+                        len(set(subgroup1.binary)) > 1
+                    ):  # there are only null and S-type, S-type is better than nothing
+                        self.data.loc[subgroup1.index, "binary"] = "S-type"
+                        counter += 1
+                        warning = ""
+                        check_on_coordinates = [
+                            subgroup1.at[i, "skycoord"]
+                            .separation(subgroup1.at[j, "skycoord"])
+                            .value
+                            for j in subgroup1.index
+                            for i in subgroup1.index
+                        ]
+                        if all([x <= tolerance for x in check_on_coordinates]) is False:
+                            if keyword == "main_id":
+                                if (
+                                    len(list(set(group.binary_mismatch_flag.values)))
+                                    > 1
+                                ) or (
+                                    list(set(group.binary_mismatch_flag.values))[0] != 1
+                                ):
                                     f.write(
-                                        key
-                                        + "\n"
+                                        "WARNING: Flags are changing here compared to previous check. Previous value of binary_mismatch_flag was:"
                                         + str(
-                                            self.data.loc[group.index][
-                                                [
-                                                    "name",
-                                                    "host",
-                                                    "letter",
-                                                    "binary",
-                                                    "catalog",
-                                                ]
-                                            ]
+                                            list(set(group.binary_mismatch_flag.values))
                                         )
-                                        + warning
-                                        + " \n"
+                                        + ". "
                                     )
 
-                    self.data.loc[group[group.binary == "S-type"].index, "binary"] = (
-                        group[group.binary != "S-type"].binary.fillna("").mode()[0]
-                    )
-
-        for (key, letter), group in self.data.groupby(by=[keyword, "letter"]):
-            if len(set(group.binary)) > 1:
-                # UNIFORM only null
-                if len(group[group.binary == ""]) > 0:
-                    warning = ""
-                    for i in group[group.binary == ""].index:
-                        for j in group[group.binary != ""].index:
-                            if (
-                                abs(group.at[i, "ra"] - group.at[j, "ra"]) > 0.01
-                                and abs(group.at[i, "dec"] - group.at[j, "dec"]) > 0.01
-                            ):
-                                warning = (
-                                    " WARNING, Coordinate Mismatch (potential_binary_mismatch 1) RA: "
-                                    + str(list(group.ra))
-                                    + " DEC:"
-                                    + str(list(group.dec))
-                                )
-                                self.data.loc[i, "potential_binary_mismatch"] = 1
-                                with pd.option_context("display.max_columns", 2000):
-                                    f.write(
-                                        key
-                                        + "\n"
-                                        + str(
-                                            self.data.loc[group.index][
-                                                [
-                                                    "name",
-                                                    "host",
-                                                    "letter",
-                                                    "binary",
-                                                    "catalog",
-                                                ]
-                                            ]
-                                        )
-                                        + warning
-                                        + " \n"
-                                    )
-
-                    self.data.loc[group[group.binary == ""].index, "binary"] = (
-                        group[group.binary != ""].binary.fillna("").mode()[0]
-                    )
-
-        # Identify weird systems after applying the correction:
-        f.write(
-            "\n****"
-            + keyword
-            + "+letter THAT ARE INCONSISTENTLY LABELED (Potential Mismatch 2). They could be complex systems. If not, "
-            "they should be treated manually in replacements.ini ****\n\n"
-        )
-        for (key, letter), group in self.data.groupby(by=[keyword, "letter"]):
-            if len(set(group.binary)) > 1:
-                with pd.option_context("display.max_columns", 2000):
-                    f.write(
-                        key
-                        + "\n"
-                        + str(
-                            self.data.loc[group.index][
-                                ["name", "host", "letter", "binary", "catalog"]
-                            ]
+                            self.data.loc[
+                                group.index, "binary_mismatch_flag"
+                            ] = 1  # flag for failed check on coordinates
+                            # if the check fails at that tolerance the tolerance, provide a warning
+                            warning = (
+                                "WARNING: coordinate agreement exceeds tolerance. Maximum difference: "
+                                + str(max(check_on_coordinates))
+                                + " (binary_mismatch_flag = 1) . Please check this system:\n"
+                                + group[
+                                    [
+                                        "name",
+                                        keyword,
+                                        "binary",
+                                        "letter",
+                                        "catalog",
+                                        "ra",
+                                        "dec",
+                                    ]
+                                ].to_string()
+                            )
+                        f.write(
+                            "Only S-type and null in the system for "
+                            + key
+                            + " "
+                            + letter
+                            + ". New binary value: S-type. "
+                            + warning
+                            + "\n\n"
                         )
-                        + "\n"
+                # the non-null values are in agreement
+                elif len(set(subgroup2.binary)) == 1:
+                    # if len(subgroup1)==0: #there is no S-type or null at all. All is well.
+
+                    if (
+                        len(subgroup1) > 0
+                    ):  # there is at least a S-type or null, we need to replace it with the value of the binary.
+                        self.data.loc[subgroup1.index, "binary"] = list(
+                            set(subgroup2.binary)
+                        )[0]
+                        counter += 1
+
+                        warning = ""
+                        check_on_coordinates = [
+                            subgroup1.at[i, "skycoord"]
+                            .separation(subgroup2.at[j, "skycoord"])
+                            .value
+                            for j in subgroup2.index
+                            for i in subgroup1.index
+                        ]
+                        if all([x <= tolerance for x in check_on_coordinates]) is False:
+                            if keyword == "main_id":
+                                if (
+                                    len(list(set(group.binary_mismatch_flag.values)))
+                                    > 1
+                                ) or (
+                                    list(set(group.binary_mismatch_flag.values))[0] != 1
+                                ):
+                                    f.write(
+                                        "WARNING: Flags are changing here compared to previous check. Previous value of binary_mismatch_flag was: "
+                                        + str(
+                                            list(set(group.binary_mismatch_flag.values))
+                                        )
+                                        + ". "
+                                    )
+
+                            self.data.loc[
+                                group.index, "binary_mismatch_flag"
+                            ] = 1  # flag for failed check on coordinates
+                            # if the check fails at that tolerance the tolerance, provide a warning
+                            warning = (
+                                "WARNING: coordinate agreement exceeds tolerance. Maximum difference: "
+                                + str(max(check_on_coordinates))
+                                + " (binary_mismatch_flag = 1). Please check this system:\n"
+                                + group[
+                                    [
+                                        "name",
+                                        keyword,
+                                        "binary",
+                                        "letter",
+                                        "catalog",
+                                        "ra",
+                                        "dec",
+                                    ]
+                                ].to_string()
+                            )
+                        f.write(
+                            "Fixed S-type or null binary for "
+                            + key
+                            + " "
+                            + letter
+                            + ". New binary value: "
+                            + str(list(set(subgroup2.binary))[0])
+                            + ". "
+                            + warning
+                            + "\n\n"
+                        )
+
+                else:  # there are multiple non-null values of binary, this is a complex system.
+                    # when running for main_id, check if the previous iteration did not have the same flag.
+                    # if so, warn the user.
+                    if keyword == "main_id":
+                        if (len(list(set(group.binary_mismatch_flag.values))) > 1) or (
+                            list(set(group.binary_mismatch_flag.values))[0] != 2
+                        ):
+                            f.write(
+                                "WARNING: Flags are changing here compared to previous check. Previous value of binary_mismatch_flag was: "
+                                + str(list(set(group.binary_mismatch_flag.values)))
+                                + ". "
+                            )
+
+                    self.data.loc[
+                        group.index, "binary_mismatch_flag"
+                    ] = 2  # flag for complex systems
+
+                    f.write(
+                        "WARNING: Either a complex system or a mismatch in the value of binary (binary_mismatch_flag = 2). Please check this system:  \n"
+                        + group[
+                            [
+                                "name",
+                                keyword,
+                                "binary",
+                                "letter",
+                                "catalog",
+                            ]
+                        ].to_string()
+                        + "\n\n"
                     )
-                self.data.loc[group.index, "potential_binary_mismatch"] = 2
+                    # if len(subgroup1)==0: #there is no S-type or null at all. All is well.
+
+                    if (
+                        len(subgroup1) > 0
+                    ):  # there is at least a S-type or null, we need to replace it with the value of the binary.
+                        # which value to replace? check on coordinates
+                        for i in subgroup1.index:
+                            for j in subgroup2.index:
+                                subgroup2.at[j, "angsep"] = (
+                                    subgroup1.at[i, "skycoord"]
+                                    .separation(subgroup2.at[j, "skycoord"])
+                                    .value
+                                )
+                            sub = subgroup2[subgroup2.angsep <= 1 / 3600]
+                            sub = sub[
+                                sub.angsep == min(sub.angsep)
+                            ]  # minimum angular separation from the unknown source
+
+                            self.data.loc[subgroup1.index, "binary"] = list(
+                                set(sub.binary)
+                            )[0]
+                            counter += 1
+
+                            f.write(
+                                "Fixed binary for complex system "
+                                + key
+                                + letter
+                                + " based on angular separation. New binary value: "
+                                + str(list(set(sub.binary))[0])
+                                + ".\n\n"
+                            )
 
         f.write(
             "****"
@@ -257,24 +370,32 @@ class Emc(Catalog):
                         + str(self.data.at[i, "name"])
                         + " binary: "
                         + str(self.data.at[i, "binary"])
+                        + " catalog:"
+                        + str(self.data.at[i, "catalog"])
                         + ".\n"
                     )
 
         f.close()
-        logging.info("Checked potential binaries to be manually corrected.")
+        logging.info(
+            "Checked potential binaries to be manually corrected. It happens "
+            + str(counter)
+            + " times."
+        )
         logging.info(
             "Automatic correction results: "
-            + str(self.data.potential_binary_mismatch.value_counts())
+            + str(self.data.binary_mismatch_flag.value_counts())
         )
 
     def prepare_columns_for_mainid_search(self) -> None:
         """
-        Prepares the columns "hostbinary", "aliasbinary", "hostbinary2", "aliasbinary2", "main_id", "list_id", "main_id_ra", "main_id_dec", "angular_separation", "angsep", and "main_id_provenance" for the search of the main identifier. It also initializes the "angular_separation" column.
+        Prepares the columns "hostbinary", "aliasbinary", "hostbinary2", "aliasbinary2", "main_id", "list_id",
+        "main_id_ra", "main_id_dec", "angular_separation", "angsep", and "main_id_provenance"
+        for the search of the main identifier. It also initializes the "angular_separation" column.
 
         :param self: The instance of the Emc class.
         :type self: Emc
         :return: None
-
+        :rtype: None
         """
         self.data["hostbinary"] = (
             self.data["host"].astype(str)
@@ -338,7 +459,8 @@ class Emc(Catalog):
 
     def fill_mainid_provenance_column(self, keyword):
         """
-        Fills the 'main_id_provenance' column with the provided keyword if 'main_id_provenance' is empty and 'main_id' is not empty for each relevant index.
+        Fills the 'main_id_provenance' column with the provided keyword if 'main_id_provenance' is empty and
+        'main_id' is not empty for each relevant index.
 
         :param self: The instance of the Emc class.
         :type self: Emc
@@ -353,7 +475,9 @@ class Emc(Catalog):
 
     def simbad_list_host_search(self, typed_id: str) -> None:
         """
-        The simbad_list_host_search function takes a column name as an argument and searches for the host star in that column in SIMBAD. It then fills in the main_id, IDS, RA, and DEC columns with information from SIMBAD if it finds a match.
+        The simbad_list_host_search function takes a column name as an argument and searches for the host star in that
+        column in SIMBAD. It then fills in the main_id, IDS, RA, and DEC columns with information from SIMBAD if it
+        finds a match.
 
         :param self: The instance of the Emc class.
         :type self: Emc
@@ -474,12 +598,15 @@ class Emc(Catalog):
 
     def get_host_info_from_simbad(self) -> None:
         """
-        The get_host_info_from_simbad function takes the dataframe and extracts all
-        unique host star names. It then queries Simbad for each of these names, and
-        returns a table with the main ID, alias IDs, RA and DEC.The function merges
-        this table with the original dataframe on host name (left join).If there are
-        still rows missing main_id values in the merged table, it will query Simbad
-        again using all aliases from those rows.
+        The get_host_info_from_simbad function takes the dataframe and extracts all unique host star names.
+        It then queries SIMBAD for each of these names, and returns a table with the main ID, alias IDs, RA and DEC.
+        The function merges this table with the original dataframe on host name (left join). If there are
+        still rows missing main_id values in the merged table, it will query SIMBAD again using all aliases from those rows.
+
+        :param self: The instance of the Emc class.
+        :type self: Emc
+        :return: None
+        :rtype: None
         """
 
         logging.info("HOST+ +BINARY Simbad Check")
@@ -530,17 +657,22 @@ class Emc(Catalog):
 
         self.fill_mainid_provenance_column("SIMBAD")
 
-    def get_coordinates_from_simbad(self) -> None:
+    def get_coordinates_from_simbad(self, tolerance: float = 1 / 3600) -> None:
         """
-        This function takes the dataframe and checks if there are any matches in Simbad for the coordinates of each
-        object. It does this by querying Simbad with a circle around each coordinate, starting at 0.01 degrees and
-        increasing to 0.5 degrees until it finds a match or gives up.
+        The get_coordinates_from_simbad function prepares a query for SIMBAD, executes the query and then merges
+         the results with the original dataframe.
+
+        :param self: The instance of the Emc class.
+        :type self: Emc
+        :param tolerance: The tolerance for the query
+        :type tolerance: float
+        :return: None
+        :rtype: None
         """
 
         # SIMBAD
         service = pyvo.dal.TAPService("http://simbad.u-strasbg.fr:80/simbad/sim-tap")
 
-        tolerance = 1 / 3600  # arcsec in degrees
         t2 = Table.from_pandas(
             self.data[self.data.main_id == ""][["hostbinary", "ra", "dec"]]
         )
@@ -596,10 +728,20 @@ class Emc(Catalog):
 
     def get_host_info_from_tic(self) -> None:
         """
-        The simbad_list_host_search function takes a column name as an argument and searches for the host star
-        in that column in SIMBAD. It then fills in the main_id, IDS, RA, and DEC columns with information from
-        SIMBAD if it finds a match.
+        The get_host_info_from_tic function takes the dataframe and extracts all unique host star names that are TIC
+        identifiers.
+        It then queries TIC for each of these names, and returns a table with the main ID, alias IDs, RA and DEC.
+        The function merges this table with the original dataframe on host name (left join).
+        If there are
+        still rows missing main_id values in the merged table, it will query TIC again using all aliases from those
+        rows, if they are TIC identifiers.
+
+        :param self: The instance of the Emc class.
+        :type self: Emc
+        :return: None
+        :rtype: None
         """
+
         logging.info("TIC host check")
         list_of_hosts = (
             self.data[self.data.main_id == ""][["host"]].drop_duplicates().dropna()
@@ -608,7 +750,9 @@ class Emc(Catalog):
         list_of_hosts["host"] = list_of_hosts.loc[
             list_of_hosts["host"].str.findall(r"[^\x00-\x7F]+").str.len() == 0, "host"
         ]
-        list_of_hosts["host"] = list_of_hosts["host"].str.replace("TIC ", "")
+        list_of_hosts["host"] = (
+            list_of_hosts["host"].str.replace("TIC ", "").str.replace("TIC-", "")
+        )
         timeout = 100000
         socket.setdefaulttimeout(timeout)
 
@@ -710,12 +854,23 @@ class Emc(Catalog):
         )
         self.fill_mainid_provenance_column("TIC")
 
-    def get_coordinates_from_tic(self, tolerance=1 / 3600):
+    def get_coordinates_from_tic(self, tolerance: float = 1.0 / 3600.0):
+        """
+        The get_coordinates_from_tic function prepares a query for TIC, executes the query and then merges
+         the results with the original dataframe.
+
+        :param self: The instance of the Emc class.
+        :type self: Emc
+        :param tolerance: The tolerance for the query
+        :type tolerance: float
+        :return: None
+        :rtype: None
+        """
+
         # TIC
 
         service = pyvo.dal.TAPService(" http://TAPVizieR.u-strasbg.fr/TAPVizieR/tap/")
         t2 = self.data[self.data.main_id == ""][["hostbinary", "ra", "dec"]]
-        tolerance = 1 / 3600  # arcsec in degrees
 
         table = pd.DataFrame()
         for ind in t2.index:
@@ -774,74 +929,79 @@ class Emc(Catalog):
         )
         self.fill_mainid_provenance_column("TICCOORD")
 
-    def check_coordinates(self) -> None:
+    def check_coordinates(self, tolerance: float = 1 / 3600) -> None:
         """
-        The check_coordinates function checks for mismatches in the RA and DEC
-        coordinates of a given host (for the targets that cannot rely on SIMBAD
-        MAIN_ID because the query was unsuccessful). It does this by grouping all
-        entries with the same host name, then checking if any of those entries have
-        an RA or DEC that is more than 0.01 degrees away from the mode value for that
-        group. If so, it prints out information about those mismatched values
-        to a log file called check_coordinates.txt.
+        The check_coordinates function checks for mismatches in the RA and DEC coordinates of a given host
+        (for the targets that cannot rely on SIMBAD or TIC MAIN_ID because the query was unsuccessful).
+        It does this by grouping all entries with the same host name, then checking if any of those entries have
+        a RA or DEC that is more than a given tolerance away from the mode value for that group.
+        If so, it prints out information about those mismatched values to a log file called check_coordinates.txt.
+
+        :param self: The instance of the Emc class.
+        :type self: Emc
+        :param tolerance: The tolerance for the check
+        :type tolerance: float
+        :return: None
+        :rtype: None
+
         """
         countra = 0
         countdec = 0
 
         self.data["coordinate_mismatch"] = ""
-
+        tolerance = round(tolerance, 6)
         f = open("Logs/check_coordinates.txt", "a")
-        for host, group in self.data[self.data.main_id == ""].groupby("host"):
-            ra = mode(list(round(group.ra, 3)))
-            dec = mode(list(round(group.dec, 3)))
-            mismatch_string = ""
+        for (host, binary), group in self.data[self.data.main_id == ""].groupby(
+            ["host", "binary"]
+        ):
+            if len(group) > 1:
+                ra = mode(list(round(group.ra, 6)))
+                dec = mode(list(round(group.dec, 6)))
+                mismatch_string = ""
 
-            if (abs(group["ra"] - ra) > 0.01).any():
-                countra = countra + 1
-                with pd.option_context("display.max_columns", 2000):
-                    f.write(
-                        "*** MISMATCH ON RA *** "
-                        + str(
-                            (
-                                group[
-                                    [
-                                        "name",
-                                        "host",
-                                        "binary",
-                                        "letter",
-                                        "catalog",
-                                        "ra",
-                                    ]
+                if (abs(round(group["ra"], 6) - ra) > tolerance).any():
+                    countra = countra + 1
+                    with pd.option_context("display.max_columns", 2000):
+                        f.write(
+                            "*** MISMATCH ON RA at tolerance "
+                            + str(tolerance)
+                            + " *** \n"
+                            + group[
+                                [
+                                    "name",
+                                    "host",
+                                    "binary",
+                                    "letter",
+                                    "catalog",
+                                    "ra",
                                 ]
-                            )
+                            ].to_string()
+                            + "\n"
                         )
-                        + "\n"
-                    )
-                mismatch_string = "RA"
+                    mismatch_string = "RA"
 
-            if (abs(group["dec"] - dec) > 0.01).any():
-                countdec = countdec + 1
-                with pd.option_context("display.max_columns", 2000):
-                    f.write(
-                        "*** MISMATCH ON DEC *** "
-                        + str(
-                            (
-                                group[
-                                    [
-                                        "name",
-                                        "host",
-                                        "binary",
-                                        "letter",
-                                        "catalog",
-                                        "dec",
-                                    ]
+                if (abs(round(group["dec"], 6) - dec) > tolerance).any():
+                    countdec = countdec + 1
+                    with pd.option_context("display.max_columns", 2000):
+                        f.write(
+                            "*** MISMATCH ON DEC at tolerance "
+                            + str(tolerance)
+                            + " *** \n"
+                            + group[
+                                [
+                                    "name",
+                                    "host",
+                                    "binary",
+                                    "letter",
+                                    "catalog",
+                                    "dec",
                                 ]
-                            )
+                            ].to_string()
+                            + "\n"
                         )
-                        + "\n"
-                    )
-                mismatch_string = mismatch_string + "DEC"
+                    mismatch_string = mismatch_string + "DEC"
 
-            self.data.loc[group.index, "coordinate_mismatch"] = mismatch_string
+                self.data.loc[group.index, "coordinate_mismatch"] = mismatch_string
         f.close()
         logging.info("Found " + str(countra) + " mismatched RA.")
         logging.info("Found " + str(countdec) + " mismatched DEC.")
@@ -849,8 +1009,23 @@ class Emc(Catalog):
         logging.info(self.data.coordinate_mismatch.value_counts())
 
     def replace_old_new_identifier(
-        self, identifier, new_identifier, binary=None
+        self, identifier: str, new_identifier: str, binary: str = None
     ) -> str:
+        """
+        The replace_old_new_identifier function replaces the old identifier with the new identifier in the dataframe. It also adds additional aliases to the main_id_aliases. If binary is not None, it also replaces the old binary with the new binary in the dataframe as specified by the calling function.
+
+        :param self: The instance of the Emc class.
+        :type self: Emc
+        :param identifier: The old identifier
+        :type identifier: str
+        :param new_identifier: The new identifier
+        :type new_identifier: str
+        :param binary: The binary string
+        :type binary: str
+        :return: The explanation string for logging purposes
+        :rtype: str
+
+        """
         output_string = ""
         service = pyvo.dal.TAPService("http://simbad.u-strasbg.fr:80/simbad/sim-tap")
 
@@ -870,7 +1045,16 @@ class Emc(Catalog):
             self.data.loc[self.data.main_id == identifier, "main_id_dec"] = float(
                 table.at[0, "dec_2"]
             )
-            if binary is not None:
+            # if there are already ids available, append
+            if (
+                len(
+                    self.data.loc[self.data.main_id == identifier, "list_id"]
+                    .replace("", np.nan)
+                    .dropna()
+                    .unique()
+                )
+                > 0
+            ):
                 cumulative_alias = (
                     ",".join(
                         self.data.loc[
@@ -892,12 +1076,14 @@ class Emc(Catalog):
                     self.data.main_id == identifier, "list_id"
                 ] = cumulative_alias
             else:
+                # if there are no current list_ids, replace with what SIMBAD finds
                 self.data.loc[self.data.main_id == identifier, "list_id"] = table.loc[
                     0, "ids"
                 ].replace("|", ",")
             output_string = (
                 "MAINID corrected " + identifier + " to " + new_identifier + "."
             )
+
             if binary is not None:
                 output_string = output_string + " Binary value: " + binary + "."
                 binary_catalog = self.data.loc[
@@ -932,20 +1118,38 @@ class Emc(Catalog):
         return output_string
 
     def polish_main_id(self) -> None:
+        """
+        Polish the main_id column in the data by removing planet/binary letters.
+
+        This function iterates over the unique values in the main_id column of the data and performs the following operations:
+
+        1. Check for planet letters in the main_id column. If a planet letter is found, it tries to look for the corresponding star in SIMBAD and replaces the main_id with the star's main_id.
+
+        2. Check for binary letters in the main_id column. If a binary letter is found, it checks if the binary value is already in the binary column. It then replaces the main_id with the modified identifier.
+
+        3. All of the above operations are logged in a text file named "Logs/polish_main_id.txt".
+
+        :param self: The instance of the Emc class.
+        :type self: Emc
+        :return: None
+        :rtype: None
+        """
+
         counter = 0
         f = open("Logs/polish_main_id.txt", "a")
         f.write("***** CHECK FOR PLANET LETTER IN MAIN_ID *****\n")
-        for identifier in self.data.main_id:
+
+        for identifier in self.data.main_id.unique():
             # PLANET IN SIMBAD, WILL TRY TO LOOK FOR STAR IN SIMBAD AND REPLACE
             if len(re.findall("[\s\d][b-i]$", identifier)) > 0:
                 new_identifier = identifier[:-1].strip().replace("NAME ", "")
                 counter += 1
                 output_string = self.replace_old_new_identifier(
-                    identifier, new_identifier, None
+                    identifier, new_identifier
                 )
                 f.write(output_string)
         f.write("\n***** CHECK FOR BINARY LETTER IN MAIN_ID *****\n")
-        for identifier in self.data.main_id:
+        for identifier in self.data.main_id.unique():
             # CHECK CIRCUMBINARY, WILL TRY TO LOOK FOR HOST
             if len(re.findall(r"[\s\d](\(AB\))$", identifier)) > 0:
                 counter += 1
@@ -958,12 +1162,10 @@ class Emc(Catalog):
                         + identifier
                         + ". Selected binary value: AB"
                         + ". Value in catalog: \n"
-                        + str(
-                            self.data.loc[
-                                self.data.main_id == identifier,
-                                ["name", "host", "binary", "catalog"],
-                            ]
-                        )
+                        + self.data.loc[
+                            self.data.main_id == identifier,
+                            ["name", "host", "binary", "catalog"],
+                        ].to_string()
                         + "\n"
                     )
 
@@ -983,12 +1185,10 @@ class Emc(Catalog):
                         + identifier
                         + ". Selected binary value: AB"
                         + ". Value in catalog: \n"
-                        + str(
-                            self.data.loc[
-                                self.data.main_id == identifier,
-                                ["name", "host", "binary", "catalog"],
-                            ]
-                        )
+                        + self.data.loc[
+                            self.data.main_id == identifier,
+                            ["name", "host", "binary", "catalog"],
+                        ].to_string()
                         + "\n"
                     )
 
@@ -1011,12 +1211,10 @@ class Emc(Catalog):
                         + ". Selected binary value: "
                         + identifier[-1:]
                         + ". Value in catalog: \n"
-                        + str(
-                            self.data.loc[
-                                self.data.main_id == identifier,
-                                ["name", "host", "binary", "catalog"],
-                            ]
-                        )
+                        + self.data.loc[
+                            self.data.main_id == identifier,
+                            ["name", "host", "binary", "catalog"],
+                        ].to_string()
                         + "\n"
                     )
 
@@ -1033,8 +1231,18 @@ class Emc(Catalog):
             + " times."
         )
 
-    def fill_missing_main_id(self):
-        # ROWS STILL MISSING ID
+    def fill_missing_main_id(self) -> None:
+        """
+        This function replaces empty strings in the 'main_id_provenance' column with the values from the 'catalog' column.
+        It also replaces empty strings in the 'main_id' column with the values from the 'host' column from the source catalog.
+        The 'main_id_ra' and 'main_id_dec' columns are filled with the values from the 'ra' and 'dec' columns respectively from the source catalog.
+        The 'angular_separation' column is then filled with the concatenation of the 'catalog' column and the 'angsep' column converted to strings.
+
+        :param self: The instance of the Emc class.
+        :type self: Emc
+        :return: None
+        :rtype: None
+        """
         self.data["main_id_provenance"] = (
             self.data["main_id_provenance"]
             .replace("", np.nan)
@@ -1055,34 +1263,58 @@ class Emc(Catalog):
 
     def check_same_host_different_id(self) -> None:
         """
-        The check_same_host_different_id function checks to see if there
-        are any instances where the same host has multiple SIMBAD main IDs.
-        This should _never_ happen unless the SIMBAD search is failing.
+        The check_same_host_different_id function checks to see if there are any instances where the same host has
+        multiple SIMBAD main IDs. This should _never_ happen unless the SIMBAD search is failing.
 
+        :param self: The instance of the Emc class.
+        :type self: Emc
+        :return: None
+        :rtype: None
         """
-        f = open("Logs/check_same_host_different_id.txt", "a")
+        f = open("Logs/post_main_id_query_checks.txt", "a")
+        f.write("**************************************\n")
+        f.write("**** CHECK SAME HOST DIFFERENT ID ****\n")
+        f.write("**************************************\n")
+
         for host, group in self.data.groupby("hostbinary"):
             if len(group.main_id.drop_duplicates()) > 1:
                 with pd.option_context("display.max_columns", 2000):
                     f.write("SAME HOST+BINARY DIFFERENT MAIN_ID\n")
-                    f.write(str(group[["main_id", "binary", "catalog"]]) + "\n")
+                    f.write(
+                        group[
+                            ["hostbinary", "main_id", "binary", "catalog"]
+                        ].to_string()
+                        + "\n"
+                    )
 
         for host, group in self.data.groupby("host"):
             if len(group.main_id.drop_duplicates()) > 1:
                 with pd.option_context("display.max_columns", 2000):
                     f.write("SAME HOST DIFFERENT MAIN_ID\n")
-                    f.write(str(group[["main_id", "binary", "catalog"]]) + "\n")
+                    f.write(
+                        group[["host", "main_id", "binary", "catalog"]].to_string()
+                        + "\n"
+                    )
         logging.info("Checked if host is found under different main_ids.")
         f.close()
 
-    def check_same_coords_different_id(self) -> None:
+    def check_same_coords_different_id(self, tolerance: float = 1 / 3600) -> None:
         """
-        The check_same_host_different_id function checks to see if there
-        are any instances where the same host has multiple SIMBAD main IDs.
-        This should _never_ happen unless the SIMBAD search is failing.
+        The check_same_host_different_id function checks to see if there are any instances where the same host
+        has multiple SIMBAD main IDs. This might happen in case of very close stars or binary stars. The user
+        should check in Logs/post_main_id_query_checks.txt that the two main ids and coordinates are indeed
+        different stars. Otherwise, they can force a replacement.
 
+        :param self: The instance of the Emc class.
+        :type self: Emc
+        :return: None
+        :rtype: None
         """
-        f = open("Logs/check_same_coords_different_id.txt", "a")
+        f = open("Logs/post_main_id_query_checks.txt", "a")
+        f.write("****************************************\n")
+        f.write("**** CHECK SAME COORDS DIFFERENT ID ****\n")
+        f.write("****************************************\n")
+
         self.data.main_id_ra = self.data.main_id_ra.astype(float)
         self.data.main_id_dec = self.data.main_id_dec.astype(float)
         self.data["skycoord"] = SkyCoord(
@@ -1090,44 +1322,59 @@ class Emc(Catalog):
         )
         for i in self.data.index:
             # create a wider rectangle to look into
+            ra = self.data.at[i, "main_id_ra"]
+            dec = self.data.at[i, "main_id_dec"]
             sub = self.data.copy()
-            sub = self.data[
-                self.data.main_id_ra < (self.data.at[i, "main_id_ra"] + 100 / 3600)
-            ]
-            sub = sub[sub.main_id_ra > (sub.at[i, "main_id_ra"] - 100 / 3600)]
-            sub = sub[sub.main_id_dec > (sub.at[i, "main_id_dec"] - 100 / 3600)]
-            sub = sub[sub.main_id_ra < (sub.at[i, "main_id_dec"] + 100 / 3600)]
+            sub = sub[sub.main_id_ra < (ra + 2 * tolerance)]
+            sub = sub[sub.main_id_ra > (ra - 2 * tolerance)]
+            sub = sub[sub.main_id_dec > (dec - 2 * tolerance)]
+            sub = sub[sub.main_id_ra < (dec + 2 * tolerance)]
             for j in sub.index:
                 sub.at[j, "angsep"] = (
                     self.data.at[i, "skycoord"].separation(sub.at[j, "skycoord"]).value
                 )
-            sub = sub[sub.angsep < 1 / 3600]
+            sub = sub[sub.angsep <= tolerance]
             if len(sub.main_id.unique()) > 1:
                 with pd.option_context("display.max_columns", 2000):
                     f.write(
                         "FOUND SAME COORDINATES DIFFERENT MAINID\n"
-                        + str(
-                            sub[
-                                [
-                                    "host",
-                                    "main_id",
-                                    "binary",
-                                    "letter",
-                                    "catalog",
-                                    "angsep",
-                                    "main_id_provenance",
-                                ]
+                        + sub[
+                            [
+                                "host",
+                                "main_id",
+                                "binary",
+                                "letter",
+                                "catalog",
+                                "angsep",
+                                "main_id_provenance",
                             ]
-                        )
+                        ].to_string()
                         + "\n"
                     )
 
-        logging.info("Checked if same coordinates found in main_ids")
+        logging.info("Checked if same coordinates found in main_ids.")
         f.close()
 
     def group_by_list_id_check_main_id(self) -> None:
-        """ """
-        f = open("Logs/group_by_list_id_check_main_id.txt", "a")
+        """
+        This function groups the data by the 'list_id' column and checks if there are any inconsistencies
+        in the 'main_id' column for each group.
+        It iterates over each group of data, checks if the 'list_id' is not empty and if there are multiple unique
+        values in the 'main_id' column.
+        If there are, it sets the 'main_id' column for all rows in the group to the first unique value in the 'main_id' column.
+        It then writes a message to the log file indicating the inconsistency and the details of the group.
+
+        :param self: The instance of the Emc class.
+        :type self: Emc
+        :return: None
+        :rtype: None
+        """
+
+        f = open("Logs/post_main_id_query_checks.txt", "a")
+        f.write("****************************************\n")
+        f.write("**** GROUP BY LIST_ID CHECK MAIN_ID ****\n")
+        f.write("****************************************\n")
+
         count = 0
         for ids, group in self.data.groupby(by="list_id"):
             if ids != "" and len(set(group.main_id)) > 1:
@@ -1137,7 +1384,7 @@ class Emc(Catalog):
                 with pd.option_context("display.max_columns", 2000):
                     f.write(
                         "*** SAME LIST_ID, DIFFERENT MAIN_ID *** \n"
-                        + str(group[["catalog", "status", "letter", "main_id"]])
+                        + group[["catalog", "status", "letter", "main_id"]].to_string()
                         + "\n"
                     )
                 count = count + 1
@@ -1147,110 +1394,180 @@ class Emc(Catalog):
         )
         f.close()
 
-    def group_by_main_id_set_final_alias(self) -> None:
+    def post_main_id_query_checks(
+        self, tolerance: float = 1 / 3600
+    ) -> None:  # pragma: no cover
         """
-        The group_by_main_id_set_final_alias function takes the alias and list_id columns from
-        the dataframe,and combines them into a single column called final_alias.
-        It then removes duplicates from this new column.
-        """
-        self.data["final_alias"] = ""
-        for host, group in self.data.groupby(by="main_id"):
-            final_alias = ""
-            for al in group.alias:
-                final_alias = final_alias + "," + str(al)
-            for al in group.list_id:
-                final_alias = final_alias + "," + str(al)
+        This function performs a series of checks after querying SIMBAD for main IDs.
+        It checks for same host with different main IDs, same coordinates with different main IDs,
+        and same list ID with different main IDs. The results are logged in `Logs/post_main_id_query_checks.txt`.
 
-            final_alias = ",".join([x for x in set(final_alias.split(",")) if x])
-            final_alias = final_alias.replace("nan", "").replace(",,", ",")
-            self.data.loc[self.data.main_id == host, "final_alias"] = final_alias
+        :param self: The instance of the Emc class.
+        :type self: Emc
+        :param tolerance: The tolerance for the angular separation in degrees. Defaults to 1/3600.
+        :type tolerance: float
+        :return: None
+        :rtype: None
+        """
+
+        # Check for same host with different main IDs
+        self.check_same_host_different_id()
+
+        # Check for same coordinates with different main IDs
+        self.check_same_coords_different_id(tolerance)
+
+        # Check for same list ID with different main IDs
+        self.group_by_list_id_check_main_id()
+
+    def group_by_main_id_set_main_id_aliases(self) -> None:
+        """
+        The group_by_main_id_set_main_id_aliases function takes the alias and list_id columns from
+        the dataframe,and combines them into a single column called main_id_aliases.
+        It then removes duplicates from this new column.
+
+        :param self: The instance of the Emc class.
+        :type self: Emc
+        :return: None
+        :rtype: None
+        """
+        # Initialize the main_id_aliases column with empty strings
+        self.data["main_id_aliases"] = ""
+
+        # Iterate over each unique main_id in the dataframe
+        for host, group in self.data.groupby(by="main_id"):
+            # Initialize the main_id_aliases string
+            main_id_aliases = ""
+            # Concatenate the alias and list_id values for the current main_id
+            for al in group.alias:
+                main_id_aliases = main_id_aliases + "," + str(al)
+            for al in group.list_id:
+                main_id_aliases = main_id_aliases + "," + str(al)
+
+            # Remove duplicates and unnecessary characters from main_id_aliases
+            main_id_aliases = ",".join(
+                [x for x in set(main_id_aliases.split(",")) if x]
+            )
+            main_id_aliases = main_id_aliases.replace("nan", "").replace(",,", ",")
+
+            # Update the main_id_aliases column for the current main_id
+            self.data.loc[
+                self.data.main_id == host, "main_id_aliases"
+            ] = main_id_aliases
 
     def cleanup_catalog(self) -> None:
         """
         The cleanup_catalog function is used to replace any rows in
         the catalog that have a value of 0 or inf for any of the
         columns i, mass, msini, a, p and e with NaN.
+
+        :param self: The instance of the Emc class.
+        :type self: Emc
+        :return: None
+        :rtype: None
         """
         for col in ["i", "mass", "msini", "a", "p", "e"]:
             self.data.loc[self.data[col + "_min"] == 0, col + "_min"] = np.nan
             self.data.loc[self.data[col + "_max"] == 0, col + "_max"] = np.nan
             self.data.loc[self.data[col + "_min"] == np.inf, col + "_min"] = np.nan
             self.data.loc[self.data[col + "_max"] == np.inf, col + "_max"] = np.nan
+
+        # Logging
         logging.info("Catalog cleared from zeroes and infinities.")
 
     def group_by_period_check_letter(self) -> None:
-        f1 = open("Logs/group_by_period_check_letter.txt", "a")
-        # self.data["working_period_group"] = Utils.round_parameter_bin(self.data["p"])
-        # self.data["working_sma_group"] = Utils.round_parameter_bin(self.data["a"])
+        """
+        The group_by_period_check_letter function is used to check for inconsistencies in the letter column.
+        It groups by main_id and binary, then checks if there are multiple planets in the system.
+        If so, it calculates an estimate of p and a using Utils.calculate_working_p_sma().
+        It then iterates through each unique value of the estimated p (or a) and checks if there are any inconsistencies with the letter column within that group of planets with similar periods (or semimajor axes).
+        If so, it attempts to fix these issues by replacing all letters with one consistent value.
 
+        :param self: An instance of the class EMC
+        :type self: Emc
+        :return: None
+        :rtype: None
+        """
+
+        # Open log file
+        f1 = open("Logs/group_by_period_check_letter.txt", "a")
+
+        # Group by main_id and binary
         grouped_df = self.data.groupby(["main_id", "binary"], sort=True, as_index=False)
         f1.write("TOTAL NUMBER OF GROUPS: " + str(grouped_df.ngroups) + "\n")
         counter = 0
+
+        # Iterate through each group
         for (
             mainid,
             binary,
         ), group in grouped_df:
-            if len(group) > 1:  # there are multiple planets in the system
+            # Check if there are multiple planets in the system
+            if len(group) > 1:
+                # Calculate an estimate of p and a
                 group = Utils.calculate_working_p_sma(group, tolerance=0.1)
+                # Iterate through each unique value of p
                 for pgroup in list(set(group.working_p)):
                     subgroup = group[group.working_p == pgroup]
                     warning = ""
                     # if period is zero, group by semimajor axis, if
                     # unsuccessful group by letter
                     if pgroup != -1:
-                        # try to fix the letter if it is different
+                        # try to fix the letter if it is different (e.g. b and .01)
                         if len(list(set(subgroup.letter))) > 1:
                             warning = (
                                 "INCONSISTENT LETTER FOR SAME PERIOD \n"
-                                + str(
-                                    subgroup[
+                                + subgroup[
+                                    [
+                                        "main_id",
+                                        "binary",
+                                        "letter",
+                                        "catalog",
+                                        "catalog_name",
+                                        "p",
+                                    ]
+                                ].to_string()
+                                + "\n\n"
+                            )
+                            # get the letter-like classification
+                            adjusted_letter = [
+                                l
+                                for l in list(set(subgroup.letter.dropna().unique()))
+                                if ".0" not in str(l)
+                            ]
+                            # if there is only one of those, fix the group to that letter (e.g. replace .01 with b)
+                            if len(adjusted_letter) == 1:
+                                self.data.loc[
+                                    subgroup.index, "letter"
+                                ] = adjusted_letter[0]
+                                warning = "FIXABLE " + warning
+
+                            # if BD is in the letter, fix all the group to be BD
+                            if "BD" in list(set(subgroup.letter.dropna().unique())):
+                                self.data.loc[subgroup.index, "letter"] = "BD"
+                                warning = "FORCED BD " + warning
+                    else:
+                        # No period, do the same with a
+
+                        # Iterate through each unique value of a
+                        for agroup in list(set(subgroup.working_a)):
+                            subsubgroup = subgroup[subgroup.working_a == agroup]
+                            # try to fix the letter if it is different (e.g. b and .01)
+                            if len(list(set(subsubgroup.letter))) > 1:
+                                warning = (
+                                    "INCONSISTENT LETTER FOR SAME SMA \n"
+                                    + subsubgroup[
                                         [
                                             "main_id",
                                             "binary",
                                             "letter",
                                             "catalog",
                                             "catalog_name",
-                                            "p",
+                                            "a",
                                         ]
-                                    ]
-                                )
-                                + "\n\n"
-                            )
-                            adjusted_letter = [
-                                l
-                                for l in list(set(subgroup.letter.dropna().unique()))
-                                if ".0" not in str(l)
-                            ]
-                            if len(adjusted_letter) == 1:
-                                self.data.loc[
-                                    subgroup.index, "letter"
-                                ] = adjusted_letter[0]
-                                warning = "FIXABLE " + warning
-                            if "BD" in list(set(subgroup.letter.dropna().unique())):
-                                self.data.loc[subgroup.index, "letter"] = "BD"
-                                warning = "FORCED BD " + warning
-                    else:
-                        for agroup in list(set(subgroup.working_a)):
-                            subsubgroup = subgroup[subgroup.working_a == agroup]
-                            # try to fix the letter if it is different
-                            if len(list(set(subsubgroup.letter))) > 1:
-                                warning = (
-                                    "INCONSISTENT LETTER FOR SAME SMA \n"
-                                    + str(
-                                        subsubgroup[
-                                            [
-                                                "main_id",
-                                                "binary",
-                                                "letter",
-                                                "catalog",
-                                                "catalog_name",
-                                                "a",
-                                            ]
-                                        ]
-                                    )
+                                    ].to_string()
                                     + "\n\n"
                                 )
-
+                                # get the letter-like classification
                                 adjusted_letter = [
                                     l
                                     for l in list(
@@ -1258,14 +1575,18 @@ class Emc(Catalog):
                                     )
                                     if ".0" not in str(l)
                                 ]
+                                # if there is only one of those, fix the group to that letter (e.g. replace .01 with b)
                                 if len(adjusted_letter) == 1:
                                     self.data.loc[
                                         subsubgroup.index, "letter"
                                     ] = adjusted_letter[0]
                                     warning = "FIXABLE " + warning
-                            if "BD" in list(set(subgroup.letter.dropna().unique())):
-                                self.data.loc[subgroup.index, "letter"] = "BD"
-                                warning = "FORCED BD " + warning
+                                # if BD is in the letter, fix all the group to be BD
+                                if "BD" in list(set(subgroup.letter.dropna().unique())):
+                                    self.data.loc[subgroup.index, "letter"] = "BD"
+                                    warning = "FORCED BD " + warning
+
+                    # Write the warning to the log file
                     f1.write(warning)
         f1.close()
 
@@ -1285,10 +1606,15 @@ class Emc(Catalog):
         The function then concatenates all of these entries together into a final catalog.
 
         :param group : A pandas DataFrame containing the duplicate occurrences.
+        :type group: pd.DataFrame
         :param mainid: The main identifier of the group
+        :type mainid: str
         :param binary: The binary identifier of the group
+        :type binary: str
         :param letter: The letter identifier of the group
+        :type letter: str
         :return: A pandas Series corresponding to the merged single entry.
+        :rtype: pd.DataFrame
         """
         # these are always going to be unique by definition
         f = open("Logs/merge_into_single_entry.txt", "a")
@@ -1327,7 +1653,7 @@ class Emc(Catalog):
                     group.catalog == catalog, "catalog_name"
                 ].tolist()[0]
 
-        # SELECT BEST MEASUREMENT
+        # Select best measurement
         params = [
             ["i_url", "i", "i_min", "i_max", "IREL"],
             ["mass_url", "mass", "mass_min", "mass_max", "MASSREL"],
@@ -1369,8 +1695,7 @@ class Emc(Catalog):
 
             entry = pd.concat([entry, result], axis=1)
 
-        # status
-
+        # Select status
         entry["checked_status_string"] = ",".join(
             sorted(group.checked_catalog_status)
         ).rstrip(",")
@@ -1387,7 +1712,8 @@ class Emc(Catalog):
             entry["status"] = group.status.unique()[0]
         else:
             entry["status"] = "CONTROVERSIAL"
-        # YEAR OF DISCOVERY
+
+        # Select discovery year
         if len(sorted(group.discovery_year.dropna().astype("int").unique())) == 1:
             entry["discovery_year"] = sorted(
                 group.discovery_year.dropna().astype("int").unique()
@@ -1398,8 +1724,8 @@ class Emc(Catalog):
             )[0]
         else:
             entry["discovery_year"] = ""
-        # discovery method
 
+        # Select discovery method
         if len(list(set(group.discovery_method.unique()))) > 1 and "toi" in list(
             set(group.catalog.unique())
         ):
@@ -1420,23 +1746,29 @@ class Emc(Catalog):
             discovery_method = ",".join(
                 list((sorted(group.discovery_method.replace(np.nan, "").unique())))
             ).rstrip(",")
-        # fix for discovery methods that already have a , in it
+
+        # fix for discovery methods that already have a "," in it
         entry["discovery_method"] = ",".join(
             [disc.strip() for disc in sorted(set(discovery_method.split(",")))]
         )
 
         entry["catalog"] = ",".join(list((sorted(group.catalog.unique())))).rstrip(",")
 
-        # final Alias
-        final_alias = ""
-        for al in group.final_alias:
-            final_alias = final_alias + "," + str(al)
-        entry["final_alias"] = ",".join(
-            [x for x in sorted(set(final_alias.split(","))) if x not in ["A", "B", ""]]
+        # Select final Alias
+        main_id_aliases = ""
+        for al in group.main_id_aliases:
+            main_id_aliases = main_id_aliases + "," + str(al)
+        entry["main_id_aliases"] = ",".join(
+            [
+                x
+                for x in sorted(set(main_id_aliases.split(",")))
+                if x not in ["A", "B", ""]
+            ]
         )
 
-        entry["potential_binary_mismatch"] = ",".join(
-            map(str, group.potential_binary_mismatch.unique())
+        # Flags
+        entry["binary_mismatch_flag"] = ",".join(
+            map(str, group.binary_mismatch_flag.unique())
         ).rstrip(",")
 
         entry["coordinate_mismatch"] = ",".join(
@@ -1460,6 +1792,7 @@ class Emc(Catalog):
 
         entry["angular_separation_flag"] = len(list(set(group.angsep.unique()))) - 1
 
+        # Check if multiple main_id_provenance (user should check that it has been done right)
         if len(group.main_id_provenance.unique()) > 1:
             with pd.option_context("display.max_columns", 2000):
                 f.write(
@@ -1470,20 +1803,20 @@ class Emc(Catalog):
                     + " "
                     + letter
                     + "\n"
-                    + str(
-                        group[
-                            [
-                                "main_id_provenance",
-                                "main_id_ra",
-                                "main_id_dec",
-                                "angular_separation",
-                                "p",
-                                "a",
-                            ]
+                    + group[
+                        [
+                            "main_id_provenance",
+                            "main_id_ra",
+                            "main_id_dec",
+                            "angular_separation",
+                            "p",
+                            "a",
                         ]
-                    )
+                    ].to_string()
                     + "\n"
                 )
+
+                # If more than one, prefer the ra and dec in the order listed below
                 for item in [
                     "SIMBAD",
                     "SIMBADCOORD",
@@ -1497,20 +1830,19 @@ class Emc(Catalog):
                 ]:
                     if item in group.main_id_provenance.unique():
                         entry["main_id_provenance"] = item
-                        entry["ra_official"] = list(
+                        entry["main_id_ra"] = list(
                             set(group[group.main_id_provenance == item].main_id_ra)
                         )[0]
-                        entry["dec_official"] = list(
+                        entry["main_id_dec"] = list(
                             set(group[group.main_id_provenance == item].main_id_dec)
                         )[0]
                         break
         else:
             entry["main_id_provenance"] = group.main_id_provenance.unique()[0]
-            entry["ra_official"] = list(set(group.main_id_ra))[0]
-            entry["dec_official"] = list(set(group.main_id_dec))[0]
+            entry["main_id_ra"] = list(set(group.main_id_ra))[0]
+            entry["main_id_dec"] = list(set(group.main_id_dec))[0]
 
-        # Catalog
-
+        # Check duplicate entries within the same catalog (to be communicated to input catalogs maintainers)
         if len(group) > len(group.catalog.unique()):
             with pd.option_context("display.max_columns", 2000):
                 f.write(
@@ -1521,18 +1853,16 @@ class Emc(Catalog):
                     + " "
                     + letter
                     + " ***\n"
-                    + str(
-                        group[
-                            [
-                                "catalog",
-                                "catalog_name",
-                                "status",
-                                "angular_separation",
-                                "p",
-                                "a",
-                            ]
+                    + group[
+                        [
+                            "catalog",
+                            "catalog_name",
+                            "status",
+                            "angular_separation",
+                            "p",
+                            "a",
                         ]
-                    )
+                    ].to_string()
                     + "\n"
                 )
 
@@ -1557,18 +1887,24 @@ class Emc(Catalog):
         axis does not match, it leaves the entries unmerged. If also the semi-major axis does not exist, it merges all
         the entries together.
 
-        :param verbose: boolean to allow printing of percentage
+        :param self: An instance of the class Emc
+        :type self: Emc
+        :param verbose: boolean to allow printing of percentage, if desired
+        :type verbose: bool
+        :return: None
+        :rtype: None
         """
+        # Create final catalog
         final_catalog = pd.DataFrame()
+        # Open log file
         f1 = open("Logs/group_by_letter_check_period.txt", "a")
-        # self.data['working_period_group'] = round_parameter_bin(self.data['p'])
-        # self.data['working_sma_group'] = round_parameter_bin(self.data['a'])
+        # Group by main_id, binary, and letter
         grouped_df = self.data.groupby(
             ["main_id", "binary", "letter"], sort=True, as_index=False
         )
         counter = 0
         for (mainid, binary, letter), group in grouped_df:
-            # cases:
+            # Calculate period and a
             group = Utils.calculate_working_p_sma(group, tolerance=0.1)
             period_list = list(
                 set(group.working_p.replace(-1, np.nan).dropna().unique())
@@ -1576,26 +1912,24 @@ class Emc(Catalog):
             if len(period_list) == 1:
                 # (test) CASE 1: period in agreement (drop nan), regular merging
                 entry = Emc.merge_into_single_entry(group, mainid, binary, str(letter))
-
+                entry["merging_mismatch_flag"] = 0
                 final_catalog = pd.concat(
                     [final_catalog, entry], sort=False
                 ).reset_index(drop=True)
             elif len(period_list) > 1:
                 # (test) CASE 4: period in disagreement (but not nan), include both
                 f1.write(
-                    "DISAGREEMENT \n"
-                    + str(
-                        group[
-                            [
-                                "main_id",
-                                "binary",
-                                "letter",
-                                "catalog",
-                                "catalog_name",
-                                "p",
-                            ]
+                    "DISAGREEMENT (merging_mismatch_flag=1)\n"
+                    + group[
+                        [
+                            "main_id",
+                            "binary",
+                            "letter",
+                            "catalog",
+                            "catalog_name",
+                            "p",
                         ]
-                    )
+                    ].to_string()
                     + "\n\n"
                 )
                 for pgroup in period_list:
@@ -1603,11 +1937,13 @@ class Emc(Catalog):
                     entry = Emc.merge_into_single_entry(
                         subgroup, mainid, binary, str(letter)
                     )
+                    entry["merging_mismatch_flag"] = 1
+
                     final_catalog = pd.concat(
                         [final_catalog, entry], sort=False
                     ).reset_index(drop=True)
             else:
-                # only nan, check sma
+                # no p available, check sma
                 sma_list = list(
                     set(group.working_a.replace(-1, np.nan).dropna().unique())
                 )
@@ -1617,6 +1953,7 @@ class Emc(Catalog):
                     entry = Emc.merge_into_single_entry(
                         group, mainid, binary, str(letter)
                     )
+                    entry["merging_mismatch_flag"] = 0
 
                     final_catalog = pd.concat(
                         [final_catalog, entry], sort=False
@@ -1624,19 +1961,17 @@ class Emc(Catalog):
                 elif len(sma_list) > 1:
                     # (test) CASE 5: sma in disagreement (but not nan), include both
                     f1.write(
-                        "DISAGREEMENT \n"
-                        + str(
-                            group[
-                                [
-                                    "main_id",
-                                    "binary",
-                                    "letter",
-                                    "catalog",
-                                    "catalog_name",
-                                    "a",
-                                ]
+                        "DISAGREEMENT (merging_mismatch_flag=1)\n"
+                        + group[
+                            [
+                                "main_id",
+                                "binary",
+                                "letter",
+                                "catalog",
+                                "catalog_name",
+                                "a",
                             ]
-                        )
+                        ].to_string()
                         + "\n\n"
                     )
                     for agroup in sma_list:
@@ -1644,6 +1979,7 @@ class Emc(Catalog):
                         entry = Emc.merge_into_single_entry(
                             subgroup, mainid, binary, letter
                         )
+                        entry["merging_mismatch_flag"] = 1
                         final_catalog = pd.concat(
                             [final_catalog, entry], sort=False
                         ).reset_index(drop=True)
@@ -1651,28 +1987,28 @@ class Emc(Catalog):
                     # (test) CASE 3: no period nor sma, merge together
                     if len(group) > 1:
                         f1.write(
-                            "FALLBACK, MERGE \n"
-                            + str(
-                                group[
-                                    [
-                                        "main_id",
-                                        "binary",
-                                        "letter",
-                                        "catalog",
-                                        "catalog_name",
-                                    ]
+                            "FALLBACK, MERGE (merging_mismatch_flag=2) \n"
+                            + group[
+                                [
+                                    "main_id",
+                                    "binary",
+                                    "letter",
+                                    "catalog",
+                                    "catalog_name",
                                 ]
-                            )
+                            ].to_string()
                             + "\n\n"
                         )
                     entry = Emc.merge_into_single_entry(
                         group, mainid, binary, str(letter)
                     )
+                    entry["merging_mismatch_flag"] = 2
 
                     final_catalog = pd.concat(
                         [final_catalog, entry], sort=False
                     ).reset_index(drop=True)
 
+            # Print progress
             if verbose:
                 print(
                     "Done "
@@ -1683,28 +2019,11 @@ class Emc(Catalog):
             counter = counter + 1
         f1.close()
 
+        # Assign final catalog
         self.data = final_catalog
-        logging.info("Catalog merged into single entries.")
 
-    def potential_duplicates_after_merging(self) -> None:
-        """
-        The potential_duplicates_after_merging function finds the rows with the same main_id, binary, letter. If more
-        than one occurs, then it assigns the "emc_duplicate_entry_flag" to 1.
-        """
-        f1 = open("Logs/potential_duplicates_after_merging.txt", "a")
-        self.data["emc_duplicate_entry_flag"] = 0
-        grouped_df = self.data.groupby(
-            ["main_id", "binary", "letter"], sort=True, as_index=False
-        )
-        counter = 0
-        for (mainid, binary, letter), group in grouped_df:
-            if len(group) > 1:
-                # they have controversial period, keep all because different
-                # periods
-                f1.write("MAINID " + mainid + " " + binary + " " + letter + "\n")
-                self.data.loc[group.index, "emc_duplicate_entry_flag"] = 1
-        f1.close()
-        logging.info("Checked duplicates after merging.")
+        # Logging
+        logging.info("Catalog merged into single entries.")
 
     def select_best_mass(self) -> None:
         """
@@ -1712,6 +2031,11 @@ class Emc(Catalog):
         The function first checks if the MASSREL value is greater than MSINIREL, and if so,
         it assigns the msini values to bestmass, bestmass_min and bestmass_max. If not,
         it assigns mass values to these columns instead.
+
+        :param self: An instance of the class Emc
+        :type self: Emc
+        :return: None
+        :rtype: None
         """
 
         for i in self.data[
@@ -1741,12 +2065,17 @@ class Emc(Catalog):
             self.data.at[i, "bestmass_url"] = np.nan
             self.data.at[i, "bestmass_provenance"] = ""
 
+        # Logging
         logging.info("Bestmass calculated.")
 
     def set_exo_mercat_name(self) -> None:
         """
-        The set_exo_mercat name creates the columns exo_mercat_name by joining the main_id, the binary (if any), and
-        the letter.
+        The set_exo_mercat name creates the columns exo_mercat_name by joining the main_id, the binary (if any), and the letter.
+
+        :param self: An instance of the class Emc
+        :type self: Emc
+        :return: None
+        :rtype: None
         """
         self.data["binary"] = self.data["binary"].replace("nan", "")
         self.data["exo_mercat_name"] = self.data.apply(
@@ -1761,12 +2090,19 @@ class Emc(Catalog):
             axis=1,
         )
         self.data = self.data.sort_values(by="exo_mercat_name").reset_index()
+
+        # Logging
         logging.info("Exo-MerCat name assigned.")
 
     def keep_columns(self) -> None:
         """
         The keep_columns function is used to keep only the columns that are needed for the analysis.
         The function takes in a dataframe and returns a new dataframe with only the columns listed above.
+
+        :param self: An instance of the class Emc
+        :type self: Emc
+        :return: None
+        :rtype: None
         """
         keep = [
             "exo_mercat_name",
@@ -1779,8 +2115,8 @@ class Emc(Catalog):
             "letter",
             "main_id",
             "binary",
-            "ra_official",
-            "dec_official",
+            "main_id_ra",
+            "main_id_dec",
             "mass",
             "mass_max",
             "mass_min",
@@ -1820,33 +2156,48 @@ class Emc(Catalog):
             "original_status_string",
             "confirmed",
             "discovery_year",
-            "final_alias",
+            "main_id_aliases",
             "catalog",
             "angular_separation",
             "angular_separation_flag",
             "main_id_provenance",
+            "binary_mismatch_flag",
             "coordinate_mismatch",
             "coordinate_mismatch_flag",
             "duplicate_catalog_flag",
             "duplicate_names",
-            "emc_duplicate_entry_flag",
+            "merging_mismatch_flag",
             "row_update",
         ]
         try:
             self.data = self.data[keep]
         except KeyError:
             raise KeyError("Not all columns exist")
+
+        # Logging
         logging.info("Selected columns to keep.")
 
-    def remove_known_brown_dwarfs(self, print_flag: bool) -> None:
+    def remove_known_brown_dwarfs(
+        self,
+        local_date: str == "",
+        print_flag: bool,
+    ) -> None:
         """
         The remove_known_brown_dwarfs function removes all known brown dwarfs from the dataframe.
         It does this by checking if the mass of a planet is less than 20 Mjup, and if it isn't,
         then it will be removed from the dataframe. If print_flag is set to True, then a csv file will be created
         with all of these planets in them.
 
+        :param self: An instance of the class Emc
+        :type self: Emc
         :param print_flag: Specify whether the function should print out a list of brown dwarfs
+        :type print_flag: bool
+        :return: None
+        :rtype: None
         """
+        if local_date == "":
+            local_date = date.today().strftime("%m-%d-%Y")
+
         if print_flag:
             self.data[
                 (
@@ -1858,6 +2209,16 @@ class Emc(Catalog):
                 #   | (self.data.letter == "BD")
             ].to_csv("Exo-MerCat/" + self.name + "_brown_dwarfs.csv")
 
+            self.data[
+                (
+                    self.data.mass.fillna(self.data.msini.fillna(0))
+                    .replace("", 0)
+                    .astype(float)
+                    > 20.0
+                )
+                #   | (self.data.letter == "BD")
+            ].to_csv("Exo-MerCat/" + self.name + "_brown_dwarfs" + local_date + ".csv")
+
         self.data = self.data[
             (
                 self.data.mass.fillna(self.data.msini.fillna(0))
@@ -1867,11 +2228,28 @@ class Emc(Catalog):
             )
             #    & (self.data.letter != "BD")
         ]
-        self.data[(self.data.letter == "BD")].to_csv(
-            "Exo-MerCat/" + self.name + "_possible_brown_dwarfs.csv"
-        )
+        # self.data[(self.data.letter == "BD")].to_csv(
+        #     "Exo-MerCat/" + self.name + "_possible_brown_dwarfs.csv"
+        # )
 
-    def fill_row_update(self, local_date: str):
+    def fill_row_update(self, local_date: str) -> None:
+        """
+        This function updates the 'row_update' column in the DataFrame.
+        If there are previous versions of the catalog present, it finds the most recent one that is earlier than
+        the current date and checks it against the current DataFrame.
+        For each row that, when compared, shows some differences or is new, it updates the 'row_update' column with the date of the current version.
+        If the row did not change in any way, it keeps the value of row_update from the previous version.
+
+        If local_date is provided, it uses that date to update the 'row_update' column for the current dataframe.
+        Otherwise, it uses the current date.
+
+        :param self: An instance of the class Emc
+        :type self: Emc
+        :param local_date: The date to update the 'row_update' column (if provided by the user)
+        :type local_date: str
+        :return: None
+        :rtype: None
+        """
         if local_date != "":
             update_date = local_date
         else:
@@ -1923,7 +2301,21 @@ class Emc(Catalog):
         else:
             self.data["row_update"] = update_date
 
-    def save_catalog(self, local_date: str == "", postfix: str == ""):
+    def save_catalog(self, local_date: str == "", postfix: str == "") -> None:
+        """
+        Saves the catalog to csv viles.
+        It is saved to the 'Exo-MerCat' folder both as a exo-mercat.csv file and as a exo-mercat_MM-DD-YYYY.csv file.
+
+        :param self: An instance of the class Emc
+        :type self: Emc
+        :param local_date: The date to save the catalog (if provided by the user)
+        :type local_date: str
+        :param postfix: The postfix to add to the filename
+        :type postfix: str
+        :return: None
+        :rtype: None
+
+        """
         if local_date == "":
             self.print_catalog(
                 "Exo-MerCat/exo-mercat"

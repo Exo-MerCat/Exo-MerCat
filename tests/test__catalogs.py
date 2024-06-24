@@ -29,6 +29,7 @@ def test__download_catalog(tmp_path, instance) -> None:
     filename = "catalog"
     # Read specific date
     expected_file_path = filename + "01-02-2024.csv"
+    # CASE 1: Cannot find specific date
     with LogCapture() as log:
         with pytest.raises(ValueError):
             result = instance.download_catalog(
@@ -38,17 +39,16 @@ def test__download_catalog(tmp_path, instance) -> None:
                 "Could not find catalog with this specific date. Please check your date value."
                 in log.actual()[0][-1]
             )
-
-    with patch("os.path.exists", MagicMock(return_value=True)):
-        open(expected_file_path, "w").close()
-        with LogCapture() as log:
-            result = instance.download_catalog(
-                url=url, filename=filename, local_date="01-02-2024"
-            )
-            assert "Reading specific version: 01-02-2024" in log.actual()[0][-1]
-            assert "Reading existing file" in log.actual()[1][-1]
-            assert "Catalog downloaded" in log.actual()[2][-1]
-            assert result == PosixPath(expected_file_path)
+    # CASE 2: finds specific version
+    open(expected_file_path, "w").close()
+    with LogCapture() as log:
+        result = instance.download_catalog(
+            url=url, filename=filename, local_date="01-02-2024"
+        )
+        assert "Reading specific version: 01-02-2024" in log.actual()[0][-1]
+        assert "Reading existing file" in log.actual()[1][-1]
+        assert "Catalog downloaded" in log.actual()[2][-1]
+        assert result == PosixPath(expected_file_path)
     os.remove(expected_file_path)
 
     expected_file_path = filename + date.today().strftime("%m-%d-%Y.csv")
@@ -57,6 +57,7 @@ def test__download_catalog(tmp_path, instance) -> None:
     with patch("os.path.exists", MagicMock(return_value=True)):
         open(expected_file_path, "w").close()
         with LogCapture() as log:
+            # Case 3: file already exists
             result = instance.download_catalog(url=url, filename=filename)
             assert "Reading existing file" in log.actual()[0][-1]
             assert "Catalog downloaded" in log.actual()[1][-1]
@@ -64,45 +65,45 @@ def test__download_catalog(tmp_path, instance) -> None:
             assert result == PosixPath(expected_file_path)
 
     os.remove(expected_file_path)
-    with patch("os.path.exists", MagicMock(return_value=False)):
-        # CASE 1: it downloads fine
-        with patch("requests.get", MagicMock()) as mock_run:
-            mock_response = Mock()
-            mock_response.status_code = 200
-            mock_response.content = b"Mock content"
-            mock_run.return_value = mock_response
-            with LogCapture() as log:
-                result = instance.download_catalog(url=url, filename=filename)
-                assert "Catalog downloaded" in log.actual()[0][-1]
 
-            assert result == Path(expected_file_path)
-            mock_run.assert_called_once_with(url, timeout=None)
-
-        os.remove(expected_file_path)
-        open("cataloglocal_copy.csv", "w").close()
-        # CASE 2.A : errors in downloading, takes local copy
+    # CASE 4: downloads the file successfully
+    with patch("requests.get", MagicMock()) as mock_run:
+        mock_response = Mock()
+        mock_response.status_code = 200
+        mock_response.content = b"Mock content"
+        mock_run.return_value = mock_response
         with LogCapture() as log:
+            result = instance.download_catalog(url=url, filename=filename)
+            assert "Catalog downloaded" in log.actual()[0][-1]
+
+        assert result == Path(expected_file_path)
+        mock_run.assert_called_once_with(url, timeout=None)
+
+    os.remove(expected_file_path)
+
+    open("cataloglocal_copy.csv", "w").close()
+    # CASE 5: errors in downloading, takes local copy
+    with LogCapture() as log:
+        result = instance.download_catalog(url=url, filename=filename, timeout=0.00001)
+        log = pd.DataFrame(list(log), columns=["user", "info", "message"])
+        assert (
+            "Error fetching the catalog, taking a local copy: cataloglocal_copy.csv"
+            in log["message"].tolist()
+        )
+        assert "Catalog downloaded." in log["message"].tolist()
+
+        # it gets another local file
+        assert result != Path(expected_file_path)
+        assert "catalog" in str(result)  # it contains the filename
+        assert "csv" in str(result)  # it is a csv file
+    os.remove("cataloglocal_copy.csv")
+
+    # CASE 6 : errors in downloading, raises error because no local copy
+    with LogCapture() as log:
+        with pytest.raises(ValueError):
             result = instance.download_catalog(
                 url=url, filename=filename, timeout=0.00001
             )
-            assert (
-                "Error fetching the catalog, taking a local copy: cataloglocal_copy.csv"
-                in log.actual()[0][-1]
-            )
-            assert "Catalog downloaded" in log.actual()[1][-1]
-
-            # it gets another local file
-            assert result != Path(expected_file_path)
-            assert "catalog" in str(result)  # it contains the filename
-            assert "csv" in str(result)  # it is a csv file
-        os.remove("cataloglocal_copy.csv")
-
-        # CASE 2.B : errors in downloading, raises error because no local copy
-        with LogCapture() as log:
-            with pytest.raises(ValueError):
-                result = instance.download_catalog(
-                    url=url, filename=filename, timeout=0.00001
-                )
     os.chdir(original_dir)
 
 
@@ -110,26 +111,6 @@ def test__read_csv_catalog(instance):
     # Create a temporary in-memory configuration object
     instance.read_csv_catalog("tests/emc_test.csv")
     assert isinstance(instance.data, pd.DataFrame)
-
-
-# def test__convert_datatypes(instance):
-#     # Test when DataFrame conversion is successful
-#     # Create a sample DataFrame
-#     data = {
-#         "col1": [1.0, 2.0, 3.0],
-#         "col2": ["A", "B", "C"],
-#         "col3": [True, False, True],
-#         "col4": [1.4, 2, 3],
-#     }
-#     instance.data = pd.DataFrame(data)
-#
-#     # Call the convert_datatypes function
-#     instance.convert_datatypes()
-#     assert instance.data["col1"].dtype.type == np.int64
-#     assert instance.data["col2"].dtype.type == str
-#     assert instance.data["col3"].dtype.type == np.bool_
-#     assert instance.data["col4"].dtype.type == np.float64
-#
 
 
 def test_keep_columns(instance):

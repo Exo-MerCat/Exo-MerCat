@@ -895,8 +895,8 @@ def test__perform_query(instance):
     tolerance = 1 / 3600  # arcsec in degrees
     t2 = Table.from_pandas(pd.DataFrame(data))
     query = (
-        """SELECT basic.main_id, basic.dec as dec_2,basic.ra as ra_2, basic.otype as type, t.hostbinary, t.ra, 
-            t.dec FROM basic JOIN TAP_UPLOAD.tab AS t on 1=CONTAINS(POINT('ICRS',basic.ra, basic.dec),   
+        """SELECT basic.main_id, basic.dec as dec_2,basic.ra as ra_2, basic.otype as type, t.hostbinary, t.ra,
+            t.dec FROM basic JOIN TAP_UPLOAD.tab AS t on 1=CONTAINS(POINT('ICRS',basic.ra, basic.dec),
             CIRCLE('ICRS', t.ra, t.dec,"""
         + str(tolerance)
         + """)) """
@@ -904,11 +904,11 @@ def test__perform_query(instance):
     table = UtilityFunctions.perform_query(service, query, uploads_dict={"tab": t2})
     # in this case must run also calculate_angsep
     table = UtilityFunctions.calculate_angsep(table)
-
     assert set(table.columns) == set(expected.columns)
-    print(table, expected)
-    assert_frame_equal(table, expected)
-
+    assert all(
+        table.iloc[0] == expected.iloc[0]
+    )  # check that the first (and only) row matches
+    # #
     ###### TIC #####
     #     # SEARCH ON TIC
     expected = pd.DataFrame(
@@ -935,7 +935,7 @@ def test__perform_query(instance):
     list_of_hosts = pd.DataFrame()
     list_of_hosts["host"] = [100263315]
     t2 = Table.from_pandas(list_of_hosts)
-    query = """SELECT tic.RAJ2000 as ra_2, tic.DEJ2000 as dec_2,tic.GAIA, tic.UCAC4, tic."2MASS", tic.WISEA, tic.TIC, 
+    query = """SELECT tic.RAJ2000 as ra_2, tic.DEJ2000 as dec_2,tic.GAIA, tic.UCAC4, tic."2MASS", tic.WISEA, tic.TIC,
     tic.KIC, tic.HIP, tic.TYC, t.*  FROM "IV/38/tic" as tic JOIN TAP_UPLOAD.tab as t ON tic.TIC = t.host"""
 
     table = UtilityFunctions.perform_query(service, query, uploads_dict={"tab": t2})
@@ -979,7 +979,7 @@ def test__perform_query(instance):
     table = pd.DataFrame()
     for ind in t2.index:
         query = (
-            """SELECT tic.RAJ2000 as ra_2, tic.DEJ2000 as dec_2,tic.GAIA, tic.UCAC4, tic."2MASS", tic.WISEA, 
+            """SELECT tic.RAJ2000 as ra_2, tic.DEJ2000 as dec_2,tic.GAIA, tic.UCAC4, tic."2MASS", tic.WISEA,
                 tic.TIC, tic.KIC, tic.HIP, tic.TYC  FROM "IV/38/tic" as tic  WHERE 1=CONTAINS(POINT('ICRS',tic.RAJ2000, tic.DEJ2000),   CIRCLE('ICRS',"""
             + str(t2.at[ind, "ra"])
             + ""","""

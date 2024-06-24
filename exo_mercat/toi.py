@@ -14,6 +14,7 @@ class Toi(Catalog):
     """
     The Toi class contains all methods and attributes related to the TESS Objects of Interest catalog.
     """
+
     def __init__(self) -> None:
         """
         The __init__ function is called when the class is instantiated. It sets up the instance of the class,

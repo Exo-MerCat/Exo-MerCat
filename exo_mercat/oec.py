@@ -33,8 +33,9 @@ class Oec(Catalog):
         super().__init__()
         self.name = "oec"
 
-    def download_catalog(self, url: str, filename: str, local_date: str = "", timeout: float = None) -> Path:
-
+    def download_catalog(
+        self, url: str, filename: str, local_date: str = "", timeout: float = None
+    ) -> Path:
         """
         Downloads a catalog from a given URL and saves it to a file. If no local file is found, it will download the
         catalog from the url. If there is an error in downloading or reading the catalog, it will take a previous
@@ -56,6 +57,7 @@ class Oec(Catalog):
 
         # If local_date is not empty, use that date, otherwise use today's date
         if local_date != "":
+            # CASE 1: local date is invalid
             file_path_str = filename + local_date + ".csv"
             file_path_xml_str = filename + local_date + ".xml.gz"
 
@@ -64,17 +66,18 @@ class Oec(Catalog):
                     "Could not find catalog with this specific date. Please check your date value."
                 )
             else:
+                # CASE 2: local date is valid
                 logging.info("Reading specific version: " + local_date)
         else:
+            # CASE 3: local date is empty, use today
             file_path_str = filename + date.today().strftime("%m-%d-%Y") + ".csv"
             file_path_xml_str = filename + date.today().strftime("%m-%d-%Y") + ".xml.gz"
 
-        # Check if the file already exists
         if os.path.exists(file_path_str):
             logging.info("Reading existing file")
 
         else:
-            # Download the file
+            # CASE 4: Download the file
             try:
                 result = requests.get(url, timeout=timeout)
                 with open(file_path_xml_str, "wb") as f:
@@ -83,20 +86,20 @@ class Oec(Catalog):
                 Utils.convert_xmlfile_to_csvfile(file_path=file_path_xml_str)
 
             except (
-                    OSError,
-                    IOError,
-                    FileNotFoundError,
-                    ConnectionError,
-                    ValueError,
-                    TypeError,
-                    TimeoutError,
-                    requests.exceptions.ConnectionError,
-                    requests.exceptions.SSLError,
-                    requests.exceptions.Timeout,
-                    requests.exceptions.ConnectTimeout,
-                    requests.exceptions.HTTPError,
+                OSError,
+                IOError,
+                FileNotFoundError,
+                ConnectionError,
+                ValueError,
+                TypeError,
+                TimeoutError,
+                requests.exceptions.ConnectionError,
+                requests.exceptions.SSLError,
+                requests.exceptions.Timeout,
+                requests.exceptions.ConnectTimeout,
+                requests.exceptions.HTTPError,
             ):
-                # Check if there is a previous version
+                # CASE 5: Errors in download, take previous version
                 if len(glob.glob(filename + "*.csv")) > 0:
                     file_path_str = glob.glob(filename + "*.csv")[0]
 
@@ -105,6 +108,7 @@ class Oec(Catalog):
                         file_path_str,
                     )
                 else:
+                    # CASE 6: raise error
                     raise ValueError("Could not find previous catalogs")
 
         # Read in the csv file
