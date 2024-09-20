@@ -26,10 +26,10 @@ class Koi(Catalog):
         self.name = "koi"
         self.data = None
 
-    def uniform_catalog(self) -> None:
+    def standardize_catalog(self) -> None:
         """
-        This function uniforms the catalog data by selecting relevant columns, creating aliases, renaming columns,
-        and logging the uniformization process.
+        This function standardizes the catalog data by selecting relevant columns, creating aliases, renaming columns,
+        and logging the standardization process.
 
         :param self: The instance of the Koi class.
         :type self: Koi
@@ -130,7 +130,7 @@ class Koi(Catalog):
         ]
 
         # Logging
-        logging.info("Catalog uniformed.")
+        logging.info("Catalog standardized.")
 
     def convert_coordinates(self) -> None:
         """

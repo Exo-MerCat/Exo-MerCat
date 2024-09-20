@@ -25,7 +25,7 @@ class Nasa(Catalog):
         super().__init__()
         self.name = "nasa"
 
-    def uniform_catalog(self) -> None:
+    def standardize_catalog(self) -> None:
         """
         This function processes raw data from a catalog. It standardizes the data format, renames columns,
         adds new columns like aliases, discovery methods, and references. Finally, it performs some string
@@ -119,7 +119,7 @@ class Nasa(Catalog):
         self.data = Utils.convert_discovery_methods(self.data)
 
         # Logging
-        logging.info("Catalog uniformed.")
+        logging.info("Catalog standardized.")
 
     def sort_bestmass_to_mass_or_msini(self) -> None:
         """
@@ -213,7 +213,7 @@ class Nasa(Catalog):
             self.data.loc[self.data[item].isnull(), item + "_url"] = ""
 
         # Logging
-        logging.info("Reference columns uniformed.")
+        logging.info("Reference columns standardized.")
 
     def assign_status(self) -> None:
         """

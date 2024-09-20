@@ -16,7 +16,7 @@ def test__init(instance):
     assert instance.name is "epic"
 
 
-def test__uniform_catalog(instance):
+def test__standardize_catalog(instance):
     data = {
         "pl_name": ["EPIC 212099230.01", "extra"],
         "discoverymethod": ["Transit", "extra"],
@@ -119,8 +119,8 @@ def test__uniform_catalog(instance):
         "alias",
     ]
     with LogCapture() as log:
-        instance.uniform_catalog()
-        assert "Catalog uniformed" in log.actual()[0][-1]
+        instance.standardize_catalog()
+        assert "Catalog standardized" in log.actual()[0][-1]
 
     assert sorted(list(instance.data.columns)) == sorted(expected_columns)
     assert len(instance.data) == 1
@@ -167,7 +167,7 @@ def test__handle_reference_format(instance):
     instance.data = pd.DataFrame(data)
     with LogCapture() as log:
         instance.handle_reference_format()
-        assert "Reference columns uniformed" in log.actual()[0][-1]
+        assert "Reference columns standardized" in log.actual()[0][-1]
     assert instance.data.at[0, "e_url"] == "2021A&A...645A..71C"
     assert instance.data.at[0, "p_url"] == "2021A&A...645A..72C"
     assert instance.data.at[0, "i_url"] == "2021A&A...645A..71C"

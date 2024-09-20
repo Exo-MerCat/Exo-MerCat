@@ -24,7 +24,7 @@ class Toi(Catalog):
         self.name = "toi"
         self.data = None
 
-    def uniform_catalog(self) -> None:
+    def standardize_catalog(self) -> None:
         """
         Standardize the dataframe columns and values. It assigns new columns to the dataframe. It runs the run_sync
         method to gather the aliases of the TIC stars, to be added to the alias column. It assigns NaN to the missing
@@ -144,7 +144,7 @@ class Toi(Catalog):
         self.data["reference"] = "toi"
 
         # Logging
-        logging.info("Catalog uniformed.")
+        logging.info("Catalog standardized.")
 
     def convert_coordinates(self) -> None:
         """
@@ -185,7 +185,7 @@ class Toi(Catalog):
             self.data[item + "_url"] = self.data[item].apply(
                 lambda x: "" if pd.isna(x) or np.isinf(x) else "toi"
             )
-        logging.info("Reference columns uniformed.")
+        logging.info("Reference columns standardized.")
 
     def assign_status(self):
         """

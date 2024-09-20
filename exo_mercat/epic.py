@@ -24,9 +24,9 @@ class Epic(Catalog):
         self.name = "epic"
         self.data = None
 
-    def uniform_catalog(self) -> None:
+    def standardize_catalog(self) -> None:
         """
-        Uniforms the catalog by renaming columns and adding useful columns derived from existing ones.
+        Standardizes the catalog by renaming columns and adding useful columns derived from existing ones.
 
         This function takes the data from the K2/EPIC catalog and creates a new table with only the columns we need
         for our analysis. It also adds some useful columns that are derived from existing ones.
@@ -123,7 +123,7 @@ class Epic(Catalog):
         self.data = Utils.convert_discovery_methods(self.data)
 
         # Logging
-        logging.info("Catalog uniformed.")
+        logging.info("Catalog standardized.")
 
     def convert_coordinates(self) -> None:
         """
@@ -196,7 +196,7 @@ class Epic(Catalog):
             self.data.loc[self.data[item].isnull(), item + "_url"] = ""
 
         # Logging
-        logging.info("Reference columns uniformed.")
+        logging.info("Reference columns standardized.")
 
     def assign_status(self) -> None:
         """
@@ -207,7 +207,16 @@ class Epic(Catalog):
         :return: None
         :rtype: None
         """
-        self.data["status"] = self.data["disposition"]
+        for i in self.data.index:
+            if "CONFIRMED" in self.data.at[i, "disposition"]:
+                self.data.at[i, "status"] = "CONFIRMED"
+            elif "CANDIDATE" in self.data.at[i, "disposition"]:
+                self.data.at[i, "status"] = "CANDIDATE"
+            elif "FALSE POSITIVE" in self.data.at[i, "disposition"]:
+                self.data.at[i, "status"] = "FALSE POSITIVE"
+            elif "REFUTED" in self.data.at[i, "disposition"]:
+                self.data.at[i, "status"] = "FALSE POSITIVE"
+
 
         logging.info("Status column assigned.")
         logging.info("Updated Status:")

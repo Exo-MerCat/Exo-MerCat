@@ -16,7 +16,7 @@ def test__init(instance):
     assert instance.name is "nasa"
 
 
-def test__uniform_catalog(instance):
+def test__standardize_catalog(instance):
     # Create a sample DataFrame with some additional columns
     data = {
         "pl_name": ["OGLE-2016-BLG-1227L b"],
@@ -75,8 +75,8 @@ def test__uniform_catalog(instance):
     df = pd.DataFrame(data)
     instance.data = df
     with LogCapture() as log:
-        instance.uniform_catalog()
-        assert "Catalog uniformed" in log.actual()[0][-1]
+        instance.standardize_catalog()
+        assert "Catalog standardized" in log.actual()[0][-1]
 
     expected_columns = [
         "name",
@@ -214,7 +214,7 @@ def test__handle_reference_format(instance):
     instance.data = pd.DataFrame(data)
     with LogCapture() as log:
         instance.handle_reference_format()
-        assert "Reference columns uniformed" in log.actual()[0][-1]
+        assert "Reference columns standardized" in log.actual()[0][-1]
     assert instance.data.at[0, "e_url"] == "2021A&A...645A..71C"
     assert instance.data.at[0, "p_url"] == "2021A&A...645A..72C"
     assert instance.data.at[0, "i_url"] == "2021A&A...645A..71C"

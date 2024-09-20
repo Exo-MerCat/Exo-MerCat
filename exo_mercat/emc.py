@@ -56,7 +56,7 @@ class Emc(Catalog):
         original host. It then adds all aliases of both hosts into one list for each row. The method opens a file
         called "Logs/alias_as_host.txt" in append mode and writes information about the aliases that were changed to
         be hosts. Finally, it updates the dataframe with the new aliases and logs the number of times the aliases
-        were changed to be hosts. It is okay if it happens multiple times, as long as it uniforms the host name and
+        were changed to be hosts. It is okay if it happens multiple times, as long as it standardizes the host name and
         adds up all the aliases, SIMBAD will find them coherently.
 
         :param self: The instance of the Emc class.
@@ -143,7 +143,7 @@ class Emc(Catalog):
 
         counter = 0  # Counter for the number of binary mismatches fixed
 
-        # Try to uniform the value of binary from the other entries of the same system.
+        # Try to standardize the value of binary from the other entries of the same system.
         for (key, letter), group in self.data.groupby(by=[keyword, "letter"]):
             group.ra = np.round(group.ra.astype(float), 6)
             group.dec = np.round(group.dec.astype(float), 6)
@@ -1081,7 +1081,7 @@ class Emc(Catalog):
                     0, "ids"
                 ].replace("|", ",")
             output_string = (
-                "MAINID corrected " + identifier + " to " + new_identifier + "."
+                "MAINID can be corrected " + identifier + " to " + new_identifier + ". "
             )
 
             if binary is not None:
@@ -1091,13 +1091,19 @@ class Emc(Catalog):
                 ].copy()
                 if (binary_catalog.replace("S-type", "") == "").all():
                     self.data.loc[self.data.main_id == identifier, "binary"] = binary
-                    output_string = output_string + " Binary could be uniformed."
+                    output_string = output_string + " Only S-type or null. Binary could be standardized."
                 elif (binary_catalog != binary).any():
+                    #CASE 2: values disagreeing. No replacement.
                     output_string = (
                         output_string
-                        + " Binary value is not in agreement, please check."
+                        + " Binary value is not in agreement, please check:\n"
+                        +self.data.loc[
+                                    self.data.main_id == identifier,
+                                    ["name", "host", "binary", "catalog"],
+                                ].to_string()
                     )
                 elif (binary_catalog == binary).all():
+                    # CASE 3: already correct. No replacement.
                     output_string = output_string + " Already correct."
             else:
                 output_string = output_string + "\n"
@@ -1108,11 +1114,11 @@ class Emc(Catalog):
             output_string = output_string
         elif len(table) == 0:
             output_string = (
-                "Weird MAINID found: "
+                    "Weird MAINID found: "
                 + identifier
                 + " but cannot be found when "
                 + new_identifier
-                + ". "
+                + ". No replacement performed."
             )
 
         return output_string
@@ -1141,7 +1147,7 @@ class Emc(Catalog):
 
         for identifier in self.data.main_id.unique():
             # PLANET IN SIMBAD, WILL TRY TO LOOK FOR STAR IN SIMBAD AND REPLACE
-            if len(re.findall("[\s\d][b-i]$", identifier)) > 0:
+            if len(re.findall("[\s\d][b-j]$", identifier)) > 0:
                 new_identifier = identifier[:-1].strip().replace("NAME ", "")
                 counter += 1
                 output_string = self.replace_old_new_identifier(
@@ -1153,77 +1159,83 @@ class Emc(Catalog):
             # CHECK CIRCUMBINARY, WILL TRY TO LOOK FOR HOST
             if len(re.findall(r"[\s\d](\(AB\))$", identifier)) > 0:
                 counter += 1
+
                 # it finds AB in main_id. Check if AB is already in binary
-                if (
-                    self.data.loc[self.data.main_id == identifier, "binary"] != "AB"
-                ).any():
-                    f.write(
-                        "MAIN_ID: "
-                        + identifier
-                        + ". Selected binary value: AB"
-                        + ". Value in catalog: \n"
-                        + self.data.loc[
-                            self.data.main_id == identifier,
-                            ["name", "host", "binary", "catalog"],
-                        ].to_string()
-                        + "\n"
-                    )
+                # if (
+                #     self.data.loc[self.data.main_id == identifier, "binary"] != "AB"
+                # ).any():
+                #     import ipdb;ipdb.set_trace()
+                #     # f.write(
+                #     #     "MAIN_ID: "
+                #     #     + identifier
+                #     #     + ". Selected binary value: AB"
+                #     #     + ". Value in catalog: \n"
+                #     #     + self.data.loc[
+                #     #         self.data.main_id == identifier,
+                #     #         ["name", "host", "binary", "catalog"],
+                #     #     ].to_string()
+                #     #     + "\n"
+                #     # )
 
                 new_identifier = identifier[:-4].rstrip().replace("NAME ", "")
                 output_string = self.replace_old_new_identifier(
                     identifier, new_identifier, "AB"
                 )
-                f.write(output_string + "\n***\n")
+
+                f.write(output_string +'\n')
+
 
             if len(re.findall(r"[\[a-z](AB)$|\s(AB)$|\d(AB)$]", identifier)) > 0:
                 counter += 1
-                if (
-                    self.data.loc[self.data.main_id == identifier, "binary"] != "AB"
-                ).any():
-                    f.write(
-                        "MAIN_ID: "
-                        + identifier
-                        + ". Selected binary value: AB"
-                        + ". Value in catalog: \n"
-                        + self.data.loc[
-                            self.data.main_id == identifier,
-                            ["name", "host", "binary", "catalog"],
-                        ].to_string()
-                        + "\n"
-                    )
+                # if (
+                #     self.data.loc[self.data.main_id == identifier, "binary"] != "AB"
+                # ).any():
+
+                    # f.write(
+                    #     "MAIN_ID: "
+                    #     + identifier
+                    #     + ". Selected binary value: AB"
+                    #     + ". Value in catalog: "
+                    #     + str(list(set(self.data.loc[
+                    #                        self.data.main_id == identifier,"binary"],
+                    #                    )))
+                    #     + "\n"
+                    #     + "\n"
+                    # )
 
                 new_identifier = identifier[:-2].rstrip()
                 output_string = self.replace_old_new_identifier(
                     identifier, new_identifier, "AB"
                 )
-                f.write(output_string + "\n***\n")
+                f.write(output_string + "\n")
 
             # REGULAR BINARY
             if len(re.findall("[\s\d][ABCSN]$", identifier)) > 0:
+
                 counter += 1
-                if (
-                    self.data.loc[self.data.main_id == identifier, "binary"]
-                    != identifier[-1:]
-                ).any():
-                    f.write(
-                        "MAIN_ID: "
-                        + identifier
-                        + ". Selected binary value: "
-                        + identifier[-1:]
-                        + ". Value in catalog: \n"
-                        + self.data.loc[
-                            self.data.main_id == identifier,
-                            ["name", "host", "binary", "catalog"],
-                        ].to_string()
-                        + "\n"
-                    )
+                # if (
+                #     self.data.loc[self.data.main_id == identifier, "binary"]
+                #     != identifier[-1:]
+                # ).any():
+                #     f.write(
+                #         "MAIN_ID: "
+                #         + identifier
+                #         + ". Selected binary value: "
+                #         + identifier[-1:]
+                #         + ". Value in catalog: \n"
+                #         + self.data.loc[
+                #             self.data.main_id == identifier,
+                #             ["name", "host", "binary", "catalog"],
+                #         ].to_string()
+                #         + "\n"
+                #     )
 
                 new_identifier = identifier[:-1].strip()
                 output_string = self.replace_old_new_identifier(
                     identifier, new_identifier, identifier[-1:]
                 )
 
-                f.write(output_string + "\n***\n")
+                f.write(output_string + "\n")
         f.close()
         logging.info(
             "Removed planet/binary letter from main_id. It happens "
@@ -1671,22 +1683,37 @@ class Emc(Catalog):
             subgroup = group[p[:-1]]
             subgroup[p[1:-1]] = subgroup[p[1:-1]].fillna(np.nan).replace("", np.nan)
             subgroup = subgroup.dropna(subset=[p[1]])
-            subgroup = subgroup.dropna(subset=[p[3], p[2]])
 
             if len(subgroup) > 0:
+
                 subgroup[p[1]] = subgroup[p[1]].astype("float")
-                subgroup["maxrel"] = subgroup[p[3]].astype("float") / subgroup[
-                    p[1]
-                ].astype("float")
-                subgroup["minrel"] = subgroup[p[2]].astype("float") / subgroup[
-                    p[1]
-                ].astype("float")
+
+                # Try removing the cases that have NaN as uncertainty.
+                # In case there are only those, keep them but replace relative error
+                # with a very large known value (1e32).
+
+                if len(subgroup.dropna(subset=[p[3], p[2]])) > 0:
+                    #keep only rows that have non-nan errorbars
+                    subgroup = subgroup.dropna(subset=[p[3], p[2]])
+                    subgroup["maxrel"] = subgroup[p[3]].astype("float") / subgroup[
+                        p[1]
+                    ].astype("float")
+                    subgroup["minrel"] = subgroup[p[2]].astype("float") / subgroup[
+                        p[1]
+                    ].astype("float")
+                else:
+                    #there are only non-nan errorbars, set relative error to 1e32
+                    subgroup["maxrel"] = 1e32
+                    subgroup["minrel"] = 1e32
+
                 subgroup = subgroup.replace(np.inf, np.nan)
                 subgroup["maxrel"] = subgroup["maxrel"].fillna(subgroup[p[2]])
                 subgroup["minrel"] = subgroup["minrel"].fillna(subgroup[p[2]])
                 subgroup[p[-1]] = subgroup[["maxrel", "minrel"]].max(axis=1)
 
                 result = subgroup.loc[subgroup[p[-1]] == subgroup[p[-1]].min(), p]
+
+                # prefer those that have a real paper associated (they generally start with a number)
                 result = result.sort_values(by=p[0]).head(1)
 
                 result = result.reset_index().drop(columns=["index"])
@@ -2196,7 +2223,7 @@ class Emc(Catalog):
         :rtype: None
         """
         if local_date == "":
-            local_date = date.today().strftime("%m-%d-%Y")
+            local_date = date.today().strftime("$Y-%m-%d")
 
         if print_flag:
             self.data[
@@ -2207,7 +2234,7 @@ class Emc(Catalog):
                     > 20.0
                 )
                 #   | (self.data.letter == "BD")
-            ].to_csv("Exo-MerCat/" + self.name + "_brown_dwarfs.csv")
+            ].to_csv("Exo-MerCat/" + self.name + "_brown_dwarfs.csv",index=None)
 
             self.data[
                 (
@@ -2217,7 +2244,7 @@ class Emc(Catalog):
                     > 20.0
                 )
                 #   | (self.data.letter == "BD")
-            ].to_csv("Exo-MerCat/" + self.name + "_brown_dwarfs" + local_date + ".csv")
+            ].to_csv("Exo-MerCat/" + self.name + "_brown_dwarfs" + local_date + ".csv",index=None)
 
         self.data = self.data[
             (
@@ -2253,17 +2280,17 @@ class Emc(Catalog):
         if local_date != "":
             update_date = local_date
         else:
-            update_date = date.today().strftime("%m-%d-%Y")
+            update_date = date.today().strftime("%Y-%m-%d")
 
         # find if there are older versions present
         if len(glob.glob("Exo-MerCat/exo-mercat*-*.csv")) > 0:
             li = list(glob.glob("Exo-MerCat/exo-mercat_full*-*.csv"))
-            li = [re.search(r"\d\d-\d\d-\d\d\d\d", l)[0] for l in li]
-            li = [datetime.strptime(l, "%m-%d-%Y") for l in li]
+            li = [re.search(r"\d\d\d\d-\d\d-\d\d", l)[0] for l in li]
+            li = [datetime.strptime(l, "%Y-%m-%d") for l in li]
 
             # get the most recent compared to the current date. Get only the ones earlier than the date
-            li = [l for l in li if l < datetime.strptime(update_date, "%m-%d-%Y")]
-            compar_date = max(li).strftime("%m-%d-%Y")
+            li = [l for l in li if l < datetime.strptime(update_date, "%Y-%m-%d")]
+            compar_date = max(li).strftime("%Y-%m-%d")
             right_merge = pd.read_csv(
                 "Exo-MerCat/exo-mercat_full" + compar_date + ".csv"
             )
@@ -2320,7 +2347,7 @@ class Emc(Catalog):
             self.print_catalog(
                 "Exo-MerCat/exo-mercat"
                 + postfix
-                + date.today().strftime("%m-%d-%Y")
+                + date.today().strftime("%Y-%m-%d")
                 + ".csv"
             )
         else:

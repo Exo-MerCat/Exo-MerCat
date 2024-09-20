@@ -28,12 +28,12 @@ def test__download_catalog(tmp_path, instance) -> None:
     url = "https://example.com/catalog.csv"
     filename = "catalog"
     # Read specific date
-    expected_file_path = filename + "01-02-2024.csv"
+    expected_file_path = filename + "2024-01-02.csv"
     # CASE 1: Cannot find specific date
     with LogCapture() as log:
         with pytest.raises(ValueError):
             result = instance.download_catalog(
-                url=url, filename=filename, local_date="01-02-2024"
+                url=url, filename=filename, local_date="2024-01-02"
             )
             assert (
                 "Could not find catalog with this specific date. Please check your date value."
@@ -43,15 +43,15 @@ def test__download_catalog(tmp_path, instance) -> None:
     open(expected_file_path, "w").close()
     with LogCapture() as log:
         result = instance.download_catalog(
-            url=url, filename=filename, local_date="01-02-2024"
+            url=url, filename=filename, local_date="2024-01-02"
         )
-        assert "Reading specific version: 01-02-2024" in log.actual()[0][-1]
+        assert "Reading specific version: 2024-01-02" in log.actual()[0][-1]
         assert "Reading existing file" in log.actual()[1][-1]
         assert "Catalog downloaded" in log.actual()[2][-1]
         assert result == PosixPath(expected_file_path)
     os.remove(expected_file_path)
 
-    expected_file_path = filename + date.today().strftime("%m-%d-%Y.csv")
+    expected_file_path = filename + date.today().strftime("%Y-%m-%d.csv")
 
     # Mock os.path.exists to simulate that the file already exists or not
     with patch("os.path.exists", MagicMock(return_value=True)):
@@ -81,13 +81,13 @@ def test__download_catalog(tmp_path, instance) -> None:
 
     os.remove(expected_file_path)
 
-    open("cataloglocal_copy.csv", "w").close()
+    open("catalog2024-01-20.csv", "w").close()
     # CASE 5: errors in downloading, takes local copy
     with LogCapture() as log:
         result = instance.download_catalog(url=url, filename=filename, timeout=0.00001)
         log = pd.DataFrame(list(log), columns=["user", "info", "message"])
         assert (
-            "Error fetching the catalog, taking a local copy: cataloglocal_copy.csv"
+            "Error fetching the catalog, taking a local copy: catalog2024-01-20.csv"
             in log["message"].tolist()
         )
         assert "Catalog downloaded." in log["message"].tolist()
@@ -96,7 +96,7 @@ def test__download_catalog(tmp_path, instance) -> None:
         assert result != Path(expected_file_path)
         assert "catalog" in str(result)  # it contains the filename
         assert "csv" in str(result)  # it is a csv file
-    os.remove("cataloglocal_copy.csv")
+    os.remove("catalog2024-01-20.csv")
 
     # CASE 6 : errors in downloading, raises error because no local copy
     with LogCapture() as log:
@@ -108,8 +108,9 @@ def test__download_catalog(tmp_path, instance) -> None:
 
 
 def test__read_csv_catalog(instance):
+    original_dir = os.getcwd()
     # Create a temporary in-memory configuration object
-    instance.read_csv_catalog("tests/emc_test.csv")
+    instance.read_csv_catalog(original_dir+"/tests/emc_test.csv")
     assert isinstance(instance.data, pd.DataFrame)
 
 
@@ -389,7 +390,7 @@ def test__make_errors_absolute(instance):
     pd.testing.assert_frame_equal(instance.data, expected_df)
 
 
-def test__uniform_name_host_letter(instance):
+def test__standardize_name_host_letter(instance):
     # Create a sample DataFrame with various names, hosts, and aliases
     data = {
         "name": ["planet1 b", "planet2 b", "planet3.01", "planet4.02"],
@@ -408,11 +409,11 @@ def test__uniform_name_host_letter(instance):
     instance.data = df
 
     with LogCapture() as log:
-        # Call the uniform_name_host_letter function
-        instance.uniform_name_host_letter()
-        assert "name, host, letter columns uniformed" in log.actual()[0][-1]
+        # Call the standardize_name_host_letter function
+        instance.standardize_name_host_letter()
+        assert "name, host, letter columns standardized" in log.actual()[0][-1]
 
-    # Check if name, host, and letter columns are uniformly modified as
+    # Check if name, host, and letter columns are standardizely modified as
     # expected
     expected_result = {
         "name": ["planet1 b", "planet2 b", "planet3.01", "planet4.02"],
@@ -464,7 +465,7 @@ def test__check_mission_tables(instance):
     instance.data = pd.DataFrame(data)
 
     with LogCapture() as log:
-        # Call the uniform_name_host_letter function
+        # Call the check_mission_tables function
         instance.check_mission_tables(test_data_file)
         assert "test_koi.csv checked" in log.actual()[0][-1]
 
@@ -551,7 +552,7 @@ def test__fill_binary_column(instance):
     instance.data = data
     # Call the function with the sample input data
     with LogCapture() as log:
-        # Call the uniform_name_host_letter function
+        # Call the fill_binary_column function
         instance.fill_binary_column()
         assert "Fixed planets orbiting binary stars" in log.actual()[0][-1]
 
@@ -588,7 +589,7 @@ def test__create_catalogstatus_string(instance):
     instance.data = data
     # Call the function with the sample input data
     with LogCapture() as log:
-        # Call the uniform_name_host_letter function
+        # Call the create_catalogstatus_string function
         instance.create_catalogstatus_string("original_catalog_status")
         assert "original_catalog_status column created" in log.actual()[0][-1]
 
@@ -606,7 +607,7 @@ def test__create_catalogstatus_string(instance):
     instance.data = data
     # Call the function with the sample input data
     with LogCapture() as log:
-        # Call the uniform_name_host_letter function
+        # Call the create_catalogstatus_string function
         instance.create_catalogstatus_string("checked_catalog_status")
         assert "checked_catalog_status column created" in log.actual()[0][-1]
 
@@ -615,7 +616,7 @@ def test__create_catalogstatus_string(instance):
     assert instance.data.at[2, "checked_catalog_status"] == "nasa: FALSE POSITIVE"
 
 
-def test__make_uniform_alias_list(instance):
+def test__make_standardized_alias_list(instance):
     data = pd.DataFrame(
         {
             "host": ["Kepler-1", "Kepler-1", "Kepler-1", "Kepler-1"],
@@ -625,8 +626,8 @@ def test__make_uniform_alias_list(instance):
     instance.data = data
     # Call the function with the sample input data
     with LogCapture() as log:
-        # Call the uniform_name_host_letter function
-        instance.make_uniform_alias_list()
+        # Call the standardized_alias_list function
+        instance.make_standardized_alias_list()
         assert "Lists of aliases" in log.actual()[0][-1]
 
     assert all(
@@ -694,7 +695,7 @@ functions_raising_error = [
     "convert_coordinates",
     "remove_theoretical_masses",
     "handle_reference_format",
-    "uniform_catalog",
+    "standardize_catalog",
     "assign_status",
 ]
 

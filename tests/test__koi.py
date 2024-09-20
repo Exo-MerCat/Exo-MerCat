@@ -16,7 +16,7 @@ def test__init(instance):
     assert instance.name is "koi"
 
 
-def test__uniform_catalog(instance):
+def test__standardize_catalog(instance):
     data = {
         "kepid": [10797460, 10811496],
         "kepoi_name": ["K00752.02", "K00753.01"],
@@ -29,8 +29,8 @@ def test__uniform_catalog(instance):
     instance.data = data
 
     with LogCapture() as log:
-        instance.uniform_catalog()
-        assert "Catalog uniformed" in log.actual()[0][-1]
+        instance.standardize_catalog()
+        assert "Catalog standardized" in log.actual()[0][-1]
 
     assert list(instance.data.columns) == [
         "name",

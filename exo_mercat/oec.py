@@ -70,8 +70,8 @@ class Oec(Catalog):
                 logging.info("Reading specific version: " + local_date)
         else:
             # CASE 3: local date is empty, use today
-            file_path_str = filename + date.today().strftime("%m-%d-%Y") + ".csv"
-            file_path_xml_str = filename + date.today().strftime("%m-%d-%Y") + ".xml.gz"
+            file_path_str = filename + date.today().strftime("%Y-%m-%d") + ".csv"
+            file_path_xml_str = filename + date.today().strftime("%Y-%m-%d") + ".xml.gz"
 
         if os.path.exists(file_path_str):
             logging.info("Reading existing file")
@@ -115,9 +115,9 @@ class Oec(Catalog):
         logging.info("Catalog downloaded.")
         return Path(file_path_str)
 
-    def uniform_catalog(self) -> None:
+    def standardize_catalog(self) -> None:
         """
-        Uniforms the catalog by renaming columns and adding useful columns derived from existing ones. It
+        Standardizes the catalog by renaming columns and adding useful columns derived from existing ones. It
         standardizes the data format, renames columns, adds new columns like aliases, discovery methods,
         and references. Finally, it performs some string manipulations on the data and converts discovery methods.
 
@@ -193,7 +193,7 @@ class Oec(Catalog):
         self.data = Utils.convert_discovery_methods(self.data)
 
         # Logging
-        logging.info("Catalog uniformed.")
+        logging.info("Catalog standardized.")
 
     def remove_theoretical_masses(self) -> None:
         """
@@ -254,7 +254,7 @@ class Oec(Catalog):
             )
 
         # Logging
-        logging.info("Reference columns uniformed.")
+        logging.info("Reference columns standardized.")
 
     def convert_coordinates(self) -> None:
         """

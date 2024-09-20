@@ -677,7 +677,7 @@ def test__simbad_list_host_search(tmp_path, instance):
                 "LTT 16750,N30 5052,NLTT 55385,NSV 14374,PPM 114985,ROT  3341,SAO  90896,SKY# 43603,SPOCS  990,"
                 "TD1 29480,UBV M  26734,UBV   19678,YPAC 218,YZ   0  1227,YZ  20  9382,uvby98 100217014,"
                 "Gaia DR2 2835207319109249920,PLX 5568.00,IRAS 22550+2030,AKARI-IRC-V1 J2257280+204608,"
-                "NAME Helvetios,WEB 20165,** RBR   21A,WDS J22575+2046A",
+                "NAME Helvetios,WEB 20165,** RBR   21A,WDS J22575+2046A,CNS5 5664",
                 "IDS 19392+5017 AB,CCDM J19418+5031AB,WDS J19418+5032AB,*  16 Cyg,ADS 12815 AB,** STFA   46,"
                 "IRAS 19404+5024,IRAS F19404+5024",
                 "",
@@ -757,7 +757,7 @@ def test__simbad_list_alias_search(tmp_path, instance):
                 "LTT 16750,N30 5052,NLTT 55385,NSV 14374,PPM 114985,ROT  3341,SAO  90896,SKY# 43603,SPOCS  990,"
                 "TD1 29480,UBV M  26734,UBV   19678,YPAC 218,YZ   0  1227,YZ  20  9382,uvby98 100217014,"
                 "Gaia DR2 2835207319109249920,PLX 5568.00,IRAS 22550+2030,AKARI-IRC-V1 J2257280+204608,"
-                "NAME Helvetios,WEB 20165,** RBR   21A,WDS J22575+2046A",
+                "NAME Helvetios,WEB 20165,** RBR   21A,WDS J22575+2046A,CNS5 5664",
                 "** CVN   12A,2MASS J12073346-3932539,2MASSW J1207334-393254,DENIS J120733.4-393254,Gaia DR2 "
                 "3459372646830687104,Gaia DR3 3459372646830687104,HIDDEN NAME 2M1207,HIDDEN NAME 2M1207A,"
                 "TIC 102076870,TWA 27,TWA 27A,USNO-B1.0 0504-00258166,WDS J12076-3933A,WISE J120733.42-393254.2,"
@@ -892,7 +892,7 @@ def test__get_host_info_from_simbad(instance):
 
     expected_output = {
         "list_id": [
-            "LTT 15751,*  16 Cyg B,** STF 4046B,ADS 12815 B,AG+50 1408,AKARI-IRC-V1 J1941518+503102,ASCC  271120,"
+            "CNS5 4878,LTT 15751,*  16 Cyg B,** STF 4046B,ADS 12815 B,AG+50 1408,AKARI-IRC-V1 J1941518+503102,ASCC  271120,"
             "BD+50  2848,CCDM J19418+5031B,GC 27285,GCRV 12084,GEN# +1.00186427,GJ 765.1 B,HD 186427,HIC  96901,"
             "HIP 96901,HR  7504,IDS 19392+5017 B,KIC 12069449,LSPM J1941+5031E,2MASS J19415198+5031032,NLTT 48138,"
             "PPM  37673,ROT  2840,SAO  31899,SKY# 36807,SPOCS  855,TIC 27533327,TYC 3565-1525-1,UBV   16780,"
@@ -913,7 +913,7 @@ def test__get_host_info_from_simbad(instance):
             "2MASS J03124644-0111458,N30  656,NLTT 10224,PLX  663,PMC 90-93    84,PPM 175267,ROT   431,SAO 130355,"
             "SKY#  4813,SPOCS  155,TD1  1984,TIC 49845357,TYC 4708-1423-1,UBV    3104,UCAC3 178-9414,"
             "UCAC4 445-004277,uvby98 100019994,WDS J03128-0112A,WEB  2887,WISEA J031246.58-011146.4,YZ  91   684,"
-            "YZ   0  3372,[RHG95]   572,Gaia DR3 3265335443260522112,Gaia DR2 3265335443260522112",
+            "YZ   0  3372,[RHG95]   572,Gaia DR3 3265335443260522112,Gaia DR2 3265335443260522112,CNS5 807",
             "2MASS J16171898-2437186,AP J16171898-2437186,EPIC 203868608,TIC 98231712,UGCS J161718.97-243718.7,WISEA J161718.97-243718.9,"
             "Gaia DR2 6049656638390048896,Gaia DR3 6049656638390048896",
             "TYC 3556-3568-1,ASAS J193833+4604.0,ATO J294.6359+46.0664,GSC2.3 N2JF000803,GSC2 N0303123803,GSC 03556-03568,Kepler-451,KIC 9472174,LAMOST J193832.60+460359.1,LAMOST J193832.62+460359.1,LAMOST J193832.61+460359.1,2MASS J19383260+4603591,NSVS   5629361,TIC 271164763,UCAC3 273-158867,USNO-B1.0 1360-00318562,EQ J1938+4603,Gaia DR3 2080063931448749824,Gaia DR2 2080063931448749824",
@@ -998,7 +998,7 @@ def test__get_coordinates_from_simbad(tmp_path, instance):
             "hostbinary": ["51 Peg", "2MASS 0103-55 AB"],
             "main_id": ["*  51 Peg", ""],
             "list_id": [
-                "LTT 16750,*  51 Peg,** RBR   21A,AG+20 2595,AKARI-IRC-V1 J2257280+204608,ASCC  826013,BD+19  5036,"
+                "LTT 16750,*  51 Peg,** RBR   21A,AG+20 2595,AKARI-IRC-V1 J2257280+204608,ASCC  826013,BD+19  5036,CNS5 5664,"
                 "CSV 102222,GC 32003,GCRV 14411,GEN# +1.00217014,GJ 882,HD 217014,HIC 113357,HIP 113357,HR  8729,"
                 "IRAS 22550+2030,JP11  3558,LSPM J2257+2046,2MASS J22572795+2046077,N30 5052,NAME Helvetios,"
                 "NLTT 55385,NSV 14374,PLX 5568,PLX 5568.00,PPM 114985,ROT  3341,SAO  90896,SKY# 43603,SPOCS  990,"
@@ -1332,8 +1332,8 @@ def test__polish_main_id(tmp_path, instance):
             "TrES-1,TOI-1236b,TOI-1236.01,HIDDEN NAME TrES-1b,NAME V672 Lyr b,TIC 120757718,2MASS J19040985+3637574,GSC 02652-01324,TYC 2652-1324-1,NAME TrES-1 Parent Star,** ADM    4A,** FAE    1A,WDS J19042+3638A,Gaia DR3 2098964849867337856,Gaia DR1 2098964845566110720,V* V672 Lyr,TOI-1236,Gaia DR2 2098964849867337856,KIC 875283",
             "YZ  18  3535,BD+18  2050,CCDM J08500+1752AB,WDS J08500+1752AB,IDS 08444+1815 AB,** KU   33,ADS  7030 AB,CSI+18  2050  1",
             "YZ  18  3535,BD+18  2050,CCDM J08500+1752AB,WDS J08500+1752AB,IDS 08444+1815 AB,** KU   33,ADS  7030 AB,CSI+18  2050  1,otherids",
-            "NLTT 55385,HR  8729,Gaia DR3 2835207319109249920,BD+19  5036,PLX 5568.00,IRAS 22550+2030,NSV 14374,ROT  3341,LTT 16750,N30 5052,HD 217014,** RBR   21A,WDS J22575+2046A,PPM 114985,*  51 Peg,PLX 5568,YPAC 218,HIP 113357,UBV M  26734,UBV   19678,YZ   0  1227,YZ  20  9382,Gaia DR2 2835207319109249920,TIC 139298196,uvby98 100217014,TD1 29480,SPOCS  990,SKY# 43603,AKARI-IRC-V1 J2257280+204608,GEN# +1.00217014,JP11  3558,GJ 882,SAO  90896,AG+20 2595,LSPM J2257+2046,TYC 1717-2193-1,ASCC  826013,2MASS J22572795+2046077,USNO-B1.0 1107-00589893,NAME Helvetios,WEB 20165,HIC 113357,GC 32003,GCRV 14411,CSV 102222",
-            "NLTT 55385,HR  8729,Gaia DR3 2835207319109249920,BD+19  5036,PLX 5568.00,IRAS 22550+2030,NSV 14374,ROT  3341,LTT 16750,N30 5052,HD 217014,** RBR   21A,WDS J22575+2046A,PPM 114985,*  51 Peg,PLX 5568,YPAC 218,HIP 113357,UBV M  26734,UBV   19678,YZ   0  1227,YZ  20  9382,Gaia DR2 2835207319109249920,TIC 139298196,uvby98 100217014,TD1 29480,SPOCS  990,SKY# 43603,AKARI-IRC-V1 J2257280+204608,GEN# +1.00217014,JP11  3558,GJ 882,SAO  90896,AG+20 2595,LSPM J2257+2046,TYC 1717-2193-1,ASCC  826013,2MASS J22572795+2046077,USNO-B1.0 1107-00589893,NAME Helvetios,WEB 20165,HIC 113357,GC 32003,GCRV 14411,CSV 102222,ids",
+            "NLTT 55385,HR  8729,Gaia DR3 2835207319109249920,BD+19  5036,CNS5 5664,PLX 5568.00,IRAS 22550+2030,NSV 14374,ROT  3341,LTT 16750,N30 5052,HD 217014,** RBR   21A,WDS J22575+2046A,PPM 114985,*  51 Peg,PLX 5568,YPAC 218,HIP 113357,UBV M  26734,UBV   19678,YZ   0  1227,YZ  20  9382,Gaia DR2 2835207319109249920,TIC 139298196,uvby98 100217014,TD1 29480,SPOCS  990,SKY# 43603,AKARI-IRC-V1 J2257280+204608,GEN# +1.00217014,JP11  3558,GJ 882,SAO  90896,AG+20 2595,LSPM J2257+2046,TYC 1717-2193-1,ASCC  826013,2MASS J22572795+2046077,USNO-B1.0 1107-00589893,NAME Helvetios,WEB 20165,HIC 113357,GC 32003,GCRV 14411,CSV 102222",
+            "NLTT 55385,HR  8729,Gaia DR3 2835207319109249920,BD+19  5036,PLX 5568.00,IRAS 22550+2030,NSV 14374,ROT  3341,LTT 16750,N30 5052,HD 217014,** RBR   21A,WDS J22575+2046A,PPM 114985,*  51 Peg,PLX 5568,YPAC 218,HIP 113357,UBV M  26734,UBV   19678,YZ   0  1227,YZ  20  9382,Gaia DR2 2835207319109249920,TIC 139298196,uvby98 100217014,TD1 29480,SPOCS  990,SKY# 43603,AKARI-IRC-V1 J2257280+204608,GEN# +1.00217014,JP11  3558,GJ 882,SAO  90896,AG+20 2595,LSPM J2257+2046,TYC 1717-2193-1,ASCC  826013,2MASS J22572795+2046077,USNO-B1.0 1107-00589893,NAME Helvetios,WEB 20165,HIC 113357,GC 32003,GCRV 14411,CSV 102222,CNS5 5664,ids",
             "unchanged id",
         ],
         "name": [
@@ -1390,32 +1390,22 @@ def test__polish_main_id(tmp_path, instance):
     assert os.path.exists("Logs/polish_main_id.txt")
     with open("Logs/polish_main_id.txt") as f:
         lines = f.readlines()
-    assert [
-        "***** CHECK FOR PLANET LETTER IN MAIN_ID *****\n",
-        "MAINID corrected NAME V672 Lyr b to V672 Lyr.\n",
-        "\n",
-        "***** CHECK FOR BINARY LETTER IN MAIN_ID *****\n",
-        "MAIN_ID: BD+18  2050B. Selected binary value: B. Value in catalog: \n",
-        "                name            host binary catalog\n",
-        "1  EPIC 211839430.01  EPIC 211839430           epic\n",
-        "MAINID corrected BD+18  2050B to BD+18  2050. Binary value: B. Binary could "
-        "be uniformed.\n",
-        "***\n",
-        "MAINID corrected BD+18  2050 B to BD+18  2050. Binary value: B. Already correct.\n",
-        "***\n",
-        "MAIN_ID: *  51 Peg (AB). Selected binary value: AB. Value in catalog: \n",
-        "       name    host  binary catalog\n",
-        "3  51 Peg b  51 Peg  S-type    nasa\n",
-        "MAINID corrected *  51 Peg (AB) to *  51 Peg. Binary value: AB. Binary could be uniformed.\n",
-        "***\n",
-        "MAIN_ID: * 51 PegAB. Selected binary value: AB. Value in catalog: \n",
-        "       name    host binary catalog\n",
-        "4  51 Peg b  51 Peg      B     oec\n",
-        "MAINID corrected * 51 PegAB to * 51 Peg. Binary value: AB. Binary value is not in agreement, please check.\n",
-        "***\n",
-        "Weird MAINID found: *  30 Ari B but cannot be found when *  30 Ari. \n",
-        "***\n",
-    ] == lines
+    assert  ['***** CHECK FOR PLANET LETTER IN MAIN_ID *****\n',
+        'MAINID can be corrected NAME V672 Lyr b to V672 Lyr. \n',
+        '\n',
+        '***** CHECK FOR BINARY LETTER IN MAIN_ID *****\n',
+        'MAINID can be corrected BD+18  2050B to BD+18  2050.  Binary value: B. Only '
+        'S-type or null. Binary could be standardized.\n',
+        'MAINID can be corrected BD+18  2050 B to BD+18  2050.  Binary value: B. '
+        'Already correct.\n',
+        'MAINID can be corrected *  51 Peg (AB) to *  51 Peg.  Binary value: AB. Only '
+        'S-type or null. Binary could be standardized.\n',
+        'MAINID can be corrected * 51 PegAB to * 51 Peg.  Binary value: AB. Binary '
+        'value is not in agreement, please check:\n',
+        '       name    host binary catalog\n',
+        '4  51 Peg b  51 Peg      B     oec\n',
+        'Weird MAINID found: *  30 Ari B but cannot be found when *  30 Ari. No '
+        'replacement performed.\n'] == lines
 
     os.chdir(original_dir)
 
@@ -1563,14 +1553,14 @@ def test__group_by_list_id_check_main_id(tmp_path, instance):
             "NSV 14374,PLX 5568,PLX 5568.00,PPM 114985,ROT  3341,SAO  90896,SKY# 43603,SPOCS  990,TD1 29480,"
             "TIC 139298196,TYC 1717-2193-1,UBV M  26734,UBV   19678,USNO-B1.0 1107-00589893,uvby98 100217014,"
             "WDS J22575+2046A,WEB 20165,YPAC 218,YZ   0  1227,YZ  20  9382,Gaia DR3 2835207319109249920,"
-            "Gaia DR2 2835207319109249920",
+            "Gaia DR2 2835207319109249920,CNS5 5664",
             "LTT 16750,*  51 Peg,** RBR   21A,AG+20 2595,AKARI-IRC-V1 J2257280+204608,ASCC  826013,BD+19  5036,"
             "CSV 102222,GC 32003,GCRV 14411,GEN# +1.00217014,GJ   882,HD 217014,HIC 113357,HIP 113357,HR  8729,"
             "IRAS 22550+2030,JP11  3558,LSPM J2257+2046,2MASS J22572795+2046077,N30 5052,NAME Helvetios,NLTT 55385,"
             "NSV 14374,PLX 5568,PLX 5568.00,PPM 114985,ROT  3341,SAO  90896,SKY# 43603,SPOCS  990,TD1 29480,"
             "TIC 139298196,TYC 1717-2193-1,UBV M  26734,UBV   19678,USNO-B1.0 1107-00589893,uvby98 100217014,"
             "WDS J22575+2046A,WEB 20165,YPAC 218,YZ   0  1227,YZ  20  9382,Gaia DR3 2835207319109249920,"
-            "Gaia DR2 2835207319109249920",
+            "Gaia DR2 2835207319109249920,CNS5 5664",
         ],
     }
 
@@ -3189,10 +3179,10 @@ def test__fill_row_update(instance, tmp_path):
     # CASE: no other exomercats available
 
     instance.data = compar_data.copy()
-    instance.fill_row_update(local_date="01-01-2020")
+    instance.fill_row_update(local_date="2020-01-01")
     assert "row_update" in instance.data.columns
-    assert instance.data.loc[0, "row_update"] == "01-01-2020"
-    assert instance.data.loc[1, "row_update"] == "01-01-2020"
+    assert instance.data.loc[0, "row_update"] == "2020-01-01"
+    assert instance.data.loc[1, "row_update"] == "2020-01-01"
 
     # CASE: Data has changed
 
@@ -3210,12 +3200,12 @@ def test__fill_row_update(instance, tmp_path):
         "mass_url": ["eu", "nasa"],
     }
     new_data = pd.DataFrame(new_data)
-    pd.DataFrame(compar_data).to_csv("Exo-MerCat/exo-mercat_full01-01-2020.csv")
+    pd.DataFrame(compar_data).to_csv("Exo-MerCat/exo-mercat_full2020-01-01.csv")
     instance.data = new_data.copy()
     instance.fill_row_update(local_date="")
     assert "row_update" in instance.data.columns
-    assert instance.data.loc[0, "row_update"] == "01-01-2020"
-    assert instance.data.loc[1, "row_update"] == date.today().strftime("%m-%d-%Y")
+    assert instance.data.loc[0, "row_update"] == "2020-01-01"
+    assert instance.data.loc[1, "row_update"] == date.today().strftime("%Y-%m-%d")
     os.chdir(original_dir)
 
 
@@ -3424,14 +3414,14 @@ def test_remove_known_brown_dwarfs(tmp_path, instance):
 
     with open("Exo-MerCat/exo_mercat_brown_dwarfs.csv", "r") as file:
         f = file.readlines()
-    assert "1,Planet2,25.0,25.0,BD\n" in f
+    assert "Planet2,25.0,25.0,BD\n" in f
 
     instance.data = df
-    local_date = "01-01-2023"
+    local_date = "2023-01-01"
     instance.remove_known_brown_dwarfs(local_date, print_flag=True)
-    with open("Exo-MerCat/exo_mercat_brown_dwarfs01-01-2023.csv", "r") as file:
+    with open("Exo-MerCat/exo_mercat_brown_dwarfs2023-01-01.csv", "r") as file:
         f = file.readlines()
-    assert "1,Planet2,25.0,25.0,BD\n" in f
+    assert "Planet2,25.0,25.0,BD\n" in f
 
     os.chdir(original_dir)
 
@@ -3453,9 +3443,9 @@ def test_save_catalog(instance, tmp_path):
     expected_output = """name,host,alias\nKOI-1,Kepler-1,KOI-1\nKOI-2,Kepler-2,Kepler-2 b\nKOI-3,Kepler-3,KOI-3\n"""
 
     instance.data = data
-    local_date = "02-04-2023"
+    local_date = "2023-02-04"
     # Temporary in-memory file for testing
-    temp_file1 = "Exo-MerCat/exo-mercat_full02-04-2023.csv"
+    temp_file1 = "Exo-MerCat/exo-mercat_full2023-02-04.csv"
     temp_file2 = "Exo-MerCat/exo-mercat_full.csv"
     # Call the function with the sample input data and temporary file
     instance.save_catalog(local_date, "_full")
@@ -3473,7 +3463,7 @@ def test_save_catalog(instance, tmp_path):
 
     local_date = ""  # today
     # Temporary in-memory file for testing
-    temp_file1 = "Exo-MerCat/exo-mercat" + date.today().strftime("%m-%d-%Y") + ".csv"
+    temp_file1 = "Exo-MerCat/exo-mercat" + date.today().strftime("%Y-%m-%d") + ".csv"
     temp_file2 = "Exo-MerCat/exo-mercat.csv"
     # Call the function with the sample input data and temporary file
     instance.save_catalog(local_date, "")

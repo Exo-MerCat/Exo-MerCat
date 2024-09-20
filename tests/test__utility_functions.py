@@ -33,7 +33,7 @@ def test__service_files_initialization(instance, tmp_path):
     # Assert that the folders are created
     assert os.path.exists("Exo-MerCat")
     assert os.path.exists("InputSources")
-    assert os.path.exists("UniformSources")
+    assert os.path.exists("StandardizedSources")
     assert os.path.exists("Logs")
 
     # Create some dummy files in the Logs folder
@@ -309,8 +309,8 @@ def test__read_config_replacements(instance, tmp_path):
         ("WASP-184 b", "WASP-184 b"),
     ],
 )
-def test__uniform_string(instance, string, expected):
-    assert instance.uniform_string(string) == expected
+def test__standardize_string(instance, string, expected):
+    assert instance.standardize_string(string) == expected
 
 
 def test__calculate_working_p_sma(instance):
@@ -736,7 +736,7 @@ def test__perform_query(instance):
                 "15751|NLTT 48138|PPM  37673|ROT  2840|SAO  31899|SKY# 36807|SPOCS  855|UBV   16780|UBV M  24082|USNO "
                 "890|YZ  50  6150|Gaia DR2 2135550755683407232|LSPM J1941+5031E|WDS J19418+5032B|AKARI-IRC-V1 "
                 "J1941518+503102|** STF 4046B|WISEA J194151.82+503102.2|Gaia DR1 2135550854464294784|WEB 17005|KIC "
-                "12069449",
+                "12069449|CNS5 4878",
                 "HIP 80351|Gaia DR3 4439556480967874432|TIC 369080491|SBC9 901|*  21 Her|* o Her|AG+07 2044|BD+07  "
                 "3164|FK5 1429|GC 22058|GCRV  9437|GEN# +1.00147869|GSC 00381-01598|HD 147869|HIC  80351|HR  6111|N30 "
                 "3675|PMC 90-93  1008|PPM 162584|SAO 121568|SBC7   573|SKY# 29573|TD1 19139|TYC  381-1598-1|UBV   "
@@ -789,7 +789,7 @@ def test__perform_query(instance):
                 "+1.00019994|IDS 03077-0134 A|Gaia DR2 3265335443260522112|TYC 4708-1423-1|IRAS "
                 "03102-0122|AKARI-IRC-V1 J0312465-011146|CSI-01   457  3|[RHG95]   572|UCAC3 178-9414|UCAC4 "
                 "445-004277|2MASS J03124644-0111458|CSI-01   457  2|WISEA J031246.58-011146.4|uvby98 100019994|WEB  "
-                "2887",
+                "2887|CNS5 807",
                 "LAMOST J193832.60+460359.1|LAMOST J193832.62+460359.1|LAMOST J193832.61+460359.1|Gaia DR3 "
                 "2080063931448749824|ATO J294.6359+46.0664|TIC 271164763|GSC 03556-03568|UCAC3 273-158867|2MASS "
                 "J19383260+4603591|USNO-B1.0 1360-00318562|GSC2 N0303123803|GSC2.3 N2JF000803|TYC 3556-3568-1|ASAS "
@@ -856,7 +856,7 @@ def test__perform_query(instance):
                 "15751|NLTT 48138|PPM  37673|ROT  2840|SAO  31899|SKY# 36807|SPOCS  855|UBV   16780|UBV M  24082|USNO "
                 "890|YZ  50  6150|Gaia DR2 2135550755683407232|LSPM J1941+5031E|WDS J19418+5032B|AKARI-IRC-V1 "
                 "J1941518+503102|** STF 4046B|WISEA J194151.82+503102.2|Gaia DR1 2135550854464294784|WEB 17005|KIC "
-                "12069449",
+                "12069449|CNS5 4878",
             ],
             "angsep": [0.0],
         }

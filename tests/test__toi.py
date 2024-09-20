@@ -15,7 +15,7 @@ def test__init(instance):
     assert instance.name is "toi"
 
 
-def test__uniform_catalog(instance):
+def test__standardize_catalog(instance):
     data = {
         "tid": [146589986, 149601557],
         "toi": [1032.01, 1033.01],
@@ -38,8 +38,8 @@ def test__uniform_catalog(instance):
     instance.data = data
 
     with LogCapture() as log:
-        instance.uniform_catalog()
-        assert "Catalog uniformed" in log.actual()[-1][-1]
+        instance.standardize_catalog()
+        assert "Catalog standardized" in log.actual()[-1][-1]
 
     expected_result = {
         "tid": [146589986, 149601557],
@@ -191,7 +191,7 @@ def test__handle_reference_format(instance):
     instance.data = df
     with LogCapture() as log:
         instance.handle_reference_format()
-        assert "Reference columns uniformed" in log.actual()[0][-1]
+        assert "Reference columns standardized" in log.actual()[0][-1]
     assert list(instance.data.columns) == [
         "name",
         "e",

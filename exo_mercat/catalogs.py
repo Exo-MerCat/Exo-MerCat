@@ -2,10 +2,9 @@ import glob
 import logging
 import os
 import re
-from datetime import date
+from datetime import date,datetime
 from pathlib import Path
 from typing import Union
-
 import numpy as np
 import pandas as pd
 import requests
@@ -67,7 +66,7 @@ class Catalog:
             else:
                 logging.info("Reading specific version: " + local_date)
         else:
-            file_path_str = filename + date.today().strftime("%m-%d-%Y") + ".csv"
+            file_path_str = filename + date.today().strftime("%Y-%m-%d") + ".csv"
 
         # Case 3: File already exists
         if os.path.exists(file_path_str):
@@ -78,7 +77,8 @@ class Catalog:
                 result = requests.get(url, timeout=timeout)
                 with open(file_path_str, "wb") as f:
                     f.write(result.content)
-
+                # try opening the catalog
+                dat=pd.read_csv(file_path_str)
             except (
                 OSError,
                 IOError,
@@ -92,10 +92,23 @@ class Catalog:
                 requests.exceptions.Timeout,
                 requests.exceptions.ConnectTimeout,
                 requests.exceptions.HTTPError,
+                pd.errors.ParserError #file downloaded but corrupted
             ):
+                # if the file that was downloaded is corrupted, eliminate file
+                if len(glob.glob(file_path_str))>0:
+                    logging.warning('File '+file_path_str+' downloaded, but corrupted. Removing file...')
+                    os.system('rm '+file_path_str)
                 # Case 5: Download failed, try local copy
                 if len(glob.glob(filename + "*.csv")) > 0:
-                    file_path_str = glob.glob(filename + "*.csv")[0]
+                    li = list(glob.glob(filename + "*.csv"))
+                    li = [re.search(r"\d\d\d\d-\d\d-\d\d", l)[0] for l in li]
+                    li = [datetime.strptime(l, "%Y-%m-%d") for l in li]
+                    # get the most recent compared to the current date. Get only the ones earlier than the date
+                    local_date_datetime=datetime.strptime(re.search(r"\d\d\d\d-\d\d-\d\d", file_path_str)[0], "%Y-%m-%d")
+                    li = [l for l in li if l <local_date_datetime]
+                    compar_date = max(li).strftime("%Y-%m-%d")
+                    file_path_str = filename + compar_date + ".csv"
+
 
                     logging.warning(
                         "Error fetching the catalog, taking a local copy: %s",
@@ -373,7 +386,7 @@ class Catalog:
         """
         raise NotImplementedError
 
-    def uniform_catalog(self) -> None:
+    def standardize_catalog(self) -> None:
         """
         Standardize the dataframe columns and values.
 
@@ -426,19 +439,48 @@ class Catalog:
             self.data[c] = self.data[c].abs()
         logging.info("Made all errors absolute values.")
 
-    def uniform_name_host_letter(self) -> None:
+    def remove_impossible_values(self) -> None:
         """
-        This function uniformizes the 'name', 'host', and 'letter' columns in the data.
+        :param self: An instance of class Catalog
+        :type self: Catalog
+        :return: None
+        :rtype: None
 
-        It processes the 'name' and 'host' columns by applying a uniform string function,
+        """
+        for c in [
+                "p",
+                "a",
+                "e",
+                "i",
+                "r",
+                "msini",
+                "mass",
+            ]:
+            self.data.loc[self.data[c]<0,c]=np.nan
+            self.data.loc[self.data[c] < 0, c+'_min'] = np.nan
+            self.data.loc[self.data[c] < 0, c+'_max'] = np.nan
+
+        #impossible value: eccentricity greater than 1
+        self.data.loc[self.data['e'] >1, 'e'] = np.nan
+        self.data.loc[self.data['e'] >1, 'e_min'] = np.nan
+        self.data.loc[self.data['e'] >1, 'e_max'] = np.nan
+
+        logging.info("Removed impossible values of parameters.")
+
+
+    def standardize_name_host_letter(self) -> None:
+        """
+        This function standardizes the 'name', 'host', and 'letter' columns in the data.
+
+        It processes the 'name' and 'host' columns by applying a standardized string function,
         filling empty host values with the name, stripping certain characters from host identifiers,
-        and cleaning the host column with the uniform_string function.
+        and cleaning the host column with the standardize_string function.
 
         It also refines the 'alias' column by removing specific characters and transforming the values.
 
         Lastly, it assigns the 'letter' column based on certain conditions from the 'name' column.
 
-        The function concludes by logging the completion of the uniformization process.
+        The function concludes by logging the completion of the standardization process.
 
         :param self: An instance of class Catalog
         :type self: Catalog
@@ -446,10 +488,10 @@ class Catalog:
         :rtype: None
         """
 
-        # uniformize name
-        self.data["name"] = self.data.name.apply(lambda x: Utils.uniform_string(x))
+        # standardize name
+        self.data["name"] = self.data.name.apply(lambda x: Utils.standardize_string(x))
         ind = self.data[self.data.host == ""].index
-        # uniformize host
+        # standardize host
         self.data["host"] = self.data.host.replace("", np.nan).fillna(self.data.name)
 
         for identifier in self.data.loc[ind, "host"]:
@@ -463,7 +505,7 @@ class Catalog:
                 self.data.loc[self.data.host == identifier, "host"] = identifier[
                     :-1
                 ].strip()
-        self.data["host"] = self.data.host.apply(lambda x: Utils.uniform_string(x))
+        self.data["host"] = self.data.host.apply(lambda x: Utils.standardize_string(x))
 
         for i in self.data.index:
             polished_alias = ""
@@ -479,11 +521,11 @@ class Catalog:
                     polished_alias = (
                         polished_alias
                         + ","
-                        + Utils.uniform_string(al.lstrip().rstrip())
+                        + Utils.standardize_string(al.lstrip().rstrip())
                     )
             self.data.at[i, "alias"] = polished_alias.lstrip(",")
 
-        # uniformize letter
+        # standardize letter
         for identifier in self.data.name:
             if not str(re.search("(\\.0)\\d$", identifier, re.M)) == "None":
                 self.data.loc[self.data.name == identifier, "letter"] = identifier[-3:]
@@ -491,7 +533,7 @@ class Catalog:
             else:
                 self.data.loc[self.data.name == identifier, "letter"] = identifier[-1:]
 
-        logging.info("name, host, letter columns uniformed.")
+        logging.info("name, host, letter columns standardized.")
 
     def assign_status(self) -> None:
         """
@@ -585,7 +627,7 @@ class Catalog:
                 for internal_alias in sub.alias:
                     for internal_al in internal_alias.split(","):
                         internal_al = (
-                            Utils.uniform_string(internal_al)
+                            Utils.standardize_string(internal_al)
                             .replace(" b", "")
                             .replace(" c", "")
                             .replace(" d", "")
@@ -731,9 +773,9 @@ class Catalog:
         self.data[string] = self.data.catalog + ": " + self.data.status.fillna("")
         logging.info(string + " column created.")
 
-    def make_uniform_alias_list(self) -> None:
+    def make_standardized_alias_list(self) -> None:
         """
-        The make_uniform_alias_list function takes in a dataframe and returns a list of aliases for each host. The
+        The make_standardized_alias_list function takes in a dataframe and returns a list of aliases for each host. The
         function first groups the data by host, then creates a set of all the aliases associated with that host. The
         set is filtered to remove any None or NaN values, as well as removing the host name from this list. Finally,
         it iterates through each row in the groupby object and sets its alias value equal to this new list.
@@ -750,9 +792,9 @@ class Catalog:
                 if al not in [np.nan, "NaN", "nan"]:
                     final_alias = final_alias + "," + al
             self.data.loc[self.data.host == host, "alias"] = ",".join(
-                [Utils.uniform_string(x) for x in set(final_alias.split(",")) if x]
+                [Utils.standardize_string(x) for x in set(final_alias.split(",")) if x]
             )
-        logging.info("Lists of aliases uniformed.")
+        logging.info("Lists of aliases standardized.")
 
     def convert_coordinates(self) -> None:
         """

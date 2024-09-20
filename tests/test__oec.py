@@ -302,8 +302,8 @@ def test__download_catalog(tmp_path, instance) -> None:
     os.remove(expected_file_path_xml)
     #
     # CASE 3: use today's value
-    expected_file_path = filename + date.today().strftime("%m-%d-%Y.csv")
-    expected_file_path_xml = filename + date.today().strftime("%m-%d-%Y.xml.gz")
+    expected_file_path = filename + date.today().strftime("%Y-%m-%d.csv")
+    expected_file_path_xml = filename + date.today().strftime("%Y-%m-%d.xml.gz")
     open(expected_file_path, "w").close()
     open(expected_file_path_xml, "w").close()
 
@@ -367,7 +367,7 @@ def test__download_catalog(tmp_path, instance) -> None:
     os.chdir(original_dir)
 
 
-def test__uniform_catalog(instance):
+def test__standardize_catalog(instance):
     # Create a sample DataFrame with some additional columns
     data = {
         "alias": [
@@ -447,8 +447,8 @@ def test__uniform_catalog(instance):
     df = pd.DataFrame(data)
     instance.data = df
     with LogCapture() as log:
-        instance.uniform_catalog()
-        assert "Catalog uniformed" in log.actual()[0][-1]
+        instance.standardize_catalog()
+        assert "Catalog standardized" in log.actual()[0][-1]
 
     assert instance.data.at[0, "catalog"] == "oec"
     assert instance.data.at[0, "catalog_name"] == "11 UMi b"
@@ -491,7 +491,7 @@ def test__uniform_catalog(instance):
     }
     df = pd.DataFrame(data)
     instance.data = df
-    instance.uniform_catalog()
+    instance.standardize_catalog()
 
     assert instance.data.at[0, "host"] == "KOI-123"
     assert instance.data.at[1, "host"] == "Planet"
@@ -554,7 +554,7 @@ def test__handle_reference_format(instance):
     instance.data = df
     with LogCapture() as log:
         instance.handle_reference_format()
-        assert "Reference columns uniformed" in log.actual()[0][-1]
+        assert "Reference columns standardized" in log.actual()[0][-1]
     assert list(instance.data.columns) == [
         "name",
         "e",

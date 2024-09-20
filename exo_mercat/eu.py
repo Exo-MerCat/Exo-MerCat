@@ -21,7 +21,7 @@ class Eu(Catalog):
         super().__init__()
         self.name = "eu"
 
-    def uniform_catalog(self) -> None:
+    def standardize_catalog(self) -> None:
         """
         This function processes raw data from a catalog. It standardizes the data format, renames columns,
         adds new columns like aliases, discovery methods, and references. Finally, it performs some string
@@ -88,7 +88,7 @@ class Eu(Catalog):
         for i in self.data.index:
             alias_polished = ""
             for al in self.data.at[i, "alias"].split(","):
-                al = Utils.uniform_string(al)
+                al = Utils.standardize_string(al)
                 alias_polished = alias_polished + "," + al.rstrip().lstrip()
 
             self.data.at[i, "alias"] = alias_polished.lstrip(",")
@@ -97,7 +97,7 @@ class Eu(Catalog):
         self.data = Utils.convert_discovery_methods(self.data)
 
         # Logging
-        logging.info("Catalog uniformed.")
+        logging.info("Catalog standardized.")
 
     def remove_theoretical_masses(self) -> None:
         """
@@ -173,7 +173,7 @@ class Eu(Catalog):
             self.data[item + "_url"] = self.data[item].apply(
                 lambda x: "" if pd.isna(x) or np.isinf(x) else "eu"
             )
-        logging.info("Reference columns uniformed.")
+        logging.info("Reference columns standardized.")
 
     def convert_coordinates(self) -> None:
         """

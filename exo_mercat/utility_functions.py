@@ -31,7 +31,7 @@ class UtilityFunctions:
     @staticmethod
     def service_files_initialization() -> None:
         """
-        Creates the `Exo-MerCat`, `InputSources`, `UniformedSources`, and `Logs` folders if they do not exist,
+        Creates the `Exo-MerCat`, `InputSources`, `StandardizedSources`, and `Logs` folders if they do not exist,
         and deletes all files in the `Logs` folder.
 
         :return: None
@@ -45,9 +45,9 @@ class UtilityFunctions:
         if not os.path.exists("InputSources/"):
             os.makedirs("InputSources")
 
-        # Create UniformSources folder if it does not exist
-        if not os.path.exists("UniformSources/"):
-            os.makedirs("UniformSources")
+        # Create StandardizedSources folder if it does not exist
+        if not os.path.exists("StandardizedSources/"):
+            os.makedirs("StandardizedSources")
 
         # Create Logs folder if it does not exist and remove all files
         if not os.path.exists("Logs/"):
@@ -269,14 +269,14 @@ class UtilityFunctions:
         return config_replace
 
     @staticmethod
-    def uniform_string(name: str) -> str:
+    def standardize_string(name: str) -> str:
         """
-        The uniform_string function takes a string as input and returns the same string with some common formatting
+        The standardize_string function takes a string as input and returns the same string with some common formatting
         errors corrected. The function is used to correct for inconsistencies in the naming of exoplanets, which can be
         caused by different sources using different naming conventions.
 
-        :param name: Specify the string to uniform
-        :return: The uniformed string
+        :param name: Specify the string to standardize
+        :return: The standardized string
         """
         name = name.replace("'", "").replace('"', "")
         if "K0" in name[:2]:

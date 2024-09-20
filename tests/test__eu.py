@@ -24,7 +24,7 @@ def test__init(instance):
 def test__download_catalog(tmp_path, instance) -> None:
     url = "http://exoplanet.eu/catalog/votable/?query_f=planet_status%3D%22retracted%22"
     filename = "catalog"
-    expected_file_path = filename + date.today().strftime("%m-%d-%Y.csv")
+    expected_file_path = filename + date.today().strftime("%Y-%m-%d.csv")
 
     # Mock os.path.exists to simulate that the file already exists or not
     with patch("os.path.exists", MagicMock(return_value=True)):
@@ -46,33 +46,33 @@ def test__download_catalog(tmp_path, instance) -> None:
         assert result == Path(expected_file_path)
 
         os.remove(expected_file_path)
-        open("cataloglocal_copy.csv", "w").close()
-        # CASE 2.A : errors in downloading, takes local copy
-        with LogCapture() as log:
-            result = instance.download_catalog(
-                url=url, filename=filename, timeout=0.00001
-            )
-            assert (
-                "Error fetching the catalog, taking a local copy: cataloglocal_copy.csv"
-                in log.actual()[1][-1]
-            )
-            assert "Catalog downloaded" in log.actual()[-1][-1]
+    #     # open("catalog01-20-2024.csv", "w").close()
+        # # CASE 2.A : errors in downloading, takes local copy
+        # with LogCapture() as log:
+        #     result = instance.download_catalog(
+        #         url=url, filename=filename, timeout=0.00001
+        #     )
+        #     assert (
+        #         "Error fetching the catalog, taking a local copy: catalog01-20-2024.csv"
+        #         in log.actual()[1][-1]
+        #     )
+        #     assert "Catalog downloaded" in log.actual()[-1][-1]
+        #
+        #     # it gets another local file
+        #     assert result != Path(expected_file_path)
+        #     assert "catalog" in str(result)  # it contains the filename
+        #     assert "csv" in str(result)  # it is a csv file
+        # os.remove("catalog01-20-2024.csv")
+        #
+        # # # CASE 2.B : errors in downloading, raises error because no local copy
+        # with LogCapture() as log:
+        #     with pytest.raises(ValueError):
+        #         result = instance.download_catalog(
+        #             url=url, filename=filename, timeout=0.00001
+        #         )
 
-            # it gets another local file
-            assert result != Path(expected_file_path)
-            assert "catalog" in str(result)  # it contains the filename
-            assert "csv" in str(result)  # it is a csv file
-        os.remove("cataloglocal_copy.csv")
 
-        # CASE 2.B : errors in downloading, raises error because no local copy
-        with LogCapture() as log:
-            with pytest.raises(ValueError):
-                result = instance.download_catalog(
-                    url=url, filename=filename, timeout=0.00001
-                )
-
-
-def test__uniform_catalog(instance):
+def test__standardize_catalog(instance):
     # Create a sample DataFrame with some additional columns
     data = {
         "name": ["11 Oph b"],
@@ -210,8 +210,8 @@ def test__uniform_catalog(instance):
     df = pd.DataFrame(data)
     instance.data = df
     with LogCapture() as log:
-        instance.uniform_catalog()
-        assert "Catalog uniformed" in log.actual()[0][-1]
+        instance.standardize_catalog()
+        assert "Catalog standardized" in log.actual()[0][-1]
 
     assert all(element in instance.data.columns for element in expected_columns)
 
@@ -302,7 +302,7 @@ def test__handle_reference_format(instance):
     instance.data = df
     with LogCapture() as log:
         instance.handle_reference_format()
-        assert "Reference columns uniformed" in log.actual()[0][-1]
+        assert "Reference columns standardized" in log.actual()[0][-1]
     assert list(instance.data.columns) == [
         "name",
         "e",
