@@ -7,7 +7,7 @@ import pytest
 from pandas._testing import assert_frame_equal
 from testfixtures import LogCapture
 import socket
-from exo_mercat.emc import Emc
+from exomercat.emc import Emc
 
 
 @pytest.fixture

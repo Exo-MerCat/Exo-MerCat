@@ -1,0 +1,28 @@
+[project]
+name = "Exo-MerCat"
+version = "2.0.0"
+authors = [
+  { name="Eleonora Alei", email="eleonora.alei.phd@gmail.com" },
+  { name="Andrea Bignmaini", email="andrea.bignamini@inaf.it"},
+  { name="Marco Molinaro", email="marco.molinaro@inaf.it"},
+  { name="Riccardo Claudi", email="riccardo.claudi@inaf.it"}
+]
+description = "A small example package"
+readme = "README.md"
+requires-python = ">=3.8"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+Homepage = "https://github.com/Exo-MerCat/Exo-MerCat"
+Issues = "https://github.com/Exo-MerCat/Exo-MerCat/issues"
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project.scripts]
+exomercat = "exomercat.cli:main"

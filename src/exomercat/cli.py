@@ -6,47 +6,60 @@ Created on Mon Oct  7 10:35:12 2019
 @author: eleonoraalei
 """
 
-from exo_mercat.nasa import Nasa
-from exo_mercat.eu import Eu
-from exo_mercat.oec import Oec
-from exo_mercat.epic import Epic
-from exo_mercat.emc import Emc
-from exo_mercat.koi import Koi
-from exo_mercat.toi import Toi
-from exo_mercat.utility_functions import UtilityFunctions as Utils
+from .nasa import Nasa
+from .eu import Eu
+from .oec import Oec
+from .epic import Epic
+from .emc import Emc
+from .koi import Koi
+from .toi import Toi
+from .utility_functions import UtilityFunctions as Utils
 import socket
 import warnings
 import pandas as pd
 import logging
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 
-# Parse command line arguments
-parser = ArgumentParser(formatter_class=ArgumentDefaultsHelpFormatter)
-parser.add_argument('function',help="specify function to be run (options: input, run, check)")           # positional argument
-parser.add_argument("-v", "--verbose", action="store_true", help="increase verbosity")
-parser.add_argument("-w", "--warnings", action="store_true", help="show UserWarnings")
-parser.add_argument(
-    "-l", "--local", action="store_false", help="load previously standardized catalogs"
-)
-parser.add_argument("-d", "--date", help="load a specific date (YYYY-MM-DD)")
-args = vars(parser.parse_args())
 
-if args["verbose"]:
-    logging.basicConfig(format="%(asctime)s: %(message)s", level=logging.INFO)
-if args["warnings"]:
-    warnings.filterwarnings("once")
-else:
-    warnings.filterwarnings("ignore")
-local_date = ""
-if args["date"]:
-    local_date = args["date"]
+def main():
+    # Parse command line arguments
+    parser = ArgumentParser(formatter_class=ArgumentDefaultsHelpFormatter)
+    parser.add_argument('function',help="specify function to be run (options: input, run, check)")           # positional argument
+    parser.add_argument("-v", "--verbose", action="store_true", help="increase verbosity")
+    parser.add_argument("-w", "--warnings", action="store_true", help="show UserWarnings")
+    parser.add_argument(
+        "-l", "--local", action="store_false", help="load previously standardized catalogs"
+    )
+    parser.add_argument("-d", "--date", help="load a specific date (YYYY-MM-DD)")
+    args = vars(parser.parse_args())
+    
+    if args["verbose"]:
+        logging.basicConfig(format="%(asctime)s: %(message)s", level=logging.INFO)
+    if args["warnings"]:
+        warnings.filterwarnings("once")
+    else:
+        warnings.filterwarnings("ignore")
+    local_date = ""
+    if args["date"]:
+        local_date = args["date"]
+
+    if args['function']=='input':
+        input(local_date)
+    if args['function']=='run':
+        run(local_date, args["verbose"])
+    if args['function']=='check':
+        check(local_date)
+    if args['function']=='all':
+        input(local_date)
+        run(local_date, args["verbose"])
+        check(local_date)
+    
+    
+    timeout = 100000
+    socket.setdefaulttimeout(timeout)
 
 
-timeout = 100000
-socket.setdefaulttimeout(timeout)
-
-
-def input():
+def input(local_date):
     """
     This function downloads and standardizes the files.
 
@@ -99,7 +112,7 @@ def input():
             cat.print_catalog("StandardizedSources/" + cat.name + local_date+".csv")
 
 
-def run():
+def run(local_date, verbose):
     '''This function runs the emc catalog'''
     emc = Emc()
 
@@ -132,7 +145,7 @@ def run():
 
     # Merging entries
     emc.group_by_period_check_letter()
-    emc.group_by_letter_check_period(verbose=args["verbose"])
+    emc.group_by_letter_check_period(verbose=verbose)
     emc.select_best_mass()
     emc.set_exo_mercat_name()
     emc.fill_row_update(local_date)
@@ -142,8 +155,7 @@ def run():
     emc.save_catalog(local_date, "")
 
 
-def check():
-    import ipdb;ipdb.set_trace()
+def check(local_date):
 
     error_string = ""
     emc = pd.read_csv("Exo-MerCat/exo-mercat_full"+local_date+".csv")
@@ -393,13 +405,4 @@ def check():
 
 
 if __name__ == "__main__":
-    if args['function']=='input':
-        input()
-    if args['function']=='run':
-        run()
-    if args['function']=='check':
-        check()
-    if args['function']=='all':
-        input()
-        run()
-        check()
+    main()

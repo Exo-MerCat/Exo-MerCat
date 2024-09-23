@@ -5,7 +5,7 @@ import pandas as pd
 import pyvo
 from astropy import constants as const
 
-from exo_mercat.catalogs import Catalog
+from .catalogs import Catalog
 
 tap_service = pyvo.dal.TAPService(" http://TAPVizieR.u-strasbg.fr/TAPVizieR/tap/")
 

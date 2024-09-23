@@ -8,7 +8,7 @@ import pandas as pd
 import pytest
 from testfixtures import LogCapture
 
-from exo_mercat.eu import Eu
+from exomercat.eu import Eu
 
 
 @pytest.fixture

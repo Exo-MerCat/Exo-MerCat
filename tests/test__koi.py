@@ -3,7 +3,7 @@ import pandas as pd
 import pytest
 from testfixtures import LogCapture
 
-from exo_mercat.koi import Koi
+from exomercat.koi import Koi
 
 
 @pytest.fixture

@@ -2,7 +2,7 @@ import logging
 import astropy.units as u
 import numpy as np
 from astropy.coordinates import SkyCoord
-from exo_mercat.catalogs import Catalog
+from .catalogs import Catalog
 
 
 class Koi(Catalog):

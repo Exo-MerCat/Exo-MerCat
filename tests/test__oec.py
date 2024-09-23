@@ -9,7 +9,7 @@ import pandas as pd
 import pytest
 from testfixtures import LogCapture
 
-from exo_mercat.oec import Oec
+from exomercat.oec import Oec
 
 
 def fill_xml_string():

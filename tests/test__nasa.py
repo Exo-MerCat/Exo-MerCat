@@ -3,7 +3,7 @@ import pandas as pd
 import pytest
 from testfixtures import LogCapture
 
-from exo_mercat.nasa import Nasa
+from exomercat.nasa import Nasa
 
 
 @pytest.fixture

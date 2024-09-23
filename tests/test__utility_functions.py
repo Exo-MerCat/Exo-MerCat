@@ -8,7 +8,7 @@ from pandas._testing import assert_frame_equal
 
 import pyvo
 from astropy.table import Table
-from exo_mercat.utility_functions import UtilityFunctions
+from exomercat.utility_functions import UtilityFunctions
 import pytest
 
 

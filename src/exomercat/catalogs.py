@@ -10,7 +10,7 @@ import pandas as pd
 import requests
 import unidecode
 
-from exo_mercat.utility_functions import UtilityFunctions as Utils
+from .utility_functions import UtilityFunctions as Utils
 
 
 class Catalog:

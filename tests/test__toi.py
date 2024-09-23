@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import pytest
 from testfixtures import LogCapture
-from exo_mercat.toi import Toi
+from exomercat.toi import Toi
 
 
 @pytest.fixture

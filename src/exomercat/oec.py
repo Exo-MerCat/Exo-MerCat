@@ -11,8 +11,8 @@ import pandas as pd
 import requests
 from astropy.coordinates import SkyCoord
 
-from exo_mercat.catalogs import Catalog
-from exo_mercat.utility_functions import UtilityFunctions as Utils
+from .catalogs import Catalog
+from .utility_functions import UtilityFunctions as Utils
 
 
 class Oec(Catalog):

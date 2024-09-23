@@ -3,7 +3,7 @@ import pandas as pd
 import pytest
 from testfixtures import LogCapture
 
-from exo_mercat.epic import Epic
+from exomercat.epic import Epic
 
 
 @pytest.fixture

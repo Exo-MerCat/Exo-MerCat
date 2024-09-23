@@ -8,7 +8,7 @@ import pandas as pd
 import pytest
 from testfixtures import LogCapture
 
-from exo_mercat.catalogs import Catalog
+from exomercat.catalogs import Catalog
 
 
 @pytest.fixture

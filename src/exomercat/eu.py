@@ -3,8 +3,8 @@ import logging
 import numpy as np
 import pandas as pd
 
-from exo_mercat.catalogs import Catalog
-from exo_mercat.utility_functions import UtilityFunctions as Utils
+from .catalogs import Catalog
+from .utility_functions import UtilityFunctions as Utils
 
 
 class Eu(Catalog):
@@ -109,18 +109,18 @@ class Eu(Catalog):
         :return: None
         :rtype: None
         """
-        for value in ["", "_min", "_max"]:
-            self.data.loc[
-                self.data["MASSPROV"].str.contains("Theoretical", na=False),
-                "mass" + value,
-            ] = np.nan
-            self.data.loc[
-                self.data["MASSPROV"].str.contains("Theoretical", na=False),
-                "msini" + value,
-            ] = np.nan
-            self.data.loc[
-                self.data["RADPROV"].str.contains("Theoretical", na=False), "r" + value
-            ] = np.nan
+        # for value in ["", "_min", "_max"]:
+        #     self.data.loc[
+        #         self.data["MASSPROV"].str.contains("Theoretical", na=False),
+        #         "mass" + value,
+        #     ] = np.nan
+        #     self.data.loc[
+        #         self.data["MASSPROV"].str.contains("Theoretical", na=False),
+        #         "msini" + value,
+        #     ] = np.nan
+        #     self.data.loc[
+        #         self.data["RADPROV"].str.contains("Theoretical", na=False), "r" + value
+        #     ] = np.nan
 
         # Logging
         logging.info("Theoretical masses/radii removed.")

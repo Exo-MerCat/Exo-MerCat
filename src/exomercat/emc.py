@@ -11,8 +11,8 @@ from astropy import units as u
 from astropy.coordinates import SkyCoord
 from astropy.table import Table
 import socket
-from exo_mercat.catalogs import Catalog
-from exo_mercat.utility_functions import UtilityFunctions as Utils
+from .catalogs import Catalog
+from .utility_functions import UtilityFunctions as Utils
 
 
 class Emc(Catalog):
