@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>Exo-MerCat: The Exoplanet Merged Catalog &#8212; Exo-MerCat 2.0</title>
+    <title>Exo-MerCat: The Exoplanet Merged Catalog &#8212; Exo-MerCat 2.0.0</title>
   
   
   
@@ -36,7 +36,7 @@
   <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
 <link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
 
-    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js?v=1aedeede"></script>
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js?v=a2b6fadd"></script>
     <script src="_static/doctools.js?v=888ff710"></script>
     <script src="_static/sphinx_highlight.js?v=4825356b"></script>
     <script src="_static/scripts/sphinx-book-theme.js?digest=5a5c038af52cf7bc1a1ec88eea08e6366ee68824"></script>
@@ -44,7 +44,7 @@
     <link rel="icon" href="_static/favicon.ico"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Usage" href="usage.html" />
+    <link rel="next" title="Run Exo-MerCat from TAP" href="run_tap.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -120,8 +120,8 @@
       
     
     
-    <img src="_static/Acquerello_scritta.png" class="logo__image only-light" alt="Exo-MerCat 2.0"/>
-    <script>document.write(`<img src="_static/Acquerello_scritta.png" class="logo__image only-dark" alt="Exo-MerCat 2.0"/>`);</script>
+    <img src="_static/Acquerello_scritta.png" class="logo__image only-light" alt="Exo-MerCat 2.0.0"/>
+    <script>document.write(`<img src="_static/Acquerello_scritta.png" class="logo__image only-dark" alt="Exo-MerCat 2.0.0"/>`);</script>
   
   
 </a></div>
@@ -129,10 +129,10 @@
     <div class="bd-toc-item navbar-nav active">
         <p aria-level="2" class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="run_tap.html">Run Exo-MerCat from TAP</a></li>
+<li class="toctree-l1"><a class="reference internal" href="run_locally.html">Run Exo-MerCat locally</a></li>
 <li class="toctree-l1"><a class="reference internal" href="classes.html">Classes</a></li>
 
-<li class="toctree-l1"><a class="reference internal" href="replacements.html">How to use the replacement.ini file</a></li>
 </ul>
 
     </div>
@@ -334,13 +334,20 @@ document.write(`
 <div class="toctree-wrapper compound">
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="run_tap.html">Run Exo-MerCat from TAP</a></li>
+<li class="toctree-l1"><a class="reference internal" href="run_locally.html">Run Exo-MerCat locally</a></li>
 <li class="toctree-l1"><a class="reference internal" href="classes.html">Classes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="classes.html#module-exo_mercat.utility_functions">Functions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="replacements.html">How to use the replacement.ini file</a></li>
+<li class="toctree-l1"><a class="reference internal" href="classes.html#module-src.exomercat.utility_functions">Functions</a></li>
 </ul>
 </div>
-<p>Exo-MerCat is a Python program designed to merge various exoplanet catalogs. Standardizing the data is crucial, as it involves comparing entries from different catalogs, a task that requires careful selection of software tools. One major challenge is identifying aliases and verifying host star coordinates due to discrepancies in notation across catalogs.</p>
+<p>Exo-MerCat is a Python software designed to generate a catalog of known and candidate exoplanets, where data is merged from various exoplanet catalogs.</p>
+<p>Exo-MerCat retrieves a common name for the planet target, linking its host star name with the preferred identifier in the most well-known stellar databases. This makes the merging of different input sources possible and it has allowed the release of a standardized catalog containing data from the major input catalogs used in the community: the <em>Exoplanets Encyclopaedia</em><a class="footnote-reference brackets" href="#id6" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a>, the <em>NASA Exoplanet Archive</em><a class="footnote-reference brackets" href="#id7" id="id2" role="doc-noteref"><span class="fn-bracket">[</span>2<span class="fn-bracket">]</span></a>, the <em>Open Exoplanet Catalogue</em><a class="footnote-reference brackets" href="#id8" id="id3" role="doc-noteref"><span class="fn-bracket">[</span>3<span class="fn-bracket">]</span></a>, the <em>TESS Objects of Interest Catalog</em><a class="footnote-reference brackets" href="#id9" id="id4" role="doc-noteref"><span class="fn-bracket">[</span>4<span class="fn-bracket">]</span></a> and the <em>EPIC/K2 Objects of Interest Catalog</em><a class="footnote-reference brackets" href="#id10" id="id5" role="doc-noteref"><span class="fn-bracket">[</span>5<span class="fn-bracket">]</span></a>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">{warning}</span>&#160;&#160;&#160;&#160; <span class="pre">Because</span> <span class="pre">of</span> <span class="pre">the</span> <span class="pre">nature</span> <span class="pre">of</span> <span class="pre">the</span> <span class="pre">merge,</span> <span class="pre">this</span> <span class="pre">catalog</span> <span class="pre">is</span> <span class="pre">not</span> <span class="pre">self-consistent</span> <span class="pre">(i.e.,</span> <span class="pre">all</span> <span class="pre">measurements</span> <span class="pre">for</span> <span class="pre">the</span> <span class="pre">same</span> <span class="pre">target</span> <span class="pre">don't</span> <span class="pre">belong</span> <span class="pre">to</span> <span class="pre">the</span> <span class="pre">same</span> <span class="pre">reference</span> <span class="pre">paper).</span>&#160;&#160;&#160;&#160;&#160; <span class="pre">Rather,</span> <span class="pre">it</span> <span class="pre">is</span> <span class="pre">a</span> <span class="pre">collection</span> <span class="pre">of</span> <span class="pre">the</span> <span class="pre">most</span> <span class="pre">precise</span> <span class="pre">estimates</span> <span class="pre">for</span> <span class="pre">each</span> <span class="pre">planetary</span> <span class="pre">parameter</span> <span class="pre">(mass,</span> <span class="pre">minimum</span> <span class="pre">mass,</span> <span class="pre">radius,</span> <span class="pre">period,</span> <span class="pre">semi-major</span> <span class="pre">axis,</span> <span class="pre">eccentricity,</span> <span class="pre">inclination),</span> <span class="pre">based</span> <span class="pre">on</span> <span class="pre">the</span> <span class="pre">lowest</span> <span class="pre">relative</span> <span class="pre">error,</span> <span class="pre">and</span> <span class="pre">the</span> <span class="pre">corresponding</span> <span class="pre">reference</span> <span class="pre">for</span> <span class="pre">each</span> <span class="pre">preferred</span> <span class="pre">estimate.</span>&#160; </code></p>
+<blockquote>
+<div><p>[!NOTE]
+Useful information that users should know, even when skimming content.</p>
+</div></blockquote>
+<p>Standardizing the data is crucial, as it involves comparing entries from different catalogs, a task that requires careful selection of software tools. One major challenge is identifying aliases and verifying host star coordinates due to discrepancies in notation across catalogs.</p>
 <p>The program includes a Graphical User Interface for catalog filtering and automatic plotting. Dependencies include the pandas package for flexible data manipulation and astropy for handling astronomical coordinates and parameters. Additional packages like astroquery and pyvo are used for accessing and retrieving data from various sources conforming to International Virtual Observatory Alliance standards.</p>
 <p>The software utilizes the Table Access Protocol and Astronomical Data Query Language for querying and filtering catalogs, enabling spatial cross-matching and custom manipulations.</p>
 <p>Datasets from different sources are retrieved using varied methods, such as wget for some catalogs like the Exoplanet Orbit Database and NASA Exoplanet Archive. Specific columns are selected during retrieval to minimize data download and ensure essential information is included.</p>
@@ -355,7 +362,30 @@ document.write(`
 <p>The latest version of the catalog is made available through a dedicated TAP service, with subsequent versions generated as workflow runs.</p>
 <p>In the performance evaluation section, the software’s performance is assessed by comparing the results of two merging runs: one without any preprocessing (referred to as “Simple”) and one with the full suite of functions applied (referred to as “EMC”). By comparing the two runs, improvements in the final catalog achieved by the software are analyzed.</p>
 <p>Overall, the software effectively standardizes and merges multiple catalogs, improving the consistency and accuracy of the resulting merged catalog.</p>
-<p>For further info, check out <a class="reference internal" href="usage.html"><span class="doc">Usage</span></a>. Read installation instructions in <a class="reference internal" href="usage.html#installation"><span class="std std-ref">Installation</span></a>.</p>
+<p>For further info, check out <a class="reference internal" href="run_tap.html"><span class="doc">Run Exo-MerCat from TAP</span></a>. Read installation instructions in <a class="reference internal" href="run_locally.html"><span class="doc">Run Exo-MerCat locally</span></a>.</p>
+<hr class="footnotes docutils" />
+<aside class="footnote-list brackets">
+<aside class="footnote brackets" id="id6" role="note">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">1</a><span class="fn-bracket">]</span></span>
+<p>http://exoplanet.eu/</p>
+</aside>
+<aside class="footnote brackets" id="id7" role="note">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id2">2</a><span class="fn-bracket">]</span></span>
+<p>https://exoplanetarchive.ipac.caltech.edu/</p>
+</aside>
+<aside class="footnote brackets" id="id8" role="note">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id3">3</a><span class="fn-bracket">]</span></span>
+<p>https://openexoplanetcatalogue.com/</p>
+</aside>
+<aside class="footnote brackets" id="id9" role="note">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id4">4</a><span class="fn-bracket">]</span></span>
+<p>tess</p>
+</aside>
+<aside class="footnote brackets" id="id10" role="note">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id5">5</a><span class="fn-bracket">]</span></span>
+<p>epic</p>
+</aside>
+</aside>
 </section>
 
 
@@ -371,11 +401,11 @@ document.write(`
     <div class="footer-article-item"><!-- Previous / next buttons -->
 <div class="prev-next-area">
     <a class="right-next"
-       href="usage.html"
+       href="run_tap.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Usage</p>
+        <p class="prev-next-title">Run Exo-MerCat from TAP</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>

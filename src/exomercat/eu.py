@@ -65,8 +65,8 @@ class Eu(Catalog):
                 "radius": "r",
                 "radius_error_max": "r_max",
                 "radius_error_min": "r_min",
-                "mass_detection_type": "MASSPROV",
-                "radius_detection_type": "RADPROV",
+                "mass_measurement_type": "MASSPROV",
+                "radius_measurement_type": "RADPROV",
                 "star_name": "host",
             }
         )

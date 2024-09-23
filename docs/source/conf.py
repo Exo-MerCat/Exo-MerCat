@@ -13,12 +13,15 @@ sys.path.insert(0, os.path.abspath(os.path.join("..", "..")))
 project = "Exo-MerCat"
 copyright = "2024, Alei et al"
 author = "Alei et al"
-release = "2.0"
+release = "2.0.0"
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
 extensions = [
+    'sphinx.ext.todo',
+    'sphinx.ext.ifconfig',
+    'sphinx.ext.githubpages',
     # 'sphinx.ext.napoleon',
     "sphinx.ext.autodoc",
     "sphinx_autodoc_typehints",
@@ -27,7 +30,7 @@ extensions = [
     #           'sphinx.ext.intersphinx',
     "sphinx.ext.duration",
     "sphinx.ext.autosectionlabel",
-    "sphinx_toolbox.collapse"
+    "sphinx_toolbox.collapse",
     # 'sphinx.ext.doctest',
     # # 'sphinx.ext.autodoc',
 ]
@@ -56,14 +59,14 @@ html_theme_options = {
     "logo": {
         # Because the logo is also a homepage link, including "home" in the
         # alt text is good practice
-        "alt_text": "Exo-MerCat 2.0",
+        "alt_text": "Exo-MerCat 2.0.0",
         "image_light": "_static/Acquerello_scritta.png",
         "image_dark": "_static/Acquerello_scritta.png",
     },
-    "show_nav_level": 2
+    "show_nav_level": 2,
 }
 html_logo = "_static/Acquerello_scritta.png"
-html_title = "Exo-MerCat 2.0"
+html_title = "Exo-MerCat 2.0.0"
 html_favicon = "_static/favicon.ico"
 
 html_static_path = ["_static"]
