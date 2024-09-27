@@ -487,6 +487,7 @@ class Emc(Catalog):
         :rtype: None
         """
         list_of_hosts = self.data[self.data.main_id == ""][[typed_id]].drop_duplicates()
+        #clean up non-ascii files
         list_of_hosts[typed_id] = list_of_hosts.loc[
             list_of_hosts[typed_id].str.findall(r"[^\x00-\x7F]+").str.len() == 0,
             typed_id,
@@ -2037,12 +2038,13 @@ class Emc(Catalog):
 
             # Print progress
             if verbose:
-                print(
-                    "Done "
-                    + str(round(counter / len(grouped_df), 2) * 100)
-                    + "% of the groups.",
-                    end="\r",
-                )
+                Utils.print_progress_bar(counter, len(grouped_df), prefix='Progress:', suffix='Complete')
+                # print(
+                #     "Done "
+                #     + str(round(counter / len(grouped_df), 2) * 100)
+                #     + "% of the groups.",
+                #     end="\r",
+                # )
             counter = counter + 1
         f1.close()
 
@@ -2206,7 +2208,7 @@ class Emc(Catalog):
 
     def remove_known_brown_dwarfs(
         self,
-        local_date: str == "",
+        local_date: str,
         print_flag: bool,
     ) -> None:
         """
@@ -2222,8 +2224,6 @@ class Emc(Catalog):
         :return: None
         :rtype: None
         """
-        if local_date == "":
-            local_date = date.today().strftime("$Y-%m-%d")
 
         if print_flag:
             self.data[
@@ -2277,10 +2277,9 @@ class Emc(Catalog):
         :return: None
         :rtype: None
         """
-        if local_date != "":
-            update_date = local_date
-        else:
-            update_date = date.today().strftime("%Y-%m-%d")
+        # whatever date it is, use it as update_date
+
+        update_date = local_date
 
         # find if there are older versions present
         if len(glob.glob("Exo-MerCat/exo-mercat*-*.csv")) > 0:
@@ -2328,14 +2327,14 @@ class Emc(Catalog):
         else:
             self.data["row_update"] = update_date
 
-    def save_catalog(self, local_date: str == "", postfix: str == "") -> None:
+    def save_catalog(self, local_date: str, postfix: str == "") -> None:
         """
         Saves the catalog to csv viles.
         It is saved to the 'Exo-MerCat' folder both as a exo-mercat.csv file and as a exo-mercat_MM-DD-YYYY.csv file.
 
         :param self: An instance of the class Emc
         :type self: Emc
-        :param local_date: The date to save the catalog (if provided by the user)
+        :param local_date: The date to save the catalog
         :type local_date: str
         :param postfix: The postfix to add to the filename
         :type postfix: str
@@ -2343,13 +2342,5 @@ class Emc(Catalog):
         :rtype: None
 
         """
-        if local_date == "":
-            self.print_catalog(
-                "Exo-MerCat/exo-mercat"
-                + postfix
-                + date.today().strftime("%Y-%m-%d")
-                + ".csv"
-            )
-        else:
-            self.print_catalog("Exo-MerCat/exo-mercat" + postfix + local_date + ".csv")
+        self.print_catalog("Exo-MerCat/exo-mercat" + postfix + local_date + ".csv")
         self.print_catalog("Exo-MerCat/exo-mercat" + postfix + ".csv")

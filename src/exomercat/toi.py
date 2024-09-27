@@ -6,6 +6,7 @@ import pyvo
 from astropy import constants as const
 
 from .catalogs import Catalog
+from .utility_functions import UtilityFunctions as Utils
 
 tap_service = pyvo.dal.TAPService(" http://TAPVizieR.u-strasbg.fr/TAPVizieR/tap/")
 
@@ -64,13 +65,14 @@ class Toi(Catalog):
                       WHERE  tic.TIC = """
                 + str(tid)
             )
+            Utils.print_progress_bar(counter, len(self.data.tid.unique()), prefix='Progress:', suffix='Complete')
 
-            print(
-                "Done "
-                + str(round(counter / len(self.data.tid.unique()), 2) * 100)
-                + "% of the groups.",
-                end="\r",
-            )
+            # print(
+            #     "Done "
+            #     + str(round(counter / len(self.data.tid.unique()), 2) * 100)
+            #     + "% of the groups.",
+            #     end="\r",
+            # )
             result = result.to_table().to_pandas()
             result = result.astype(str)
             result["UCAC4"] = "UCAC4 " + result["UCAC4"].replace("", "<NA>")

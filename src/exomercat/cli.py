@@ -19,6 +19,7 @@ import warnings
 import pandas as pd
 import logging
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
+from datetime import date,datetime
 
 
 def main():
@@ -26,22 +27,18 @@ def main():
     parser = ArgumentParser(formatter_class=ArgumentDefaultsHelpFormatter)
     parser.add_argument('function',help="specify function to be run (options: input, run, check)")           # positional argument
     parser.add_argument("-v", "--verbose", action="store_true", help="increase verbosity")
-    parser.add_argument("-w", "--warnings", action="store_true", help="show UserWarnings")
-    parser.add_argument(
-        "-l", "--local", action="store_false", help="load previously standardized catalogs"
-    )
     parser.add_argument("-d", "--date", help="load a specific date (YYYY-MM-DD)")
     args = vars(parser.parse_args())
     
     if args["verbose"]:
         logging.basicConfig(format="%(asctime)s: %(message)s", level=logging.INFO)
-    if args["warnings"]:
         warnings.filterwarnings("once")
-    else:
-        warnings.filterwarnings("ignore")
-    local_date = ""
+
+    # date: either a specific date, or today's date
     if args["date"]:
         local_date = args["date"]
+    else:
+        local_date = date.today().strftime("%Y-%m-%d")
 
     if args['function']=='input':
         input(local_date)
@@ -66,7 +63,6 @@ def input(local_date):
     """
     config_dict = Utils.read_config()
     Utils.service_files_initialization()
-
     for cat in [Koi()]:
             # Ingesting catalogs
             logging.info("****** " + cat.name + " ******")

@@ -6,6 +6,7 @@ import xml.etree.ElementTree as ElementTree
 from pathlib import Path
 from typing import Union
 import socket
+import sys
 
 import numpy as np
 import pandas as pd
@@ -653,6 +654,7 @@ class UtilityFunctions:
             table["angsep"] = 0.0  # default value
 
             table = table[table.main_id != ""]
+            table = table.applymap(lambda x: x.strip() if isinstance(x, str) else x)
 
             return table.reset_index(drop=True)
         else:
@@ -715,3 +717,14 @@ class UtilityFunctions:
         # Filter out unselected rows
         table = table[table.selected == 1]
         return table
+
+
+
+    @staticmethod
+    def print_progress_bar(iteration, total, prefix='', suffix='', length=50, fill='█'):
+        percent = ("{0:.1f}").format(100 * (iteration / float(total)))
+        filled_length = int(length * iteration // total)
+        bar = fill * filled_length + '-' * (length - filled_length)
+        sys.stdout.write(f'\r{prefix} |{bar}| {percent}% {suffix}')
+        sys.stdout.flush()  # Flush to ensure it prints out immediately
+

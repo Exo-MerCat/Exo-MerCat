@@ -32,8 +32,11 @@ extensions = [
     "sphinx.ext.autosectionlabel",
     "sphinx_toolbox.collapse",
     # 'sphinx.ext.doctest',
-    # # 'sphinx.ext.autodoc',
+    "sphinx_design"
 ]
+
+myst_enable_extensions = ["colon_fence"]
+
 autodoc_member_order = "bysource"
 
 autodoc_default_options = {

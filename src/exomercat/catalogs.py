@@ -33,7 +33,7 @@ class Catalog:
         self.name = "catalog"
 
     def download_catalog(
-        self, url: str, filename: str, local_date: str = "", timeout: float = None
+        self, url: str, filename: str, local_date: str , timeout: float = None
     ) -> Path:
         """
         Downloads a catalog from a given URL and saves it to a file. If no local file is found, it will download the
@@ -46,7 +46,7 @@ class Catalog:
         :type url: str
         :param filename: The name of the file to save the catalog to.
         :type filename: str
-        :param local_date: The date of the catalog to download. Default is an empty string.
+        :param local_date: The date of the catalog to download.
         :type local_date: str
         :param timeout: The maximum amount of time to wait for the download to complete. Default is None.
         :type timeout: float
@@ -54,9 +54,10 @@ class Catalog:
         :rtype: Path
         """
 
-        # If local_date is not empty, use that date, otherwise use today's date
-        if local_date != "":
-            file_path_str = filename + local_date + ".csv"
+        file_path_str = filename + local_date + ".csv"
+        # If local_date is not today, use that date, otherwise use today's date
+        if local_date != date.today().strftime("%Y-%m-%d"):
+
             # Case 1
             if len(glob.glob(file_path_str)) == 0:
                 raise ValueError(
@@ -65,8 +66,7 @@ class Catalog:
             # Case 2
             else:
                 logging.info("Reading specific version: " + local_date)
-        else:
-            file_path_str = filename + date.today().strftime("%Y-%m-%d") + ".csv"
+
 
         # Case 3: File already exists
         if os.path.exists(file_path_str):
