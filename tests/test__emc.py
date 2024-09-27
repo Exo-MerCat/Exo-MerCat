@@ -3202,7 +3202,7 @@ def test__fill_row_update(instance, tmp_path):
     new_data = pd.DataFrame(new_data)
     pd.DataFrame(compar_data).to_csv("Exo-MerCat/exo-mercat_full2020-01-01.csv")
     instance.data = new_data.copy()
-    instance.fill_row_update(local_date="")
+    instance.fill_row_update(local_date=date.today().strftime("%Y-%m-%d"))
     assert "row_update" in instance.data.columns
     assert instance.data.loc[0, "row_update"] == "2020-01-01"
     assert instance.data.loc[1, "row_update"] == date.today().strftime("%Y-%m-%d")
@@ -3461,7 +3461,7 @@ def test_save_catalog(instance, tmp_path):
     os.remove(temp_file1)
     os.remove(temp_file2)
 
-    local_date = ""  # today
+    local_date = date.today().strftime("%Y-%m-%d")  # today
     # Temporary in-memory file for testing
     temp_file1 = "Exo-MerCat/exo-mercat" + date.today().strftime("%Y-%m-%d") + ".csv"
     temp_file2 = "Exo-MerCat/exo-mercat.csv"
@@ -3477,4 +3477,4 @@ def test_save_catalog(instance, tmp_path):
     os.remove(temp_file1)
     os.remove(temp_file2)
 
-    os.chdir(original_dir)
+    # os.chdir(original_dir)

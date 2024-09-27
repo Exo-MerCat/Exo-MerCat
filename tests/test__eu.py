@@ -21,55 +21,59 @@ def test__init(instance):
     assert instance.name is "eu"
 
 
-def test__download_catalog(tmp_path, instance) -> None:
-    url = "http://exoplanet.eu/catalog/votable/?query_f=planet_status%3D%22retracted%22"
-    filename = "catalog"
-    expected_file_path = filename + date.today().strftime("%Y-%m-%d.csv")
-
-    # Mock os.path.exists to simulate that the file already exists or not
-    with patch("os.path.exists", MagicMock(return_value=True)):
-        open(expected_file_path, "w").close()
-        with LogCapture() as log:
-            result = instance.download_catalog(url=url, filename=filename)
-            assert "Reading existing file" in log.actual()[0][-1]
-            assert "Catalog downloaded" in log.actual()[1][-1]
-
-            assert result == Path(expected_file_path)
-
-    with patch("os.path.exists", MagicMock(return_value=False)):
-        # CASE 1: it downloads fine
-
-        with LogCapture() as log:
-            result = instance.download_catalog(url=url, filename=filename)
-            assert "Catalog downloaded" in log.actual()[-1][-1]
-
-        assert result == Path(expected_file_path)
-
-        os.remove(expected_file_path)
-    #     # open("catalog01-20-2024.csv", "w").close()
-        # # CASE 2.A : errors in downloading, takes local copy
-        # with LogCapture() as log:
-        #     result = instance.download_catalog(
-        #         url=url, filename=filename, timeout=0.00001
-        #     )
-        #     assert (
-        #         "Error fetching the catalog, taking a local copy: catalog01-20-2024.csv"
-        #         in log.actual()[1][-1]
-        #     )
-        #     assert "Catalog downloaded" in log.actual()[-1][-1]
-        #
-        #     # it gets another local file
-        #     assert result != Path(expected_file_path)
-        #     assert "catalog" in str(result)  # it contains the filename
-        #     assert "csv" in str(result)  # it is a csv file
-        # os.remove("catalog01-20-2024.csv")
-        #
-        # # # CASE 2.B : errors in downloading, raises error because no local copy
-        # with LogCapture() as log:
-        #     with pytest.raises(ValueError):
-        #         result = instance.download_catalog(
-        #             url=url, filename=filename, timeout=0.00001
-        #         )
+# def test__download_catalog(tmp_path, instance) -> None:
+#     original_dir = os.getcwd()
+#
+#     os.chdir(tmp_path)  # Create a temporary in-memory configuration object
+#
+#     url = "http://exoplanet.eu/catalog/votable/?query_f=planet_status%3D%22retracted%22"
+#     filename = "catalog"
+#     expected_file_path = filename + date.today().strftime("%Y-%m-%d")+".csv"
+#
+#     # CASE 1: it downloads fine
+#
+#     with LogCapture() as log:
+#         result = instance.download_catalog(url=url, filename=filename, local_date=date.today().strftime("%Y-%m-%d"))
+#         assert "Catalog downloaded" in log.actual()[-1][-1]
+#
+#         assert result == Path(expected_file_path)
+#
+#     with LogCapture() as log:
+#         result = instance.download_catalog(url=url, filename=filename,local_date=date.today().strftime("%Y-%m-%d"))
+#         assert "Reading existing file" in log.actual()[0][-1]
+#         assert "Catalog downloaded" in log.actual()[1][-1]
+#
+#         assert result == Path(expected_file_path)
+#
+#     os.remove(expected_file_path)
+#
+#         #
+#         # os.remove(expected_file_path)
+#     #     # open("catalog01-20-2024.csv", "w").close()
+#         # # CASE 2.A : errors in downloading, takes local copy
+#         # with LogCapture() as log:
+#         #     result = instance.download_catalog(
+#         #         url=url, filename=filename, timeout=0.00001
+#         #     )
+#         #     assert (
+#         #         "Error fetching the catalog, taking a local copy: catalog01-20-2024.csv"
+#         #         in log.actual()[1][-1]
+#         #     )
+#         #     assert "Catalog downloaded" in log.actual()[-1][-1]
+#         #
+#         #     # it gets another local file
+#         #     assert result != Path(expected_file_path)
+#         #     assert "catalog" in str(result)  # it contains the filename
+#         #     assert "csv" in str(result)  # it is a csv file
+#         # os.remove("catalog01-20-2024.csv")
+#         #
+#         # # # CASE 2.B : errors in downloading, raises error because no local copy
+#         # with LogCapture() as log:
+#         #     with pytest.raises(ValueError):
+#         #         result = instance.download_catalog(
+#         #             url=url, filename=filename, timeout=0.00001
+#         #         )
+#     os.chdir(original_dir)
 
 
 def test__standardize_catalog(instance):

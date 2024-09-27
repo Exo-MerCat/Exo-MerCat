@@ -50,15 +50,15 @@ def test__download_catalog(tmp_path, instance) -> None:
         assert "Catalog downloaded" in log.actual()[2][-1]
         assert result == PosixPath(expected_file_path)
     os.remove(expected_file_path)
-
-    expected_file_path = filename + date.today().strftime("%Y-%m-%d.csv")
+    #
+    expected_file_path = filename + date.today().strftime("%Y-%m-%d")+".csv"
 
     # Mock os.path.exists to simulate that the file already exists or not
     with patch("os.path.exists", MagicMock(return_value=True)):
         open(expected_file_path, "w").close()
         with LogCapture() as log:
             # Case 3: file already exists
-            result = instance.download_catalog(url=url, filename=filename)
+            result = instance.download_catalog(url=url, filename=filename,local_date=date.today().strftime("%Y-%m-%d"))
             assert "Reading existing file" in log.actual()[0][-1]
             assert "Catalog downloaded" in log.actual()[1][-1]
 
@@ -73,7 +73,7 @@ def test__download_catalog(tmp_path, instance) -> None:
         mock_response.content = b"Mock content"
         mock_run.return_value = mock_response
         with LogCapture() as log:
-            result = instance.download_catalog(url=url, filename=filename)
+            result = instance.download_catalog(url=url, filename=filename,local_date=date.today().strftime("%Y-%m-%d"))
             assert "Catalog downloaded" in log.actual()[0][-1]
 
         assert result == Path(expected_file_path)
@@ -84,7 +84,7 @@ def test__download_catalog(tmp_path, instance) -> None:
     open("catalog2024-01-20.csv", "w").close()
     # CASE 5: errors in downloading, takes local copy
     with LogCapture() as log:
-        result = instance.download_catalog(url=url, filename=filename, timeout=0.00001)
+        result = instance.download_catalog(url=url, filename=filename, local_date=date.today().strftime("%Y-%m-%d"),timeout=0.00001)
         log = pd.DataFrame(list(log), columns=["user", "info", "message"])
         assert (
             "Error fetching the catalog, taking a local copy: catalog2024-01-20.csv"
@@ -102,7 +102,7 @@ def test__download_catalog(tmp_path, instance) -> None:
     with LogCapture() as log:
         with pytest.raises(ValueError):
             result = instance.download_catalog(
-                url=url, filename=filename, timeout=0.00001
+                url=url, filename=filename, timeout=0.00001,local_date=date.today().strftime("%Y-%m-%d.csv")
             )
     os.chdir(original_dir)
 

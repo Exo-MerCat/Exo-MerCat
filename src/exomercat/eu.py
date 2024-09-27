@@ -109,18 +109,18 @@ class Eu(Catalog):
         :return: None
         :rtype: None
         """
-        # for value in ["", "_min", "_max"]:
-        #     self.data.loc[
-        #         self.data["MASSPROV"].str.contains("Theoretical", na=False),
-        #         "mass" + value,
-        #     ] = np.nan
-        #     self.data.loc[
-        #         self.data["MASSPROV"].str.contains("Theoretical", na=False),
-        #         "msini" + value,
-        #     ] = np.nan
-        #     self.data.loc[
-        #         self.data["RADPROV"].str.contains("Theoretical", na=False), "r" + value
-        #     ] = np.nan
+        for value in ["", "_min", "_max"]:
+            self.data.loc[
+                self.data["MASSPROV"].str.contains("Theoretical", na=False),
+                "mass" + value,
+            ] = np.nan
+            self.data.loc[
+                self.data["MASSPROV"].str.contains("Theoretical", na=False),
+                "msini" + value,
+            ] = np.nan
+            self.data.loc[
+                self.data["RADPROV"].str.contains("Theoretical", na=False), "r" + value
+            ] = np.nan
 
         # Logging
         logging.info("Theoretical masses/radii removed.")
