@@ -8,7 +8,7 @@ from astropy import constants as const
 from .catalogs import Catalog
 from .utility_functions import UtilityFunctions as Utils
 
-tap_service = pyvo.dal.TAPService(" http://TAPVizieR.u-strasbg.fr/TAPVizieR/tap/")
+tap_service = pyvo.dal.TAPService(" http://TAPVizieR.cds.unistra.fr/TAPVizieR/tap/")
 
 
 class Toi(Catalog):
@@ -83,13 +83,8 @@ class Toi(Catalog):
         counter = -1
         for tid in self.data.tid.unique():
             counter += 1
-            result = tap_service.run_sync(
-                """SELECT tic.TIC,  tic.UCAC4,  tic."2MASS",  tic.WISEA,  tic.GAIA,  tic.KIC,
-                      tic.HIP,   tic.TYC
-                      FROM "IV/38/tic" as tic
-                      WHERE  tic.TIC = """
-                + str(tid)
-            )
+            query='SELECT TIC, UCAC4, "2MASS", WISEA, GAIA, KIC, HIP, TYC FROM "IV/38/tic" WHERE TIC = ' + str(tid)
+            result = tap_service.run_sync(query)
             Utils.print_progress_bar(counter, len(self.data.tid.unique()), prefix='Progress:', suffix='Complete')
 
             # print(
