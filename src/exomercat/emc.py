@@ -493,14 +493,12 @@ class Emc(Catalog):
             typed_id,
         ]
 
-        service = pyvo.dal.TAPService("http://simbad.u-strasbg.fr:80/simbad/sim-tap")
+        service = pyvo.dal.TAPService("http://simbad.cds.unistra.fr/simbad/sim-tap")
 
         t2 = Table.from_pandas(list_of_hosts)
         query = (
-            """SELECT t.*, basic.main_id, basic.ra as ra_2,basic.dec as dec_2, ids.ids as ids FROM TAP_UPLOAD.tab as 
-            t LEFT OUTER JOIN ident ON ident.id = t."""
-            + typed_id
-            + """ LEFT OUTER JOIN basic ON ident.oidref = basic.oid LEFT OUTER JOIN ids ON basic.oid = ids.oidref"""
+            "SELECT t.*, basic.main_id, basic.ra as ra_2,basic.dec as dec_2, ids.ids as ids FROM TAP_UPLOAD.tab as t LEFT OUTER JOIN ident ON ident.id = t." + typed_id
+            + " LEFT OUTER JOIN basic ON ident.oidref = basic.oid LEFT OUTER JOIN ids ON basic.oid = ids.oidref"
         )
         table = Utils.perform_query(service, query, uploads_dict={"tab": t2})
 
@@ -558,13 +556,12 @@ class Emc(Catalog):
                 cleaned_list_of_aliases["ind"] = i
                 alias_df = pd.concat([alias_df, cleaned_list_of_aliases])
 
-        service = pyvo.dal.TAPService("http://simbad.u-strasbg.fr:80/simbad/sim-tap")
+        service = pyvo.dal.TAPService("http://simbad.cds.unistra.fr/simbad/sim-tap")
         t2 = Table.from_pandas(alias_df)
         query = (
-            """SELECT t.*, basic.main_id, basic.ra as ra_2,basic.dec as dec_2, ids.ids FROM TAP_UPLOAD.tab as t LEFT 
-            OUTER JOIN ident ON ident.id = t."""
+            "SELECT t.*, basic.main_id, basic.ra as ra_2,basic.dec as dec_2, ids.ids FROM TAP_UPLOAD.tab as t LEFT OUTER JOIN ident ON ident.id = t."
             + column
-            + """ LEFT OUTER JOIN basic ON ident.oidref = basic.oid LEFT OUTER JOIN ids ON basic.oid = ids.oidref"""
+            + " LEFT OUTER JOIN basic ON ident.oidref = basic.oid LEFT OUTER JOIN ids ON basic.oid = ids.oidref"
         )
         table = Utils.perform_query(service, query, uploads_dict={"tab": t2})
 
@@ -672,24 +669,19 @@ class Emc(Catalog):
         """
 
         # SIMBAD
-        service = pyvo.dal.TAPService("http://simbad.u-strasbg.fr:80/simbad/sim-tap")
+        service = pyvo.dal.TAPService("http://simbad.cds.unistra.fr/simbad/sim-tap")
 
         t2 = Table.from_pandas(
             self.data[self.data.main_id == ""][["hostbinary", "ra", "dec"]]
         )
         query = (
-            """SELECT basic.main_id, basic.dec as dec_2,basic.ra as ra_2, basic.otype as type, t.hostbinary, t.ra, 
-            t.dec FROM basic JOIN TAP_UPLOAD.tab AS t on 1=CONTAINS(POINT('ICRS',basic.ra, basic.dec),   
-            CIRCLE('ICRS', t.ra, t.dec,"""
-            + str(tolerance)
-            + """)) """
+            "SELECT basic.main_id, basic.dec as dec_2,basic.ra as ra_2, basic.otype as type, t.hostbinary, t.ra, t.dec FROM basic JOIN TAP_UPLOAD.tab AS t on 1=CONTAINS(POINT('ICRS',basic.ra, basic.dec), CIRCLE('ICRS', t.ra, t.dec,"+ str(tolerance) + ")) "
         )
         table = Utils.perform_query(service, query, uploads_dict={"tab": t2})
 
         # collect ids too from the previous table
         t2 = Table.from_pandas(table)
-        query = """SELECT t.*, ids.ids as ids FROM TAP_UPLOAD.tab as t LEFT OUTER JOIN ident ON ident.id = t.main_id 
-        LEFT OUTER JOIN basic ON ident.oidref = basic.oid LEFT OUTER JOIN ids ON basic.oid = ids.oidref"""
+        query = "SELECT t.*, ids.ids as ids FROM TAP_UPLOAD.tab as t LEFT OUTER JOIN ident ON ident.id = t.main_id LEFT OUTER JOIN basic ON ident.oidref = basic.oid LEFT OUTER JOIN ids ON basic.oid = ids.oidref"
         table = Utils.perform_query(service, query, uploads_dict={"tab": t2})
         table = Utils.calculate_angsep(table)
 
@@ -757,14 +749,11 @@ class Emc(Catalog):
         timeout = 100000
         socket.setdefaulttimeout(timeout)
 
-        service = pyvo.dal.TAPService("http://TAPVizieR.u-strasbg.fr/TAPVizieR/tap/")
+        service = pyvo.dal.TAPService("http://TAPVizieR.cds.unistra.fr/TAPVizieR/tap/")
 
         table = pd.DataFrame()
         for host in list_of_hosts["host"]:
-            query = """SELECT tic.RAJ2000 as ra_2, tic.DEJ2000 as dec_2,tic.GAIA, tic.UCAC4, tic."2MASS", tic.WISEA, 
-        tic.TIC, tic.KIC, tic.HIP, tic.TYC  FROM "IV/38/tic" as tic WHERE tic.TIC = """ + str(
-                host
-            )
+            query = 'SELECT RAJ2000 as ra_2, DEJ2000 as dec_2, GAIA, UCAC4, "2MASS", WISEA, TIC, KIC, HIP, TYC  FROM "IV/38/tic"  WHERE TIC = ' + str(host)
 
             single_table = Utils.perform_query(service, query, uploads_dict={})
             single_table["host"] = host
@@ -814,8 +803,7 @@ class Emc(Catalog):
         table = pd.DataFrame()
         for ind in alias_df.index:
             query = (
-                """SELECT tic.RAJ2000 as ra_2, tic.DEJ2000 as dec_2,tic.GAIA, tic.UCAC4, tic."2MASS", tic.WISEA, 
-        tic.TIC, tic.KIC, tic.HIP, tic.TYC  FROM "IV/38/tic" as tic WHERE tic.TIC = """
+                'SELECT RAJ2000 as ra_2, DEJ2000 as dec_2,GAIA, UCAC4, "2MASS", WISEA, TIC, KIC, HIP, TYC  FROM "IV/38/tic" WHERE TIC = '
                 + alias_df.at[ind, "tic_alias"]
             )
 
@@ -870,14 +858,13 @@ class Emc(Catalog):
 
         # TIC
 
-        service = pyvo.dal.TAPService(" http://TAPVizieR.u-strasbg.fr/TAPVizieR/tap/")
+        service = pyvo.dal.TAPService("http://TAPVizieR.cds.unistra.fr/TAPVizieR/tap/")
         t2 = self.data[self.data.main_id == ""][["hostbinary", "ra", "dec"]]
 
         table = pd.DataFrame()
         for ind in t2.index:
             query = (
-                """SELECT tic.RAJ2000 as ra_2, tic.DEJ2000 as dec_2,tic.GAIA, tic.UCAC4, tic."2MASS", tic.WISEA, 
-                    tic.TIC, tic.KIC, tic.HIP, tic.TYC  FROM "IV/38/tic" as tic  WHERE 1=CONTAINS(POINT('ICRS',tic.RAJ2000, tic.DEJ2000),   CIRCLE('ICRS',"""
+                """SELECT RAJ2000 as ra_2, DEJ2000 as dec_2,GAIA, UCAC4, "2MASS", WISEA, TIC, KIC, HIP, TYC FROM "IV/38/tic" WHERE 1=CONTAINS(POINT('ICRS',RAJ2000, DEJ2000),   CIRCLE('ICRS',"""
                 + str(t2.at[ind, "ra"])
                 + ""","""
                 + str(t2.at[ind, "dec"])
@@ -1028,12 +1015,10 @@ class Emc(Catalog):
 
         """
         output_string = ""
-        service = pyvo.dal.TAPService("http://simbad.u-strasbg.fr:80/simbad/sim-tap")
+        service = pyvo.dal.TAPService("http://simbad.cds.unistra.fr/simbad/sim-tap")
 
         query = (
-            """SELECT  basic.main_id, basic.ra as ra_2,basic.dec as dec_2, ids.ids
-    FROM ident JOIN basic ON ident.oidref = basic.oid LEFT OUTER JOIN ids ON basic.oid = ids.oidref
-    WHERE id = '"""
+            """SELECT  basic.main_id, basic.ra as ra_2,basic.dec as dec_2, ids.ids FROM ident JOIN basic ON ident.oidref = basic.oid LEFT OUTER JOIN ids ON basic.oid = ids.oidref  WHERE id = '"""
             + new_identifier
             + """'"""
         )
