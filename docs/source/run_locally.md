@@ -18,12 +18,16 @@ You can use [conda](https://conda.io/projects/conda/en/latest/user-guide/getting
     pyenv install 3.8.0  # Or any specific version
     pyenv virtualenv 3.8.0 exomercat2  # Create a virtual environment named exomercat2
     pyenv activate exomercat2  # Activate the virtual environment
+    pip3 install -r requirements.txt
+
 
 :::
 
 :::{tab-item} venv
     python3 -m venv exomercat2  # Create a virtual environment named exomercat2
     source exomercat2/bin/activate  # Activate the virtual environment (on Linux/macOS)
+    pip3 install -r requirements.txt
+
 
 ::::
 

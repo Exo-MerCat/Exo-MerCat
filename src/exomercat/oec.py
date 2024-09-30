@@ -34,7 +34,7 @@ class Oec(Catalog):
         self.name = "oec"
 
     def download_catalog(
-        self, url: str, filename: str, local_date: str = "", timeout: float = None
+        self, url: str, filename: str, local_date: str, timeout: float = None
     ) -> Path:
         """
         Downloads a catalog from a given URL and saves it to a file. If no local file is found, it will download the
@@ -54,9 +54,11 @@ class Oec(Catalog):
         :return: The path to the downloaded file.
         :rtype: Path
         """
+        file_path_str = filename + date.today().strftime("%Y-%m-%d") + ".csv"
+        file_path_xml_str = filename + date.today().strftime("%Y-%m-%d") + ".xml.gz"
 
         # If local_date is not empty, use that date, otherwise use today's date
-        if local_date != "":
+        if local_date != date.today().strftime("%Y-%m-%d"):
             # CASE 1: local date is invalid
             file_path_str = filename + local_date + ".csv"
             file_path_xml_str = filename + local_date + ".xml.gz"
@@ -68,10 +70,8 @@ class Oec(Catalog):
             else:
                 # CASE 2: local date is valid
                 logging.info("Reading specific version: " + local_date)
-        else:
-            # CASE 3: local date is empty, use today
-            file_path_str = filename + date.today().strftime("%Y-%m-%d") + ".csv"
-            file_path_xml_str = filename + date.today().strftime("%Y-%m-%d") + ".xml.gz"
+
+        # CASE 3: local date is empty, use today
 
         if os.path.exists(file_path_str):
             logging.info("Reading existing file")
@@ -115,6 +115,52 @@ class Oec(Catalog):
         logging.info("Catalog downloaded.")
         return Path(file_path_str)
 
+
+    def check_input_columns(self) -> None:
+        """
+        The check_input_columns ensures that the .csv file contains the columns the script needs later.
+
+        :param self: An instance of class Catalog
+        :return: None
+        :rtype: None
+        """
+        # check that the table contains the names of the columns that we need
+
+        columns =['name',
+     'discoverymethod',
+     'period',
+     'period_min',
+     'period_max',
+     'semimajoraxis',
+     'semimajoraxis_min',
+     'semimajoraxis_max',
+     'eccentricity',
+     'eccentricity_min',
+     'eccentricity_max',
+     'inclination',
+     'inclination_min',
+     'inclination_max',
+     'radius',
+     'radius_min',
+     'radius_max',
+     'discoveryyear',
+     'mass',
+     'mass_min',
+     'mass_max',
+     'system_rightascension',
+     'system_declination',
+                  "binary_flag",
+                  "masstype","list"]
+
+        missing_columns = ''
+        for col in columns:
+            if col not in self.data.keys():
+                missing_columns = ",".join([col, missing_columns])
+        if missing_columns != '':
+           print("Check input columns.........FAILED. \n\tMissing columns: " + missing_columns.rstrip(',') + '\n')
+        else:
+            print('Check input columns.........OK')
+
     def standardize_catalog(self) -> None:
         """
         Standardizes the catalog by renaming columns and adding useful columns derived from existing ones. It
@@ -150,9 +196,9 @@ class Oec(Catalog):
                 "radius_min": "r_min",
                 "radius_max": "r_max",
                 "discoveryyear": "discovery_year",
-                "mass": "mass",
-                "mass_min": "mass_min",
-                "mass_max": "mass_max",
+                # "mass": "mass",
+                # "mass_min": "mass_min",
+                # "mass_max": "mass_max",
                 "system_rightascension": "ra",
                 "system_declination": "dec",
             }

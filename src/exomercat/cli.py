@@ -56,6 +56,27 @@ def main():
     socket.setdefaulttimeout(timeout)
 
 
+
+def sanity_checks(local_date):
+    config_dict = Utils.read_config()
+    Utils.service_files_initialization()
+    cat_types = [Koi(), Eu(), Nasa(), Oec(), Toi(), Epic()]
+    for cat in cat_types:
+        logging.info("****** " + cat.name + " ******")
+        config_per_cat = config_dict[cat.name]
+
+        # try downloading the catalog
+        file_path = cat.download_catalog(
+        config_per_cat["url"], config_per_cat["file"], local_date
+        )
+
+        # try reading the catalog
+        cat.read_csv_catalog(file_path)
+        # check the goodness of the catalog (if contains all the columns, if there are weird characters...)
+        cat.check_input_columns(file_path)
+        #check that the columns have the right format
+        #check non-ascii characters
+
 def input(local_date):
     """
     This function downloads and standardizes the files.

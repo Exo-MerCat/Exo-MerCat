@@ -121,6 +121,19 @@ class Catalog:
 
         return Path(file_path_str)
 
+    def sanity_check(self,local_date:str) -> None:
+        """
+        The sanity_check function performs sanity checks on the input catalog. This is catalog-specific, so
+        this function must be defined in each sub-class of the Catalog class. In case there is no replacement
+        function, this returns NotImplementedError
+
+        :param self: An instance of class Catalog
+        :return: None
+        :rtype: None
+        :raises NotImplementedError: This method is not implemented in the base class.
+        """
+        raise NotImplementedError
+
     def read_csv_catalog(self, file_path_str: Union[Path, str]) -> None:
         """
         The read_csv_catalog function reads in a csv file and stores it as a pandas dataframe in the self.
@@ -132,7 +145,10 @@ class Catalog:
         :return: None
         :rtype: None
         """
-        self.data = pd.read_csv(file_path_str, low_memory=False)
+        try:
+            self.data = pd.read_csv(file_path_str, low_memory=False)
+        except:
+            raise ValueError('Failed to read the .csv file.')
 
     def keep_columns(self) -> None:
         """

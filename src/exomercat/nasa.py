@@ -25,6 +25,33 @@ class Nasa(Catalog):
         super().__init__()
         self.name = "nasa"
 
+    def check_input_columns(self) -> None:
+        """
+        The check_input_columns ensures that the .csv file contains the columns the script needs later.
+
+        :param self: An instance of class Catalog
+        :return: None
+        :rtype: None
+        """
+        # check that the table contains the names of the columns that we need
+
+        columns = ["pl_name","discoverymethod","pl_orbper","pl_orbpererr2","pl_orbpererr1","pl_orbsmax",
+                   "pl_orbsmaxerr2","pl_orbsmaxerr1","pl_orbeccen","pl_orbeccenerr2","pl_orbeccenerr1",
+                   "pl_orbincl","pl_orbinclerr2","pl_orbinclerr1","pl_radj","pl_radjerr2","pl_radjerr1",
+                   "disc_year","disc_refname","rv_flag","tran_flag","ttv_flag", "pl_bmassj","pl_bmassjerr2",
+                   "pl_bmassjerr1","pl_bmassprov","hostname","pl_radj_reflink", "pl_orbeccen_reflink",
+                   "pl_orbsmax_reflink","pl_orbper_reflink","pl_orbincl_reflink","pl_bmassj_reflink",
+                   "hd_name", "hip_name", "tic_id", "gaia_id"]
+        missing_columns = ''
+        for col in columns:
+            if col not in self.data.keys():
+                missing_columns = ",".join([col, missing_columns])
+        if missing_columns != '':
+           print("Check input columns.........FAILED. \n\tMissing columns: " + missing_columns.rstrip(',') + '\n')
+        else:
+            print('Check input columns.........OK')
+
+
     def standardize_catalog(self) -> None:
         """
         This function processes raw data from a catalog. It standardizes the data format, renames columns,
@@ -69,12 +96,12 @@ class Nasa(Catalog):
                 "pl_bmassjerr1": "bestmass_max",
                 "pl_bmassprov": "bestmass_provenance",
                 "hostname": "host",
-                "st_age": "Age (Gyrs)",
-                "st_ageerr1": "Age_max",
-                "st_ageerr2": "Age_min",
-                "st_mass": "Mstar",
-                "st_masserr1": "Mstar_max",
-                "st_masserr2": "Mstar_min",
+                # "st_age": "Age (Gyrs)",
+                # "st_ageerr1": "Age_max",
+                # "st_ageerr2": "Age_min",
+                # "st_mass": "Mstar",
+                # "st_masserr1": "Mstar_max",
+                # "st_masserr2": "Mstar_min",
                 "pl_radj_reflink": "r_url",
                 "pl_orbeccen_reflink": "e_url",
                 "pl_orbsmax_reflink": "a_url",

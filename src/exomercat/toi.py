@@ -25,6 +25,31 @@ class Toi(Catalog):
         self.name = "toi"
         self.data = None
 
+    def check_input_columns(self) -> None:
+        """
+        The check_input_columns ensures that the .csv file contains the columns the script needs later.
+
+        :param self: An instance of class Catalog
+        :return: None
+        :rtype: None
+        """
+        # check that the table contains the names of the columns that we need
+
+        columns =['tid', 'toi', 'toidisplay', 'toipfx', 'ctoi_alias', 'pl_pnum',
+       'tfopwg_disp', 'ra',
+       'dec',  'pl_orbper', 'pl_orbpererr1', 'pl_orbpererr2',
+       'pl_orbpersymerr', 'pl_orbperlim',
+       'pl_rade', 'pl_radeerr1', 'pl_radeerr2', 'pl_radesymerr', 'pl_radelim',
+     'toi_created', ]
+
+        missing_columns = ''
+        for col in columns:
+            if col not in self.data.keys():
+                missing_columns = ",".join([col, missing_columns])
+        if missing_columns != '':
+           print("Check input columns.........FAILED. \n\tMissing columns: " + missing_columns.rstrip(',') + '\n')
+        else:
+            print('Check input columns.........OK')
     def standardize_catalog(self) -> None:
         """
         Standardize the dataframe columns and values. It assigns new columns to the dataframe. It runs the run_sync
