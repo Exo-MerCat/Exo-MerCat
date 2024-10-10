@@ -3,6 +3,7 @@ import os
 from datetime import date
 from pathlib import Path, PosixPath
 from unittest.mock import MagicMock, patch, Mock
+import requests
 
 import numpy as np
 import pandas as pd
@@ -258,113 +259,88 @@ def instance():
 
 
 def test__init(instance):
-    assert instance.data is None
-    assert instance.name is "oec"
+    assert instance.data == None
+    assert instance.name == "oec"
 
 
 def test__download_catalog(tmp_path, instance) -> None:
     original_dir = os.getcwd()
 
-    os.chdir(tmp_path)  # Create a temporary in-memory configuration object
+    os.chdir(tmp_path)
 
-    url = "https://example.com/catalog.xml.gz"
-    filename = "catalog"
-
-    # local_date not null. Read specific date
-    expected_file_path = filename + "01-02-2024.csv"
-    expected_file_path_xml = filename + "01-02-2024.xml.gz"
-    # CASE 1: local date is invalid
+    url = "https://raw.githubusercontent.com/OpenExoplanetCatalogue/open_exoplanet_catalogue/refs/heads/master/systems/HD%20154857.xml"
+    filename = "oec"
+    # DATE IS TODAY AND FILE DOES NOT EXIST
+    expected_file_path = filename+date.today().strftime("%Y-%m-%d")+".csv"
+    expected_file_path_xml = filename + date.today().strftime("%Y-%m-%d")+".xml"
+    # CASE A: download the file
     with LogCapture() as log:
-        with pytest.raises(ValueError):
-            result = instance.download_catalog(
-                url=url, filename=filename, local_date="01-02-2024"
-            )
-            assert (
-                "Could not find catalog with this specific date. Please check your date value."
-                in log.actual()[0][-1]
-            )
-    # CASE 2: local date is valid
-    open(expected_file_path, "w").close()
-    open(expected_file_path_xml, "w").close()
+        result = instance.download_catalog(url=url, filename=filename,local_date=date.today().strftime("%Y-%m-%d"))
+    log = pd.DataFrame(list(log), columns=["user", "info", "message"])
+    assert "Catalog downloaded." in log["message"].to_list()
+    assert isinstance(pd.read_csv(expected_file_path), pd.DataFrame)
 
+    # CASE B: file already exists, no need to download
     with LogCapture() as log:
-        result = instance.download_catalog(
-            url=url, filename=filename, local_date="01-02-2024"
-        )
-        assert "Reading specific version: 01-02-2024" in log.actual()[0][-1]
-        assert "Reading existing file" in log.actual()[1][-1]
-        assert "Catalog downloaded" in log.actual()[2][-1]
-        assert result == PosixPath(expected_file_path)
-        assert os.path.isfile(expected_file_path)
-        assert os.path.isfile(expected_file_path_xml)
+        result = instance.download_catalog(url=url, filename=filename, local_date=date.today().strftime("%Y-%m-%d"))
+    log = pd.DataFrame(list(log), columns=["user", "info", "message"])
+    assert "Reading existing file downloaded in date: " + date.today().strftime("%Y-%m-%d") in log["message"].to_list()
+    assert isinstance(pd.read_csv(expected_file_path), pd.DataFrame)
 
-    os.remove(expected_file_path)
-    os.remove(expected_file_path_xml)
-    #
-    # CASE 3: use today's value
-    expected_file_path = filename + date.today().strftime("%Y-%m-%d.csv")
-    expected_file_path_xml = filename + date.today().strftime("%Y-%m-%d.xml.gz")
-    open(expected_file_path, "w").close()
-    open(expected_file_path_xml, "w").close()
 
-    # file is found
+    os.rename(expected_file_path,'oec2024-10-02.csv')
+    os.rename(expected_file_path_xml,'oec2024-10-02.xml')
+
+    # CASE C: file corrupted
     with LogCapture() as log:
-        result = instance.download_catalog(url=url, filename=filename)
-        assert "Reading existing file" in log.actual()[0][-1]
-        assert "Catalog downloaded" in log.actual()[1][-1]
-
-        assert result == Path(expected_file_path)
-        assert os.path.isfile(expected_file_path)
-        assert os.path.isfile(expected_file_path_xml)
-
-    # file must be downloaded
-    # CASE 4: it downloads fine
-    os.remove(expected_file_path)
-    os.remove(expected_file_path_xml)
-    with patch("requests.get", MagicMock()) as mock_run:
-        mock_response = Mock()
-        mock_response.status_code = 200
-        # Gzip the content using gzip.compress before setting it to
-        # mock_response.content
-        xml_content = fill_xml_string().encode("utf-8")
-        gzipped_content = gzip.compress(xml_content)
-        mock_response.content = gzipped_content
-        mock_run.return_value = mock_response
-        mock_run.return_value.content = gzipped_content
-
-        with LogCapture() as log:
-            result = instance.download_catalog(url=url, filename=filename)
-            log = pd.DataFrame(list(log), columns=["user", "info", "message"])
-        assert "Convert from .xml to .csv" in log["message"].tolist()
-        assert "Catalog downloaded." in log["message"].tolist()
-
-        assert result == Path(expected_file_path)
-        assert os.path.isfile(expected_file_path)
-        assert os.path.isfile(expected_file_path_xml)
-
-    os.remove(expected_file_path)
-    os.remove(expected_file_path_xml)
-
-    open("cataloglocal_copy.csv", "w").close()
-    # CASE 5 : errors in downloading, takes local copy
-    with LogCapture() as log:
-        result = instance.download_catalog(
-            url=url, filename=filename, timeout=0.00000001
+        with   patch("pandas.read_csv", side_effect=pd.errors.ParserError):  # Simulate corrupted file
+                result = instance.download_catalog(
+                    url=url, filename=filename, local_date=date.today().strftime("%Y-%m-%d"))
+        log = pd.DataFrame(list(log), columns=["user", "info", "message"])
+    assert(
+                    "File "+expected_file_path+" downloaded, but corrupted. Removing file..."
+                    in log['message'].to_list()
         )
 
-        # it gets another local file
-        assert result != Path(expected_file_path)
-        assert "catalog" in str(result)  # it contains the filename
-        assert "csv" in str(result)  # it is a csv file
-        os.remove("cataloglocal_copy.csv")
-        #
-    # CASE 6: errors in downloading, raises error because no local copy
+        # CASE C.1: We can find old file
+    assert ("Error fetching the catalog, taking a local copy: oec2024-10-02.csv") in log['message'].to_list()
+    assert isinstance(pd.read_csv("oec2024-10-02.csv"), pd.DataFrame)
+
+    os.remove('oec2024-10-02.csv')
     with LogCapture() as log:
-        with pytest.raises(ValueError):
+        with   patch("requests.get", side_effect=requests.exceptions.ConnectionError):  # Simulate error in download
+            with pytest.raises(ConnectionError) as exc_info:
+                result = instance.download_catalog(
+                    url=url, filename=filename, local_date=date.today().strftime("%Y-%m-%d"))
+        log = pd.DataFrame(list(log), columns=["user", "info", "message"])
+
+    # CASE C.2: cannot find alternative
+    assert (
+                    "The catalog could not be downloaded and there is no backup catalog available." == str(exc_info.value)
+        )
+    # CASE D: no available catalog at specific date
+    with LogCapture() as log:
+        with pytest.raises(ValueError) as exc_info:
             result = instance.download_catalog(
-                url=url, filename=filename, timeout=0.00001
-            )
+                    url=url, filename=filename, local_date='2024-01-01')
+        log = pd.DataFrame(list(log), columns=["user", "info", "message"])
+
+    assert (
+            "Could not find catalog with this specific date. Please check your date value."  == str(exc_info.value)
+    )
+    # REPEAT TO CHECK .xml.gz case
+    with LogCapture() as log:
+        with pytest.raises(ValueError) as exc_info:
+            result = instance.download_catalog(
+                    url=url+'.gz', filename=filename, local_date='2024-01-01')
+        log = pd.DataFrame(list(log), columns=["user", "info", "message"])
+
+    assert (
+            "Could not find catalog with this specific date. Please check your date value."  == str(exc_info.value)
+    )
+
     os.chdir(original_dir)
+
 
 
 def test__standardize_catalog(instance):
@@ -502,7 +478,7 @@ def test__standardize_catalog(instance):
 
 
 def test__remove_theoretical_masses(instance):
-    assert instance.remove_theoretical_masses() is None
+    assert instance.remove_theoretical_masses() == None
 
 
 def test__assign_status(instance):

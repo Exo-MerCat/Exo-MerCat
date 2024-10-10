@@ -6,7 +6,6 @@ dependencies:
   - numpy
   - astropy
   - Unidecode
-  - pytest=7.4.0
   - requests
   - pip
   - pip:

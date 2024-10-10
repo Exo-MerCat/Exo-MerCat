@@ -12,8 +12,8 @@ def instance():
 
 
 def test__init(instance):
-    assert instance.data is None
-    assert instance.name is "nasa"
+    assert instance.data == None
+    assert instance.name == "nasa"
 
 
 def test__standardize_catalog(instance):
@@ -106,12 +106,6 @@ def test__standardize_catalog(instance):
         "bestmass_max",
         "bestmass_provenance",
         "host",
-        "Age (Gyrs)",
-        "Age_max",
-        "Age_min",
-        "Mstar",
-        "Mstar_max",
-        "Mstar_min",
         "r_url",
         "e_url",
         "a_url",

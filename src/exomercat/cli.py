@@ -22,17 +22,21 @@ from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 from datetime import date,datetime
 
 
-def main():
+def main():# pragma: no cover
     # Parse command line arguments
     parser = ArgumentParser(formatter_class=ArgumentDefaultsHelpFormatter)
     parser.add_argument('function',help="specify function to be run (options: input, run, check)")           # positional argument
-    parser.add_argument("-v", "--verbose", action="store_true", help="increase verbosity")
+    parser.add_argument('--verbose', '-v', action='count', default=0,
+                        help="Increase output verbosity. Use -v, -vv, or -vvv for more verbosity.")
     parser.add_argument("-d", "--date", help="load a specific date (YYYY-MM-DD)")
     args = vars(parser.parse_args())
-    
-    if args["verbose"]:
+
+    warnings.filterwarnings("ignore")
+    if args["verbose"]>=1:
         logging.basicConfig(format="%(asctime)s: %(message)s", level=logging.INFO)
-        warnings.filterwarnings("once")
+        if args["verbose"] >=2:
+            #debugging verbose
+            warnings.filterwarnings("default")
 
     # date: either a specific date, or today's date
     if args["date"]:
@@ -57,7 +61,7 @@ def main():
 
 
 
-def sanity_checks(local_date):
+def sanity_checks(local_date): # pragma: no cover
     config_dict = Utils.read_config()
     Utils.service_files_initialization()
     cat_types = [Koi(), Eu(), Nasa(), Oec(), Toi(), Epic()]
@@ -77,7 +81,7 @@ def sanity_checks(local_date):
         #check that the columns have the right format
         #check non-ascii characters
 
-def input(local_date):
+def input(local_date):# pragma: no cover
     """
     This function downloads and standardizes the files.
 
@@ -129,16 +133,17 @@ def input(local_date):
             cat.print_catalog("StandardizedSources/" + cat.name + local_date+".csv")
 
 
-def run(local_date, verbose):
+def run(local_date, verbose):# pragma: no cover
     '''This function runs the emc catalog'''
     emc = Emc()
 
     logging.info("Loading standardized files...")
-    emc.data = pd.read_csv("StandardizedSources/eu"+local_date+".csv")
-    emc.data = pd.concat([emc.data, pd.read_csv("StandardizedSources/nasa"+local_date+".csv")])
-    emc.data = pd.concat([emc.data, pd.read_csv("StandardizedSources/oec"+local_date+".csv")])
-    emc.data = pd.concat([emc.data, pd.read_csv("StandardizedSources/toi"+local_date+".csv")])
-    emc.data = pd.concat([emc.data, pd.read_csv("StandardizedSources/epic"+local_date+".csv")])
+    emc.data = Utils.load_standardized_catalog(
+        "StandardizedSources/nasa",local_date )
+    for catalog in ['eu','oec','toi','epic']:
+        emc.data = pd.concat([emc.data, Utils.load_standardized_catalog(
+        "StandardizedSources/"+catalog,local_date )])
+
     # fix for toi catalog that only has ".0x" and it is read as a float
     emc.data.letter = emc.data.letter.astype(str)
     emc.data.letter = emc.data.letter.str[-3:]
@@ -172,7 +177,7 @@ def run(local_date, verbose):
     emc.save_catalog(local_date, "")
 
 
-def check(local_date):
+def check(local_date):# pragma: no cover
 
     error_string = ""
     emc = pd.read_csv("Exo-MerCat/exo-mercat_full"+local_date+".csv")
@@ -421,5 +426,5 @@ def check(local_date):
         print("The following checks failed:\n" + error_string)
 
 
-if __name__ == "__main__":
+if __name__ == "__main__": # pragma: no cover
     main()

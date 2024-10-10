@@ -54,72 +54,81 @@ class Catalog:
         :rtype: Path
         """
 
+        # date is today:
+        #  -    check if it exists, if not download
+        # - if download fails, get latest available version
+        # date is not today:
+        # Check if file with that date exists, if so load it up.
+
         file_path_str = filename + local_date + ".csv"
-        # If local_date is not today, use that date, otherwise use today's date
-        if local_date != date.today().strftime("%Y-%m-%d"):
-
-            # Case 1
-            if len(glob.glob(file_path_str)) == 0:
-                raise ValueError(
-                    "Could not find catalog with this specific date. Please check your date value."
-                )
-            # Case 2
-            else:
-                logging.info("Reading specific version: " + local_date)
-
-
-        # Case 3: File already exists
+        # File already exists
         if os.path.exists(file_path_str):
-            logging.info("Reading existing file")
+            logging.info("Reading existing file downloaded in date: " + local_date)
         else:
-            # Case 4: Download the file
-            try:
-                result = requests.get(url, timeout=timeout)
-                with open(file_path_str, "wb") as f:
-                    f.write(result.content)
-                # try opening the catalog
-                dat=pd.read_csv(file_path_str)
-            except (
-                OSError,
-                IOError,
-                FileNotFoundError,
-                ConnectionError,
-                ValueError,
-                TypeError,
-                TimeoutError,
-                requests.exceptions.ConnectionError,
-                requests.exceptions.SSLError,
-                requests.exceptions.Timeout,
-                requests.exceptions.ConnectTimeout,
-                requests.exceptions.HTTPError,
-                pd.errors.ParserError #file downloaded but corrupted
-            ):
-                # if the file that was downloaded is corrupted, eliminate file
-                if len(glob.glob(file_path_str))>0:
-                    logging.warning('File '+file_path_str+' downloaded, but corrupted. Removing file...')
-                    os.system('rm '+file_path_str)
-                # Case 5: Download failed, try local copy
-                if len(glob.glob(filename + "*.csv")) > 0:
-                    li = list(glob.glob(filename + "*.csv"))
-                    li = [re.search(r"\d\d\d\d-\d\d-\d\d", l)[0] for l in li]
-                    li = [datetime.strptime(l, "%Y-%m-%d") for l in li]
-                    # get the most recent compared to the current date. Get only the ones earlier than the date
-                    local_date_datetime=datetime.strptime(re.search(r"\d\d\d\d-\d\d-\d\d", file_path_str)[0], "%Y-%m-%d")
-                    li = [l for l in li if l <local_date_datetime]
-                    compar_date = max(li).strftime("%Y-%m-%d")
-                    file_path_str = filename + compar_date + ".csv"
+            #File does not exist. If date is today, try downloading it
+            if local_date==date.today().strftime("%Y-%m-%d"):
+                # Try to download the file
+                try:
+                    result = requests.get(url, timeout=timeout)
+                    with open(file_path_str, "wb") as f:
+                        f.write(result.content)
+                    # try opening the catalog
+                    dat = pd.read_csv(file_path_str)
+                    logging.info("Catalog downloaded.")
+                except (
+                        OSError,
+                        IOError,
+                        FileNotFoundError,
+                        ConnectionError,
+                        ValueError,
+                        TypeError,
+                        TimeoutError,
+                        requests.exceptions.ConnectionError,
+                        requests.exceptions.SSLError,
+                        requests.exceptions.Timeout,
+                        requests.exceptions.ConnectTimeout,
+                        requests.exceptions.HTTPError,
+                        pd.errors.ParserError  # file downloaded but corrupted
+                ):
+                    # if the file that was downloaded is corrupted, eliminate file
+                    if len(glob.glob(file_path_str)) > 0:
+                        logging.warning('File ' + file_path_str + ' downloaded, but corrupted. Removing file...')
+                        os.system('rm ' + file_path_str)
+                    # Download failed, try most recent local copy
+                    if len(glob.glob(filename + "*.csv")) > 0:
+                        li = list(glob.glob(filename + "*.csv"))
+                        li = [re.search(r"\d\d\d\d-\d\d-\d\d", l)[0] for l in li]
+                        li = [datetime.strptime(l, "%Y-%m-%d") for l in li]
+                        # get the most recent compared to the current date. Get only the ones earlier than the date
+                        local_date_datetime = datetime.strptime(re.search(r"\d\d\d\d-\d\d-\d\d", file_path_str)[0],
+                                                                "%Y-%m-%d")
+                        li = [l for l in li if l < local_date_datetime]
+                        compar_date = max(li).strftime("%Y-%m-%d")
+                        file_path_str = filename + compar_date + ".csv"
+
+                        logging.warning(
+                            "Error fetching the catalog, taking a local copy: %s",
+                            file_path_str,
+                        )
+                    else:
+                        raise ConnectionError('The catalog could not be downloaded and there is no backup catalog available.')
+
+            else:
+                #date is not today and the file does not exist
+                raise ValueError(
+                "Could not find catalog with this specific date. Please check your date value."
+            )
 
 
-                    logging.warning(
-                        "Error fetching the catalog, taking a local copy: %s",
-                        file_path_str,
-                    )
-                # Case 6: Cannot find local copy
-                else:
-                    raise ValueError("Could not find previous catalogs")
-        logging.info("Catalog downloaded.")
+            #TODO: file does not exist and date is not today. Use an earlier date
+
+
+
 
         return Path(file_path_str)
+
+
+
 
     def sanity_check(self,local_date:str) -> None:
         """
@@ -472,14 +481,15 @@ class Catalog:
                 "msini",
                 "mass",
             ]:
-            self.data.loc[self.data[c]<0,c]=np.nan
             self.data.loc[self.data[c] < 0, c+'_min'] = np.nan
             self.data.loc[self.data[c] < 0, c+'_max'] = np.nan
+            self.data.loc[self.data[c]<0,c]=np.nan
+
 
         #impossible value: eccentricity greater than 1
-        self.data.loc[self.data['e'] >1, 'e'] = np.nan
         self.data.loc[self.data['e'] >1, 'e_min'] = np.nan
         self.data.loc[self.data['e'] >1, 'e_max'] = np.nan
+        self.data.loc[self.data['e'] >1, 'e'] = np.nan
 
         logging.info("Removed impossible values of parameters.")
 

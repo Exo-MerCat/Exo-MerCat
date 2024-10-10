@@ -26,3 +26,14 @@ build-backend = "setuptools.build_meta"
 
 [project.scripts]
 exomercat = "exomercat.cli:main"
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = " --cov-report html --cov=src/"
+testpaths = [
+    "tests"
+]
+[tool.coverage.run]
+omit = [
+    "src/exomercat/cli.py",
+]

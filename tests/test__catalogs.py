@@ -1,7 +1,7 @@
 import os
 from datetime import date
-from pathlib import Path, PosixPath
-from unittest.mock import patch, MagicMock, Mock
+from unittest.mock import patch, mock_open, MagicMock
+import requests
 
 import numpy as np
 import pandas as pd
@@ -24,94 +24,129 @@ def test__init(instance):
 def test__download_catalog(tmp_path, instance) -> None:
     original_dir = os.getcwd()
 
-    os.chdir(tmp_path)  # Create a temporary in-memory configuration object
-    url = "https://example.com/catalog.csv"
-    filename = "catalog"
-    # Read specific date
-    expected_file_path = filename + "2024-01-02.csv"
-    # CASE 1: Cannot find specific date
+    os.chdir(tmp_path)
+    url = "https://exoplanet.eu/catalog/csv/?query_f=planet_status%3D%22retracted%22"
+    filename = "eu"
+    # DATE IS TODAY AND FILE DOES NOT EXIST
+    expected_file_path = filename+date.today().strftime("%Y-%m-%d")+".csv"
+    # CASE A: download the file
     with LogCapture() as log:
-        with pytest.raises(ValueError):
-            result = instance.download_catalog(
-                url=url, filename=filename, local_date="2024-01-02"
-            )
-            assert (
-                "Could not find catalog with this specific date. Please check your date value."
-                in log.actual()[0][-1]
-            )
-    # CASE 2: finds specific version
-    open(expected_file_path, "w").close()
+        result = instance.download_catalog(url=url, filename=filename,local_date=date.today().strftime("%Y-%m-%d"))
+    log = pd.DataFrame(list(log), columns=["user", "info", "message"])
+    assert "Catalog downloaded." in log["message"].to_list()
+    assert isinstance(pd.read_csv(expected_file_path), pd.DataFrame)
+
+    # CASE B: file already exists, no need to download
     with LogCapture() as log:
-        result = instance.download_catalog(
-            url=url, filename=filename, local_date="2024-01-02"
-        )
-        assert "Reading specific version: 2024-01-02" in log.actual()[0][-1]
-        assert "Reading existing file" in log.actual()[1][-1]
-        assert "Catalog downloaded" in log.actual()[2][-1]
-        assert result == PosixPath(expected_file_path)
-    os.remove(expected_file_path)
-    #
-    expected_file_path = filename + date.today().strftime("%Y-%m-%d")+".csv"
+        result = instance.download_catalog(url=url, filename=filename,local_date=date.today().strftime("%Y-%m-%d"))
+    log = pd.DataFrame(list(log), columns=["user", "info", "message"])
+    assert "Reading existing file downloaded in date: "+date.today().strftime("%Y-%m-%d") in log["message"].to_list()
+    assert isinstance(pd.read_csv(expected_file_path), pd.DataFrame)
 
-    # Mock os.path.exists to simulate that the file already exists or not
-    with patch("os.path.exists", MagicMock(return_value=True)):
-        open(expected_file_path, "w").close()
-        with LogCapture() as log:
-            # Case 3: file already exists
-            result = instance.download_catalog(url=url, filename=filename,local_date=date.today().strftime("%Y-%m-%d"))
-            assert "Reading existing file" in log.actual()[0][-1]
-            assert "Catalog downloaded" in log.actual()[1][-1]
+    os.rename(expected_file_path,'eu2024-10-02.csv')
 
-            assert result == PosixPath(expected_file_path)
-
-    os.remove(expected_file_path)
-
-    # CASE 4: downloads the file successfully
-    with patch("requests.get", MagicMock()) as mock_run:
-        mock_response = Mock()
-        mock_response.status_code = 200
-        mock_response.content = b"Mock content"
-        mock_run.return_value = mock_response
-        with LogCapture() as log:
-            result = instance.download_catalog(url=url, filename=filename,local_date=date.today().strftime("%Y-%m-%d"))
-            assert "Catalog downloaded" in log.actual()[0][-1]
-
-        assert result == Path(expected_file_path)
-        mock_run.assert_called_once_with(url, timeout=None)
-
-    os.remove(expected_file_path)
-
-    open("catalog2024-01-20.csv", "w").close()
-    # CASE 5: errors in downloading, takes local copy
+    # CASE C: file corrupted
     with LogCapture() as log:
-        result = instance.download_catalog(url=url, filename=filename, local_date=date.today().strftime("%Y-%m-%d"),timeout=0.00001)
+        with   patch("pandas.read_csv", side_effect=pd.errors.ParserError):  # Simulate corrupted file
+                result = instance.download_catalog(
+                    url=url, filename=filename, local_date=date.today().strftime("%Y-%m-%d"))
         log = pd.DataFrame(list(log), columns=["user", "info", "message"])
-        assert (
-            "Error fetching the catalog, taking a local copy: catalog2024-01-20.csv"
-            in log["message"].tolist()
+    assert(
+                    "File "+expected_file_path+" downloaded, but corrupted. Removing file..."
+                    in log['message'].to_list()
         )
-        assert "Catalog downloaded." in log["message"].tolist()
 
-        # it gets another local file
-        assert result != Path(expected_file_path)
-        assert "catalog" in str(result)  # it contains the filename
-        assert "csv" in str(result)  # it is a csv file
-    os.remove("catalog2024-01-20.csv")
+        # CASE C.1: We can find old file
+    assert ("Error fetching the catalog, taking a local copy: eu2024-10-02.csv") in log['message'].to_list()
+    assert isinstance(pd.read_csv("eu2024-10-02.csv"), pd.DataFrame)
 
-    # CASE 6 : errors in downloading, raises error because no local copy
+    os.remove('eu2024-10-02.csv')
     with LogCapture() as log:
-        with pytest.raises(ValueError):
+        with   patch("requests.get", side_effect=requests.exceptions.ConnectionError):  # Simulate error in download
+            with pytest.raises(ConnectionError) as exc_info:
+                result = instance.download_catalog(
+                    url=url, filename=filename, local_date=date.today().strftime("%Y-%m-%d"))
+        log = pd.DataFrame(list(log), columns=["user", "info", "message"])
+
+    # CASE C.2: cannot find alternative
+    assert (
+                    "The catalog could not be downloaded and there is no backup catalog available." == str(exc_info.value)
+        )
+
+    # CASE D: no available catalog at specific date
+    with LogCapture() as log:
+        with pytest.raises(ValueError) as exc_info:
             result = instance.download_catalog(
-                url=url, filename=filename, timeout=0.00001,local_date=date.today().strftime("%Y-%m-%d.csv")
-            )
+                    url=url, filename=filename, local_date='2024-01-01')
+        log = pd.DataFrame(list(log), columns=["user", "info", "message"])
+
+    assert (
+            "Could not find catalog with this specific date. Please check your date value."  == str(exc_info.value)
+    )
+
     os.chdir(original_dir)
 
 
-def test__read_csv_catalog(instance):
+def test__read_csv_catalog(tmp_path, instance):
+    data = pd.DataFrame(  {'name': ['HD 114762 b', 'PSR B1620-26 b', '51 Peg b'],
+     'discovery_method': ['Radial Velocity', 'Pulsar Timing', 'Radial Velocity'],
+     'ra': [198.0791667, 245.9092575, 344.366585],
+     'dec': [17.51694444, -26.5316025, 20.76882839],
+     'p': [83.9151, 24837.0, 4.231],
+     'p_max': [np.nan, np.nan, np.nan],
+     'p_min': [np.nan, np.nan, np.nan],
+     'a': [0.353, 20.0, 0.052],
+     'a_max': [np.nan, np.nan, np.nan],
+     'a_min': [np.nan, np.nan, np.nan],
+     'e': [0.3354, 0.13, 0.0],
+     'e_max': [np.nan, np.nan, np.nan],
+     'e_min': [np.nan, np.nan, np.nan],
+     'i': [np.nan, np.nan, 80.0],
+     'i_max': [np.nan, np.nan, 10.0],
+     'i_min': [np.nan, np.nan, 19.0],
+     'mass': [10.98, np.nan, 0.46],
+     'mass_max': [np.nan, np.nan, 0.06],
+     'mass_min': [np.nan, np.nan, 0.01],
+     'msini': [np.nan, 1.7, np.nan],
+     'msini_max': [np.nan, np.nan, np.nan],
+     'msini_min': [np.nan, np.nan, np.nan],
+     'r': [np.nan, np.nan, np.nan],
+     'r_max': [np.nan, np.nan, np.nan],
+     'r_min': [np.nan, np.nan, np.nan],
+     'discovery_year': [1992, 1994, 1995],
+     'alias': [np.nan,
+      'B1620-26',
+      ' GJ 882, BD+19 5036, HIP 113357, HR 8729, HD 217014,51 Peg, Gaia DR2 2835207319109249920, Helvetios, SAO 90896, TYC 1717-2193-1'],
+     'a_url': ['oec', 'oec', 'oec'],
+     'mass_url': ['oec', 'oec', 'oec'],
+     'p_url': ['oec', 'oec', 'oec'],
+     'msini_url': ['oec', 'oec', 'oec'],
+     'r_url': ['oec', 'oec', 'oec'],
+     'i_url': ['oec', 'oec', 'oec'],
+     'e_url': ['oec', 'oec', 'oec'],
+     'host': ['HD 114762', 'PSR B1620-26', '51 Peg'],
+     'binary': ['S-type', 'AB', np.nan],
+     'letter': ['b', 'b', 'b'],
+     'status': ['CONFIRMED', 'CONFIRMED', 'CONFIRMED'],
+     'catalog': ['oec', 'oec', 'oec'],
+     'Catalogstatus': ['oec: CONFIRMED', 'oec: CONFIRMED', 'oec: CONFIRMED']})
+
     original_dir = os.getcwd()
+    os.chdir(tmp_path)
+    data.to_csv('catalog'+date.today().strftime("%Y-%m-%d")+'.csv')
     # Create a temporary in-memory configuration object
-    instance.read_csv_catalog(original_dir+"/tests/emc_test.csv")
+    instance.read_csv_catalog('catalog'+date.today().strftime("%Y-%m-%d")+'.csv')
+    os.chdir(original_dir)
     assert isinstance(instance.data, pd.DataFrame)
+
+    #test failure
+    with pytest.raises(ValueError) as exc_info:
+        instance.read_csv_catalog('catalog2024-01-01.csv')
+
+    assert (
+            "Failed to read the .csv file."  == str(exc_info.value)
+    )
+
 
 
 def test_keep_columns(instance):
@@ -425,6 +460,64 @@ def test__standardize_name_host_letter(instance):
     pd.testing.assert_frame_equal(instance.data, expected_df)
 
 
+def test__remove_impossible_values(instance):
+        test_data = pd.DataFrame({
+            'p': [-1],
+            'a': [-0.5],
+            'i': [-0.8],
+            'e': [1.5],
+            'r': [-1],
+            'msini': [-5],
+            'mass': [-2],
+            'p_min': [1],
+            'a_min': [0.2],
+            'i_min': [0.6],
+            'e_min': [0.5],
+            'r_min': [-1.1],
+            'msini_min': [-2.2],
+            'mass_min': [2],
+            'p_max': [1],
+            'a_max': [0.2],
+            'i_max': [0.6],
+            'e_max': [0.5],
+            'r_max': [-1.1],
+            'msini_max': [-2.2],
+            'mass_max': [2],
+        })
+        expected_result = pd.DataFrame({
+            'p': [np.nan],
+            'a': [np.nan],
+            'i': [np.nan],
+            'e': [np.nan],
+            'r': [np.nan],
+            'msini': [np.nan],
+            'mass': [np.nan],
+            'p_min': [np.nan],
+            'a_min': [np.nan],
+            'i_min': [np.nan],
+            'e_min': [np.nan],
+            'r_min': [np.nan],
+            'msini_min': [np.nan],
+            'mass_min': [np.nan],
+            'p_max': [np.nan],
+            'a_max': [np.nan],
+            'i_max': [np.nan],
+            'e_max': [np.nan],
+            'r_max': [np.nan],
+            'msini_max': [np.nan],
+            'mass_max': [np.nan],
+        })
+        expected_df = pd.DataFrame(expected_result)
+
+        instance.data=test_data
+        with LogCapture() as log:
+            # Call the check_mission_tables function
+            instance.remove_impossible_values()
+            assert "Removed impossible values of parameters." in log.actual()[0][-1]
+
+        print(instance.data)
+        pd.testing.assert_frame_equal(instance.data, expected_df)
+
 def test__check_mission_tables(instance):
     koi_test = {
         "kepid": [6922244, 4055765],
@@ -697,6 +790,7 @@ functions_raising_error = [
     "handle_reference_format",
     "standardize_catalog",
     "assign_status",
+
 ]
 
 
@@ -706,3 +800,9 @@ def test__notimplemented(instance, function_name):
     # Call the convert_coordinates function and expect NotImplementedError
     with pytest.raises(NotImplementedError):
         func()
+
+
+def test__sanity_check(instance):
+    # Call the convert_coordinates function and expect NotImplementedError
+    with pytest.raises(NotImplementedError):
+        instance.sanity_check(local_date=date.today().strftime("%Y-%m-%d"))

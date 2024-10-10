@@ -1,8 +1,7 @@
-pandas==1.5.3
+pandas
 numpy
 astropy
 Unidecode
-pytest==7.4.0
 requests
 pyvo
 astroquery

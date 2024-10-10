@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 import pyvo
 from astropy import constants as const
+from astropy.table import Table
 
 from .catalogs import Catalog
 from .utility_functions import UtilityFunctions as Utils
@@ -80,39 +81,16 @@ class Toi(Catalog):
         )
 
         # Run the TAP query
-        counter = -1
-        for tid in self.data.tid.unique():
-            counter += 1
-            query='SELECT TIC, UCAC4, "2MASS", WISEA, GAIA, KIC, HIP, TYC FROM "IV/38/tic" WHERE TIC = ' + str(tid)
-            result = tap_service.run_sync(query)
-            Utils.print_progress_bar(counter, len(self.data.tid.unique()), prefix='Progress:', suffix='Complete')
+        query = """SELECT tc.tid,  db.TIC, db.UCAC4, db."2MASS", db.WISEA, db.GAIA, db.KIC, db.HIP, db.TYC FROM "IV/39/tic82" AS db JOIN TAP_UPLOAD.t1 AS tc ON db.TIC = tc.tid"""
+        t2 = Table.from_pandas(self.data[['tid']])
+        result = Utils.perform_query(tap_service, query, uploads_dict={"t1": t2})
+        result['tid'] = result['tid'].astype(int)
+        result = result[['tid', 'ids']]
+        self.data=self.data.merge(result,how='outer',on='tid')
 
-            # print(
-            #     "Done "
-            #     + str(round(counter / len(self.data.tid.unique()), 2) * 100)
-            #     + "% of the groups.",
-            #     end="\r",
-            # )
-            result = result.to_table().to_pandas()
-            result = result.astype(str)
-            result["UCAC4"] = "UCAC4 " + result["UCAC4"].replace("", "<NA>")
-            result["2MASS"] = "2MASS J" + result["2MASS"].replace("", "<NA>")
-            result["WISEA"] = "WISE " + result["WISEA"].replace("", "<NA>")
-            result["GAIA"] = "Gaia DR2 " + result["GAIA"].replace("", "<NA>")
-            result["KIC"] = "KIC " + result["KIC"].replace("", "<NA>")
-            result["HIP"] = "HIP " + result["HIP"].replace("", "<NA>")
-            result["TYC"] = "TYC " + result["TYC"].replace("", "<NA>")
-            for col in result.columns:
-                result.loc[result[col].str.contains("<NA>"), col] = ""
-            result["alias_vizier"] = result[
-                ["UCAC4", "2MASS", "WISEA", "GAIA", "KIC", "HIP", "TYC"]
-            ].agg(",".join, axis=1)
-            self.data.loc[self.data.tid == tid, "alias_vizier"] = result[
-                "alias_vizier"
-            ][0]
 
         # Save to aliases
-        self.data["alias"] = self.data["alias"] + "," + self.data["alias_vizier"]
+        self.data["alias"] = self.data["alias"] + "," + self.data["ids"]
 
         for i in self.data.index:
             self.data.at[i, "alias"] = ",".join(
@@ -146,12 +124,7 @@ class Toi(Catalog):
         self.data["i"] = np.nan
         self.data["i_min"] = np.nan
         self.data["i_max"] = np.nan
-        self.data["Age (Gyrs)"] = np.nan
-        self.data["Age_max"] = np.nan
-        self.data["Age_min"] = np.nan
-        self.data["Mstar"] = np.nan
-        self.data["Mstar_max"] = np.nan
-        self.data["Mstar_min"] = np.nan
+
 
         # Convert to correct units
         self.data["r"] = self.data["pl_rade"] * const.R_earth / const.R_jup

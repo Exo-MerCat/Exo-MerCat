@@ -11,6 +11,7 @@ from astropy.table import Table
 from exomercat.utility_functions import UtilityFunctions
 import pytest
 
+from testfixtures import LogCapture
 
 @pytest.fixture
 def instance():
@@ -584,7 +585,7 @@ def test__convert_xmlfile_to_csvfile(instance):
     # Write to a compressed XML file (output.xml.gz)
     with gzip.open("output.xml.gz", "wb") as file:
         tree.write(file, encoding="utf-8", xml_declaration=True)
-    instance.convert_xmlfile_to_csvfile(file_path="output.xml.gz")
+    instance.convert_xmlfile_to_csvfile(file_path="output.xml.gz",output_file='output.csv')
     data = pd.read_csv("output.csv")
     expected_columns = [
         "name",
@@ -654,8 +655,8 @@ def test__convert_xmlfile_to_csvfile(instance):
     os.remove("output.csv")
     os.remove("output.xml.gz")
     # Intentionally pass an invalid XML file path to the function
-    with pytest.raises(Exception) as e:
-        instance.convert_xmlfile_to_csvfile(file_path="invalid_path_to_xml_file.xml.gz")
+    with pytest.raises(FileNotFoundError) as e:
+        instance.convert_xmlfile_to_csvfile(file_path="invalid_path_to_xml_file.xml.gz",output_file='invalid.csv')
 
     # Check if the logging.error is called and the message is logged
     assert "No such file or directory" in str(e.value)
@@ -751,7 +752,7 @@ def test__perform_query(instance):
 
     list_of_hosts = pd.DataFrame()
     list_of_hosts["hostbinary"] = ["16 Cyg B", "21 HerAB", "EPIC 203868608"]
-    service = pyvo.dal.TAPService("http://simbad.u-strasbg.fr:80/simbad/sim-tap")
+    service = pyvo.dal.TAPService("http://simbad.cds.unistra.fr/simbad/sim-tap")
 
     t2 = Table.from_pandas(list_of_hosts)
     query = """SELECT t.*, basic.main_id, basic.ra as ra_2,basic.dec as dec_2, ids.ids as ids FROM TAP_UPLOAD.tab as 
@@ -999,3 +1000,44 @@ def test__perform_query(instance):
 
     assert set(table.columns) == set(expected.columns)
     assert_frame_equal(table, expected)
+
+
+def test__load_standardized_catalog(tmp_path):
+    original_dir = os.getcwd()
+    os.chdir(tmp_path)
+    data = pd.DataFrame(
+        {
+            "name": ["KOI-1", "KOI-2", "KOI-3"],
+            "host": ["Kepler-1", "Kepler-2", "Kepler-3"],
+            "alias": ["KOI-1", "Kepler-2 b", "KOI-3"],
+        }
+    )
+    data.to_csv('output2024-01-01.csv')
+
+    # It finds the file
+    with LogCapture() as log:
+        standardized_data=UtilityFunctions.load_standardized_catalog('output',local_date='2024-01-01')
+    log = pd.DataFrame(list(log), columns=["user", "info", "message"])
+    assert "Reading existing standardized file: output2024-01-01.csv" in log["message"].to_list()
+    assert isinstance(standardized_data, pd.DataFrame)
+
+    # It does not find the file but it finds an earlier version (the most recent one)
+
+    data.to_csv('output2023-12-23.csv') #create an earlier version
+    with LogCapture() as log:
+        standardized_data = UtilityFunctions.load_standardized_catalog('output', local_date='2024-02-01')
+    log = pd.DataFrame(list(log), columns=["user", "info", "message"])
+    assert "Error fetching the standardized catalog, taking a local copy: output2024-01-01.csv" in log["message"].to_list()
+    assert isinstance(standardized_data, pd.DataFrame)
+
+    # It cannot find file
+    os.remove('output2023-12-23.csv')
+    os.remove('output2024-01-01.csv')
+
+    with pytest.raises(ValueError) as exc_info:
+        standardized_data = UtilityFunctions.load_standardized_catalog('output', local_date='2024-02-01')
+    assert (
+                "Could not find catalog with this specific date. Please check your date value." == str(exc_info.value)
+        )
+
+    os.chdir(original_dir)

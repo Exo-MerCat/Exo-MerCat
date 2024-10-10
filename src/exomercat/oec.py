@@ -2,7 +2,7 @@ import glob
 import logging
 import os
 import re
-from datetime import date
+from datetime import date,datetime
 from pathlib import Path
 
 import astropy.units as u
@@ -54,65 +54,88 @@ class Oec(Catalog):
         :return: The path to the downloaded file.
         :rtype: Path
         """
-        file_path_str = filename + date.today().strftime("%Y-%m-%d") + ".csv"
-        file_path_xml_str = filename + date.today().strftime("%Y-%m-%d") + ".xml.gz"
 
-        # If local_date is not empty, use that date, otherwise use today's date
-        if local_date != date.today().strftime("%Y-%m-%d"):
-            # CASE 1: local date is invalid
-            file_path_str = filename + local_date + ".csv"
+
+        # date is today:
+        #  -    check if it exists, if not download
+        # - if download fails, get latest available version
+        # date is not today:
+        # Check if file with that date exists, if so load it up.
+        file_path_str = filename + local_date + ".csv"
+        if '.xml.gz' in url:
             file_path_xml_str = filename + local_date + ".xml.gz"
+        elif '.xml' in url:
+            file_path_xml_str = filename + local_date + ".xml"
+        else:
+            raise ValueError('url not valid. Only .xml or .xml.gz files are accepted.')
 
-            if len(glob.glob(file_path_str)) == 0:
+        # File already exists
+        if os.path.exists(file_path_str):
+            logging.info("Reading existing file downloaded in date: " + local_date)
+        else:
+            # File does not exist. If date is today, try downloading it
+            if local_date == date.today().strftime("%Y-%m-%d"):
+                # Try to download the file
+                try:
+                    result = requests.get(url, timeout=timeout)
+                    # Open the input file and parse it as XML
+
+                    with open(file_path_xml_str, "wb") as f:
+                        f.write(result.content)
+                    logging.info("Convert from .xml to .csv")
+
+                    Utils.convert_xmlfile_to_csvfile(file_path=file_path_xml_str,output_file=file_path_str)
+                    dat = pd.read_csv(file_path_str)
+                except (
+                        OSError,
+                        IOError,
+                        FileNotFoundError,
+                        ConnectionError,
+                        ValueError,
+                        TypeError,
+                        TimeoutError,
+                        requests.exceptions.ConnectionError,
+                        requests.exceptions.SSLError,
+                        requests.exceptions.Timeout,
+                        requests.exceptions.ConnectTimeout,
+                        requests.exceptions.HTTPError,
+                        pd.errors.ParserError  # file downloaded but corrupted
+                ):
+                    # if the file that was downloaded is corrupted, eliminate file
+                    if len(glob.glob(file_path_str)) > 0:
+                        logging.warning('File ' + file_path_str + ' downloaded, but corrupted. Removing file...')
+                        os.system('rm ' + file_path_str)
+                        os.system('rm ' + file_path_xml_str)
+                    # Download failed, try most recent local copy
+                    if len(glob.glob(filename + "*.csv")) > 0:
+                        li = list(glob.glob(filename + "*.csv"))
+                        li = [re.search(r"\d\d\d\d-\d\d-\d\d", l)[0] for l in li]
+                        li = [datetime.strptime(l, "%Y-%m-%d") for l in li]
+                        # get the most recent compared to the current date. Get only the ones earlier than the date
+                        local_date_datetime = datetime.strptime(re.search(r"\d\d\d\d-\d\d-\d\d", file_path_str)[0],
+                                                                "%Y-%m-%d")
+                        li = [l for l in li if l < local_date_datetime]
+                        compar_date = max(li).strftime("%Y-%m-%d")
+                        file_path_str = filename + compar_date + ".csv"
+
+                        logging.warning(
+                            "Error fetching the catalog, taking a local copy: %s",
+                            file_path_str,
+                        )
+                    else:
+                        raise ConnectionError(
+                            'The catalog could not be downloaded and there is no backup catalog available.')
+
+            else:
+                # date is not today and the file does not exist
                 raise ValueError(
                     "Could not find catalog with this specific date. Please check your date value."
                 )
-            else:
-                # CASE 2: local date is valid
-                logging.info("Reading specific version: " + local_date)
 
-        # CASE 3: local date is empty, use today
+            # TODO: file does not exist and date is not today. Use an earlier date
 
-        if os.path.exists(file_path_str):
-            logging.info("Reading existing file")
-
-        else:
-            # CASE 4: Download the file
-            try:
-                result = requests.get(url, timeout=timeout)
-                with open(file_path_xml_str, "wb") as f:
-                    f.write(result.content)
-                logging.info("Convert from .xml to .csv")
-                Utils.convert_xmlfile_to_csvfile(file_path=file_path_xml_str)
-
-            except (
-                OSError,
-                IOError,
-                FileNotFoundError,
-                ConnectionError,
-                ValueError,
-                TypeError,
-                TimeoutError,
-                requests.exceptions.ConnectionError,
-                requests.exceptions.SSLError,
-                requests.exceptions.Timeout,
-                requests.exceptions.ConnectTimeout,
-                requests.exceptions.HTTPError,
-            ):
-                # CASE 5: Errors in download, take previous version
-                if len(glob.glob(filename + "*.csv")) > 0:
-                    file_path_str = glob.glob(filename + "*.csv")[0]
-
-                    logging.warning(
-                        "Error fetching the catalog, taking a local copy: %s",
-                        file_path_str,
-                    )
-                else:
-                    # CASE 6: raise error
-                    raise ValueError("Could not find previous catalogs")
-
-        # Read in the csv file
         logging.info("Catalog downloaded.")
+
         return Path(file_path_str)
 
 

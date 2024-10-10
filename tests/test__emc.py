@@ -17,7 +17,7 @@ def instance():
 
 def test__init(instance):
     assert instance.data.empty is True
-    assert instance.name is "exo_mercat"
+    assert instance.name == "exo_mercat"
 
 
 def test__convert_coordinates(instance):
@@ -2067,8 +2067,8 @@ def test__merge_into_single_entry(tmp_path):
         "mass_max": [np.nan, 0.13, 0.13, np.nan, 0.13],
         "mass_min": [np.nan, 0.13, 0.13, np.nan, 0.13],
         "msini": [np.nan, 0.57, np.nan, np.nan, np.nan],
-        "msini_max": [np.nan, 0.04, np.nan, np.nan, np.nan],
-        "msini_min": [np.nan, 0.04, np.nan, np.nan, np.nan],
+        "msini_max": [np.nan, np.nan, np.nan, np.nan, np.nan],
+        "msini_min": [np.nan, np.nan, np.nan, np.nan, np.nan],
         "r": [1.3067001051730265, 1.33, 1.33, 1.3, 1.33],
         "r_max": [0.0570577303460527, 0.13, 0.13, np.nan, 0.13],
         "r_min": [0.0570577303460527, 0.13, 0.13, np.nan, 0.13],
@@ -2180,10 +2180,10 @@ def test__merge_into_single_entry(tmp_path):
         "mass_url": ["2017AJ....153..136S"],
         "MASSREL": [0.21311475409836067],
         "msini": [0.57],
-        "msini_max": [0.04],
-        "msini_min": [0.04],
+        "msini_max": [np.nan],
+        "msini_min": [np.nan],
         "msini_url": ["eu"],
-        "MSINIREL": [0.07017543859649124],
+        "MSINIREL": [1e32],
         "p": [4.4656343],
         "p_max": [2.4e-06],
         "p_min": [2.4e-06],

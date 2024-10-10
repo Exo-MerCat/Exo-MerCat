@@ -1,4 +1,5 @@
 import configparser
+from datetime import datetime
 import gzip
 import os
 import re
@@ -7,7 +8,8 @@ from pathlib import Path
 from typing import Union
 import socket
 import sys
-
+import logging
+import glob
 import numpy as np
 import pandas as pd
 from astropy import units as u
@@ -414,7 +416,7 @@ class UtilityFunctions:
         return ret
 
     @staticmethod
-    def convert_xmlfile_to_csvfile(file_path: Union[Path, str]) -> None:
+    def convert_xmlfile_to_csvfile(file_path: Union[Path, str],output_file: str) -> None:
         """
         Converts an XML file to a CSV file, extracting specific fields from the XML data.
 
@@ -474,10 +476,12 @@ class UtilityFunctions:
             "alias",
             "list",
         ]
+        if '.xml.gz' in file_path:
+            input_file = gzip.open(Path(file_path), "r")
+            table = ElementTree.parse(input_file)
+        else: #if it ends in .xml. Strings ending in other extensions are forbidden in parent function
+            table = ElementTree.parse(file_path)
 
-        # Open the input file and parse it as XML
-        input_file = gzip.open(Path(file_path), "r")
-        table = ElementTree.parse(input_file)
         # Create an empty DataFrame to store the extracted data
         tab = pd.DataFrame()
 
@@ -537,8 +541,7 @@ class UtilityFunctions:
 
                 tab = pd.concat([tab, parameters], sort=False)
 
-        new_file_path = Path(str(file_path[:-6] + "csv"))
-        tab.to_csv(new_file_path)
+        tab.to_csv(output_file)
 
     @staticmethod
     def convert_discovery_methods(data: pd.DataFrame) -> pd.DataFrame:
@@ -719,6 +722,40 @@ class UtilityFunctions:
         return table
 
 
+    def load_standardized_catalog(
+        filename: str,local_date: str
+    ) -> pd.DataFrame:
+        """
+
+        """
+        file_path_str = filename + local_date + ".csv"
+        # File already exists
+        if os.path.exists(file_path_str):
+            logging.info("Reading existing standardized file: " + file_path_str)
+        else:
+
+            # Cannot find, try most recent local copy
+            if len(glob.glob(filename + "*.csv")) > 0:
+                li = list(glob.glob(filename + "*.csv"))
+                li = [re.search(r"\d\d\d\d-\d\d-\d\d", l)[0] for l in li]
+                li = [datetime.strptime(l, "%Y-%m-%d") for l in li]
+                # get the most recent compared to the current date. Get only the ones earlier than the date
+                local_date_datetime = datetime.strptime(re.search(r"\d\d\d\d-\d\d-\d\d", file_path_str)[0],
+                                                        "%Y-%m-%d")
+                li = [l for l in li if l < local_date_datetime]
+                compar_date = max(li).strftime("%Y-%m-%d")
+                file_path_str = filename + compar_date + ".csv"
+
+                logging.warning(
+                    "Error fetching the standardized catalog, taking a local copy: %s",
+                    file_path_str,
+                )
+            else:
+                raise ValueError(
+                    "Could not find catalog with this specific date. Please check your date value."
+                )
+
+        return pd.read_csv(file_path_str)
 
     @staticmethod
     def print_progress_bar(iteration, total, prefix='', suffix='', length=50, fill='█'):

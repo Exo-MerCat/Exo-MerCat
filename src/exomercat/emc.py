@@ -736,28 +736,27 @@ class Emc(Catalog):
         """
 
         logging.info("TIC host check")
-        list_of_hosts = (
-            self.data[self.data.main_id == ""][["host"]].drop_duplicates().dropna()
-        )
+        list_of_hosts = self.data[self.data.main_id == ""][["host"]].drop_duplicates().dropna()
         list_of_hosts = list_of_hosts[list_of_hosts.host.str.contains("TIC")]
         list_of_hosts["host"] = list_of_hosts.loc[
             list_of_hosts["host"].str.findall(r"[^\x00-\x7F]+").str.len() == 0, "host"
         ]
         list_of_hosts["host"] = (
             list_of_hosts["host"].str.replace("TIC ", "").str.replace("TIC-", "")
-        )
+        ).astype(int)
         timeout = 100000
         socket.setdefaulttimeout(timeout)
 
         service = pyvo.dal.TAPService("http://TAPVizieR.cds.unistra.fr/TAPVizieR/tap/")
 
-        table = pd.DataFrame()
-        for host in list_of_hosts["host"]:
-            query = 'SELECT RAJ2000 as ra_2, DEJ2000 as dec_2, GAIA, UCAC4, "2MASS", WISEA, TIC, KIC, HIP, TYC  FROM "IV/38/tic"  WHERE TIC = ' + str(host)
+        t2 = Table.from_pandas(
+            pd.DataFrame(list_of_hosts['host'])
+        )
 
-            single_table = Utils.perform_query(service, query, uploads_dict={})
-            single_table["host"] = host
-            table = pd.concat([table, single_table])
+        query = 'SELECT tc.*, RAJ2000 as ra_2, DEJ2000 as dec_2, GAIA, UCAC4, "2MASS", WISEA, TIC, KIC, HIP, TYC  FROM "IV/39/tic82" AS db JOIN TAP_UPLOAD.t1 AS tc ON db.TIC = tc.host'
+
+        table = Utils.perform_query(service, query, uploads_dict={"t1": t2})
+
         table = table.drop_duplicates()
         logging.info(
             "List of unique star names with a TIC host "
@@ -796,21 +795,28 @@ class Emc(Catalog):
         for ind in alias_df.index:
             tic_alias = alias_df.at[ind, "alias"].split(",")
             alias_df.at[ind, "tic_alias"] = [x for x in tic_alias if "TIC" in x][0]
-        alias_df["tic_alias"] = alias_df["tic_alias"].str.replace("TIC ", "")
+        alias_df["tic_alias"] = alias_df["tic_alias"].str.replace("TIC ", "").astype(int)
 
         alias_df = alias_df[["host", "tic_alias"]]
+        t2 = Table.from_pandas(
+            alias_df[['host','tic_alias']]
+        )
 
-        table = pd.DataFrame()
-        for ind in alias_df.index:
-            query = (
-                'SELECT RAJ2000 as ra_2, DEJ2000 as dec_2,GAIA, UCAC4, "2MASS", WISEA, TIC, KIC, HIP, TYC  FROM "IV/38/tic" WHERE TIC = '
-                + alias_df.at[ind, "tic_alias"]
-            )
+        query = 'SELECT tc.*, RAJ2000 as ra_2, DEJ2000 as dec_2, GAIA, UCAC4, "2MASS", WISEA, TIC, KIC, HIP, TYC  FROM "IV/39/tic82" AS db JOIN TAP_UPLOAD.t1 AS tc ON db.TIC = tc.tic_alias'
 
-            single_table = Utils.perform_query(service, query, uploads_dict={})
-            single_table["host"] = alias_df.at[ind, "host"]
-            table = pd.concat([table, single_table])
-        table = table.drop_duplicates()
+        table = Utils.perform_query(service, query, uploads_dict={"t1": t2})
+
+        # table = pd.DataFrame()
+        # for ind in alias_df.index:
+        #     query = (
+        #         'SELECT RAJ2000 as ra_2, DEJ2000 as dec_2,GAIA, UCAC4, "2MASS", WISEA, TIC, KIC, HIP, TYC  FROM "IV/38/tic" WHERE TIC = '
+        #         + alias_df.at[ind, "tic_alias"]
+        #     )
+        #
+        #     single_table = Utils.perform_query(service, query, uploads_dict={})
+        #     single_table["host"] = alias_df.at[ind, "host"]
+        #     table = pd.concat([table, single_table])
+        # table = table.drop_duplicates()
 
         logging.info(
             "List of unique star names with a TIC alias "
@@ -859,28 +865,37 @@ class Emc(Catalog):
         # TIC
 
         service = pyvo.dal.TAPService("http://TAPVizieR.cds.unistra.fr/TAPVizieR/tap/")
-        t2 = self.data[self.data.main_id == ""][["hostbinary", "ra", "dec"]]
 
-        table = pd.DataFrame()
-        for ind in t2.index:
-            query = (
-                """SELECT RAJ2000 as ra_2, DEJ2000 as dec_2,GAIA, UCAC4, "2MASS", WISEA, TIC, KIC, HIP, TYC FROM "IV/38/tic" WHERE 1=CONTAINS(POINT('ICRS',RAJ2000, DEJ2000),   CIRCLE('ICRS',"""
-                + str(t2.at[ind, "ra"])
-                + ""","""
-                + str(t2.at[ind, "dec"])
-                + ""","""
-                + str(tolerance)
-                + """))"""
-            )
-            single_table = Utils.perform_query(service, query, uploads_dict={})
-            if len(single_table) > 0:
-                single_table["hostbinary"] = t2.at[ind, "hostbinary"]
-                single_table["ra"] = t2.at[ind, "ra"]
-                single_table["dec"] = t2.at[ind, "dec"]
-                single_table = Utils.calculate_angsep(single_table)
+        t2 = Table.from_pandas(
+            self.data[self.data.main_id == ""][["hostbinary", "ra", "dec"]]
+        )
+        query = (
+                """SELECT t.*, RAJ2000 as ra_2, DEJ2000 as dec_2, GAIA, UCAC4, "2MASS", WISEA, TIC, KIC, HIP, TYC FROM "IV/39/tic82" JOIN TAP_UPLOAD.tab AS t on 1=CONTAINS(POINT('ICRS',RAJ2000, DEJ2000), CIRCLE('ICRS', t.ra, t.dec,""" + str(
+            tolerance) + """)) """
+        )
+        table = Utils.perform_query(service, query, uploads_dict={"tab": t2})
 
-                table = pd.concat([table, single_table])
+        # table = pd.DataFrame()
+        # for ind in t2.index:
+        #     query = (
+        #         """SELECT RAJ2000 as ra_2, DEJ2000 as dec_2,GAIA, UCAC4, "2MASS", WISEA, TIC, KIC, HIP, TYC FROM "IV/38/tic" WHERE 1=CONTAINS(POINT('ICRS',RAJ2000, DEJ2000),   CIRCLE('ICRS',"""
+        #         + str(t2.at[ind, "ra"])
+        #         + ""","""
+        #         + str(t2.at[ind, "dec"])
+        #         + ""","""
+        #         + str(tolerance)
+        #         + """))"""
+        #     )
+            # single_table = Utils.perform_query(service, query, uploads_dict={})
+            # if len(single_table) > 0:
+            #     single_table["hostbinary"] = t2.at[ind, "hostbinary"]
+            #     single_table["ra"] = t2.at[ind, "ra"]
+            #     single_table["dec"] = t2.at[ind, "dec"]
+            #     single_table = Utils.calculate_angsep(single_table)
+            #
+            #     table = pd.concat([table, single_table])
         table = table.drop_duplicates()
+        table = Utils.calculate_angsep(table)
 
         for host in table["hostbinary"]:
             self.data.loc[self.data["hostbinary"] == host, "main_id_ra"] = float(
@@ -1667,7 +1682,7 @@ class Emc(Catalog):
             result.loc[0, p[0]] = ""
 
             subgroup = group[p[:-1]]
-            subgroup[p[1:-1]] = subgroup[p[1:-1]].fillna(np.nan).replace("", np.nan)
+            subgroup.loc[:, p[1:-1]] = subgroup.loc[:, p[1:-1]].fillna(np.nan).replace("", np.nan)
             subgroup = subgroup.dropna(subset=[p[1]])
 
             if len(subgroup) > 0:
@@ -2024,12 +2039,7 @@ class Emc(Catalog):
             # Print progress
             if verbose:
                 Utils.print_progress_bar(counter, len(grouped_df), prefix='Progress:', suffix='Complete')
-                # print(
-                #     "Done "
-                #     + str(round(counter / len(grouped_df), 2) * 100)
-                #     + "% of the groups.",
-                #     end="\r",
-                # )
+
             counter = counter + 1
         f1.close()
 

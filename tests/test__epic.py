@@ -187,10 +187,15 @@ def test__handle_reference_format(instance):
 
 def test__assign_status(instance):
     # Create a sample DataFrame with some additional columns
-    data = {"name": ["EPIC 212099230.01"], "disposition": ["CANDIDATE"]}
-    df = pd.DataFrame(data)
-    instance.data = df
-    with LogCapture() as log:
-        instance.assign_status()
-        assert "Status column assigned" in log.actual()[0][-1]
-        assert list(set(instance.data.status.values)) == ["CANDIDATE"]
+    case_dict={'CONFIRMED':'CONFIRMED',
+               'CANDIDATE':'CANDIDATE',
+               'FALSE POSITIVE':'FALSE POSITIVE',
+               'REFUTED':'FALSE POSITIVE'}
+    for case in case_dict.keys():
+        data = {"name": ["EPIC 212099230.01"], "disposition": [case]}
+        df = pd.DataFrame(data)
+        instance.data = df
+        with LogCapture() as log:
+            instance.assign_status()
+            assert "Status column assigned" in log.actual()[0][-1]
+            assert list(set(instance.data.status.values)) == [case_dict[case]]
