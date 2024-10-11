@@ -38,9 +38,9 @@ If you use Exo-MerCat, please cite the following papers:
 - Code restructured into modules and functions, facilitating future input source integration.
 - Exo-MerCat released as open-source, fully tested, and documented.
 
-[^1]:http://exoplanet.eu/ 
-[^2]:https://exoplanetarchive.ipac.caltech.edu/
-[^3]:https://openexoplanetcatalogue.com/ 
-[^4]:tess
-[^5]:epic
+[^1]:[http://exoplanet.eu/](http://exoplanet.eu/)
+[^2]:[https://exoplanetarchive.ipac.caltech.edu/](https://exoplanetarchive.ipac.caltech.edu/)
+[^3]:[https://openexoplanetcatalogue.com/](https://openexoplanetcatalogue.com/)
+[^4]:[https://exoplanetarchive.ipac.caltech.edu/cgi-bin/TblView/nph-tblView?app=ExoTbls&config=TOI](https://exoplanetarchive.ipac.caltech.edu/cgi-bin/TblView/nph-tblView?app=ExoTbls&config=TOI) 
+[^5]:[https://exoplanetarchive.ipac.caltech.edu/cgi-bin/TblView/nph-tblView?app=ExoTbls&config=k2pandc](https://exoplanetarchive.ipac.caltech.edu/cgi-bin/TblView/nph-tblView?app=ExoTbls&config=k2pandc)
 

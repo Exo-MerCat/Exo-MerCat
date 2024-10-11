@@ -262,6 +262,7 @@ document.write(`
  | <a href="#H"><strong>H</strong></a>
  | <a href="#I"><strong>I</strong></a>
  | <a href="#K"><strong>K</strong></a>
+ | <a href="#L"><strong>L</strong></a>
  | <a href="#M"><strong>M</strong></a>
  | <a href="#N"><strong>N</strong></a>
  | <a href="#O"><strong>O</strong></a>
@@ -302,26 +303,20 @@ document.write(`
 </li>
       <li><a href="classes.html#src.exomercat.emc.Emc.check_binary_mismatch">check_binary_mismatch() (src.exomercat.emc.Emc method)</a>
 </li>
+      <li><a href="classes.html#src.exomercat.catalogs.Catalog.check_column_dtypes">check_column_dtypes() (src.exomercat.catalogs.Catalog method)</a>
+</li>
       <li><a href="classes.html#src.exomercat.emc.Emc.check_coordinates">check_coordinates() (src.exomercat.emc.Emc method)</a>
 </li>
-      <li><a href="classes.html#src.exomercat.eu.Eu.check_input_columns">check_input_columns() (src.exomercat.eu.Eu method)</a>
-
-      <ul>
-        <li><a href="classes.html#src.exomercat.koi.Koi.check_input_columns">(src.exomercat.koi.Koi method)</a>
+      <li><a href="classes.html#src.exomercat.catalogs.Catalog.check_input_columns">check_input_columns() (src.exomercat.catalogs.Catalog method)</a>
 </li>
-        <li><a href="classes.html#src.exomercat.nasa.Nasa.check_input_columns">(src.exomercat.nasa.Nasa method)</a>
-</li>
-        <li><a href="classes.html#src.exomercat.oec.Oec.check_input_columns">(src.exomercat.oec.Oec method)</a>
-</li>
-      </ul></li>
       <li><a href="classes.html#src.exomercat.catalogs.Catalog.check_mission_tables">check_mission_tables() (src.exomercat.catalogs.Catalog method)</a>
 </li>
       <li><a href="classes.html#src.exomercat.emc.Emc.check_same_coords_different_id">check_same_coords_different_id() (src.exomercat.emc.Emc method)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="classes.html#src.exomercat.emc.Emc.check_same_host_different_id">check_same_host_different_id() (src.exomercat.emc.Emc method)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="classes.html#src.exomercat.emc.Emc.cleanup_catalog">cleanup_catalog() (src.exomercat.emc.Emc method)</a>
 </li>
       <li><a href="classes.html#src.exomercat.catalogs.Catalog.convert_coordinates">convert_coordinates() (src.exomercat.catalogs.Catalog method)</a>
@@ -391,6 +386,8 @@ document.write(`
       <li><a href="classes.html#src.exomercat.emc.Emc.fill_row_update">fill_row_update() (src.exomercat.emc.Emc method)</a>
 </li>
       <li><a href="classes.html#src.exomercat.utility_functions.UtilityFunctions.find_const">find_const() (src.exomercat.utility_functions.UtilityFunctions static method)</a>
+</li>
+      <li><a href="classes.html#src.exomercat.catalogs.Catalog.find_non_ascii">find_non_ascii() (src.exomercat.catalogs.Catalog method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -467,6 +464,14 @@ document.write(`
   </ul></td>
 </tr></table>
 
+<h2 id="L">L</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="classes.html#src.exomercat.utility_functions.UtilityFunctions.load_standardized_catalog">load_standardized_catalog() (src.exomercat.utility_functions.UtilityFunctions method)</a>
+</li>
+  </ul></td>
+</tr></table>
+
 <h2 id="M">M</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
@@ -521,12 +526,14 @@ document.write(`
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="classes.html#src.exomercat.utility_functions.UtilityFunctions.perform_query">perform_query() (src.exomercat.utility_functions.UtilityFunctions static method)</a>
 </li>
-      <li><a href="classes.html#src.exomercat.emc.Emc.polish_main_id">polish_main_id() (src.exomercat.emc.Emc method)</a>
+      <li><a href="classes.html#src.exomercat.utility_functions.UtilityFunctions.ping_simbad_vizier">ping_simbad_vizier() (src.exomercat.utility_functions.UtilityFunctions static method)</a>
 </li>
-      <li><a href="classes.html#src.exomercat.emc.Emc.post_main_id_query_checks">post_main_id_query_checks() (src.exomercat.emc.Emc method)</a>
+      <li><a href="classes.html#src.exomercat.emc.Emc.polish_main_id">polish_main_id() (src.exomercat.emc.Emc method)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="classes.html#src.exomercat.emc.Emc.post_main_id_query_checks">post_main_id_query_checks() (src.exomercat.emc.Emc method)</a>
+</li>
       <li><a href="classes.html#src.exomercat.emc.Emc.prepare_columns_for_mainid_search">prepare_columns_for_mainid_search() (src.exomercat.emc.Emc method)</a>
 </li>
       <li><a href="classes.html#src.exomercat.catalogs.Catalog.print_catalog">print_catalog() (src.exomercat.catalogs.Catalog method)</a>
@@ -573,8 +580,6 @@ document.write(`
 <h2 id="S">S</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="classes.html#src.exomercat.catalogs.Catalog.sanity_check">sanity_check() (src.exomercat.catalogs.Catalog method)</a>
-</li>
       <li><a href="classes.html#src.exomercat.emc.Emc.save_catalog">save_catalog() (src.exomercat.emc.Emc method)</a>
 </li>
       <li><a href="classes.html#src.exomercat.emc.Emc.select_best_mass">select_best_mass() (src.exomercat.emc.Emc method)</a>

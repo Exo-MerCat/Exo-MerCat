@@ -333,7 +333,9 @@ document.write(`
 <li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#">Classes</a><ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.catalogs.Catalog"><code class="docutils literal notranslate"><span class="pre">Catalog</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.catalogs.Catalog.download_catalog"><code class="docutils literal notranslate"><span class="pre">Catalog.download_catalog()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.catalogs.Catalog.sanity_check"><code class="docutils literal notranslate"><span class="pre">Catalog.sanity_check()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.catalogs.Catalog.check_input_columns"><code class="docutils literal notranslate"><span class="pre">Catalog.check_input_columns()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.catalogs.Catalog.check_column_dtypes"><code class="docutils literal notranslate"><span class="pre">Catalog.check_column_dtypes()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.catalogs.Catalog.find_non_ascii"><code class="docutils literal notranslate"><span class="pre">Catalog.find_non_ascii()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.catalogs.Catalog.read_csv_catalog"><code class="docutils literal notranslate"><span class="pre">Catalog.read_csv_catalog()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.catalogs.Catalog.keep_columns"><code class="docutils literal notranslate"><span class="pre">Catalog.keep_columns()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.catalogs.Catalog.identify_brown_dwarfs"><code class="docutils literal notranslate"><span class="pre">Catalog.identify_brown_dwarfs()</span></code></a></li>
@@ -363,13 +365,11 @@ document.write(`
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.koi.Koi"><code class="docutils literal notranslate"><span class="pre">Koi</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.koi.Koi.check_input_columns"><code class="docutils literal notranslate"><span class="pre">Koi.check_input_columns()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.koi.Koi.standardize_catalog"><code class="docutils literal notranslate"><span class="pre">Koi.standardize_catalog()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.koi.Koi.convert_coordinates"><code class="docutils literal notranslate"><span class="pre">Koi.convert_coordinates()</span></code></a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.eu.Eu"><code class="docutils literal notranslate"><span class="pre">Eu</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.eu.Eu.check_input_columns"><code class="docutils literal notranslate"><span class="pre">Eu.check_input_columns()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.eu.Eu.standardize_catalog"><code class="docutils literal notranslate"><span class="pre">Eu.standardize_catalog()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.eu.Eu.remove_theoretical_masses"><code class="docutils literal notranslate"><span class="pre">Eu.remove_theoretical_masses()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.eu.Eu.assign_status"><code class="docutils literal notranslate"><span class="pre">Eu.assign_status()</span></code></a></li>
@@ -379,7 +379,6 @@ document.write(`
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.oec.Oec"><code class="docutils literal notranslate"><span class="pre">Oec</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.oec.Oec.download_catalog"><code class="docutils literal notranslate"><span class="pre">Oec.download_catalog()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.oec.Oec.check_input_columns"><code class="docutils literal notranslate"><span class="pre">Oec.check_input_columns()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.oec.Oec.standardize_catalog"><code class="docutils literal notranslate"><span class="pre">Oec.standardize_catalog()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.oec.Oec.remove_theoretical_masses"><code class="docutils literal notranslate"><span class="pre">Oec.remove_theoretical_masses()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.oec.Oec.assign_status"><code class="docutils literal notranslate"><span class="pre">Oec.assign_status()</span></code></a></li>
@@ -388,7 +387,6 @@ document.write(`
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.nasa.Nasa"><code class="docutils literal notranslate"><span class="pre">Nasa</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.nasa.Nasa.check_input_columns"><code class="docutils literal notranslate"><span class="pre">Nasa.check_input_columns()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.nasa.Nasa.standardize_catalog"><code class="docutils literal notranslate"><span class="pre">Nasa.standardize_catalog()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.nasa.Nasa.sort_bestmass_to_mass_or_msini"><code class="docutils literal notranslate"><span class="pre">Nasa.sort_bestmass_to_mass_or_msini()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.nasa.Nasa.handle_reference_format"><code class="docutils literal notranslate"><span class="pre">Nasa.handle_reference_format()</span></code></a></li>
@@ -435,6 +433,7 @@ document.write(`
 <li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#module-src.exomercat.utility_functions">Functions</a><ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.utility_functions.UtilityFunctions"><code class="docutils literal notranslate"><span class="pre">UtilityFunctions</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.utility_functions.UtilityFunctions.service_files_initialization"><code class="docutils literal notranslate"><span class="pre">UtilityFunctions.service_files_initialization()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.utility_functions.UtilityFunctions.ping_simbad_vizier"><code class="docutils literal notranslate"><span class="pre">UtilityFunctions.ping_simbad_vizier()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.utility_functions.UtilityFunctions.find_const"><code class="docutils literal notranslate"><span class="pre">UtilityFunctions.find_const()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.utility_functions.UtilityFunctions.read_config"><code class="docutils literal notranslate"><span class="pre">UtilityFunctions.read_config()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.utility_functions.UtilityFunctions.read_config_replacements"><code class="docutils literal notranslate"><span class="pre">UtilityFunctions.read_config_replacements()</span></code></a></li>
@@ -447,6 +446,7 @@ document.write(`
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.utility_functions.UtilityFunctions.convert_discovery_methods"><code class="docutils literal notranslate"><span class="pre">UtilityFunctions.convert_discovery_methods()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.utility_functions.UtilityFunctions.perform_query"><code class="docutils literal notranslate"><span class="pre">UtilityFunctions.perform_query()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.utility_functions.UtilityFunctions.calculate_angsep"><code class="docutils literal notranslate"><span class="pre">UtilityFunctions.calculate_angsep()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.utility_functions.UtilityFunctions.load_standardized_catalog"><code class="docutils literal notranslate"><span class="pre">UtilityFunctions.load_standardized_catalog()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.utility_functions.UtilityFunctions.print_progress_bar"><code class="docutils literal notranslate"><span class="pre">UtilityFunctions.print_progress_bar()</span></code></a></li>
 </ul>
 </li>
@@ -497,11 +497,9 @@ version of that same day’s downloaded catalog if one exists.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="src.exomercat.catalogs.Catalog.sanity_check">
-<span class="sig-name descname"><span class="pre">sanity_check</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">local_date</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.catalogs.Catalog.sanity_check" title="Permalink to this definition">#</a></dt>
-<dd><p>The sanity_check function performs sanity checks on the input catalog. This is catalog-specific, so
-this function must be defined in each sub-class of the Catalog class. In case there is no replacement
-function, this returns NotImplementedError</p>
+<dt class="sig sig-object py" id="src.exomercat.catalogs.Catalog.check_input_columns">
+<span class="sig-name descname"><span class="pre">check_input_columns</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.catalogs.Catalog.check_input_columns" title="Permalink to this definition">#</a></dt>
+<dd><p>The check_input_columns ensures that the .csv file contains the columns the script needs later.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>self</strong> – An instance of class Catalog</p>
@@ -512,11 +510,30 @@ function, this returns NotImplementedError</p>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>None</p>
 </dd>
-<dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>NotImplementedError</strong> – This method is not implemented in the base class.</p>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.exomercat.catalogs.Catalog.check_column_dtypes">
+<span class="sig-name descname"><span class="pre">check_column_dtypes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.catalogs.Catalog.check_column_dtypes" title="Permalink to this definition">#</a></dt>
+<dd><p>The check_datatype_columns ensures that the columns have the expected types.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>self</strong> – An instance of class Catalog</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
 </dd>
 </dl>
 </dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.exomercat.catalogs.Catalog.find_non_ascii">
+<span class="sig-name descname"><span class="pre">find_non_ascii</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.catalogs.Catalog.find_non_ascii" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="src.exomercat.catalogs.Catalog.read_csv_catalog">
@@ -1013,23 +1030,6 @@ corresponding reference column. It then removes all rows where any of these para
 <dd><p>Bases: <a class="reference internal" href="#src.exomercat.catalogs.Catalog" title="src.exomercat.catalogs.Catalog"><code class="xref py py-class docutils literal notranslate"><span class="pre">Catalog</span></code></a></p>
 <p>The Koi class contains all methods and attributes related to the Kepler Objects of Interest catalog.</p>
 <dl class="py method">
-<dt class="sig sig-object py" id="src.exomercat.koi.Koi.check_input_columns">
-<span class="sig-name descname"><span class="pre">check_input_columns</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.koi.Koi.check_input_columns" title="Permalink to this definition">#</a></dt>
-<dd><p>The check_input_columns ensures that the .csv file contains the columns the script needs later.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>self</strong> – An instance of class Catalog</p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>None</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>None</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="src.exomercat.koi.Koi.standardize_catalog">
 <span class="sig-name descname"><span class="pre">standardize_catalog</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.koi.Koi.standardize_catalog" title="Permalink to this definition">#</a></dt>
 <dd><p>This function standardizes the catalog data by selecting relevant columns, creating aliases, renaming columns,
@@ -1074,23 +1074,6 @@ values to decimal degrees using SkyCoord. If the values are empty strings, NaN i
 <dt class="sig sig-object py" id="src.exomercat.eu.Eu">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.exomercat.eu.</span></span><span class="sig-name descname"><span class="pre">Eu</span></span><a class="headerlink" href="#src.exomercat.eu.Eu" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#src.exomercat.catalogs.Catalog" title="src.exomercat.catalogs.Catalog"><code class="xref py py-class docutils literal notranslate"><span class="pre">Catalog</span></code></a></p>
-<dl class="py method">
-<dt class="sig sig-object py" id="src.exomercat.eu.Eu.check_input_columns">
-<span class="sig-name descname"><span class="pre">check_input_columns</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.eu.Eu.check_input_columns" title="Permalink to this definition">#</a></dt>
-<dd><p>The check_input_columns ensures that the .csv file contains the columns the script needs later.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>self</strong> – An instance of class Catalog</p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>None</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>None</p>
-</dd>
-</dl>
-</dd></dl>
-
 <dl class="py method">
 <dt class="sig sig-object py" id="src.exomercat.eu.Eu.standardize_catalog">
 <span class="sig-name descname"><span class="pre">standardize_catalog</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.eu.Eu.standardize_catalog" title="Permalink to this definition">#</a></dt>
@@ -1196,7 +1179,7 @@ function is not implemented as the Eu already has coordinates in decimal degrees
 <p>The Oec class contains all methods and attributes related to the Open Exoplanet Catalogue.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="src.exomercat.oec.Oec.download_catalog">
-<span class="sig-name descname"><span class="pre">download_catalog</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">local_date</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.oec.Oec.download_catalog" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">download_catalog</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">local_date</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.oec.Oec.download_catalog" title="Permalink to this definition">#</a></dt>
 <dd><p>Downloads a catalog from a given URL and saves it to a file. If no local file is found, it will download the
 catalog from the url. If there is an error in downloading or reading the catalog, it will take a previous
 version of that same day’s downloaded catalog if one exists.</p>
@@ -1215,23 +1198,6 @@ version of that same day’s downloaded catalog if one exists.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Path</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="src.exomercat.oec.Oec.check_input_columns">
-<span class="sig-name descname"><span class="pre">check_input_columns</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.oec.Oec.check_input_columns" title="Permalink to this definition">#</a></dt>
-<dd><p>The check_input_columns ensures that the .csv file contains the columns the script needs later.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>self</strong> – An instance of class Catalog</p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>None</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>None</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1343,23 +1309,6 @@ values to decimal degrees using SkyCoord. If the values are empty strings, NaN i
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.exomercat.nasa.</span></span><span class="sig-name descname"><span class="pre">Nasa</span></span><a class="headerlink" href="#src.exomercat.nasa.Nasa" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#src.exomercat.catalogs.Catalog" title="src.exomercat.catalogs.Catalog"><code class="xref py py-class docutils literal notranslate"><span class="pre">Catalog</span></code></a></p>
 <p>The Nasa class contains all methods and attributes related to the NASA Exoplanet Archive catalog.</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="src.exomercat.nasa.Nasa.check_input_columns">
-<span class="sig-name descname"><span class="pre">check_input_columns</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.nasa.Nasa.check_input_columns" title="Permalink to this definition">#</a></dt>
-<dd><p>The check_input_columns ensures that the .csv file contains the columns the script needs later.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>self</strong> – An instance of class Catalog</p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>None</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>None</p>
-</dd>
-</dl>
-</dd></dl>
-
 <dl class="py method">
 <dt class="sig sig-object py" id="src.exomercat.nasa.Nasa.standardize_catalog">
 <span class="sig-name descname"><span class="pre">standardize_catalog</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.nasa.Nasa.standardize_catalog" title="Permalink to this definition">#</a></dt>
@@ -2156,6 +2105,16 @@ and deletes all files in the <cite>Logs</cite> folder.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="src.exomercat.utility_functions.UtilityFunctions.ping_simbad_vizier">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ping_simbad_vizier</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.utility_functions.UtilityFunctions.ping_simbad_vizier" title="Permalink to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="src.exomercat.utility_functions.UtilityFunctions.find_const">
 <em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">find_const</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.utility_functions.UtilityFunctions.find_const" title="Permalink to this definition">#</a></dt>
 <dd><p>Returns a dictionary containing a mapping of common astronomical constants to their abbreviated forms.</p>
@@ -2299,7 +2258,7 @@ Parses the ElementTree object for a list of parameters.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="src.exomercat.utility_functions.UtilityFunctions.convert_xmlfile_to_csvfile">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">convert_xmlfile_to_csvfile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.utility_functions.UtilityFunctions.convert_xmlfile_to_csvfile" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">convert_xmlfile_to_csvfile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_file</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.utility_functions.UtilityFunctions.convert_xmlfile_to_csvfile" title="Permalink to this definition">#</a></dt>
 <dd><p>Converts an XML file to a CSV file, extracting specific fields from the XML data.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -2370,6 +2329,16 @@ Parses the ElementTree object for a list of parameters.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="src.exomercat.utility_functions.UtilityFunctions.load_standardized_catalog">
+<span class="sig-name descname"><span class="pre">load_standardized_catalog</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">local_date</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.utility_functions.UtilityFunctions.load_standardized_catalog" title="Permalink to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="src.exomercat.utility_functions.UtilityFunctions.print_progress_bar">
 <em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">print_progress_bar</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">iteration</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">total</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">suffix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fill</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'█'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.utility_functions.UtilityFunctions.print_progress_bar" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
@@ -2429,7 +2398,9 @@ Parses the ElementTree object for a list of parameters.</p>
 <li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#">Classes</a><ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.catalogs.Catalog"><code class="docutils literal notranslate"><span class="pre">Catalog</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.catalogs.Catalog.download_catalog"><code class="docutils literal notranslate"><span class="pre">Catalog.download_catalog()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.catalogs.Catalog.sanity_check"><code class="docutils literal notranslate"><span class="pre">Catalog.sanity_check()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.catalogs.Catalog.check_input_columns"><code class="docutils literal notranslate"><span class="pre">Catalog.check_input_columns()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.catalogs.Catalog.check_column_dtypes"><code class="docutils literal notranslate"><span class="pre">Catalog.check_column_dtypes()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.catalogs.Catalog.find_non_ascii"><code class="docutils literal notranslate"><span class="pre">Catalog.find_non_ascii()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.catalogs.Catalog.read_csv_catalog"><code class="docutils literal notranslate"><span class="pre">Catalog.read_csv_catalog()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.catalogs.Catalog.keep_columns"><code class="docutils literal notranslate"><span class="pre">Catalog.keep_columns()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.catalogs.Catalog.identify_brown_dwarfs"><code class="docutils literal notranslate"><span class="pre">Catalog.identify_brown_dwarfs()</span></code></a></li>
@@ -2459,13 +2430,11 @@ Parses the ElementTree object for a list of parameters.</p>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.koi.Koi"><code class="docutils literal notranslate"><span class="pre">Koi</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.koi.Koi.check_input_columns"><code class="docutils literal notranslate"><span class="pre">Koi.check_input_columns()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.koi.Koi.standardize_catalog"><code class="docutils literal notranslate"><span class="pre">Koi.standardize_catalog()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.koi.Koi.convert_coordinates"><code class="docutils literal notranslate"><span class="pre">Koi.convert_coordinates()</span></code></a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.eu.Eu"><code class="docutils literal notranslate"><span class="pre">Eu</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.eu.Eu.check_input_columns"><code class="docutils literal notranslate"><span class="pre">Eu.check_input_columns()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.eu.Eu.standardize_catalog"><code class="docutils literal notranslate"><span class="pre">Eu.standardize_catalog()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.eu.Eu.remove_theoretical_masses"><code class="docutils literal notranslate"><span class="pre">Eu.remove_theoretical_masses()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.eu.Eu.assign_status"><code class="docutils literal notranslate"><span class="pre">Eu.assign_status()</span></code></a></li>
@@ -2475,7 +2444,6 @@ Parses the ElementTree object for a list of parameters.</p>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.oec.Oec"><code class="docutils literal notranslate"><span class="pre">Oec</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.oec.Oec.download_catalog"><code class="docutils literal notranslate"><span class="pre">Oec.download_catalog()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.oec.Oec.check_input_columns"><code class="docutils literal notranslate"><span class="pre">Oec.check_input_columns()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.oec.Oec.standardize_catalog"><code class="docutils literal notranslate"><span class="pre">Oec.standardize_catalog()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.oec.Oec.remove_theoretical_masses"><code class="docutils literal notranslate"><span class="pre">Oec.remove_theoretical_masses()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.oec.Oec.assign_status"><code class="docutils literal notranslate"><span class="pre">Oec.assign_status()</span></code></a></li>
@@ -2484,7 +2452,6 @@ Parses the ElementTree object for a list of parameters.</p>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.nasa.Nasa"><code class="docutils literal notranslate"><span class="pre">Nasa</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.nasa.Nasa.check_input_columns"><code class="docutils literal notranslate"><span class="pre">Nasa.check_input_columns()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.nasa.Nasa.standardize_catalog"><code class="docutils literal notranslate"><span class="pre">Nasa.standardize_catalog()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.nasa.Nasa.sort_bestmass_to_mass_or_msini"><code class="docutils literal notranslate"><span class="pre">Nasa.sort_bestmass_to_mass_or_msini()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.nasa.Nasa.handle_reference_format"><code class="docutils literal notranslate"><span class="pre">Nasa.handle_reference_format()</span></code></a></li>
@@ -2531,6 +2498,7 @@ Parses the ElementTree object for a list of parameters.</p>
 <li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#module-src.exomercat.utility_functions">Functions</a><ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.utility_functions.UtilityFunctions"><code class="docutils literal notranslate"><span class="pre">UtilityFunctions</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.utility_functions.UtilityFunctions.service_files_initialization"><code class="docutils literal notranslate"><span class="pre">UtilityFunctions.service_files_initialization()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.utility_functions.UtilityFunctions.ping_simbad_vizier"><code class="docutils literal notranslate"><span class="pre">UtilityFunctions.ping_simbad_vizier()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.utility_functions.UtilityFunctions.find_const"><code class="docutils literal notranslate"><span class="pre">UtilityFunctions.find_const()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.utility_functions.UtilityFunctions.read_config"><code class="docutils literal notranslate"><span class="pre">UtilityFunctions.read_config()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.utility_functions.UtilityFunctions.read_config_replacements"><code class="docutils literal notranslate"><span class="pre">UtilityFunctions.read_config_replacements()</span></code></a></li>
@@ -2543,6 +2511,7 @@ Parses the ElementTree object for a list of parameters.</p>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.utility_functions.UtilityFunctions.convert_discovery_methods"><code class="docutils literal notranslate"><span class="pre">UtilityFunctions.convert_discovery_methods()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.utility_functions.UtilityFunctions.perform_query"><code class="docutils literal notranslate"><span class="pre">UtilityFunctions.perform_query()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.utility_functions.UtilityFunctions.calculate_angsep"><code class="docutils literal notranslate"><span class="pre">UtilityFunctions.calculate_angsep()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.utility_functions.UtilityFunctions.load_standardized_catalog"><code class="docutils literal notranslate"><span class="pre">UtilityFunctions.load_standardized_catalog()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.utility_functions.UtilityFunctions.print_progress_bar"><code class="docutils literal notranslate"><span class="pre">UtilityFunctions.print_progress_bar()</span></code></a></li>
 </ul>
 </li>

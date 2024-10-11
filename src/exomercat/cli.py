@@ -509,8 +509,8 @@ def check(local_date):  # pragma: no cover
     """
     CHECK final_alias: final_alias should never be null (except when it is null from the source files).
     """
-    if len(emc[emc.main_id_alias.isna()]) > 0:
-        error_string = error_string + "CHECK main_id_alias.a (known issue)\n"
+    if len(emc[emc.main_id_aliases.isna()]) > 0:
+        error_string = error_string + "CHECK main_id_aliases.a (known issue)\n"
 
     if len(error_string) == 0:
         print("All checks passed.")
