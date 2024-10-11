@@ -5,6 +5,7 @@ import pandas as pd
 import pyvo
 from astropy import constants as const
 from astropy.table import Table
+from pandas import Int64Dtype, Float64Dtype, StringDtype
 
 from .catalogs import Catalog
 from .utility_functions import UtilityFunctions as Utils
@@ -25,32 +26,29 @@ class Toi(Catalog):
         super().__init__()
         self.name = "toi"
         self.data = None
+        self.columns = {
+            "tid": Int64Dtype(),
+            "toi": Float64Dtype(),
+            "toidisplay": StringDtype(),
+            "toipfx": Int64Dtype(),
+            "ctoi_alias": Float64Dtype(),
+            "pl_pnum": Int64Dtype(),
+            "tfopwg_disp": StringDtype(),
+            "ra": Float64Dtype(),
+            "dec": Float64Dtype(),
+            "pl_orbper": Float64Dtype(),
+            "pl_orbpererr1": Float64Dtype(),
+            "pl_orbpererr2": Float64Dtype(),
+            "pl_orbpersymerr": Int64Dtype(),
+            "pl_orbperlim": Int64Dtype(),
+            "pl_rade": Float64Dtype(),
+            "pl_radeerr1": Float64Dtype(),
+            "pl_radeerr2": Float64Dtype(),
+            "pl_radesymerr": Int64Dtype(),
+            "pl_radelim": Int64Dtype(),
+            "toi_created": StringDtype(),
+        }
 
-    def check_input_columns(self) -> None:
-        """
-        The check_input_columns ensures that the .csv file contains the columns the script needs later.
-
-        :param self: An instance of class Catalog
-        :return: None
-        :rtype: None
-        """
-        # check that the table contains the names of the columns that we need
-
-        columns =['tid', 'toi', 'toidisplay', 'toipfx', 'ctoi_alias', 'pl_pnum',
-       'tfopwg_disp', 'ra',
-       'dec',  'pl_orbper', 'pl_orbpererr1', 'pl_orbpererr2',
-       'pl_orbpersymerr', 'pl_orbperlim',
-       'pl_rade', 'pl_radeerr1', 'pl_radeerr2', 'pl_radesymerr', 'pl_radelim',
-     'toi_created', ]
-
-        missing_columns = ''
-        for col in columns:
-            if col not in self.data.keys():
-                missing_columns = ",".join([col, missing_columns])
-        if missing_columns != '':
-           print("Check input columns.........FAILED. \n\tMissing columns: " + missing_columns.rstrip(',') + '\n')
-        else:
-            print('Check input columns.........OK')
     def standardize_catalog(self) -> None:
         """
         Standardize the dataframe columns and values. It assigns new columns to the dataframe. It runs the run_sync
@@ -82,12 +80,11 @@ class Toi(Catalog):
 
         # Run the TAP query
         query = """SELECT tc.tid,  db.TIC, db.UCAC4, db."2MASS", db.WISEA, db.GAIA, db.KIC, db.HIP, db.TYC FROM "IV/39/tic82" AS db JOIN TAP_UPLOAD.t1 AS tc ON db.TIC = tc.tid"""
-        t2 = Table.from_pandas(self.data[['tid']])
+        t2 = Table.from_pandas(self.data[["tid"]])
         result = Utils.perform_query(tap_service, query, uploads_dict={"t1": t2})
-        result['tid'] = result['tid'].astype(int)
-        result = result[['tid', 'ids']]
-        self.data=self.data.merge(result,how='outer',on='tid')
-
+        result["tid"] = result["tid"].astype(int)
+        result = result[["tid", "ids"]]
+        self.data = self.data.merge(result, how="outer", on="tid")
 
         # Save to aliases
         self.data["alias"] = self.data["alias"] + "," + self.data["ids"]
@@ -124,7 +121,6 @@ class Toi(Catalog):
         self.data["i"] = np.nan
         self.data["i_min"] = np.nan
         self.data["i_max"] = np.nan
-
 
         # Convert to correct units
         self.data["r"] = self.data["pl_rade"] * const.R_earth / const.R_jup

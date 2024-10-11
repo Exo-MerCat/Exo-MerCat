@@ -2,6 +2,7 @@ import logging
 import re
 
 import numpy as np
+from pandas import Int64Dtype, Float64Dtype, StringDtype
 
 from .catalogs import Catalog
 from .utility_functions import UtilityFunctions as Utils
@@ -23,6 +24,48 @@ class Epic(Catalog):
         super().__init__()
         self.name = "epic"
         self.data = None
+        self.columns = {
+            "pl_name": StringDtype(),
+            "discoverymethod": StringDtype(),
+            "pl_orbper": Float64Dtype(),
+            "pl_orbpererr2": Float64Dtype(),
+            "pl_orbpererr1": Float64Dtype(),
+            "pl_orbsmax": Float64Dtype(),
+            "pl_orbsmaxerr2": Float64Dtype(),
+            "pl_orbsmaxerr1": Float64Dtype(),
+            "pl_orbeccen": Float64Dtype(),
+            "pl_orbeccenerr2": Float64Dtype(),
+            "pl_orbeccenerr1": Float64Dtype(),
+            "pl_orbincl": Float64Dtype(),
+            "pl_orbinclerr2": Float64Dtype(),
+            "pl_orbinclerr1": Float64Dtype(),
+            "pl_radj": Float64Dtype(),
+            "pl_radjerr2": Float64Dtype(),
+            "pl_radjerr1": Float64Dtype(),
+            "disc_year": Int64Dtype(),
+            "rv_flag": Int64Dtype(),
+            "tran_flag": Int64Dtype(),
+            "ttv_flag": Int64Dtype(),
+            "pl_massj": Float64Dtype(),
+            "pl_massjerr2": Float64Dtype(),
+            "pl_massjerr1": Float64Dtype(),
+            "pl_msinij": Float64Dtype(),
+            "pl_msinijerr2": Float64Dtype(),
+            "pl_msinijerr1": Float64Dtype(),
+            "hostname": StringDtype(),
+            "st_age": Float64Dtype(),
+            "st_ageerr1": Float64Dtype(),
+            "st_ageerr2": Float64Dtype(),
+            "st_mass": Float64Dtype(),
+            "st_masserr1": Float64Dtype(),
+            "st_masserr2": Float64Dtype(),
+            "pl_refname": StringDtype(),
+            "hd_name": StringDtype(),
+            "hip_name": StringDtype(),
+            "tic_id": StringDtype(),
+            "gaia_id": StringDtype(),
+            "pl_letter": StringDtype(),
+        }
 
     def standardize_catalog(self) -> None:
         """
@@ -216,7 +259,6 @@ class Epic(Catalog):
                 self.data.at[i, "status"] = "FALSE POSITIVE"
             elif "REFUTED" in self.data.at[i, "disposition"]:
                 self.data.at[i, "status"] = "FALSE POSITIVE"
-
 
         logging.info("Status column assigned.")
         logging.info("Updated Status:")

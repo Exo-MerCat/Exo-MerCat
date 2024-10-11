@@ -3,6 +3,7 @@ import astropy.units as u
 import numpy as np
 from astropy.coordinates import SkyCoord
 from .catalogs import Catalog
+from pandas import Int64Dtype, Float64Dtype, StringDtype
 
 
 class Koi(Catalog):
@@ -25,34 +26,14 @@ class Koi(Catalog):
         super().__init__()
         self.name = "koi"
         self.data = None
-
-    def check_input_columns(self) -> None:
-        """
-        The check_input_columns ensures that the .csv file contains the columns the script needs later.
-
-        :param self: An instance of class Catalog
-        :return: None
-        :rtype: None
-        """
-        error_list = ''
-        # check that the table contains the names of the columns that we need
-
-        columns = ["kepid",
-                "kepoi_name",
-                "kepler_name",
-                "koi_disposition",
-                "ra_str",
-                "dec_str",
-                   ]
-        missing_columns = ''
-        for col in columns:
-            if col not in self.data.keys():
-                missing_columns = ",".join([col, missing_columns])
-        if missing_columns != '':
-            print("Check input columns.........FAILED. \n\tMissing columns: " + missing_columns.rstrip(',') + '\n')
-        else:
-            print('Check input columns.........OK')
-
+        self.columns = {
+            "kepid": Int64Dtype(),
+            "kepoi_name": StringDtype(),
+            "kepler_name": StringDtype(),
+            "koi_disposition": StringDtype(),
+            "ra_str": StringDtype(),
+            "dec_str": StringDtype(),
+        }
 
     def standardize_catalog(self) -> None:
         """

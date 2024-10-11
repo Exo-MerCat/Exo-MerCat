@@ -339,6 +339,19 @@ def test__download_catalog(tmp_path, instance) -> None:
             "Could not find catalog with this specific date. Please check your date value."  == str(exc_info.value)
     )
 
+    #check invalid catalog url
+    url = "https://raw.githubusercontent.com/OpenExoplanetCatalogue/open_exoplanet_catalogue/refs/heads/master/systems/HD%20154857.xml.fs"
+    filename = "oec"
+
+    with LogCapture() as log:
+        with pytest.raises(ValueError) as exc_info:
+            result = instance.download_catalog(
+                    url=url, filename=filename, local_date='2024-01-01')
+        log = pd.DataFrame(list(log), columns=["user", "info", "message"])
+
+    assert (
+            "url not valid. Only .xml or .xml.gz files are accepted."  == str(exc_info.value)
+    )
     os.chdir(original_dir)
 
 

@@ -2,12 +2,14 @@ import glob
 import logging
 import os
 import re
-from datetime import date,datetime
+from datetime import date, datetime
 from pathlib import Path
 
 import astropy.units as u
 import numpy as np
 import pandas as pd
+from pandas import Int64Dtype, Float64Dtype, StringDtype
+
 import requests
 from astropy.coordinates import SkyCoord
 
@@ -32,6 +34,34 @@ class Oec(Catalog):
         """
         super().__init__()
         self.name = "oec"
+        self.columns = {
+            "name": StringDtype(),
+            "discoverymethod": StringDtype(),
+            "period": Float64Dtype(),
+            "period_min": Float64Dtype(),
+            "period_max": Float64Dtype(),
+            "semimajoraxis": Float64Dtype(),
+            "semimajoraxis_min": Float64Dtype(),
+            "semimajoraxis_max": Float64Dtype(),
+            "eccentricity": Float64Dtype(),
+            "eccentricity_min": Float64Dtype(),
+            "eccentricity_max": Float64Dtype(),
+            "inclination": Float64Dtype(),
+            "inclination_min": Float64Dtype(),
+            "inclination_max": Float64Dtype(),
+            "radius": Float64Dtype(),
+            "radius_min": Float64Dtype(),
+            "radius_max": Float64Dtype(),
+            "discoveryyear": Int64Dtype(),
+            "mass": Float64Dtype(),
+            "mass_min": Float64Dtype(),
+            "mass_max": Float64Dtype(),
+            "system_rightascension": StringDtype(),
+            "system_declination": StringDtype(),
+            "binaryflag": Int64Dtype(),
+            "masstype": StringDtype(),
+            "list": StringDtype(),
+        }
 
     def download_catalog(
         self, url: str, filename: str, local_date: str, timeout: float = None
@@ -55,19 +85,18 @@ class Oec(Catalog):
         :rtype: Path
         """
 
-
         # date is today:
         #  -    check if it exists, if not download
         # - if download fails, get latest available version
         # date is not today:
         # Check if file with that date exists, if so load it up.
         file_path_str = filename + local_date + ".csv"
-        if '.xml.gz' in url:
+        if ".xml.gz" in url[-7:]:
             file_path_xml_str = filename + local_date + ".xml.gz"
-        elif '.xml' in url:
+        elif ".xml" in url[-4:]:
             file_path_xml_str = filename + local_date + ".xml"
         else:
-            raise ValueError('url not valid. Only .xml or .xml.gz files are accepted.')
+            raise ValueError("url not valid. Only .xml or .xml.gz files are accepted.")
 
         # File already exists
         if os.path.exists(file_path_str):
@@ -84,36 +113,44 @@ class Oec(Catalog):
                         f.write(result.content)
                     logging.info("Convert from .xml to .csv")
 
-                    Utils.convert_xmlfile_to_csvfile(file_path=file_path_xml_str,output_file=file_path_str)
+                    Utils.convert_xmlfile_to_csvfile(
+                        file_path=file_path_xml_str, output_file=file_path_str
+                    )
                     dat = pd.read_csv(file_path_str)
                 except (
-                        OSError,
-                        IOError,
-                        FileNotFoundError,
-                        ConnectionError,
-                        ValueError,
-                        TypeError,
-                        TimeoutError,
-                        requests.exceptions.ConnectionError,
-                        requests.exceptions.SSLError,
-                        requests.exceptions.Timeout,
-                        requests.exceptions.ConnectTimeout,
-                        requests.exceptions.HTTPError,
-                        pd.errors.ParserError  # file downloaded but corrupted
+                    OSError,
+                    IOError,
+                    FileNotFoundError,
+                    ConnectionError,
+                    ValueError,
+                    TypeError,
+                    TimeoutError,
+                    requests.exceptions.ConnectionError,
+                    requests.exceptions.SSLError,
+                    requests.exceptions.Timeout,
+                    requests.exceptions.ConnectTimeout,
+                    requests.exceptions.HTTPError,
+                    pd.errors.ParserError,  # file downloaded but corrupted
                 ):
                     # if the file that was downloaded is corrupted, eliminate file
                     if len(glob.glob(file_path_str)) > 0:
-                        logging.warning('File ' + file_path_str + ' downloaded, but corrupted. Removing file...')
-                        os.system('rm ' + file_path_str)
-                        os.system('rm ' + file_path_xml_str)
+                        logging.warning(
+                            "File "
+                            + file_path_str
+                            + " downloaded, but corrupted. Removing file..."
+                        )
+                        os.system("rm " + file_path_str)
+                        os.system("rm " + file_path_xml_str)
                     # Download failed, try most recent local copy
                     if len(glob.glob(filename + "*.csv")) > 0:
                         li = list(glob.glob(filename + "*.csv"))
                         li = [re.search(r"\d\d\d\d-\d\d-\d\d", l)[0] for l in li]
                         li = [datetime.strptime(l, "%Y-%m-%d") for l in li]
                         # get the most recent compared to the current date. Get only the ones earlier than the date
-                        local_date_datetime = datetime.strptime(re.search(r"\d\d\d\d-\d\d-\d\d", file_path_str)[0],
-                                                                "%Y-%m-%d")
+                        local_date_datetime = datetime.strptime(
+                            re.search(r"\d\d\d\d-\d\d-\d\d", file_path_str)[0],
+                            "%Y-%m-%d",
+                        )
                         li = [l for l in li if l < local_date_datetime]
                         compar_date = max(li).strftime("%Y-%m-%d")
                         file_path_str = filename + compar_date + ".csv"
@@ -124,7 +161,8 @@ class Oec(Catalog):
                         )
                     else:
                         raise ConnectionError(
-                            'The catalog could not be downloaded and there is no backup catalog available.')
+                            "The catalog could not be downloaded and there is no backup catalog available."
+                        )
 
             else:
                 # date is not today and the file does not exist
@@ -137,52 +175,6 @@ class Oec(Catalog):
         logging.info("Catalog downloaded.")
 
         return Path(file_path_str)
-
-
-    def check_input_columns(self) -> None:
-        """
-        The check_input_columns ensures that the .csv file contains the columns the script needs later.
-
-        :param self: An instance of class Catalog
-        :return: None
-        :rtype: None
-        """
-        # check that the table contains the names of the columns that we need
-
-        columns =['name',
-     'discoverymethod',
-     'period',
-     'period_min',
-     'period_max',
-     'semimajoraxis',
-     'semimajoraxis_min',
-     'semimajoraxis_max',
-     'eccentricity',
-     'eccentricity_min',
-     'eccentricity_max',
-     'inclination',
-     'inclination_min',
-     'inclination_max',
-     'radius',
-     'radius_min',
-     'radius_max',
-     'discoveryyear',
-     'mass',
-     'mass_min',
-     'mass_max',
-     'system_rightascension',
-     'system_declination',
-                  "binary_flag",
-                  "masstype","list"]
-
-        missing_columns = ''
-        for col in columns:
-            if col not in self.data.keys():
-                missing_columns = ",".join([col, missing_columns])
-        if missing_columns != '':
-           print("Check input columns.........FAILED. \n\tMissing columns: " + missing_columns.rstrip(',') + '\n')
-        else:
-            print('Check input columns.........OK')
 
     def standardize_catalog(self) -> None:
         """

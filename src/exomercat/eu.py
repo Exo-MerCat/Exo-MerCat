@@ -2,6 +2,7 @@ import logging
 
 import numpy as np
 import pandas as pd
+from pandas import Int64Dtype, Float64Dtype, StringDtype
 
 from .catalogs import Catalog
 from .utility_functions import UtilityFunctions as Utils
@@ -11,7 +12,7 @@ class Eu(Catalog):
     def __init__(self) -> None:
         """
         This function is called when the class is instantiated. It sets up the object with a name attribute that can
-        be used to refer to this particular instance of Eu.
+        be used to refer to this particular instance of Eu. It defines the expected columns for this catalog.
 
         :param self: An instance of class Eu
         :type self: Eu
@@ -20,37 +21,41 @@ class Eu(Catalog):
         """
         super().__init__()
         self.name = "eu"
-
-    def check_input_columns(self) -> None:
-        """
-        The check_input_columns ensures that the .csv file contains the columns the script needs later.
-
-        :param self: An instance of class Catalog
-        :return: None
-        :rtype: None
-        """
-        error_list=''
-        # check that the table contains the names of the columns that we need
-
-        columns= ["detection_type","orbital_period","orbital_period_error_max","orbital_period_error_min",
-         "semi_major_axis","semi_major_axis_error_max","semi_major_axis_error_min","eccentricity",
-         "eccentricity_error_max","eccentricity_error_min","inclination","inclination_error_max",
-         "inclination_error_min","name","updated","discovered","mass","mass_error_max", "mass_error_min",
-         "mass_sini","mass_sini_error_max","mass_sini_error_min","radius","radius_error_max",
-         "radius_error_min","mass_measurement_type","radius_measurement_type","star_name","name",
-         "alternate_names","star_alternate_names","planet_status","ra","dec",
-        ]
-        missing_columns = ''
-        for col in columns:
-            if col not in self.data.keys():
-                missing_columns = ",".join([col, missing_columns])
-        if missing_columns != '':
-            print("Check input columns.........FAILED. \n\tMissing columns: " + missing_columns.rstrip(',') + '\n')
-        else:
-            print('Check input columns.........OK')
-
-
-
+        self.columns = {
+            "detection_type": StringDtype(),
+            "orbital_period": Float64Dtype(),
+            "orbital_period_error_max": Float64Dtype(),
+            "orbital_period_error_min": Float64Dtype(),
+            "semi_major_axis": Float64Dtype(),
+            "semi_major_axis_error_max": Float64Dtype(),
+            "semi_major_axis_error_min": Float64Dtype(),
+            "eccentricity": Float64Dtype(),
+            "eccentricity_error_max": Float64Dtype(),
+            "eccentricity_error_min": Float64Dtype(),
+            "inclination": Float64Dtype(),
+            "inclination_error_max": Float64Dtype(),
+            "inclination_error_min": Float64Dtype(),
+            "name": StringDtype(),
+            "updated": StringDtype(),
+            "discovered": Int64Dtype(),
+            "mass": Float64Dtype(),
+            "mass_error_max": Float64Dtype(),
+            "mass_error_min": Float64Dtype(),
+            "mass_sini": Float64Dtype(),
+            "mass_sini_error_max": Float64Dtype(),
+            "mass_sini_error_min": Float64Dtype(),
+            "radius": Float64Dtype(),
+            "radius_error_max": Float64Dtype(),
+            "radius_error_min": Float64Dtype(),
+            "mass_measurement_type": StringDtype(),
+            "radius_measurement_type": StringDtype(),
+            "star_name": StringDtype(),
+            "alternate_names": StringDtype(),
+            "star_alternate_names": StringDtype(),
+            "planet_status": StringDtype(),
+            "ra": Float64Dtype(),
+            "dec": Float64Dtype(),
+        }
 
     def standardize_catalog(self) -> None:
         """

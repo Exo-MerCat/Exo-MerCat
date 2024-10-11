@@ -2,6 +2,7 @@ import os
 from datetime import date
 from unittest.mock import patch, mock_open, MagicMock
 import requests
+from pandas import Int64Dtype, Float64Dtype,StringDtype
 
 import numpy as np
 import pandas as pd
@@ -86,6 +87,60 @@ def test__download_catalog(tmp_path, instance) -> None:
 
     os.chdir(original_dir)
 
+
+def test__check_input_columns(instance):
+    # Example DataFrame
+    df = pd.DataFrame({
+        'column1': [1, 2, 3],
+        'column2': [1.1, 2.2, 3.3],
+        'column3': ['a', 'b', 'c'],
+    })
+    instance.data = df
+    # Define the expected data types
+    instance.columns = {
+        'column1': Int64Dtype(),
+        'column2': Float64Dtype(),
+        'column3': StringDtype(),  # Object type for string columns
+        'missing': Float64Dtype()
+    }
+    # Check the data types
+    missing_columns = instance.check_input_columns()
+    assert missing_columns == 'missing'
+
+
+def test__check_column_dtypes(instance):
+    # Example DataFrame
+    df = pd.DataFrame({
+        'column1': [1, 2, 3],
+        'column2': [1.1, 2.2, 3.3],
+        'column3': ['a', 'b', 'c'],
+        'wrong': ['a',1,1.2]
+    })
+    instance.data=df
+    # Define the expected data types
+    instance.columns = {
+        'column1': Int64Dtype(),
+        'column2':Float64Dtype(),
+        'column3': StringDtype(),  # Object type for string columns
+        'wrong': Float64Dtype()
+    }
+
+    # Check the data types
+    wrong_dtypes=instance.check_column_dtypes()
+    assert wrong_dtypes=='wrong[object]'
+
+def test__find_non_ascii(instance):
+    # Example DataFrame
+    df = pd.DataFrame({
+        'column1': ['hello', 'world', 'goodbye'],
+        'column2': ['normal', 'ASCII text', 'non-ASCII: ñ'],
+        'column3': ['123', '456', '789']
+    })
+    instance.data=df
+    # Check for non-ASCII characters
+    non_ascii=instance.find_non_ascii()
+
+    assert non_ascii=={'column2':[2]}
 
 def test__read_csv_catalog(tmp_path, instance):
     data = pd.DataFrame(  {'name': ['HD 114762 b', 'PSR B1620-26 b', '51 Peg b'],
@@ -802,7 +857,3 @@ def test__notimplemented(instance, function_name):
         func()
 
 
-def test__sanity_check(instance):
-    # Call the convert_coordinates function and expect NotImplementedError
-    with pytest.raises(NotImplementedError):
-        instance.sanity_check(local_date=date.today().strftime("%Y-%m-%d"))

@@ -1,5 +1,6 @@
 import logging
 import re
+from pandas import Int64Dtype, Float64Dtype, StringDtype
 
 import numpy as np
 
@@ -24,33 +25,45 @@ class Nasa(Catalog):
         """
         super().__init__()
         self.name = "nasa"
-
-    def check_input_columns(self) -> None:
-        """
-        The check_input_columns ensures that the .csv file contains the columns the script needs later.
-
-        :param self: An instance of class Catalog
-        :return: None
-        :rtype: None
-        """
-        # check that the table contains the names of the columns that we need
-
-        columns = ["pl_name","discoverymethod","pl_orbper","pl_orbpererr2","pl_orbpererr1","pl_orbsmax",
-                   "pl_orbsmaxerr2","pl_orbsmaxerr1","pl_orbeccen","pl_orbeccenerr2","pl_orbeccenerr1",
-                   "pl_orbincl","pl_orbinclerr2","pl_orbinclerr1","pl_radj","pl_radjerr2","pl_radjerr1",
-                   "disc_year","disc_refname","rv_flag","tran_flag","ttv_flag", "pl_bmassj","pl_bmassjerr2",
-                   "pl_bmassjerr1","pl_bmassprov","hostname","pl_radj_reflink", "pl_orbeccen_reflink",
-                   "pl_orbsmax_reflink","pl_orbper_reflink","pl_orbincl_reflink","pl_bmassj_reflink",
-                   "hd_name", "hip_name", "tic_id", "gaia_id"]
-        missing_columns = ''
-        for col in columns:
-            if col not in self.data.keys():
-                missing_columns = ",".join([col, missing_columns])
-        if missing_columns != '':
-           print("Check input columns.........FAILED. \n\tMissing columns: " + missing_columns.rstrip(',') + '\n')
-        else:
-            print('Check input columns.........OK')
-
+        self.columns = {
+            "pl_name": StringDtype(),
+            "discoverymethod": StringDtype(),
+            "pl_orbper": Float64Dtype(),
+            "pl_orbpererr2": Float64Dtype(),
+            "pl_orbpererr1": Float64Dtype(),
+            "pl_orbsmax": Float64Dtype(),
+            "pl_orbsmaxerr2": Float64Dtype(),
+            "pl_orbsmaxerr1": Float64Dtype(),
+            "pl_orbeccen": Float64Dtype(),
+            "pl_orbeccenerr2": Float64Dtype(),
+            "pl_orbeccenerr1": Float64Dtype(),
+            "pl_orbincl": Float64Dtype(),
+            "pl_orbinclerr2": Float64Dtype(),
+            "pl_orbinclerr1": Float64Dtype(),
+            "pl_radj": Float64Dtype(),
+            "pl_radjerr2": Float64Dtype(),
+            "pl_radjerr1": Float64Dtype(),
+            "disc_year": Int64Dtype(),
+            "disc_refname": StringDtype(),
+            "rv_flag": Int64Dtype(),
+            "tran_flag": Int64Dtype(),
+            "ttv_flag": Int64Dtype(),
+            "pl_bmassj": Float64Dtype(),
+            "pl_bmassjerr2": Float64Dtype(),
+            "pl_bmassjerr1": Float64Dtype(),
+            "pl_bmassprov": StringDtype(),
+            "hostname": StringDtype(),
+            "pl_radj_reflink": StringDtype(),
+            "pl_orbeccen_reflink": StringDtype(),
+            "pl_orbsmax_reflink": StringDtype(),
+            "pl_orbper_reflink": StringDtype(),
+            "pl_orbincl_reflink": StringDtype(),
+            "pl_bmassj_reflink": StringDtype(),
+            "hd_name": StringDtype(),
+            "hip_name": StringDtype(),
+            "tic_id": StringDtype(),
+            "gaia_id": StringDtype(),
+        }
 
     def standardize_catalog(self) -> None:
         """

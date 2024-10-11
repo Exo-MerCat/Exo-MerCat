@@ -2,7 +2,7 @@ import glob
 import logging
 import os
 import re
-from datetime import date,datetime
+from datetime import date, datetime
 from pathlib import Path
 from typing import Union
 import numpy as np
@@ -31,9 +31,10 @@ class Catalog:
         """
         self.data = None
         self.name = "catalog"
+        self.columns = {}
 
     def download_catalog(
-        self, url: str, filename: str, local_date: str , timeout: float = None
+        self, url: str, filename: str, local_date: str, timeout: float = None
     ) -> Path:
         """
         Downloads a catalog from a given URL and saves it to a file. If no local file is found, it will download the
@@ -65,8 +66,8 @@ class Catalog:
         if os.path.exists(file_path_str):
             logging.info("Reading existing file downloaded in date: " + local_date)
         else:
-            #File does not exist. If date is today, try downloading it
-            if local_date==date.today().strftime("%Y-%m-%d"):
+            # File does not exist. If date is today, try downloading it
+            if local_date == date.today().strftime("%Y-%m-%d"):
                 # Try to download the file
                 try:
                     result = requests.get(url, timeout=timeout)
@@ -76,32 +77,38 @@ class Catalog:
                     dat = pd.read_csv(file_path_str)
                     logging.info("Catalog downloaded.")
                 except (
-                        OSError,
-                        IOError,
-                        FileNotFoundError,
-                        ConnectionError,
-                        ValueError,
-                        TypeError,
-                        TimeoutError,
-                        requests.exceptions.ConnectionError,
-                        requests.exceptions.SSLError,
-                        requests.exceptions.Timeout,
-                        requests.exceptions.ConnectTimeout,
-                        requests.exceptions.HTTPError,
-                        pd.errors.ParserError  # file downloaded but corrupted
+                    OSError,
+                    IOError,
+                    FileNotFoundError,
+                    ConnectionError,
+                    ValueError,
+                    TypeError,
+                    TimeoutError,
+                    requests.exceptions.ConnectionError,
+                    requests.exceptions.SSLError,
+                    requests.exceptions.Timeout,
+                    requests.exceptions.ConnectTimeout,
+                    requests.exceptions.HTTPError,
+                    pd.errors.ParserError,  # file downloaded but corrupted
                 ):
                     # if the file that was downloaded is corrupted, eliminate file
                     if len(glob.glob(file_path_str)) > 0:
-                        logging.warning('File ' + file_path_str + ' downloaded, but corrupted. Removing file...')
-                        os.system('rm ' + file_path_str)
+                        logging.warning(
+                            "File "
+                            + file_path_str
+                            + " downloaded, but corrupted. Removing file..."
+                        )
+                        os.system("rm " + file_path_str)
                     # Download failed, try most recent local copy
                     if len(glob.glob(filename + "*.csv")) > 0:
                         li = list(glob.glob(filename + "*.csv"))
                         li = [re.search(r"\d\d\d\d-\d\d-\d\d", l)[0] for l in li]
                         li = [datetime.strptime(l, "%Y-%m-%d") for l in li]
                         # get the most recent compared to the current date. Get only the ones earlier than the date
-                        local_date_datetime = datetime.strptime(re.search(r"\d\d\d\d-\d\d-\d\d", file_path_str)[0],
-                                                                "%Y-%m-%d")
+                        local_date_datetime = datetime.strptime(
+                            re.search(r"\d\d\d\d-\d\d-\d\d", file_path_str)[0],
+                            "%Y-%m-%d",
+                        )
                         li = [l for l in li if l < local_date_datetime]
                         compar_date = max(li).strftime("%Y-%m-%d")
                         file_path_str = filename + compar_date + ".csv"
@@ -111,37 +118,69 @@ class Catalog:
                             file_path_str,
                         )
                     else:
-                        raise ConnectionError('The catalog could not be downloaded and there is no backup catalog available.')
+                        raise ConnectionError(
+                            "The catalog could not be downloaded and there is no backup catalog available."
+                        )
 
             else:
-                #date is not today and the file does not exist
+                # date is not today and the file does not exist
                 raise ValueError(
-                "Could not find catalog with this specific date. Please check your date value."
-            )
+                    "Could not find catalog with this specific date. Please check your date value."
+                )
 
-
-            #TODO: file does not exist and date is not today. Use an earlier date
-
-
-
+            # TODO: file does not exist and date is not today. Use an earlier date
 
         return Path(file_path_str)
 
-
-
-
-    def sanity_check(self,local_date:str) -> None:
+    def check_input_columns(self) -> str:
         """
-        The sanity_check function performs sanity checks on the input catalog. This is catalog-specific, so
-        this function must be defined in each sub-class of the Catalog class. In case there is no replacement
-        function, this returns NotImplementedError
+        The check_input_columns ensures that the .csv file contains the columns the script needs later.
 
         :param self: An instance of class Catalog
         :return: None
         :rtype: None
-        :raises NotImplementedError: This method is not implemented in the base class.
         """
-        raise NotImplementedError
+        # check that the table contains the names of the columns that we need
+
+        missing_columns = ""
+        for col in self.columns:
+            if col not in self.data.keys():
+                missing_columns = ",".join([col, missing_columns])
+        return missing_columns.rstrip(",").lstrip(",")
+
+    def check_column_dtypes(self) -> str:
+        """
+        The check_datatype_columns ensures that the columns have the expected types.
+
+        :param self: An instance of class Catalog
+        :return: None
+        :rtype: None
+        """
+        # check that the table contains the names of the columns that we need
+
+        wrong_dtypes = ""
+        self.data = self.data.convert_dtypes()
+        for column, expected_dtype in self.columns.items():
+            actual_dtype = self.data[column].dtype
+            if actual_dtype != expected_dtype:
+                wrong_dtypes += ",".join([wrong_dtypes, f"{column}[{actual_dtype}]"])
+
+        return wrong_dtypes.rstrip(",").lstrip(",")
+
+    def find_non_ascii(self):
+        non_ascii = {}  # Dictionary to store columns and rows with non-ASCII characters
+        # Iterate through columns
+        for column in self.data.columns:
+            if self.data[column].dtype == "object":  # Only check string columns
+                # Use regular expression to find non-ASCII characters
+                non_ascii_rows = self.data[
+                    self.data[column].apply(
+                        lambda x: bool(re.search(r"[^\x00-\x7F]", str(x)))
+                    )
+                ]
+                if not non_ascii_rows.empty:
+                    non_ascii[column] = non_ascii_rows.index.tolist()
+        return non_ascii
 
     def read_csv_catalog(self, file_path_str: Union[Path, str]) -> None:
         """
@@ -157,7 +196,7 @@ class Catalog:
         try:
             self.data = pd.read_csv(file_path_str, low_memory=False)
         except:
-            raise ValueError('Failed to read the .csv file.')
+            raise ValueError("Failed to read the .csv file.")
 
     def keep_columns(self) -> None:
         """
@@ -473,26 +512,24 @@ class Catalog:
 
         """
         for c in [
-                "p",
-                "a",
-                "e",
-                "i",
-                "r",
-                "msini",
-                "mass",
-            ]:
-            self.data.loc[self.data[c] < 0, c+'_min'] = np.nan
-            self.data.loc[self.data[c] < 0, c+'_max'] = np.nan
-            self.data.loc[self.data[c]<0,c]=np.nan
+            "p",
+            "a",
+            "e",
+            "i",
+            "r",
+            "msini",
+            "mass",
+        ]:
+            self.data.loc[self.data[c] < 0, c + "_min"] = np.nan
+            self.data.loc[self.data[c] < 0, c + "_max"] = np.nan
+            self.data.loc[self.data[c] < 0, c] = np.nan
 
-
-        #impossible value: eccentricity greater than 1
-        self.data.loc[self.data['e'] >1, 'e_min'] = np.nan
-        self.data.loc[self.data['e'] >1, 'e_max'] = np.nan
-        self.data.loc[self.data['e'] >1, 'e'] = np.nan
+        # impossible value: eccentricity greater than 1
+        self.data.loc[self.data["e"] > 1, "e_min"] = np.nan
+        self.data.loc[self.data["e"] > 1, "e_max"] = np.nan
+        self.data.loc[self.data["e"] > 1, "e"] = np.nan
 
         logging.info("Removed impossible values of parameters.")
-
 
     def standardize_name_host_letter(self) -> None:
         """

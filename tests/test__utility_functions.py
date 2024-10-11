@@ -1,6 +1,7 @@
 import gzip
 import os
 import xml.etree.ElementTree as ElementTree
+from unittest.mock import patch, MagicMock
 
 import numpy as np
 import pandas as pd
@@ -1041,3 +1042,46 @@ def test__load_standardized_catalog(tmp_path):
         )
 
     os.chdir(original_dir)
+
+
+def test__ping_simbad_vizier():
+    #SUCCESS
+    # Mock for TAPService
+    mock_service = MagicMock()
+
+    # Mock return value for SIMBAD service
+    mock_simbad_response = MagicMock()
+    mock_simbad_response.to_table.return_value = Table()
+    mock_service.run_sync.return_value = mock_simbad_response
+
+    # Mock return value for VizieR service
+    mock_vizier_response = MagicMock()
+    mock_vizier_response.to_table.return_value = Table()
+    mock_service.run_sync.return_value = mock_vizier_response
+
+    # Mock the pyvo.dal.TAPService class and socket timeout
+    with patch('pyvo.dal.TAPService', return_value=mock_service), \
+            patch('socket.setdefaulttimeout'):
+        # Call the function
+        result = UtilityFunctions.ping_simbad_vizier()
+
+        # Check the output
+        assert 'Ping to SIMBAD\t\t\tOK.' in result
+        assert 'Ping to VizieR\t\t\tOK.' in result
+
+    #FAILURE
+    # Mock for TAPService
+    mock_service = MagicMock()
+
+    # Simulate failure in SIMBAD service
+    mock_service.run_sync.side_effect = Exception('SIMBAD error')
+
+    # Mock the pyvo.dal.TAPService class and socket timeout
+    with patch('pyvo.dal.TAPService', return_value=mock_service), \
+            patch('socket.setdefaulttimeout'):
+        # Call the function
+        result = UtilityFunctions.ping_simbad_vizier()
+
+        # Check the output
+        assert 'Ping to SIMBAD\t\t\tFAILED.' in result
+        assert 'Ping to VizieR\t\t\tFAILED.' in result

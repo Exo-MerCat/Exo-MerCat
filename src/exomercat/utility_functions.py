@@ -12,6 +12,9 @@ import logging
 import glob
 import numpy as np
 import pandas as pd
+import pyvo
+from astropy.table import Table
+
 from astropy import units as u
 from astropy.coordinates import SkyCoord
 
@@ -56,6 +59,55 @@ class UtilityFunctions:
         if not os.path.exists("Logs/"):
             os.makedirs("Logs")
         os.system("rm Logs/*")
+
+    @staticmethod
+    def ping_simbad_vizier() -> str:
+        error_str = ""
+        data = {
+            "hostbinary": ["51 Peg"],
+            "host": ["51 Peg"],
+        }
+        list_of_hosts = pd.DataFrame(data)
+
+        service = pyvo.dal.TAPService("http://simbad.cds.unistra.fr/simbad/sim-tap")
+
+        t2 = Table.from_pandas(list_of_hosts)
+        query = "SELECT t.*, basic.main_id, basic.ra as ra_2,basic.dec as dec_2, ids.ids as ids FROM TAP_UPLOAD.tab as t LEFT OUTER JOIN ident ON ident.id = t.hostbinary LEFT OUTER JOIN basic ON ident.oidref = basic.oid LEFT OUTER JOIN ids ON basic.oid = ids.oidref"
+        # Set socket timeout
+        timeout = 100000
+        socket.setdefaulttimeout(timeout)
+        try:
+            table = service.run_sync(query, uploads={"tab": t2}, timeout=timeout)
+            table = table.to_table()
+            error_str += "Ping to SIMBAD\t\t\tOK. \n"
+        except:
+            error_str += "Ping to SIMBAD\t\t\tFAILED. \n"
+
+        service = pyvo.dal.TAPService("http://TAPVizieR.cds.unistra.fr/TAPVizieR/tap/")
+        data = {
+            "hostbinary": ["TIC 50365310"],
+            "host": ["TIC 50365310"],
+        }
+        list_of_hosts = pd.DataFrame(data)
+
+        list_of_hosts["host"] = (
+            list_of_hosts["host"].str.replace("TIC ", "").str.replace("TIC-", "")
+        ).astype(int)
+        t2 = Table.from_pandas(list_of_hosts)
+
+        query = 'SELECT tc.*, RAJ2000 as ra_2, DEJ2000 as dec_2, GAIA, UCAC4, "2MASS", WISEA, TIC, KIC, HIP, TYC  FROM "IV/39/tic82" AS db JOIN TAP_UPLOAD.tab AS tc ON db.TIC = tc.host'
+        # Set socket timeout
+        timeout = 100000
+        socket.setdefaulttimeout(timeout)
+
+        try:
+            table = service.run_sync(query, uploads={"tab": t2}, timeout=timeout)
+            table = table.to_table()
+            error_str += "Ping to VizieR\t\t\tOK."
+        except:
+            error_str += "Ping to VizieR\t\t\tFAILED."
+
+        return error_str
 
     @staticmethod
     def find_const() -> dict:
@@ -416,7 +468,9 @@ class UtilityFunctions:
         return ret
 
     @staticmethod
-    def convert_xmlfile_to_csvfile(file_path: Union[Path, str],output_file: str) -> None:
+    def convert_xmlfile_to_csvfile(
+        file_path: Union[Path, str], output_file: str
+    ) -> None:
         """
         Converts an XML file to a CSV file, extracting specific fields from the XML data.
 
@@ -476,10 +530,10 @@ class UtilityFunctions:
             "alias",
             "list",
         ]
-        if '.xml.gz' in file_path:
+        if ".xml.gz" in file_path:
             input_file = gzip.open(Path(file_path), "r")
             table = ElementTree.parse(input_file)
-        else: #if it ends in .xml. Strings ending in other extensions are forbidden in parent function
+        else:  # if it ends in .xml. Strings ending in other extensions are forbidden in parent function
             table = ElementTree.parse(file_path)
 
         # Create an empty DataFrame to store the extracted data
@@ -721,27 +775,22 @@ class UtilityFunctions:
         table = table[table.selected == 1]
         return table
 
-
-    def load_standardized_catalog(
-        filename: str,local_date: str
-    ) -> pd.DataFrame:
-        """
-
-        """
+    def load_standardized_catalog(filename: str, local_date: str) -> pd.DataFrame:
+        """ """
         file_path_str = filename + local_date + ".csv"
         # File already exists
         if os.path.exists(file_path_str):
             logging.info("Reading existing standardized file: " + file_path_str)
         else:
-
             # Cannot find, try most recent local copy
             if len(glob.glob(filename + "*.csv")) > 0:
                 li = list(glob.glob(filename + "*.csv"))
                 li = [re.search(r"\d\d\d\d-\d\d-\d\d", l)[0] for l in li]
                 li = [datetime.strptime(l, "%Y-%m-%d") for l in li]
                 # get the most recent compared to the current date. Get only the ones earlier than the date
-                local_date_datetime = datetime.strptime(re.search(r"\d\d\d\d-\d\d-\d\d", file_path_str)[0],
-                                                        "%Y-%m-%d")
+                local_date_datetime = datetime.strptime(
+                    re.search(r"\d\d\d\d-\d\d-\d\d", file_path_str)[0], "%Y-%m-%d"
+                )
                 li = [l for l in li if l < local_date_datetime]
                 compar_date = max(li).strftime("%Y-%m-%d")
                 file_path_str = filename + compar_date + ".csv"
@@ -758,10 +807,9 @@ class UtilityFunctions:
         return pd.read_csv(file_path_str)
 
     @staticmethod
-    def print_progress_bar(iteration, total, prefix='', suffix='', length=50, fill='█'):
+    def print_progress_bar(iteration, total, prefix="", suffix="", length=50, fill="█"):
         percent = ("{0:.1f}").format(100 * (iteration / float(total)))
         filled_length = int(length * iteration // total)
-        bar = fill * filled_length + '-' * (length - filled_length)
-        sys.stdout.write(f'\r{prefix} |{bar}| {percent}% {suffix}')
+        bar = fill * filled_length + "-" * (length - filled_length)
+        sys.stdout.write(f"\r{prefix} |{bar}| {percent}% {suffix}")
         sys.stdout.flush()  # Flush to ensure it prints out immediately
-

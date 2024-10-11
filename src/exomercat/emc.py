@@ -149,7 +149,7 @@ class Emc(Catalog):
             group.dec = np.round(group.dec.astype(float), 6)
             group.binary = group.binary.replace("", "null")
             group["skycoord"] = SkyCoord(
-                ra=group.ra * u.degree, dec=group.dec * u.degree
+                ra=group.ra * u.degree, dec=group.dec * u.degree, unit="deg"
             )
             # if len(set(group.binary))==1 there is no issue, the binary values agree with one another
             if len(set(group.binary)) > 1:  # there is a discrepancy
@@ -487,7 +487,7 @@ class Emc(Catalog):
         :rtype: None
         """
         list_of_hosts = self.data[self.data.main_id == ""][[typed_id]].drop_duplicates()
-        #clean up non-ascii files
+        # clean up non-ascii files
         list_of_hosts[typed_id] = list_of_hosts.loc[
             list_of_hosts[typed_id].str.findall(r"[^\x00-\x7F]+").str.len() == 0,
             typed_id,
@@ -497,7 +497,8 @@ class Emc(Catalog):
 
         t2 = Table.from_pandas(list_of_hosts)
         query = (
-            "SELECT t.*, basic.main_id, basic.ra as ra_2,basic.dec as dec_2, ids.ids as ids FROM TAP_UPLOAD.tab as t LEFT OUTER JOIN ident ON ident.id = t." + typed_id
+            "SELECT t.*, basic.main_id, basic.ra as ra_2,basic.dec as dec_2, ids.ids as ids FROM TAP_UPLOAD.tab as t LEFT OUTER JOIN ident ON ident.id = t."
+            + typed_id
             + " LEFT OUTER JOIN basic ON ident.oidref = basic.oid LEFT OUTER JOIN ids ON basic.oid = ids.oidref"
         )
         table = Utils.perform_query(service, query, uploads_dict={"tab": t2})
@@ -675,7 +676,9 @@ class Emc(Catalog):
             self.data[self.data.main_id == ""][["hostbinary", "ra", "dec"]]
         )
         query = (
-            "SELECT basic.main_id, basic.dec as dec_2,basic.ra as ra_2, basic.otype as type, t.hostbinary, t.ra, t.dec FROM basic JOIN TAP_UPLOAD.tab AS t on 1=CONTAINS(POINT('ICRS',basic.ra, basic.dec), CIRCLE('ICRS', t.ra, t.dec,"+ str(tolerance) + ")) "
+            "SELECT basic.main_id, basic.dec as dec_2,basic.ra as ra_2, basic.otype as type, t.hostbinary, t.ra, t.dec FROM basic JOIN TAP_UPLOAD.tab AS t on 1=CONTAINS(POINT('ICRS',basic.ra, basic.dec), CIRCLE('ICRS', t.ra, t.dec,"
+            + str(tolerance)
+            + ")) "
         )
         table = Utils.perform_query(service, query, uploads_dict={"tab": t2})
 
@@ -736,7 +739,9 @@ class Emc(Catalog):
         """
 
         logging.info("TIC host check")
-        list_of_hosts = self.data[self.data.main_id == ""][["host"]].drop_duplicates().dropna()
+        list_of_hosts = (
+            self.data[self.data.main_id == ""][["host"]].drop_duplicates().dropna()
+        )
         list_of_hosts = list_of_hosts[list_of_hosts.host.str.contains("TIC")]
         list_of_hosts["host"] = list_of_hosts.loc[
             list_of_hosts["host"].str.findall(r"[^\x00-\x7F]+").str.len() == 0, "host"
@@ -749,9 +754,7 @@ class Emc(Catalog):
 
         service = pyvo.dal.TAPService("http://TAPVizieR.cds.unistra.fr/TAPVizieR/tap/")
 
-        t2 = Table.from_pandas(
-            pd.DataFrame(list_of_hosts['host'])
-        )
+        t2 = Table.from_pandas(pd.DataFrame(list_of_hosts["host"]))
 
         query = 'SELECT tc.*, RAJ2000 as ra_2, DEJ2000 as dec_2, GAIA, UCAC4, "2MASS", WISEA, TIC, KIC, HIP, TYC  FROM "IV/39/tic82" AS db JOIN TAP_UPLOAD.t1 AS tc ON db.TIC = tc.host'
 
@@ -795,12 +798,12 @@ class Emc(Catalog):
         for ind in alias_df.index:
             tic_alias = alias_df.at[ind, "alias"].split(",")
             alias_df.at[ind, "tic_alias"] = [x for x in tic_alias if "TIC" in x][0]
-        alias_df["tic_alias"] = alias_df["tic_alias"].str.replace("TIC ", "").astype(int)
+        alias_df["tic_alias"] = (
+            alias_df["tic_alias"].str.replace("TIC ", "").astype(int)
+        )
 
         alias_df = alias_df[["host", "tic_alias"]]
-        t2 = Table.from_pandas(
-            alias_df[['host','tic_alias']]
-        )
+        t2 = Table.from_pandas(alias_df[["host", "tic_alias"]])
 
         query = 'SELECT tc.*, RAJ2000 as ra_2, DEJ2000 as dec_2, GAIA, UCAC4, "2MASS", WISEA, TIC, KIC, HIP, TYC  FROM "IV/39/tic82" AS db JOIN TAP_UPLOAD.t1 AS tc ON db.TIC = tc.tic_alias'
 
@@ -870,8 +873,9 @@ class Emc(Catalog):
             self.data[self.data.main_id == ""][["hostbinary", "ra", "dec"]]
         )
         query = (
-                """SELECT t.*, RAJ2000 as ra_2, DEJ2000 as dec_2, GAIA, UCAC4, "2MASS", WISEA, TIC, KIC, HIP, TYC FROM "IV/39/tic82" JOIN TAP_UPLOAD.tab AS t on 1=CONTAINS(POINT('ICRS',RAJ2000, DEJ2000), CIRCLE('ICRS', t.ra, t.dec,""" + str(
-            tolerance) + """)) """
+            """SELECT t.*, RAJ2000 as ra_2, DEJ2000 as dec_2, GAIA, UCAC4, "2MASS", WISEA, TIC, KIC, HIP, TYC FROM "IV/39/tic82" JOIN TAP_UPLOAD.tab AS t on 1=CONTAINS(POINT('ICRS',RAJ2000, DEJ2000), CIRCLE('ICRS', t.ra, t.dec,"""
+            + str(tolerance)
+            + """)) """
         )
         table = Utils.perform_query(service, query, uploads_dict={"tab": t2})
 
@@ -886,14 +890,14 @@ class Emc(Catalog):
         #         + str(tolerance)
         #         + """))"""
         #     )
-            # single_table = Utils.perform_query(service, query, uploads_dict={})
-            # if len(single_table) > 0:
-            #     single_table["hostbinary"] = t2.at[ind, "hostbinary"]
-            #     single_table["ra"] = t2.at[ind, "ra"]
-            #     single_table["dec"] = t2.at[ind, "dec"]
-            #     single_table = Utils.calculate_angsep(single_table)
-            #
-            #     table = pd.concat([table, single_table])
+        # single_table = Utils.perform_query(service, query, uploads_dict={})
+        # if len(single_table) > 0:
+        #     single_table["hostbinary"] = t2.at[ind, "hostbinary"]
+        #     single_table["ra"] = t2.at[ind, "ra"]
+        #     single_table["dec"] = t2.at[ind, "dec"]
+        #     single_table = Utils.calculate_angsep(single_table)
+        #
+        #     table = pd.concat([table, single_table])
         table = table.drop_duplicates()
         table = Utils.calculate_angsep(table)
 
@@ -1092,16 +1096,19 @@ class Emc(Catalog):
                 ].copy()
                 if (binary_catalog.replace("S-type", "") == "").all():
                     self.data.loc[self.data.main_id == identifier, "binary"] = binary
-                    output_string = output_string + " Only S-type or null. Binary could be standardized."
+                    output_string = (
+                        output_string
+                        + " Only S-type or null. Binary could be standardized."
+                    )
                 elif (binary_catalog != binary).any():
-                    #CASE 2: values disagreeing. No replacement.
+                    # CASE 2: values disagreeing. No replacement.
                     output_string = (
                         output_string
                         + " Binary value is not in agreement, please check:\n"
-                        +self.data.loc[
-                                    self.data.main_id == identifier,
-                                    ["name", "host", "binary", "catalog"],
-                                ].to_string()
+                        + self.data.loc[
+                            self.data.main_id == identifier,
+                            ["name", "host", "binary", "catalog"],
+                        ].to_string()
                     )
                 elif (binary_catalog == binary).all():
                     # CASE 3: already correct. No replacement.
@@ -1115,7 +1122,7 @@ class Emc(Catalog):
             output_string = output_string
         elif len(table) == 0:
             output_string = (
-                    "Weird MAINID found: "
+                "Weird MAINID found: "
                 + identifier
                 + " but cannot be found when "
                 + new_identifier
@@ -1183,8 +1190,7 @@ class Emc(Catalog):
                     identifier, new_identifier, "AB"
                 )
 
-                f.write(output_string +'\n')
-
+                f.write(output_string + "\n")
 
             if len(re.findall(r"[\[a-z](AB)$|\s(AB)$|\d(AB)$]", identifier)) > 0:
                 counter += 1
@@ -1192,17 +1198,17 @@ class Emc(Catalog):
                 #     self.data.loc[self.data.main_id == identifier, "binary"] != "AB"
                 # ).any():
 
-                    # f.write(
-                    #     "MAIN_ID: "
-                    #     + identifier
-                    #     + ". Selected binary value: AB"
-                    #     + ". Value in catalog: "
-                    #     + str(list(set(self.data.loc[
-                    #                        self.data.main_id == identifier,"binary"],
-                    #                    )))
-                    #     + "\n"
-                    #     + "\n"
-                    # )
+                # f.write(
+                #     "MAIN_ID: "
+                #     + identifier
+                #     + ". Selected binary value: AB"
+                #     + ". Value in catalog: "
+                #     + str(list(set(self.data.loc[
+                #                        self.data.main_id == identifier,"binary"],
+                #                    )))
+                #     + "\n"
+                #     + "\n"
+                # )
 
                 new_identifier = identifier[:-2].rstrip()
                 output_string = self.replace_old_new_identifier(
@@ -1212,7 +1218,6 @@ class Emc(Catalog):
 
             # REGULAR BINARY
             if len(re.findall("[\s\d][ABCSN]$", identifier)) > 0:
-
                 counter += 1
                 # if (
                 #     self.data.loc[self.data.main_id == identifier, "binary"]
@@ -1682,11 +1687,12 @@ class Emc(Catalog):
             result.loc[0, p[0]] = ""
 
             subgroup = group[p[:-1]]
-            subgroup.loc[:, p[1:-1]] = subgroup.loc[:, p[1:-1]].fillna(np.nan).replace("", np.nan)
+            subgroup.loc[:, p[1:-1]] = (
+                subgroup.loc[:, p[1:-1]].fillna(np.nan).replace("", np.nan)
+            )
             subgroup = subgroup.dropna(subset=[p[1]])
 
             if len(subgroup) > 0:
-
                 subgroup[p[1]] = subgroup[p[1]].astype("float")
 
                 # Try removing the cases that have NaN as uncertainty.
@@ -1694,7 +1700,7 @@ class Emc(Catalog):
                 # with a very large known value (1e32).
 
                 if len(subgroup.dropna(subset=[p[3], p[2]])) > 0:
-                    #keep only rows that have non-nan errorbars
+                    # keep only rows that have non-nan errorbars
                     subgroup = subgroup.dropna(subset=[p[3], p[2]])
                     subgroup["maxrel"] = subgroup[p[3]].astype("float") / subgroup[
                         p[1]
@@ -1703,7 +1709,7 @@ class Emc(Catalog):
                         p[1]
                     ].astype("float")
                 else:
-                    #there are only non-nan errorbars, set relative error to 1e32
+                    # there are only non-nan errorbars, set relative error to 1e32
                     subgroup["maxrel"] = 1e32
                     subgroup["minrel"] = 1e32
 
@@ -2038,7 +2044,9 @@ class Emc(Catalog):
 
             # Print progress
             if verbose:
-                Utils.print_progress_bar(counter, len(grouped_df), prefix='Progress:', suffix='Complete')
+                Utils.print_progress_bar(
+                    counter, len(grouped_df), prefix="Progress:", suffix="Complete"
+                )
 
             counter = counter + 1
         f1.close()
@@ -2229,7 +2237,7 @@ class Emc(Catalog):
                     > 20.0
                 )
                 #   | (self.data.letter == "BD")
-            ].to_csv("Exo-MerCat/" + self.name + "_brown_dwarfs.csv",index=None)
+            ].to_csv("Exo-MerCat/" + self.name + "_brown_dwarfs.csv", index=None)
 
             self.data[
                 (
@@ -2239,7 +2247,10 @@ class Emc(Catalog):
                     > 20.0
                 )
                 #   | (self.data.letter == "BD")
-            ].to_csv("Exo-MerCat/" + self.name + "_brown_dwarfs" + local_date + ".csv",index=None)
+            ].to_csv(
+                "Exo-MerCat/" + self.name + "_brown_dwarfs" + local_date + ".csv",
+                index=None,
+            )
 
         self.data = self.data[
             (
