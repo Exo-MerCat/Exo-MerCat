@@ -265,26 +265,26 @@ def test__read_config_replacements(instance, tmp_path):
     os.chdir(tmp_path)  # Create a temporary in-memory configuration object
     # Create a temporary directory to store the fake_config.ini
     with open("replacements.ini", "w") as config_file:
-        config_file.write("[NAME]\n")
+        config_file.write("[NAMEtochangeNAME]\n")
         config_file.write("alf Tau b = Aldebaran b\n")
-        config_file.write("[HOST]\n")
+        config_file.write("[HOSTtochangeHOST]\n")
         config_file.write("gam1 Leo = gam01 Leo\n")
-        config_file.write("[ra]\n")
+        config_file.write("[HOSTtochangeRA]\n")
         config_file.write("K2-2016-BLG-0005L = 269.879166677\n")
         config_file.write("[DROP]\n")
         config_file.write("name = Trojan\n")
-        config_file.write("[BINARY]\n")
+        config_file.write("[NAMEtochangeBINARY]\n")
         config_file.write("XO-2N c = A\n")
 
-    replacements = instance.read_config_replacements("NAME")
+    replacements = instance.read_config_replacements("NAMEtochangeNAME")
     assert replacements["alf Tau b"] == "Aldebaran b"
-    replacements = instance.read_config_replacements("HOST")
+    replacements = instance.read_config_replacements("HOSTtochangeHOST")
     assert replacements["gam1 Leo"] == "gam01 Leo"
-    replacements = instance.read_config_replacements("ra")
+    replacements = instance.read_config_replacements("HOSTtochangeRA")
     assert replacements["K2-2016-BLG-0005L"] == "269.879166677"
     replacements = instance.read_config_replacements("DROP")
     assert replacements["name"] == "Trojan"
-    replacements = instance.read_config_replacements("BINARY")
+    replacements = instance.read_config_replacements("NAMEtochangeBINARY")
     assert replacements["XO-2N c"] == "A"
     assert replacements["XO-2N c"] != "N"
     os.chdir(original_dir)

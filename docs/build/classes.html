@@ -132,7 +132,7 @@
     <div class="bd-toc-item navbar-nav active">
         <p aria-level="2" class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="run_tap.html">Run Exo-MerCat from TAP</a></li>
+<li class="toctree-l1"><a class="reference internal" href="run_tap.html">Get Exo-MerCat from TAP</a></li>
 <li class="toctree-l1"><a class="reference internal" href="run_locally.html">Run Exo-MerCat locally</a></li>
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">Classes</a></li>
 
@@ -421,7 +421,7 @@ document.write(`
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.emc.Emc.merge_into_single_entry"><code class="docutils literal notranslate"><span class="pre">Emc.merge_into_single_entry()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.emc.Emc.group_by_letter_check_period"><code class="docutils literal notranslate"><span class="pre">Emc.group_by_letter_check_period()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.emc.Emc.select_best_mass"><code class="docutils literal notranslate"><span class="pre">Emc.select_best_mass()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.emc.Emc.set_exo_mercat_name"><code class="docutils literal notranslate"><span class="pre">Emc.set_exo_mercat_name()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.emc.Emc.set_exomercat_name"><code class="docutils literal notranslate"><span class="pre">Emc.set_exomercat_name()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.emc.Emc.keep_columns"><code class="docutils literal notranslate"><span class="pre">Emc.keep_columns()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.emc.Emc.remove_known_brown_dwarfs"><code class="docutils literal notranslate"><span class="pre">Emc.remove_known_brown_dwarfs()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.emc.Emc.fill_row_update"><code class="docutils literal notranslate"><span class="pre">Emc.fill_row_update()</span></code></a></li>
@@ -1974,9 +1974,9 @@ it assigns mass values to these columns instead.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="src.exomercat.emc.Emc.set_exo_mercat_name">
-<span class="sig-name descname"><span class="pre">set_exo_mercat_name</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.emc.Emc.set_exo_mercat_name" title="Permalink to this definition">#</a></dt>
-<dd><p>The set_exo_mercat name creates the columns exo_mercat_name by joining the main_id, the binary (if any), and the letter.</p>
+<dt class="sig sig-object py" id="src.exomercat.emc.Emc.set_exomercat_name">
+<span class="sig-name descname"><span class="pre">set_exomercat_name</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.emc.Emc.set_exomercat_name" title="Permalink to this definition">#</a></dt>
+<dd><p>The set_exo_mercat name creates the columns exo-mercat_name by joining the main_id, the binary (if any), and the letter.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>self</strong> (<a class="reference internal" href="#src.exomercat.emc.Emc" title="src.exomercat.emc.Emc"><em>Emc</em></a>) – An instance of the class Emc</p>
@@ -2486,7 +2486,7 @@ Parses the ElementTree object for a list of parameters.</p>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.emc.Emc.merge_into_single_entry"><code class="docutils literal notranslate"><span class="pre">Emc.merge_into_single_entry()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.emc.Emc.group_by_letter_check_period"><code class="docutils literal notranslate"><span class="pre">Emc.group_by_letter_check_period()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.emc.Emc.select_best_mass"><code class="docutils literal notranslate"><span class="pre">Emc.select_best_mass()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.emc.Emc.set_exo_mercat_name"><code class="docutils literal notranslate"><span class="pre">Emc.set_exo_mercat_name()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.emc.Emc.set_exomercat_name"><code class="docutils literal notranslate"><span class="pre">Emc.set_exomercat_name()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.emc.Emc.keep_columns"><code class="docutils literal notranslate"><span class="pre">Emc.keep_columns()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.emc.Emc.remove_known_brown_dwarfs"><code class="docutils literal notranslate"><span class="pre">Emc.remove_known_brown_dwarfs()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.emc.Emc.fill_row_update"><code class="docutils literal notranslate"><span class="pre">Emc.fill_row_update()</span></code></a></li>

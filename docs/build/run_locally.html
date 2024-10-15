@@ -334,6 +334,7 @@ document.write(`
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#install-exo-mercat">Install Exo-MerCat</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#run-exo-mercat">Run Exo-MerCat</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#modify-the-ini-files">Modify the <code class="docutils literal notranslate"><span class="pre">.ini</span></code> files</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#the-input-sources-ini-file">The <code class="docutils literal notranslate"><span class="pre">input_sources.ini</span></code> file</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#the-replacements-ini-file">The <code class="docutils literal notranslate"><span class="pre">replacements.ini</span></code> file</a></li>
 </ul>
 </li>
@@ -394,28 +395,106 @@ pip3 install -r requirements.txt
 <section id="run-exo-mercat">
 <h2>Run Exo-MerCat<a class="headerlink" href="#run-exo-mercat" title="Permalink to this heading">#</a></h2>
 <p>Once installed, the script can be launched with the following command:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">exomercat</span> <span class="p">[</span> <span class="p">[</span><span class="o">-</span><span class="n">l</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">d</span> <span class="n">DATE</span><span class="p">]</span> <span class="n">function</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">exomercat</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">d</span> <span class="n">DATE</span><span class="p">]</span> <span class="n">function</span>
 </pre></div>
 </div>
 <p>The user can select optional arguments:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">-h</span></code> (or <code class="docutils literal notranslate"><span class="pre">--help</span></code>) to print a help message;</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">-v</span></code> (or <code class="docutils literal notranslate"><span class="pre">--verbose</span></code>) to increase the verbosity of the output’;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-v</span></code> (or <code class="docutils literal notranslate"><span class="pre">--verbose</span></code>) to increase output verbosity. Use <code class="docutils literal notranslate"><span class="pre">-vv</span></code> or <code class="docutils literal notranslate"><span class="pre">-vvv</span></code> to increase verbosity;</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">-d</span> <span class="pre">YYYY-MM-DD</span></code> (or <code class="docutils literal notranslate"><span class="pre">--date</span> <span class="pre">YYYY-MM-DD</span></code>) to load the input sources at a specific date in YYYY-MM-DD format.</p></li>
 </ul>
 <p>Possible functions to be run are:</p>
 <ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">maintenance</span></code>, which executes sanity checks on the input sources to check if they are currently available for download;</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">input</span></code>, which executes the download of the input sources and their standardization;</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">run</span></code>, which joins the input sources to generate the Exo-MerCat catalog;</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">check</span></code>, which performs sanity checks on the output;</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">tests</span></code>, which performs unit tests on the code.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">all</span></code>, which runs all of the functions above.</p></li>
 </ul>
+<p>To run tests on the code, the user can run:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pytest</span>
+</pre></div>
+</div>
+<p>This will produce a html page in the folder <code class="docutils literal notranslate"><span class="pre">htmlcov</span></code> showing if the cose is currently covered by the implemented tests.</p>
 <p>You can run Exo-MerCat in any folder, as long as it contains the <code class="docutils literal notranslate"><span class="pre">replacements.ini</span></code> and the <code class="docutils literal notranslate"><span class="pre">input_sources.ini</span></code> files. You can change the <code class="docutils literal notranslate"><span class="pre">.ini</span></code> files according to your preferences.</p>
 </section>
 <section id="modify-the-ini-files">
 <h2>Modify the <code class="docutils literal notranslate"><span class="pre">.ini</span></code> files<a class="headerlink" href="#modify-the-ini-files" title="Permalink to this heading">#</a></h2>
+<section id="the-input-sources-ini-file">
+<h3>The <code class="docutils literal notranslate"><span class="pre">input_sources.ini</span></code> file<a class="headerlink" href="#the-input-sources-ini-file" title="Permalink to this heading">#</a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">input_sources.ini</span></code> file contains the links to the input sources and the path to where they should be saved. In an ideal scenario, this file will never need to be changed. However, in case the input sources change the location of their tables, or if the user wants to add a new resource and/or change the location of the files that are downloaded, this is the file to modify.</p>
+<p>Here is an example of the <code class="docutils literal notranslate"><span class="pre">input_sources.ini</span></code> file.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>[nasa]
+url = https://exoplanetarchive.ipac.caltech.edu/TAP/sync?query=select+*+from+pscomppars&amp;format=csv
+file = InputSources/nasa_init
+
+[oec]
+url = https://github.com/OpenExoplanetCatalogue/oec_gzip/raw/master/systems.xml.gz
+file = InputSources/oec_init
+
+[eu]
+url =  https://exoplanet.eu/catalog/csv/?query_f=planet_status%3D%22confirmed%22%20or%20planet_status%3D%22candidate%22%20or%20planet_status%3D%22unconfirmed%22%20or%20planet_status%3D%22controversial%22%20or%20planet_status%3D%22retracted%22
+file = InputSources/eu_init
+
+[koi]
+url = https://exoplanetarchive.ipac.caltech.edu/cgi-bin/nstedAPI/nph-nstedAPI?table=cumulative
+file = InputSources/koi_init
+
+[epic]
+url = https://exoplanetarchive.ipac.caltech.edu/TAP/sync?query=select+*+from+k2pandc&amp;format=csv
+file = InputSources/epic_init
+
+[toi]
+url = https://exoplanetarchive.ipac.caltech.edu/TAP/sync?query=select+*+from+TOI&amp;format=csv
+file = InputSources/toi_init
+</pre></div>
+</div>
+<p>The file is split in sections, one per catalog. The section name is between brackets and it must be the same as the assigned name of each catalog. Then, the URL must be specified as well as the preferred file name/path.</p>
+</section>
 <section id="the-replacements-ini-file">
 <h3>The <code class="docutils literal notranslate"><span class="pre">replacements.ini</span></code> file<a class="headerlink" href="#the-replacements-ini-file" title="Permalink to this heading">#</a></h3>
+<p>Here is an excerpt of a valid <code class="docutils literal notranslate"><span class="pre">replacements.ini</span></code> file:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">NAMEtochangeNAME</span><span class="p">]</span> 
+<span class="n">KOI</span><span class="o">-</span><span class="mi">7209</span> <span class="o">=</span> <span class="n">KOI</span><span class="o">-</span><span class="mi">7209</span> <span class="n">b</span>
+<span class="n">gam1</span> <span class="n">Leo</span> <span class="n">b</span> <span class="o">=</span> <span class="n">gam01</span> <span class="n">Leo</span> <span class="n">b</span>
+
+<span class="p">[</span><span class="n">NAMEtochangeHOST</span><span class="p">]</span>
+<span class="mi">2</span><span class="n">MASS</span> <span class="mi">0359</span><span class="o">+</span><span class="mi">2009</span> <span class="n">b</span> <span class="o">=</span> <span class="mi">2</span><span class="n">MASS</span> <span class="n">J03590986</span><span class="o">+</span><span class="mi">2009361</span>
+<span class="mi">2</span><span class="n">M</span> <span class="mi">0103</span><span class="o">-</span><span class="mi">55</span> <span class="p">(</span><span class="n">AB</span><span class="p">)</span> <span class="n">b</span> <span class="o">=</span> <span class="mi">2</span><span class="n">MASS</span> <span class="n">J01033563</span><span class="o">-</span><span class="mi">5515561</span>
+
+<span class="p">[</span><span class="n">NAMEtochangeBINARY</span><span class="p">]</span>
+<span class="n">XO</span><span class="o">-</span><span class="mi">2</span><span class="n">N</span> <span class="n">c</span> <span class="o">=</span> <span class="n">A</span>
+<span class="n">XO</span><span class="o">-</span><span class="mi">2</span><span class="n">N</span> <span class="n">b</span> <span class="o">=</span> <span class="n">A</span>
+
+<span class="p">[</span><span class="n">HOSTtochangeHOST</span><span class="p">]</span>
+<span class="mi">2</span><span class="n">M</span> <span class="mi">0103</span><span class="o">-</span><span class="mi">55</span> <span class="p">(</span><span class="n">AB</span><span class="p">)</span> <span class="o">=</span> <span class="n">SCR</span> <span class="n">J0103</span><span class="o">-</span><span class="mi">5515</span> <span class="p">(</span><span class="n">AB</span><span class="p">)</span>
+<span class="mi">1</span><span class="n">SWASP</span> <span class="n">J1407</span> <span class="o">=</span> <span class="mi">1</span><span class="n">SWASP</span> <span class="n">J140747</span><span class="mf">.93</span><span class="o">-</span><span class="mf">394542.6</span>
+
+<span class="p">[</span><span class="n">HOSTtochangeRA</span><span class="p">]</span>
+<span class="n">K2</span><span class="o">-</span><span class="mi">2016</span><span class="o">-</span><span class="n">BLG</span><span class="o">-</span><span class="mi">0005</span><span class="n">L</span> <span class="o">=</span> <span class="mf">269.879166677</span>
+
+<span class="p">[</span><span class="n">HOSTtochangeDEC</span><span class="p">]</span>
+<span class="n">M62H</span> <span class="n">b</span> <span class="o">=-</span><span class="mf">30.1069833</span>
+
+<span class="p">[</span><span class="n">DROP</span><span class="p">]</span>
+<span class="n">name</span> <span class="o">=</span> <span class="n">Trojan</span><span class="p">,</span><span class="n">Candidate</span>
+<span class="n">name</span> <span class="o">=</span> <span class="n">Oumuamua</span>
+<span class="n">alias</span><span class="o">=</span> <span class="n">Sun</span>
+<span class="n">host</span> <span class="o">=</span> <span class="n">Sun</span>
+</pre></div>
+</div>
+<p>There are six different sections, depending on the preferred key that needs to be used to change a specific value. Specifically:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">NAMEtochangeHOST</span></code> contains all entries for which we need to use the planet name to change the host star name;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">NAMEtochangeHOST</span></code> contains all entries for which we need to use the planet name to change the host star name;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">NAMEtochangeBINARY</span></code> contains all entries for which we need to use the planet name to change the binary letter value;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">HOSTtochangeHOST</span></code> contains all entries for which we need to use the host star name to change the host star name itself;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">HOSTtochangeRA</span></code> contains all entries for which we need to use the host star name to change the host star right ascension;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">HOSTtochangeDEC</span></code> contains all entries for which we need to use the host star name to change the host star declination;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">DROP</span></code> contains all entries that need to be dropped, searching through the following keys: <code class="docutils literal notranslate"><span class="pre">name</span></code> (the planet name), <code class="docutils literal notranslate"><span class="pre">host</span></code> (the star name), <code class="docutils literal notranslate"><span class="pre">alias</span></code> (a stellar alias). All items to be discarded can be listed one by one (e.g. <code class="docutils literal notranslate"><span class="pre">name=Candidate</span></code> and <code class="docutils literal notranslate"><span class="pre">name=Trojan</span></code>) or as a comma-separated list (i.e.<code class="docutils literal notranslate"><span class="pre">name=Candidate,Trojan</span></code>).</p></li>
+</ul>
+<p>You can find a summary of the used replacements for each catalogs in the logfile <code class="docutils literal notranslate"><span class="pre">replace_known_mistakes.txt</span></code>.</p>
 </section>
 </section>
 </section>
@@ -472,6 +551,7 @@ pip3 install -r requirements.txt
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#install-exo-mercat">Install Exo-MerCat</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#run-exo-mercat">Run Exo-MerCat</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#modify-the-ini-files">Modify the <code class="docutils literal notranslate"><span class="pre">.ini</span></code> files</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#the-input-sources-ini-file">The <code class="docutils literal notranslate"><span class="pre">input_sources.ini</span></code> file</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#the-replacements-ini-file">The <code class="docutils literal notranslate"><span class="pre">replacements.ini</span></code> file</a></li>
 </ul>
 </li>

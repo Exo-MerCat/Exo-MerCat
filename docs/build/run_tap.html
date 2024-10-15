@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>Run Exo-MerCat from TAP &#8212; Exo-MerCat 2.0.0</title>
+    <title>Get Exo-MerCat from TAP &#8212; Exo-MerCat 2.0.0</title>
   
   
   
@@ -132,7 +132,7 @@
     <div class="bd-toc-item navbar-nav active">
         <p aria-level="2" class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current nav bd-sidenav">
-<li class="toctree-l1 current active"><a class="current reference internal" href="#">Run Exo-MerCat from TAP</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Get Exo-MerCat from TAP</a></li>
 <li class="toctree-l1"><a class="reference internal" href="run_locally.html">Run Exo-MerCat locally</a></li>
 <li class="toctree-l1"><a class="reference internal" href="classes.html">Classes</a></li>
 
@@ -320,7 +320,7 @@ document.write(`
               
 
 <div id="jb-print-docs-body" class="onlyprint">
-    <h1>Run Exo-MerCat from TAP</h1>
+    <h1>Get Exo-MerCat from TAP</h1>
     <!-- Table of contents -->
     <div id="print-main-content">
         <div id="jb-print-toc">
@@ -330,9 +330,14 @@ document.write(`
             </div>
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#install-topcat">Install TOPCAT</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#install-pyvo">Install PYVO</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#examples">Examples</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#topcat">TOPCAT</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#pyvo">pyvo</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#examples">Examples</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#download-the-full-catalog">Download the full catalog</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#get-original-eu-entry">Get original EU entry</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#get-more-info-on-the-star-from-simbad">Get more info on the star from SIMBAD</a></li>
+</ul>
+</li>
 </ul>
             </nav>
         </div>
@@ -344,16 +349,67 @@ document.write(`
 <div id="searchbox"></div>
                 <article class="bd-article" role="main">
                   
-  <section id="run-exo-mercat-from-tap">
-<h1>Run Exo-MerCat from TAP<a class="headerlink" href="#run-exo-mercat-from-tap" title="Permalink to this heading">#</a></h1>
-<section id="install-topcat">
-<h2>Install TOPCAT<a class="headerlink" href="#install-topcat" title="Permalink to this heading">#</a></h2>
+  <section id="get-exo-mercat-from-tap">
+<h1>Get Exo-MerCat from TAP<a class="headerlink" href="#get-exo-mercat-from-tap" title="Permalink to this heading">#</a></h1>
+<p>The easiest way to access Exo-MerCat is through Table Access protocol (for more information, see <a class="reference external" href="https://www.ivoa.net/documents/TAP/">the IVOA TAP standard page</a>). This can be done through <a class="reference internal" href="#topcat"><span class="std std-ref">TOPCAT</span></a> or <a class="reference internal" href="#pyvo"><span class="std std-ref">pyvo</span></a>.</p>
+<section id="topcat">
+<h2>TOPCAT<a class="headerlink" href="#topcat" title="Permalink to this heading">#</a></h2>
+<p>Exo-MerCat can be queried using <a class="reference external" href="https://www.star.bris.ac.uk/~mbt/topcat/">TOPCAT</a>. To download the Exo-MerCat table by performing a TAP query on TOPCAT the user should:</p>
+<ul class="simple">
+<li><p>Select VO –&gt; Table Access Protocol (TAP) Query</p></li>
+<li><p>Paste this link TAP URL into the Selected TAP Service: <a class="reference external" href="http://archives.ia2.inaf.it:80/vo/tap/projects">http://archives.ia2.inaf.it:80/vo/tap/projects</a> and click Use Service</p></li>
+<li><p>Paste your ADQL query in the ADQL section. (for example <code class="docutils literal notranslate"><span class="pre">SELECT</span> <span class="pre">TOP</span> <span class="pre">1000</span> <span class="pre">*</span> <span class="pre">FROM</span> <span class="pre">exomercat.exomercat</span></code>) and click Run Query.</p></li>
+</ul>
+<p>The Exo-MerCat table will be then downloaded and available on TOPCAT. More ADQL examples can be found in <a class="reference internal" href="#examples"><span class="std std-ref">Examples</span></a>.</p>
 </section>
-<section id="install-pyvo">
-<h2>Install PYVO<a class="headerlink" href="#install-pyvo" title="Permalink to this heading">#</a></h2>
+<section id="pyvo">
+<h2>pyvo<a class="headerlink" href="#pyvo" title="Permalink to this heading">#</a></h2>
+<p>Exo-MerCat can be accessed in Python through <a class="reference external" href="https://pyvo.readthedocs.io/en/latest/">pyvo</a>. Once installed the package, the user can run:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pyvo</span> <span class="k">as</span> <span class="nn">vo</span>
+<span class="n">service</span> <span class="o">=</span> <span class="n">vo</span><span class="o">.</span><span class="n">dal</span><span class="o">.</span><span class="n">TAPService</span><span class="p">(</span><span class="s2">&quot;http://archives.ia2.inaf.it:80/vo/tap/projects&quot;</span><span class="p">)</span>
+<span class="n">resultset</span> <span class="o">=</span> <span class="n">service</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s2">&quot;SELECT TOP 1000 * FROM exomercat.exomercat&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>For more information, please see the <a class="reference external" href="https://pyvo.readthedocs.io/en/latest/">pyvo documentation</a>.</p>
 </section>
 <section id="examples">
 <h2>Examples<a class="headerlink" href="#examples" title="Permalink to this heading">#</a></h2>
+<p>In this section, we provide some useful ADQL queries that might be useful to the user.</p>
+<section id="download-the-full-catalog">
+<h3>Download the full catalog<a class="headerlink" href="#download-the-full-catalog" title="Permalink to this heading">#</a></h3>
+<p>Using the following TAP service: <a class="reference external" href="http://archives.ia2.inaf.it:80/vo/tap/projects">http://archives.ia2.inaf.it:80/vo/tap/projects</a></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">SELECT</span> <span class="o">*</span> 
+<span class="n">FROM</span> <span class="n">exomercat</span><span class="o">.</span><span class="n">exomercat</span>
+</pre></div>
+</div>
+</section>
+<section id="get-original-eu-entry">
+<h3>Get original EU entry<a class="headerlink" href="#get-original-eu-entry" title="Permalink to this heading">#</a></h3>
+<p>Using the following TAP service: <a class="reference external" href="http://voparis-tap-planeto.obspm.fr/tap">http://voparis-tap-planeto.obspm.fr/tap</a></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">SELECT</span> <span class="o">*</span> 
+<span class="n">FROM</span> <span class="n">exoplanet</span><span class="o">.</span><span class="n">epn_core</span> <span class="n">AS</span> <span class="n">db</span>
+<span class="n">JOIN</span> <span class="n">TAP_UPLOAD</span><span class="o">.</span><span class="n">t1</span> <span class="n">AS</span> <span class="n">tc</span> 
+  <span class="n">ON</span> <span class="n">tc</span><span class="o">.</span><span class="n">eu_name</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">target_name</span>
+</pre></div>
+</div>
+</section>
+<section id="get-more-info-on-the-star-from-simbad">
+<h3>Get more info on the star from SIMBAD<a class="headerlink" href="#get-more-info-on-the-star-from-simbad" title="Permalink to this heading">#</a></h3>
+<p>Using the following TAP service: <a class="reference external" href="http://simbad.cds.unistra.fr/simbad/sim-tap">http://simbad.cds.unistra.fr/simbad/sim-tap</a></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">SELECT</span> <span class="n">t1</span><span class="o">.*</span><span class="p">,</span> 
+       <span class="n">basic</span><span class="o">.</span><span class="n">sp_type</span><span class="p">,</span> 
+       <span class="n">basic</span><span class="o">.</span><span class="n">pmra</span><span class="p">,</span> 
+       <span class="n">basic</span><span class="o">.</span><span class="n">pmdec</span><span class="p">,</span> 
+       <span class="n">basic</span><span class="o">.</span><span class="n">plx_value</span><span class="p">,</span> 
+       <span class="n">basic</span><span class="o">.</span><span class="n">rvz_redshift</span><span class="p">,</span> 
+       <span class="n">basic</span><span class="o">.</span><span class="n">otype_txt</span>
+<span class="n">FROM</span> <span class="n">TAP_UPLOAD</span><span class="o">.</span><span class="n">t1</span> <span class="n">AS</span> <span class="n">t1</span>
+<span class="n">LEFT</span> <span class="n">OUTER</span> <span class="n">JOIN</span> <span class="n">ident</span> <span class="n">ON</span> <span class="n">ident</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="n">t1</span><span class="o">.</span><span class="n">main_id</span>
+<span class="n">LEFT</span> <span class="n">OUTER</span> <span class="n">JOIN</span> <span class="n">basic</span> <span class="n">ON</span> <span class="n">ident</span><span class="o">.</span><span class="n">oidref</span> <span class="o">=</span> <span class="n">basic</span><span class="o">.</span><span class="n">oid</span>
+<span class="n">LEFT</span> <span class="n">OUTER</span> <span class="n">JOIN</span> <span class="n">ids</span> <span class="n">ON</span> <span class="n">basic</span><span class="o">.</span><span class="n">oid</span> <span class="o">=</span> <span class="n">ids</span><span class="o">.</span><span class="n">oidref</span>
+</pre></div>
+</div>
+</section>
 </section>
 </section>
 
@@ -405,9 +461,14 @@ document.write(`
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#install-topcat">Install TOPCAT</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#install-pyvo">Install PYVO</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#examples">Examples</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#topcat">TOPCAT</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#pyvo">pyvo</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#examples">Examples</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#download-the-full-catalog">Download the full catalog</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#get-original-eu-entry">Get original EU entry</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#get-more-info-on-the-star-from-simbad">Get more info on the star from SIMBAD</a></li>
+</ul>
+</li>
 </ul>
   </nav></div>
 

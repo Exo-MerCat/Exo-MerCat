@@ -411,13 +411,13 @@ def test__check_binary_mismatch(tmp_path, instance):
         "**** CHECKING BINARIES USING: main_id ****\n",
         "*************************************************\n",
         "\n",
-        "WARNING: Flags are changing here compared to previous check. Previous value of binary_mismatch_flag was: [0]. Fixed S-type or null binary for 91 Aqr b. New binary value: A. WARNING: coordinate agreement exceeds tolerance. Maximum difference: 12.22406962954591 (binary_mismatch_flag = 1). Please check this system:\n",
+        "WARNING: Flags are changing here compared to previous check. Previous value of binary_mismatch_flag was: 0. Fixed S-type or null binary for 91 Aqr b. New binary value: A. WARNING: coordinate agreement exceeds tolerance. Maximum difference: 12.22406962954591 (binary_mismatch_flag = 1). Please check this system:\n",
         "         name main_id binary letter    catalog    ra   dec\n",
         "0  91 Aqr A b  91 Aqr      A      b  Catalog 1  10.0  40.0\n",
         "1    91 Aqr b  91 Aqr   null      b  Catalog 3  20.0  50.0\n",
         "\n",
         "\n",
-        "WARNING: Flags are changing here compared to previous check. Previous value of binary_mismatch_flag was:[2]. Only S-type and "
+        "WARNING: Flags are changing here compared to previous check. Previous value of binary_mismatch_flag was: 2. Only S-type and "
         "null in the system for HD 156846 b. New binary value: S-type. WARNING: "
         "coordinate agreement exceeds tolerance. Maximum difference: "
         "0.0009839776494423166 (binary_mismatch_flag = 1) . Please check "
@@ -427,7 +427,7 @@ def test__check_binary_mismatch(tmp_path, instance):
         "5  HD 156846 b  HD 156846  S-type      b      eu  260.142337 -19.334365\n",
         "\n",
         "\n",
-        "WARNING: Flags are changing here compared to previous check. Previous value of binary_mismatch_flag was: [0, 1]. WARNING: Either "
+        "WARNING: Flags are changing here compared to previous check. Previous value of binary_mismatch_flag was: 0,1. WARNING: Either "
         "a complex system or a mismatch in the value of binary (binary_mismatch_flag"
         " = 2). Please check this system:  \n",
         "               name    main_id binary letter catalog\n",
@@ -2673,7 +2673,7 @@ def test__merge_into_single_entry(tmp_path):
         test7_expected["toi_name"] = ""
         test7_expected["eu_name"] = "TOI-774.01"  # the first one
         test7_expected["duplicate_names"] = [
-            "eu: TOI-774.01,eu: WASP-55 b,nasa: WASP-55 b,oec: WASP-55 b,epic: WASP-55 b"
+            "epic: WASP-55 b,eu: TOI-774.01,eu: WASP-55 b,nasa: WASP-55 b,oec: WASP-55 b"
         ]
         test7_expected["catalog"] = "epic,eu,nasa,oec"
         result = Emc.merge_into_single_entry(test7_data, "WASP-55", "", "b")
@@ -3137,7 +3137,7 @@ def test__select_best_mass(instance):
     assert instance.data.at[4, "bestmass_provenance"] == ""
 
 
-def test__set_exo_mercat_name(instance):
+def test__set_exomercat_name(instance):
     data = {
         "main_id": ["*  51 Peg", "*  16 Cyg B", "HD 106515A"],
         "binary": ["", "B", "A"],
@@ -3145,11 +3145,11 @@ def test__set_exo_mercat_name(instance):
     }
     instance.data = pd.DataFrame(data)
     with LogCapture() as log:
-        instance.set_exo_mercat_name()
+        instance.set_exomercat_name()
         log = pd.DataFrame(list(log), columns=["user", "info", "message"])
 
         assert "Exo-MerCat name assigned." in log["message"].tolist()
-        assert list(instance.data["exo_mercat_name"]) == [
+        assert list(instance.data["exo-mercat_name"]) == [
             "*  16 Cyg B b",
             "*  51 Peg b",
             "HD 106515 A b",
@@ -3163,7 +3163,7 @@ def test__fill_row_update(instance, tmp_path):
     os.mkdir("Exo-MerCat/")
 
     compar_data = {
-        "exo_mercat_name": ["KMT-2019-BLG-2991 b", "*   6 Lyn b"],
+        "exo-mercat_name": ["KMT-2019-BLG-2991 b", "*   6 Lyn b"],
         "host": ["MOA 2019-BLG-421", "6 Lyn"],
         "letter": ["b", "b"],
         "main_id": ["KMT-2019-BLG-2991", "*   6 Lyn"],
@@ -3187,7 +3187,7 @@ def test__fill_row_update(instance, tmp_path):
     # CASE: Data has changed
 
     new_data = {
-        "exo_mercat_name": ["KMT-2019-BLG-2991 b", "*   6 Lyn b"],
+        "exo-mercat_name": ["KMT-2019-BLG-2991 b", "*   6 Lyn b"],
         "host": ["MOA 2019-BLG-421", "6 Lyn"],
         "letter": ["b", "b"],
         "main_id": ["KMT-2019-BLG-2991", "*   6 Lyn"],
@@ -3289,7 +3289,7 @@ def test__keep_columns(instance):
         "bestmass_max": [0.11],
         "bestmass_url": ["oec"],
         "bestmass_provenance": ["Msini"],
-        "exo_mercat_name": ["*   6 Lyn  b"],
+        "exo-mercat_name": ["*   6 Lyn  b"],
         "main_id_provenance": ["SIMBAD"],
         "binary_mismatch_flag": [0],
         "merging_mismatch_flag": [0],
@@ -3306,7 +3306,7 @@ def test__keep_columns(instance):
     # Check if the DataFrame contains only the columns specified in the keep
     # list
     expected_columns = [
-        "exo_mercat_name",
+        "exo-mercat_name",
         "nasa_name",
         "toi_name",
         "epic_name",

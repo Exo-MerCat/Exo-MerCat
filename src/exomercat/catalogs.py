@@ -340,9 +340,12 @@ class Catalog:
         config_name_for_name = Utils.read_config_replacements("NAMEtochangeNAME")
         config_name_for_host = Utils.read_config_replacements("NAMEtochangeHOST")
         config_host_for_host = Utils.read_config_replacements("HOSTtochangeHOST")
+        config_name_for_coord={}
+        config_name_for_coord['ra']=Utils.read_config_replacements("HOSTtochangeRA")
+        config_name_for_coord['dec']=Utils.read_config_replacements("HOSTtochangeDEC")
 
-        config_replace = Utils.read_config_replacements("DROP")
-        for check, lis in config_replace.items():
+        config_drop = Utils.read_config_replacements("DROP")
+        for check, lis in config_drop.items():
             for drop in lis.split(","):
                 self.data = self.data[
                     ~(self.data[check].str.contains(drop.strip(), na=False))
@@ -381,13 +384,13 @@ class Catalog:
 
         # ra and dec
         for coord in ["ra", "dec"]:
-            config_replace = Utils.read_config_replacements(coord)
-            for name in config_replace.keys():
+            config_coord = config_name_for_coord[coord]
+            for name in config_coord.keys():
                 if len(self.data.loc[self.data.host == name]) == 0:
                     f.write(coord + ": " + name + "\n")
                 else:
                     self.data.loc[self.data.host == name, coord] = float(
-                        config_replace[name]
+                        config_coord[name]
                     )
 
         # const dictionary

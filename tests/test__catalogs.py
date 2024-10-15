@@ -374,10 +374,10 @@ def test__replace_known_mistakes(tmp_path, instance):
         config_file.write("[HOSTtochangeHOST]\n")
         config_file.write("gam1 Leo = gam01 Leo\n")
         config_file.write("not present = NOT PRESENT\n")
-        config_file.write("[ra]\n")
+        config_file.write("[HOSTtochangeRA]\n")
         config_file.write("K2-2016-BLG-0005L = 269.879166677\n")
         config_file.write("not present = NOT PRESENT\n")
-        config_file.write("[dec]\n")
+        config_file.write("[HOSTtochangeDEC]\n")
         config_file.write("K2-2016-BLG-0005L = 269.879166677\n")
         config_file.write("[DROP]\n")
         config_file.write("name = Trojan\n")
@@ -768,7 +768,7 @@ def test__make_standardized_alias_list(instance):
     data = pd.DataFrame(
         {
             "host": ["Kepler-1", "Kepler-1", "Kepler-1", "Kepler-1"],
-            "alias": ["K001,Kepler-1", "anotheralias", np.NaN, ""],
+            "alias": ["K001,Kepler-1", "anotheralias", np.nan, ""],
         }
     )
     instance.data = data

@@ -149,7 +149,7 @@ class Emc(Catalog):
             group.dec = np.round(group.dec.astype(float), 6)
             group.binary = group.binary.replace("", "null")
             group["skycoord"] = SkyCoord(
-                ra=group.ra * u.degree, dec=group.dec * u.degree, unit="deg"
+                ra=group.ra * u.deg, dec=group.dec * u.deg, unit="deg"
             )
             # if len(set(group.binary))==1 there is no issue, the binary values agree with one another
             if len(set(group.binary)) > 1:  # there is a discrepancy
@@ -183,10 +183,8 @@ class Emc(Catalog):
                                     list(set(group.binary_mismatch_flag.values))[0] != 1
                                 ):
                                     f.write(
-                                        "WARNING: Flags are changing here compared to previous check. Previous value of binary_mismatch_flag was:"
-                                        + str(
-                                            list(set(group.binary_mismatch_flag.values))
-                                        )
+                                        "WARNING: Flags are changing here compared to previous check. Previous value of binary_mismatch_flag was: "
+                                        + ','.join([str(l) for l in (set(group.binary_mismatch_flag.values))])
                                         + ". "
                                     )
 
@@ -249,9 +247,7 @@ class Emc(Catalog):
                                 ):
                                     f.write(
                                         "WARNING: Flags are changing here compared to previous check. Previous value of binary_mismatch_flag was: "
-                                        + str(
-                                            list(set(group.binary_mismatch_flag.values))
-                                        )
+                                        + ','.join([str(l) for l in (set(group.binary_mismatch_flag.values))])
                                         + ". "
                                     )
 
@@ -296,7 +292,7 @@ class Emc(Catalog):
                         ):
                             f.write(
                                 "WARNING: Flags are changing here compared to previous check. Previous value of binary_mismatch_flag was: "
-                                + str(list(set(group.binary_mismatch_flag.values)))
+                                +','.join([str(l) for l in (set(group.binary_mismatch_flag.values))])
                                 + ". "
                             )
 
@@ -1336,7 +1332,7 @@ class Emc(Catalog):
         self.data.main_id_ra = self.data.main_id_ra.astype(float)
         self.data.main_id_dec = self.data.main_id_dec.astype(float)
         self.data["skycoord"] = SkyCoord(
-            ra=self.data.main_id_ra * u.degree, dec=self.data.main_id_dec * u.degree
+            ra=self.data.main_id_ra * u.deg, dec=self.data.main_id_dec * u.deg, unit="deg"
         )
         for i in self.data.index:
             # create a wider rectangle to look into
@@ -1640,7 +1636,7 @@ class Emc(Catalog):
         entry["binary"] = binary
         entry["letter"] = letter
 
-        entry["host"] = list(set(group["host"].mode()))[0]  # gets most common name
+        entry["host"] = sorted(list(set(group["host"].mode())))[0]  # gets most common name; if there are more than one, sort alphabetically
 
         # save catalog name
         entry["nasa_name"] = ""
@@ -1901,9 +1897,9 @@ class Emc(Catalog):
                 )
 
             entry["duplicate_catalog_flag"] = 1
-
+            group['catalog_and_name']=group.catalog + ": " + group.catalog_name
             entry["duplicate_names"] = ",".join(
-                group.catalog + ": " + group.catalog_name
+                sorted(group.catalog_and_name)
             ).rstrip(",")
 
         else:
@@ -2100,9 +2096,9 @@ class Emc(Catalog):
         # Logging
         logging.info("Bestmass calculated.")
 
-    def set_exo_mercat_name(self) -> None:
+    def set_exomercat_name(self) -> None:
         """
-        The set_exo_mercat name creates the columns exo_mercat_name by joining the main_id, the binary (if any), and the letter.
+        The set_exo_mercat name creates the columns exo-mercat_name by joining the main_id, the binary (if any), and the letter.
 
         :param self: An instance of the class Emc
         :type self: Emc
@@ -2110,7 +2106,7 @@ class Emc(Catalog):
         :rtype: None
         """
         self.data["binary"] = self.data["binary"].replace("nan", "")
-        self.data["exo_mercat_name"] = self.data.apply(
+        self.data["exo-mercat_name"] = self.data.apply(
             lambda row: (
                 row["main_id"]
                 if str(re.search("[\\s\\d][ABCNS]$", row["main_id"], re.M)) == "None"
@@ -2121,7 +2117,7 @@ class Emc(Catalog):
             + row["letter"],
             axis=1,
         )
-        self.data = self.data.sort_values(by="exo_mercat_name").reset_index()
+        self.data = self.data.sort_values(by="exo-mercat_name").reset_index()
 
         # Logging
         logging.info("Exo-MerCat name assigned.")
@@ -2137,7 +2133,7 @@ class Emc(Catalog):
         :rtype: None
         """
         keep = [
-            "exo_mercat_name",
+            "exo-mercat_name",
             "nasa_name",
             "toi_name",
             "epic_name",
