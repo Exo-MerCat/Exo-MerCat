@@ -237,7 +237,7 @@ def run(local_date, verbose):  # pragma: no cover
     emc.group_by_period_check_letter()
     emc.group_by_letter_check_period(verbose=verbose)
     emc.select_best_mass()
-    emc.set_exo_mercat_name()
+    emc.set_exomercat_name()
     emc.fill_row_update(local_date)
     emc.keep_columns()
     emc.save_catalog(local_date, "_full")

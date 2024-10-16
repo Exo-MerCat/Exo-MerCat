@@ -2053,6 +2053,7 @@ class Emc(Catalog):
         # Logging
         logging.info("Catalog merged into single entries.")
 
+
     def select_best_mass(self) -> None:
         """
         The select_best_mass function is used to select the best mass for each planet.

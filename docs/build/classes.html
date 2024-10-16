@@ -428,9 +428,6 @@ document.write(`
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.emc.Emc.save_catalog"><code class="docutils literal notranslate"><span class="pre">Emc.save_catalog()</span></code></a></li>
 </ul>
 </li>
-</ul>
-</li>
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#module-src.exomercat.utility_functions">Functions</a><ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.utility_functions.UtilityFunctions"><code class="docutils literal notranslate"><span class="pre">UtilityFunctions</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.utility_functions.UtilityFunctions.service_files_initialization"><code class="docutils literal notranslate"><span class="pre">UtilityFunctions.service_files_initialization()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.utility_functions.UtilityFunctions.ping_simbad_vizier"><code class="docutils literal notranslate"><span class="pre">UtilityFunctions.ping_simbad_vizier()</span></code></a></li>
@@ -450,6 +447,14 @@ document.write(`
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.utility_functions.UtilityFunctions.print_progress_bar"><code class="docutils literal notranslate"><span class="pre">UtilityFunctions.print_progress_bar()</span></code></a></li>
 </ul>
 </li>
+</ul>
+</li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#module-src.exomercat.cli">Functions</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.cli.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.cli.sanity_checks"><code class="docutils literal notranslate"><span class="pre">sanity_checks()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.cli.input"><code class="docutils literal notranslate"><span class="pre">input()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.cli.run"><code class="docutils literal notranslate"><span class="pre">run()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.cli.check"><code class="docutils literal notranslate"><span class="pre">check()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -2081,10 +2086,7 @@ It is saved to the ‘Exo-MerCat’ folder both as a exo-mercat.csv file and as 
 
 </dd></dl>
 
-</section>
-<section id="module-src.exomercat.utility_functions">
-<span id="functions"></span><h1>Functions<a class="headerlink" href="#module-src.exomercat.utility_functions" title="Permalink to this heading">#</a></h1>
-<dl class="py class">
+<span class="target" id="module-src.exomercat.utility_functions"></span><dl class="py class">
 <dt class="sig sig-object py" id="src.exomercat.utility_functions.UtilityFunctions">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.exomercat.utility_functions.</span></span><span class="sig-name descname"><span class="pre">UtilityFunctions</span></span><a class="headerlink" href="#src.exomercat.utility_functions.UtilityFunctions" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
@@ -2346,6 +2348,38 @@ Parses the ElementTree object for a list of parameters.</p>
 </dd></dl>
 
 </section>
+<section id="module-src.exomercat.cli">
+<span id="functions"></span><h1>Functions<a class="headerlink" href="#module-src.exomercat.cli" title="Permalink to this heading">#</a></h1>
+<p>Created on Mon Oct  7 10:35:12 2019</p>
+<p>&#64;author: eleonoraalei</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="src.exomercat.cli.main">
+<span class="sig-prename descclassname"><span class="pre">src.exomercat.cli.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.cli.main" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.exomercat.cli.sanity_checks">
+<span class="sig-prename descclassname"><span class="pre">src.exomercat.cli.</span></span><span class="sig-name descname"><span class="pre">sanity_checks</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">local_date</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.cli.sanity_checks" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.exomercat.cli.input">
+<span class="sig-prename descclassname"><span class="pre">src.exomercat.cli.</span></span><span class="sig-name descname"><span class="pre">input</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">local_date</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.cli.input" title="Permalink to this definition">#</a></dt>
+<dd><p>This function downloads and standardizes the files.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.exomercat.cli.run">
+<span class="sig-prename descclassname"><span class="pre">src.exomercat.cli.</span></span><span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">local_date</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.cli.run" title="Permalink to this definition">#</a></dt>
+<dd><p>This function runs the emc catalog</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.exomercat.cli.check">
+<span class="sig-prename descclassname"><span class="pre">src.exomercat.cli.</span></span><span class="sig-name descname"><span class="pre">check</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">local_date</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.cli.check" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+</section>
 
 
                 </article>
@@ -2493,9 +2527,6 @@ Parses the ElementTree object for a list of parameters.</p>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.emc.Emc.save_catalog"><code class="docutils literal notranslate"><span class="pre">Emc.save_catalog()</span></code></a></li>
 </ul>
 </li>
-</ul>
-</li>
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#module-src.exomercat.utility_functions">Functions</a><ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.utility_functions.UtilityFunctions"><code class="docutils literal notranslate"><span class="pre">UtilityFunctions</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.utility_functions.UtilityFunctions.service_files_initialization"><code class="docutils literal notranslate"><span class="pre">UtilityFunctions.service_files_initialization()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.utility_functions.UtilityFunctions.ping_simbad_vizier"><code class="docutils literal notranslate"><span class="pre">UtilityFunctions.ping_simbad_vizier()</span></code></a></li>
@@ -2515,6 +2546,14 @@ Parses the ElementTree object for a list of parameters.</p>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.utility_functions.UtilityFunctions.print_progress_bar"><code class="docutils literal notranslate"><span class="pre">UtilityFunctions.print_progress_bar()</span></code></a></li>
 </ul>
 </li>
+</ul>
+</li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#module-src.exomercat.cli">Functions</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.cli.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.cli.sanity_checks"><code class="docutils literal notranslate"><span class="pre">sanity_checks()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.cli.input"><code class="docutils literal notranslate"><span class="pre">input()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.cli.run"><code class="docutils literal notranslate"><span class="pre">run()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.cli.check"><code class="docutils literal notranslate"><span class="pre">check()</span></code></a></li>
 </ul>
 </li>
 </ul>

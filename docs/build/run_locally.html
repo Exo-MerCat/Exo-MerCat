@@ -47,7 +47,7 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Classes" href="classes.html" />
-    <link rel="prev" title="Run Exo-MerCat from TAP" href="run_tap.html" />
+    <link rel="prev" title="Get Exo-MerCat from TAP" href="run_tap.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -132,7 +132,7 @@
     <div class="bd-toc-item navbar-nav active">
         <p aria-level="2" class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="run_tap.html">Run Exo-MerCat from TAP</a></li>
+<li class="toctree-l1"><a class="reference internal" href="run_tap.html">Get Exo-MerCat from TAP</a></li>
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">Run Exo-MerCat locally</a></li>
 <li class="toctree-l1"><a class="reference internal" href="classes.html">Classes</a></li>
 
@@ -475,11 +475,10 @@ file = InputSources/toi_init
 <span class="n">K2</span><span class="o">-</span><span class="mi">2016</span><span class="o">-</span><span class="n">BLG</span><span class="o">-</span><span class="mi">0005</span><span class="n">L</span> <span class="o">=</span> <span class="mf">269.879166677</span>
 
 <span class="p">[</span><span class="n">HOSTtochangeDEC</span><span class="p">]</span>
-<span class="n">M62H</span> <span class="n">b</span> <span class="o">=-</span><span class="mf">30.1069833</span>
+<span class="n">M62H</span> <span class="o">=-</span><span class="mf">30.1069833</span>
 
 <span class="p">[</span><span class="n">DROP</span><span class="p">]</span>
-<span class="n">name</span> <span class="o">=</span> <span class="n">Trojan</span><span class="p">,</span><span class="n">Candidate</span>
-<span class="n">name</span> <span class="o">=</span> <span class="n">Oumuamua</span>
+<span class="n">name</span> <span class="o">=</span> <span class="n">Trojan</span><span class="p">,</span><span class="n">Candidate</span><span class="p">,</span><span class="n">Oumuamua</span>
 <span class="n">alias</span><span class="o">=</span> <span class="n">Sun</span>
 <span class="n">host</span> <span class="o">=</span> <span class="n">Sun</span>
 </pre></div>
@@ -492,7 +491,7 @@ file = InputSources/toi_init
 <li><p><code class="docutils literal notranslate"><span class="pre">HOSTtochangeHOST</span></code> contains all entries for which we need to use the host star name to change the host star name itself;</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">HOSTtochangeRA</span></code> contains all entries for which we need to use the host star name to change the host star right ascension;</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">HOSTtochangeDEC</span></code> contains all entries for which we need to use the host star name to change the host star declination;</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">DROP</span></code> contains all entries that need to be dropped, searching through the following keys: <code class="docutils literal notranslate"><span class="pre">name</span></code> (the planet name), <code class="docutils literal notranslate"><span class="pre">host</span></code> (the star name), <code class="docutils literal notranslate"><span class="pre">alias</span></code> (a stellar alias). All items to be discarded can be listed one by one (e.g. <code class="docutils literal notranslate"><span class="pre">name=Candidate</span></code> and <code class="docutils literal notranslate"><span class="pre">name=Trojan</span></code>) or as a comma-separated list (i.e.<code class="docutils literal notranslate"><span class="pre">name=Candidate,Trojan</span></code>).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">DROP</span></code> contains all entries that need to be dropped, searching through the following keys: <code class="docutils literal notranslate"><span class="pre">name</span></code> (the planet name), <code class="docutils literal notranslate"><span class="pre">host</span></code> (the star name), <code class="docutils literal notranslate"><span class="pre">alias</span></code> (a stellar alias). All items to be discarded must be listed as a comma-separated list for each key (i.e.<code class="docutils literal notranslate"><span class="pre">name=Candidate,Trojan</span></code>).</p></li>
 </ul>
 <p>You can find a summary of the used replacements for each catalogs in the logfile <code class="docutils literal notranslate"><span class="pre">replace_known_mistakes.txt</span></code>.</p>
 </section>
@@ -517,7 +516,7 @@ file = InputSources/toi_init
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Run Exo-MerCat from TAP</p>
+        <p class="prev-next-title">Get Exo-MerCat from TAP</p>
       </div>
     </a>
     <a class="right-next"

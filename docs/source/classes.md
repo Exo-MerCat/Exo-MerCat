@@ -29,9 +29,11 @@
 .. automodule:: src.exomercat.emc
 
 ```
-
+```{eval-rst}
+.. automodule:: src.exomercat.utility_functions
+```
 # Functions
 
 ```{eval-rst}
-.. automodule:: src.exomercat.utility_functions
+.. automodule:: src.exomercat.cli
 ```

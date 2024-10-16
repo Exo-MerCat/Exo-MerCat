@@ -136,11 +136,10 @@ XO-2N b = A
 K2-2016-BLG-0005L = 269.879166677
 
 [HOSTtochangeDEC]
-M62H b =-30.1069833
+M62H =-30.1069833
 
 [DROP]
-name = Trojan,Candidate
-name = Oumuamua
+name = Trojan,Candidate,Oumuamua
 alias= Sun
 host = Sun
 ```
@@ -153,7 +152,7 @@ There are six different sections, depending on the preferred key that needs to b
 - `HOSTtochangeHOST` contains all entries for which we need to use the host star name to change the host star name itself;
 - `HOSTtochangeRA` contains all entries for which we need to use the host star name to change the host star right ascension;
 - `HOSTtochangeDEC` contains all entries for which we need to use the host star name to change the host star declination;
-- `DROP` contains all entries that need to be dropped, searching through the following keys: `name` (the planet name), `host` (the star name), `alias` (a stellar alias). All items to be discarded can be listed one by one (e.g. `name=Candidate` and `name=Trojan`) or as a comma-separated list (i.e.`name=Candidate,Trojan`).
+- `DROP` contains all entries that need to be dropped, searching through the following keys: `name` (the planet name), `host` (the star name), `alias` (a stellar alias). All items to be discarded must be listed as a comma-separated list for each key (i.e.`name=Candidate,Trojan`).
 
 You can find a summary of the used replacements for each catalogs in the logfile `replace_known_mistakes.txt`.
 
