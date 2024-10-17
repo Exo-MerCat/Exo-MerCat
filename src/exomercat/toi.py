@@ -10,19 +10,46 @@ from pandas import Int64Dtype, Float64Dtype, StringDtype
 from .catalogs import Catalog
 from .utility_functions import UtilityFunctions as Utils
 
-tap_service = pyvo.dal.TAPService(" http://TAPVizieR.cds.unistra.fr/TAPVizieR/tap/")
 
 
 class Toi(Catalog):
     """
-    The Toi class contains all methods and attributes related to the TESS Objects of Interest catalog.
+    A class representing the TESS Objects of Interest (TOI) catalog.
+
+    This class inherits from the Catalog base class and provides specific
+    functionality for handling and processing data from the TOI catalog.
+    It includes methods for standardizing the catalog data, converting
+    coordinates, handling references, and assigning status to the objects.
+
+    Attributes:
+        name (str): The name of the catalog, set to "toi".
+        data (pandas.DataFrame): The catalog data.
+        columns (dict): A dictionary defining the data types of the columns.
+
+    Methods:
+        standardize_catalog(): Standardizes the catalog data format.
+        handle_reference_format(): Standardize reference format and create URL columns.
+        remove_theoretical_masses(): Removes theoretical masses from the data (not implemented for TOI).
+        assign_status(): Assigns status to planets based on their classification.
+        convert_coordinates(): Placeholder method for coordinate conversion (not implemented for TOI).
     """
+
 
     def __init__(self) -> None:
         """
-        The __init__ function is called when the class is instantiated. It sets up the instance of the class,
-        and defines any variables that will be used by all instances of this class.
-        """
+        Initialize the Toi class.
+
+        This method sets up the instance of the Toi class by:
+        1. Calling the parent class initializer.
+        2. Setting the catalog name to "toi".
+        3. Initializing the data attribute as None.
+        4. Defining the expected columns and their data types for this catalog.
+
+        :param self: An instance of class Toi
+        :type self: Toi
+        :return: None
+        :rtype: None
+       """
         super().__init__()
         self.name = "toi"
         self.data = None
@@ -51,10 +78,16 @@ class Toi(Catalog):
 
     def standardize_catalog(self) -> None:
         """
-        Standardize the dataframe columns and values. It assigns new columns to the dataframe. It runs the run_sync
-        method to gather the aliases of the TIC stars, to be added to the alias column. It assigns NaN to the missing
-        data columns in the dataframe. It calculates the radius and its uncertainties by converting from Earth units
-        to Jupiter units.
+        Standardize the TESS Objects of Interest catalog data.
+
+        This method performs the following operations:
+        1. Creates TOI, TOI_host, and TIC_host columns.
+        2. Runs a TAP query to gather aliases for TIC stars.
+        3. Renames columns to standard names used across all catalogs.
+        4. Adds missing columns with NaN values.
+        5. Converts radius and its uncertainties from Earth to Jupiter units.
+        6. Adds discovery year and method.
+        7. Sets a reference value for all entries.
 
         :param self: An instance of class Toi
         :type self: Toi
@@ -79,6 +112,8 @@ class Toi(Catalog):
         )
 
         # Run the TAP query
+        tap_service = pyvo.dal.TAPService(" http://TAPVizieR.cds.unistra.fr/TAPVizieR/tap/")
+
         query = """SELECT tc.tid,  db.TIC, db.UCAC4, db."2MASS", db.WISEA, db.GAIA, db.KIC, db.HIP, db.TYC FROM "IV/39/tic82" AS db JOIN TAP_UPLOAD.t1 AS tc ON db.TIC = tc.tid"""
         t2 = Table.from_pandas(self.data[["tid"]])
         result = Utils.perform_query(tap_service, query, uploads_dict={"t1": t2})
@@ -94,6 +129,7 @@ class Toi(Catalog):
                 sorted([x for x in set(self.data.at[i, "alias"].split(",")) if x])
             )
 
+        # Rename columns
         self.data["name"] = self.data["TOI"]
         self.data["catalog_name"] = self.data["TOI"]
         self.data["catalog_host"] = self.data["host"]
@@ -132,6 +168,7 @@ class Toi(Catalog):
 
         self.data["discovery_method"] = "Transit"
 
+        # Add reference
         self.data["reference"] = "toi"
 
         # Logging
@@ -139,7 +176,10 @@ class Toi(Catalog):
 
     def convert_coordinates(self) -> None:
         """
-        Convert the `ra` and `dec columns of the dataframe to decimal degrees. Not implemented for Toi.
+        Convert coordinates to decimal degrees.
+
+        This method is a placeholder and does not perform any operations,
+        as the TESS Objects of Interest catalog already has coordinates in decimal degrees.
 
         :param self: An instance of class Toi
         :type self: Toi
@@ -152,7 +192,10 @@ class Toi(Catalog):
 
     def remove_theoretical_masses(self) -> None:
         """
-        Remove theoretical masses from the dataframe. Not used for the Toi catalog, since there are no masses
+        Remove theoretical masses from the dataframe.
+
+        This method is a placeholder and does not perform any operations,
+        as the TESS Objects of Interest catalog does not include mass information.
 
         :param self: The instance of the Toi class.
         :type self: Toi
@@ -164,8 +207,10 @@ class Toi(Catalog):
 
     def handle_reference_format(self) -> None:
         """
-        he handle_reference_format function is used to create a URL for each reference in the references list. Since
-        the Exoplanet Encyclopaedia table does not provide references, we just use "toi" as a keyword in the url.
+        Standardize the reference format for various parameters.
+
+        This method creates a '_url' column for each parameter (e, mass, msini, i, a, p, r),
+        setting the value to 'toi' for non-null, finite values and an empty string otherwise.
 
         :param self: An instance of class Toi
         :type self: Toi
@@ -180,11 +225,9 @@ class Toi(Catalog):
 
     def assign_status(self):
         """
-        Assigns status based on the disposition values.
+        Assign status to each entry based on the 'tfopwg_disp' column.
 
-        The function uses a dictionary to map the disposition values to status categories.
-
-        Status Categories:
+        This method maps the disposition values to standard status categories:
         - "APC" -> "CONTROVERSIAL"
         - "CP"  -> "CONFIRMED"
         - "FA"  -> "FALSE POSITIVE"
@@ -193,9 +236,12 @@ class Toi(Catalog):
         - "PC"  -> "CANDIDATE"
         - ""    -> "UNKNOWN"
 
-        The function updates the 'status' column in the data attribute using the replace method.
+        The method also logs the updated status counts.
 
-        Logging is used to inform about the assignment of the status column and to display the updated status counts.
+        :param self: An instance of class Toi
+        :type self: Toi
+        :return: None
+        :rtype: None
         """
         replace_dict = {
             "APC": "CONTROVERSIAL",

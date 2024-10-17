@@ -8,15 +8,32 @@ from pandas import Int64Dtype, Float64Dtype, StringDtype
 
 class Koi(Catalog):
     """
-    The Koi class contains all methods and attributes related to the Kepler Objects of Interest catalog.
+    A class representing the Kepler Objects of Interest (KOI) catalog.
+
+    This class inherits from the Catalog class and provides specific functionality
+    for handling and processing data from the KOI catalog. It includes methods for
+    standardizing the catalog data, converting coordinates, and managing KOI-specific
+    attributes.
+
+    Attributes:
+        name (str): The name of the catalog, set to "koi".
+        data (pandas.DataFrame): The catalog data stored as a DataFrame.
+        columns (dict): A dictionary defining the expected columns and their data types.
+
+    Methods:
+        standardize_catalog(): Standardizes the catalog data format.
+        convert_coordinates(): Converts RA and Dec to decimal degrees.
     """
 
     def __init__(self) -> None:
         """
-        Initializes the Koi class object.
+        Initialize the Koi class.
 
-        This function is automatically called when an instance of the Emc class is created.
-        It sets up the instance of the class by assigning a name.
+        This method sets up the instance of the Koi class by:
+        1. Calling the parent class initializer.
+        2. Setting the catalog name to "koi".
+        3. Initializing the data attribute as None.
+        4. Defining the expected columns and their data types for this catalog.
 
         :param self: The instance of the Koi class.
         :type self: Koi
@@ -37,9 +54,17 @@ class Koi(Catalog):
 
     def standardize_catalog(self) -> None:
         """
-        This function standardizes the catalog data by selecting relevant columns, creating aliases, renaming columns,
-        and logging the standardization process.
+        Standardize the Kepler Objects of Interest catalog data.
 
+        This method performs the following operations:
+        1. Selects relevant columns from the raw data.
+        2. Creates new columns: KOI, KOI_host, Kepler_host, KIC_host.
+        3. Generates a 'letter' column for planet designation.
+        4. Creates 'alias' and 'aliasplanet' columns with various identifiers.
+        5. Renames and creates standard columns like 'name', 'disposition', and 'discoverymethod'.
+        6. Retains only the standardized columns in the final dataset.
+
+        
         :param self: The instance of the Koi class.
         :type self: Koi
         :return: None
@@ -143,10 +168,12 @@ class Koi(Catalog):
 
     def convert_coordinates(self) -> None:
         """
-         Convert the right ascension (RA) and declination (Dec) columns of the dataframe to decimal degrees.
+        Convert right ascension (RA) and declination (Dec) from string format to decimal degrees.
 
-        This function handles missing values by replacing them with empty strings, then converts the RA and Dec
-        values to decimal degrees using SkyCoord. If the values are empty strings, NaN is assigned.
+        This method performs the following operations:
+        1. Replaces missing values in RA and Dec columns with empty strings.
+        2. Converts RA and Dec from string format (HH:MM:SS) to decimal degrees using astropy's SkyCoord.
+        3. Assigns NaN to entries where conversion is not possible (empty strings).
 
         :param self: An instance of class Koi
         :type self: Koi
@@ -154,10 +181,13 @@ class Koi(Catalog):
         :rtype: None
         """
 
+        # Replace nans
         self.data["ra"] = self.data.ra.fillna("").replace("nan", "").replace(np.nan, "")
         self.data["dec"] = (
             self.data.dec.fillna("").replace("nan", "").replace(np.nan, "")
         )
+
+        # Convert to degrees
         self.data["ra"] = self.data.apply(
             lambda row: SkyCoord(
                 str(row["ra"]) + " " + str(row["dec"]), unit=(u.hourangle, u.deg)

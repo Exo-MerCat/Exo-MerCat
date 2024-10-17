@@ -19,13 +19,37 @@ from .utility_functions import UtilityFunctions as Utils
 
 class Oec(Catalog):
     """
-    The Oec class contains all methods and attributes related to the Open Exoplanet Catalogue.
+    The Oec class represents the Open Exoplanet Catalogue.
+
+    This class inherits from the Catalog class and provides specific functionality
+    for handling and processing data from the Open Exoplanet Catalogue. It includes
+    methods for downloading, standardizing, and manipulating the catalog data.
+
+    Attributes:
+        name (str): The name of the catalog, set to "oec".
+        data (pandas.DataFrame): The catalog data stored as a DataFrame.
+        columns (dict): A dictionary defining the expected columns and their data types.
+
+    Methods:
+        download_catalog(url, filename, local_date, timeout): Downloads the catalog from a given URL.
+        standardize_catalog(): Standardizes the catalog data format.
+        sort_bestmass_to_mass_or_msini(): Sorts mass values into appropriate columns.
+        handle_reference_format(): Standardize reference format and create URL columns.
+        remove_theoretical_masses(): Placeholder method for theoretical masses (not implemented for OEC).
+        assign_status(): Assigns status to planets based on their classification.
+        handle_reference_format(): Standardize reference format and create URL columns.
+        convert_coordinates(): Converts RA and Dec to decimal degrees.
     """
+    
 
     def __init__(self) -> None:
         """
-        This function is called when the class is instantiated. It sets up a name attribute that can be used to refer
-        to this particular instance of Oec.
+        Initialize the Oec class.
+
+        This method sets up the instance of the Oec class by:
+        1. Calling the parent class initializer.
+        2. Setting the catalog name to "oec".
+        3. Defining the expected columns and their data types for this catalog.
 
         :param self: An instance of class Oec
         :type self: Oec
@@ -67,9 +91,14 @@ class Oec(Catalog):
         self, url: str, filename: str, local_date: str, timeout: float = None
     ) -> Path:
         """
-        Downloads a catalog from a given URL and saves it to a file. If no local file is found, it will download the
-        catalog from the url. If there is an error in downloading or reading the catalog, it will take a previous
-        version of that same day's downloaded catalog if one exists.
+        Download the Open Exoplanet Catalogue from a given URL and save it to a file.
+
+        This method performs the following operations:
+        1. Checks if a local file for the given date already exists.
+        2. If not, attempts to download the catalog from the URL.
+        3. Converts the downloaded XML file to CSV format.
+        4. If download fails, attempts to use the most recent local copy.
+        5. Handles various error scenarios and provides appropriate logging.
 
         :param self: An instance of class Catalog
         :type self: Catalog
@@ -77,7 +106,7 @@ class Oec(Catalog):
         :type url: str
         :param filename: The name of the file to save the catalog to.
         :type filename: str
-        :param local_date: The date of the catalog to download. Default is an empty string.
+        :param local_date: The date of the catalog to download.(format: YYYY-MM-DD)
         :type local_date: str
         :param timeout: The maximum amount of time to wait for the download to complete. Default is None.
         :type timeout: float
@@ -85,12 +114,11 @@ class Oec(Catalog):
         :rtype: Path
         """
 
-        # date is today:
-        #  -    check if it exists, if not download
-        # - if download fails, get latest available version
-        # date is not today:
-        # Check if file with that date exists, if so load it up.
+        # Construct file paths for CSV and XML versions
+
         file_path_str = filename + local_date + ".csv"
+
+        # Validate URL format
         if ".xml.gz" in url[-7:]:
             file_path_xml_str = filename + local_date + ".xml.gz"
         elif ".xml" in url[-4:]:
@@ -98,13 +126,15 @@ class Oec(Catalog):
         else:
             raise ValueError("url not valid. Only .xml or .xml.gz files are accepted.")
 
-        # File already exists
+        # Check if the CSV file already exists
         if os.path.exists(file_path_str):
             logging.info("Reading existing file downloaded in date: " + local_date)
+        
         else:
-            # File does not exist. If date is today, try downloading it
+            
+            # If file doesn't exist and the requested date is today, attempt to download
             if local_date == date.today().strftime("%Y-%m-%d"):
-                # Try to download the file
+                # Download the XML file
                 try:
                     result = requests.get(url, timeout=timeout)
                     # Open the input file and parse it as XML
@@ -112,10 +142,12 @@ class Oec(Catalog):
                     with open(file_path_xml_str, "wb") as f:
                         f.write(result.content)
                     logging.info("Convert from .xml to .csv")
-
+                    
+                    # Convert XML to CSV
                     Utils.convert_xmlfile_to_csvfile(
                         file_path=file_path_xml_str, output_file=file_path_str
                     )
+                    # Verify the CSV file can be read
                     dat = pd.read_csv(file_path_str)
                 except (
                     OSError,
@@ -132,7 +164,7 @@ class Oec(Catalog):
                     requests.exceptions.HTTPError,
                     pd.errors.ParserError,  # file downloaded but corrupted
                 ):
-                    # if the file that was downloaded is corrupted, eliminate file
+                    # Remove corrupted files if they exist
                     if len(glob.glob(file_path_str)) > 0:
                         logging.warning(
                             "File "
@@ -141,12 +173,14 @@ class Oec(Catalog):
                         )
                         os.system("rm " + file_path_str)
                         os.system("rm " + file_path_xml_str)
-                    # Download failed, try most recent local copy
+
+                    # Attempt to use the most recent local copy
                     if len(glob.glob(filename + "*.csv")) > 0:
                         li = list(glob.glob(filename + "*.csv"))
                         li = [re.search(r"\d\d\d\d-\d\d-\d\d", l)[0] for l in li]
                         li = [datetime.strptime(l, "%Y-%m-%d") for l in li]
-                        # get the most recent compared to the current date. Get only the ones earlier than the date
+
+                        # Get the most recent compared to the current date. Get only the ones earlier than the date
                         local_date_datetime = datetime.strptime(
                             re.search(r"\d\d\d\d-\d\d-\d\d", file_path_str)[0],
                             "%Y-%m-%d",
@@ -165,12 +199,12 @@ class Oec(Catalog):
                         )
 
             else:
-                # date is not today and the file does not exist
+                # The requested date is not today and the file doesn't exist
                 raise ValueError(
                     "Could not find catalog with this specific date. Please check your date value."
                 )
 
-            # TODO: file does not exist and date is not today. Use an earlier date
+            # Note: The TODO for handling dates earlier than today could be implemented here
 
         logging.info("Catalog downloaded.")
 
@@ -178,9 +212,15 @@ class Oec(Catalog):
 
     def standardize_catalog(self) -> None:
         """
-        Standardizes the catalog by renaming columns and adding useful columns derived from existing ones. It
-        standardizes the data format, renames columns, adds new columns like aliases, discovery methods,
-        and references. Finally, it performs some string manipulations on the data and converts discovery methods.
+        Standardize the Open Exoplanet Catalogue data.
+
+        This method performs the following operations:
+        1. Sets the catalog name.
+        2. Renames columns to standard names used across all catalogs.
+        3. Adds new columns such as host, catalog_name, and catalog_host.
+        4. Separates mass into msini and mass based on the masstype column.
+        5. Cleans host names.
+        6. Converts discovery methods to a standard format.
 
         :param self: An instance of class Oec
         :type self: Oec
@@ -258,8 +298,10 @@ class Oec(Catalog):
 
     def remove_theoretical_masses(self) -> None:
         """
-        Remove theoretical masses from the dataframe. Not used in the Oec catalog, since it does not have theoretical
-        masses.
+        Remove theoretical masses from the dataframe.
+
+        This method is a placeholder and does not perform any operations,
+        as the Open Exoplanet Catalogue does not include theoretical masses.
 
         :param self: The instance of the Oec class.
         :type self: Oec
@@ -271,12 +313,14 @@ class Oec(Catalog):
 
     def assign_status(self) -> None:
         """
-        Assigns a status to each row in the dataframe based on the value in the "list" column.
+        Assign status to each entry based on the 'list' column.
 
-        - If "Confirmed" is in the list, assigns "CONFIRMED".
-        - If "Controversial" is in the list, assigns "CANDIDATE".
-        - If "Retracted" is in the list, assigns "FALSE POSITIVE".
-        - Kepler Objects of Interest are assigned "CANDIDATE".
+        This method assigns status as follows:
+        - "CONFIRMED" if 'Confirmed' is in the list.
+        - "CANDIDATE" if 'Controversial' is in the list or for Kepler Objects of Interest.
+        - "FALSE POSITIVE" if 'Retracted' is in the list.
+
+        The method also logs the updated status counts.
 
         :param self: An instance of class Oec
         :type self: Oec
@@ -301,8 +345,10 @@ class Oec(Catalog):
 
     def handle_reference_format(self) -> None:
         """
-        The handle_reference_format function is used to create a URL for each reference in the references list. Since
-        the Open Exoplanet Catalogue table does not provide references, we just use "oec" as a keyword in the url.
+        Standardize the reference format for various parameters.
+
+        This method creates a '_url' column for each parameter (e, mass, msini, i, a, p, r),
+        setting the value to 'oec' for non-null, finite values and an empty string otherwise.
 
         :param self: An instance of class Oec
         :type self: Oec
@@ -319,10 +365,12 @@ class Oec(Catalog):
 
     def convert_coordinates(self) -> None:
         """
-        Convert the right ascension (RA) and declination (Dec) columns of the dataframe to decimal degrees.
+        Convert right ascension (RA) and declination (Dec) from string format to decimal degrees.
 
-        This function handles missing values by replacing them with empty strings, then converts the RA and Dec
-        values to decimal degrees using SkyCoord. If the values are empty strings, NaN is assigned.
+        This method performs the following operations:
+        1. Replaces missing values in RA and Dec columns with empty strings.
+        2. Converts RA and Dec from string format (HH:MM:SS) to decimal degrees using astropy's SkyCoord.
+        3. Assigns NaN to entries where conversion is not possible (empty strings).
 
         :param self: An instance of class Oec
         :type self: Oec

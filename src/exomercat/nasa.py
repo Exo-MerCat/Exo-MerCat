@@ -10,13 +10,38 @@ from .utility_functions import UtilityFunctions as Utils
 
 class Nasa(Catalog):
     """
-    The Nasa class contains all methods and attributes related to the NASA Exoplanet Archive catalog.
+    A class representing the NASA Exoplanet Archive catalog.
+
+    This class inherits from the Catalog base class and provides specific
+    functionality for processing and standardizing data from the NASA
+    Exoplanet Archive. It includes methods for initializing the catalog,
+    standardizing the data format, handling references, assigning planet
+    status, and removing theoretical masses and radii.
+
+    Attributes:
+        name (str): The name of the catalog, set to "nasa".
+        data (pandas.DataFrame): The catalog data stored as a DataFrame.
+        columns (dict): A dictionary defining the expected columns and their data types.
+
+    Methods:
+        standardize_catalog(): Standardizes the catalog data format.
+        sort_bestmass_to_mass_or_msini(): Sorts mass values into appropriate columns.
+        handle_reference_format(): Standardize reference format and create URL columns.
+        remove_theoretical_masses(): Removes theoretical masses from the data.
+        assign_status(): Assigns status to planets based on their classification.
+        handle_reference_format(): Standardize reference format and create URL columns.
+        convert_coordinates(): Placeholder method for coordinate conversion (not implemented for NASA).
     """
+   
 
     def __init__(self) -> None:
         """
-        This function is called when the class is instantiated. It sets up the object with a name attribute that can
-        be used to refer to this particular instance of Nasa.
+        Initialize the Nasa class.
+
+        This method sets up the instance of the Nasa class by:
+        1. Calling the parent class initializer.
+        2. Setting the catalog name to "nasa".
+        3. Defining the expected columns and their data types for this catalog.
 
         :param self: An instance of class Nasa
         :type self: Nasa
@@ -67,15 +92,22 @@ class Nasa(Catalog):
 
     def standardize_catalog(self) -> None:
         """
-        This function processes raw data from a catalog. It standardizes the data format, renames columns,
-        adds new columns like aliases, discovery methods, and references. Finally, it performs some string
-        manipulations on the data and converts discovery methods.
+        Standardize the NASA Exoplanet Archive catalog data.
 
+        This method performs the following operations:
+        1. Sets the catalog name.
+        2. Renames columns to standard names used across all catalogs.
+        3. Adds new columns such as catalog_name and catalog_host.
+        4. Splits best mass into mass and msini.
+        5. Processes and standardizes the alias information.
+        6. Converts discovery methods to a standard format.
+        
         :param self: An instance of class Nasa
         :type self: Nasa
         :return: None
         :rtype: None
         """
+
         # Standardizing data format
         self.data["catalog"] = self.name
 
@@ -163,14 +195,17 @@ class Nasa(Catalog):
 
     def sort_bestmass_to_mass_or_msini(self) -> None:
         """
-        Sorts the values of 'bestmass' into either 'mass' or 'msini' based on the 'bestmass_provenance' column If
-        'bestmass' is found to be a mass, it is sorted into 'mass'. If it is found to be an 'msini' value,
-        it is sorted into 'msini'. If neither are true (e.g. theoretical mass), both 'mass' and 'msini' are set to
-        NaN for that row.
+        Sort the 'bestmass' values into either 'mass' or 'msini' columns.
+
+        This method categorizes the 'bestmass' values based on the 'bestmass_provenance':
+        - If 'Mass', values are placed in the 'mass' columns.
+        - If 'Msini', values are placed in the 'msini' columns.
+        - If 'M-R relationship' or 'Msin(i)/sin(i)', both 'mass' and 'msini' are set to NaN.
+        - For any other provenance, a RuntimeError is raised.
 
         :param self: An instance of the Nasa class
         :type self: Nasa
-        :raise ValueError: If 'bestmass' is not a mass or an 'msini'
+        :raise RuntimeError: If 'bestmass' is not a mass or an 'msini'
         :return: None
         :rtype: None
         """
@@ -211,9 +246,13 @@ class Nasa(Catalog):
 
     def handle_reference_format(self) -> None:
         """
-        This function takes in a dataframe and replaces the reference column with a url column. It also adds columns
-        for each of the seven parameters (e, mass, msini, i, a, P, and R) and sets them to be equal to the
-        corresponding reference column. It then removes all rows where any of these parameters are null.
+        Standardize the reference format for various parameters.
+
+        This method performs the following for each parameter (e, mass, msini, i, a, p, r):
+        1. Ensures a '_url' column exists for each parameter.
+        2. Extracts the bibcode from the reference URL.
+        3. Standardizes the URL format.
+        4. Sets empty strings for null values.
 
         :param self: The instance of the Nasa class.
         :type self: Nasa
@@ -257,8 +296,9 @@ class Nasa(Catalog):
 
     def assign_status(self) -> None:
         """
-        This function sets the status of each planet in the data DataFrame based on the value in the planet_status
-        column. For Nasa, this is "CONFIRMED" by default.
+        Assign status to each entry in the catalog.
+
+        For the NASA Exoplanet Archive, all entries are set to "CONFIRMED" by default.
 
         :param self: An instance of the Nasa class.
         :type self: Nasa
@@ -276,8 +316,10 @@ class Nasa(Catalog):
 
     def convert_coordinates(self) -> None:
         """
-        Convert the right ascension (RA) and declination (Dec) columns of the dataframe to decimal degrees. This
-        function is not necessary as the NASA Exoplanet Archive already has coordinates in decimal degrees.
+        Convert coordinates to decimal degrees.
+
+        This method is a placeholder and does not perform any operations,
+        as the NASA Exoplanet Archive catalog already has coordinates in decimal degrees.
 
         :param self: An instance of class Nasa
         :type self: Nasa
@@ -289,8 +331,10 @@ class Nasa(Catalog):
 
     def remove_theoretical_masses(self) -> None:
         """
-        Removes theoretical masses and radii calculated through M-R relationships. This function removes all rows
-        where the mass_url, msini_url, and r_url columns contain the word "Calculated".
+        Remove theoretical masses and radii from the catalog.
+
+        This method removes values for mass, msini, and radius (including their error ranges and URLs) 
+        where the corresponding URL contains "Calculated", indicating a theoretical value.
 
         :param self: An instance of the Nasa class.
         :type self: Nasa

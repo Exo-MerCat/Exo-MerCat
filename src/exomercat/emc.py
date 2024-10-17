@@ -29,6 +29,42 @@ class Emc(Catalog):
 
     The class methods cover various aspects of catalog management, from initial data processing
     to final catalog generation and export.
+
+    Attributes:
+        name (str): The name of the catalog, set to "exo_mercat".
+        data (pd.DataFrame): The main DataFrame containing the exoplanet catalog data.
+
+    Methods:
+        __init__(): Initializes the Emc class object.
+        convert_coordinates(): Placeholder for coordinate conversion (not implemented).
+        alias_as_host(): Checks and standardizes host names based on aliases.
+        check_binary_mismatch(keyword, tolerance): Checks for binary mismatches in the dataframe.
+        prepare_columns_for_mainid_search(): Prepares columns for the search of the main identifier.
+        fill_mainid_provenance_column(keyword): Fills the 'main_id_provenance' column with the provided keyword.
+        simbad_list_host_search(typed_id): Searches for host stars in SIMBAD using the specified column.
+        simbad_list_alias_search(column): Searches for the main ID of each object in the specified column using SIMBAD.
+        get_host_info_from_simbad(): Retrieves host information from SIMBAD.
+        get_coordinates_from_simbad(tolerance): Retrieves coordinates from SIMBAD for objects without main IDs.
+        get_host_info_from_tic(): Retrieves host information from the TESS Input Catalog (TIC).
+        get_coordinates_from_tic(tolerance): Retrieves coordinates from TIC for objects without main IDs.
+        check_coordinates(tolerance): Checks for mismatches in RA and DEC coordinates of a given host.
+        replace_old_new_identifier(identifier, new_identifier, binary): Replaces old identifiers with new ones.
+        polish_main_id(): Polishes the main_id column by removing planet/binary letters.
+        fill_missing_main_id(): Fills missing values in main_id related columns.
+        check_same_host_different_id(): Checks for instances where the same host has multiple SIMBAD main IDs.
+        check_same_coords_different_id(tolerance): Checks for instances where the same coordinates have different main IDs.
+        group_by_list_id_check_main_id(): Groups data by 'list_id' and checks for inconsistencies in 'main_id'.
+        post_main_id_query_checks(tolerance): Performs a series of checks after querying SIMBAD for main IDs.
+        group_by_main_id_set_main_id_aliases(): Groups by main_id and combines aliases into main_id_aliases.
+        cleanup_catalog(): Cleans up the catalog by replacing 0 and infinity values with NaN.
+        group_by_period_check_letter(): Checks for inconsistencies in the letter column and attempts to fix them.
+        group_by_letter_check_period(verbose): Groups by letter and merges entries based on period or semi-major axis agreement.
+        select_best_mass(): Selects the best mass estimate for each planet in the catalog.
+        set_exomercat_name(): Creates the 'exo-mercat_name' column.
+        keep_columns(): Retains only specified columns in the dataframe.
+        remove_known_brown_dwarfs(local_date, print_flag): Removes objects with masses greater than 20 Jupiter masses.
+        fill_row_update(local_date): Updates the 'row_update' column based on changes from the previous version.
+        save_catalog(local_date, postfix): Saves the catalog to CSV files.
     """
 
     def __init__(self) -> None:

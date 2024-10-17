@@ -9,10 +9,34 @@ from .utility_functions import UtilityFunctions as Utils
 
 
 class Eu(Catalog):
+    """
+    A class representing the Exoplanet Encyclopedia (EU) catalog.
+
+    This class inherits from the Catalog class and provides specific functionality
+    for handling and processing data from the Exoplanet Encyclopedia. It includes
+    methods for standardizing the catalog, removing theoretical masses, assigning
+    status to planets, handling reference formats, and converting coordinates.
+
+    Attributes:
+        name (str): The name of the catalog, set to "eu".
+        data (pandas.DataFrame): The catalog data stored as a DataFrame.
+        columns (dict): A dictionary defining the expected columns and their data types.
+
+    Methods:
+        standardize_catalog(): Standardizes the catalog data format.
+        remove_theoretical_masses(): Removes theoretical masses from the data.
+        assign_status(): Assigns status to planets based on their classification.
+        handle_reference_format(): Standardize reference format and create URL columns.
+        convert_coordinates(): Placeholder method for coordinate conversion (not implemented for EU).
+    """
     def __init__(self) -> None:
         """
-        This function is called when the class is instantiated. It sets up the object with a name attribute that can
-        be used to refer to this particular instance of Eu. It defines the expected columns for this catalog.
+        Initialize the Eu (Exoplanet Encyclopaedia) class.
+
+        This method sets up the instance of the Eu class by:
+        1. Calling the parent class initializer.
+        2. Setting the catalog name to "eu".
+        3. Defining the expected columns and their data types for this catalog.
 
         :param self: An instance of class Eu
         :type self: Eu
@@ -59,9 +83,15 @@ class Eu(Catalog):
 
     def standardize_catalog(self) -> None:
         """
-        This function processes raw data from a catalog. It standardizes the data format, renames columns,
-        adds new columns like aliases, discovery methods, and references. Finally, it performs some string
-        manipulations on the data and converts discovery methods.
+        Standardize the Exoplanet Encyclopaedia catalog data.
+
+        This method performs the following operations:
+        1. Sets the catalog name.
+        2. Replaces "None" and "nan" values.
+        3. Renames columns to standard names used across all catalogs.
+        4. Adds new columns such as catalog_name, catalog_host, and reference.
+        5. Processes and standardizes the alias information.
+        6. Converts discovery methods to a standard format.
 
         :param self: An instance of class Eu
         :type self: Eu
@@ -137,8 +167,10 @@ class Eu(Catalog):
 
     def remove_theoretical_masses(self) -> None:
         """
-        This function removes theoretical masses from the dataframe by setting the mass/msini values to NaN where the
-        MASSPROV column contains "Theoretical" and the radii where the RADPROV column contains "Theoretical".
+        Remove theoretical masses and radii from the dataframe.
+
+        This method sets mass, msini, and radius values (including their error ranges) to NaN 
+        where the MASSPROV or RADPROV columns indicate theoretical values.
 
         :param self: An instance of the Eu class.
         :type self: Eu
@@ -163,10 +195,14 @@ class Eu(Catalog):
 
     def assign_status(self) -> None:
         """
-        This function sets the status of each planet in the data DataFrame based on the value in the planet_status
-        column. It first sets all planets with confirmed planets as CONFIRMED. Then, it looks for candidate,
-        unconfirmed, and controversial planets and sets them as CANDIDATE. Finally, it looks for retracted planets
-        and sets them as FALSE POSITIVE.
+        Assign status to each entry based on the 'planet_status' column.
+
+        This method maps the values in the 'planet_status' column to standard status values:
+        - 'CONFIRMED' for confirmed planets
+        - 'CANDIDATE' for candidate, unconfirmed, or controversial planets
+        - 'FALSE POSITIVE' for retracted planets
+
+        The method also logs the updated status counts.
 
         :param self: An instance of the Eu class.
         :type self: Eu
@@ -197,8 +233,12 @@ class Eu(Catalog):
 
     def handle_reference_format(self) -> None:
         """
-        The handle_reference_format function is used to create a URL for each reference in the references list. Since
-        the Exoplanet Encyclopaedia table does not provide references, we just use "eu" as a keyword in the url.
+        Create placeholder URL references for each parameter.
+
+        Since the Exoplanet Encyclopaedia does not provide specific references,
+        this method creates a placeholder 'eu' URL for each non-null, finite parameter value.
+
+        Parameters handled: e, mass, msini, i, a, p, r
 
         :param self: An instance of class Eu
         :type self: Eu
@@ -213,8 +253,10 @@ class Eu(Catalog):
 
     def convert_coordinates(self) -> None:
         """
-        Convert the right ascension (RA) and declination (Dec) columns of the dataframe to decimal degrees. This
-        function is not implemented as the Eu already has coordinates in decimal degrees.
+        Convert coordinates to decimal degrees.
+
+        This method is a placeholder and does not perform any operations,
+        as the Exoplanet Encyclopaedia catalog already has coordinates in decimal degrees.
 
         :param self: An instance of class Eu
         :type self: Eu
