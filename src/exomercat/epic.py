@@ -16,27 +16,19 @@ class Epic(Catalog):
     functionality for handling and processing data from the EPIC catalog.
     It includes methods for standardizing the catalog data, converting
     coordinates, handling reference formats, and assigning status to entries.
-
-    Attributes:
-        name (str): The name of the catalog, set to "epic".
-        data (pandas.DataFrame): The catalog data stored as a DataFrame.
-        columns (dict): A dictionary defining the expected columns and their data types.
-
-    Methods:
-        standardize_catalog(): Standardize the catalog data format.
-        convert_coordinates(): Placeholder method for coordinate conversion (not implemented for EPIC).
-        remove_theoretical_masses(): Remove theoretical masses (placeholder method).
-        handle_reference_format(): Standardize reference format and create URL columns.
-        assign_status(): Assign status to each entry based on disposition.
     """
     def __init__(self) -> None:
         """
         Initialize the Epic class object.
 
         This method sets up the instance of the Epic class by:
+
         1. Calling the parent class initializer.
+
         2. Setting the catalog name to "epic".
+
         3. Initializing the data attribute as None.
+
         4. Defining the expected columns and their data types.
 
         :param self: The instance of the Epic class.
@@ -95,10 +87,15 @@ class Epic(Catalog):
         Standardize the EPIC catalog data.
 
         This method performs the following operations:
+
         1. Sets the catalog name and catalog-specific names.
+
         2. Renames columns to standard names used across all catalogs.
+
         3. Filters data based on the default_flag.
+
         4. Adds and modifies columns such as Kepler_host, letter, and alias.
+
         5. Converts discovery methods to standard format.
 
         :param self: The instance of the Epic class.
@@ -231,8 +228,11 @@ class Epic(Catalog):
         Standardize reference format and create URL columns for parameters.
 
         This method performs the following operations:
+
         1. Adds URL columns for each parameter (e, mass, msini, i, a, p, r).
+
         2. Extracts and standardizes URLs from the reference column.
+
         3. Replaces null values with empty strings in URL columns.
 
         :param self: The instance of the Epic class.
@@ -281,8 +281,11 @@ class Epic(Catalog):
         Assign status to each entry based on the 'disposition' column.
 
         This method maps the values in the 'disposition' column to standard status values:
+
         - 'CONFIRMED' for confirmed planets
+
         - 'CANDIDATE' for candidate planets
+
         - 'FALSE POSITIVE' for false positives and refuted planets
 
         The method also logs the updated status counts.

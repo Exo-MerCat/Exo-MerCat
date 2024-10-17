@@ -431,7 +431,7 @@ document.write(`
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.utility_functions.UtilityFunctions"><code class="docutils literal notranslate"><span class="pre">UtilityFunctions</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.utility_functions.UtilityFunctions.service_files_initialization"><code class="docutils literal notranslate"><span class="pre">UtilityFunctions.service_files_initialization()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.utility_functions.UtilityFunctions.ping_simbad_vizier"><code class="docutils literal notranslate"><span class="pre">UtilityFunctions.ping_simbad_vizier()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.utility_functions.UtilityFunctions.find_const"><code class="docutils literal notranslate"><span class="pre">UtilityFunctions.find_const()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.utility_functions.UtilityFunctions.get_common_nomenclature"><code class="docutils literal notranslate"><span class="pre">UtilityFunctions.get_common_nomenclature()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.utility_functions.UtilityFunctions.read_config"><code class="docutils literal notranslate"><span class="pre">UtilityFunctions.read_config()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.utility_functions.UtilityFunctions.read_config_replacements"><code class="docutils literal notranslate"><span class="pre">UtilityFunctions.read_config_replacements()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.utility_functions.UtilityFunctions.standardize_string"><code class="docutils literal notranslate"><span class="pre">UtilityFunctions.standardize_string()</span></code></a></li>
@@ -475,13 +475,17 @@ document.write(`
 <dt class="sig sig-object py" id="src.exomercat.catalogs.Catalog">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.exomercat.catalogs.</span></span><span class="sig-name descname"><span class="pre">Catalog</span></span><a class="headerlink" href="#src.exomercat.catalogs.Catalog" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>The Catalog class contains all methods and attributes that apply to all the other catalogs.</p>
+<p>A base class for managing exoplanet catalogs.</p>
+<p>This class provides a foundation for handling various exoplanet catalogs.
+It includes methods for downloading, reading, and processing catalog data,
+as well as standardizing and validating the information.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="src.exomercat.catalogs.Catalog.download_catalog">
 <span class="sig-name descname"><span class="pre">download_catalog</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">local_date</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.catalogs.Catalog.download_catalog" title="Permalink to this definition">#</a></dt>
-<dd><p>Downloads a catalog from a given URL and saves it to a file. If no local file is found, it will download the
-catalog from the url. If there is an error in downloading or reading the catalog, it will take a previous
-version of that same day’s downloaded catalog if one exists.</p>
+<dd><p>Download a catalog from a given URL and save it to a file.</p>
+<p>This method attempts to download the catalog for the specified date. If the file
+already exists locally, it uses that file. If downloading fails, it attempts to
+use the most recent local copy.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -504,16 +508,16 @@ version of that same day’s downloaded catalog if one exists.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="src.exomercat.catalogs.Catalog.check_input_columns">
 <span class="sig-name descname"><span class="pre">check_input_columns</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.catalogs.Catalog.check_input_columns" title="Permalink to this definition">#</a></dt>
-<dd><p>The check_input_columns ensures that the .csv file contains the columns the script needs later.</p>
+<dd><p>Check if the loaded data contains all required columns.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>self</strong> – An instance of class Catalog</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>None</p>
+<dd class="field-even"><p>A comma-separated string of missing column names, if any.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>None</p>
+<dd class="field-odd"><p>str</p>
 </dd>
 </dl>
 </dd></dl>
@@ -521,16 +525,16 @@ version of that same day’s downloaded catalog if one exists.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="src.exomercat.catalogs.Catalog.check_column_dtypes">
 <span class="sig-name descname"><span class="pre">check_column_dtypes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.catalogs.Catalog.check_column_dtypes" title="Permalink to this definition">#</a></dt>
-<dd><p>The check_datatype_columns ensures that the columns have the expected types.</p>
+<dd><p>Check if the data types of columns match the expected types.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>self</strong> – An instance of class Catalog</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>None</p>
+<dd class="field-even"><p>A comma-separated string of columns with mismatched data types, if any.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>None</p>
+<dd class="field-odd"><p>str</p>
 </dd>
 </dl>
 </dd></dl>
@@ -538,12 +542,25 @@ version of that same day’s downloaded catalog if one exists.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="src.exomercat.catalogs.Catalog.find_non_ascii">
 <span class="sig-name descname"><span class="pre">find_non_ascii</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.catalogs.Catalog.find_non_ascii" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
+<dd><p>Identify non-ASCII characters in string columns of the dataset.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>self</strong> – An instance of class Catalog</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A dictionary where keys are column names and values are lists of row indices
+containing non-ASCII characters.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="src.exomercat.catalogs.Catalog.read_csv_catalog">
 <span class="sig-name descname"><span class="pre">read_csv_catalog</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path_str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.catalogs.Catalog.read_csv_catalog" title="Permalink to this definition">#</a></dt>
-<dd><p>The read_csv_catalog function reads in a csv file and stores it as a pandas dataframe in the self.</p>
+<dd><p>Read a CSV file into the catalog’s data attribute.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -557,13 +574,16 @@ version of that same day’s downloaded catalog if one exists.</p>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>None</p>
 </dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If reading of the .csv file fails.</p>
+</dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="src.exomercat.catalogs.Catalog.keep_columns">
 <span class="sig-name descname"><span class="pre">keep_columns</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.catalogs.Catalog.keep_columns" title="Permalink to this definition">#</a></dt>
-<dd><p>The keep_columns function removes all columns from the dataframe except for those specified in the keep list.</p>
+<dd><p>Retain only specified columns in the dataframe.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>self</strong> (<a class="reference internal" href="#src.exomercat.catalogs.Catalog" title="src.exomercat.catalogs.Catalog"><em>Catalog</em></a>) – An instance of class Catalog</p>
@@ -580,15 +600,9 @@ version of that same day’s downloaded catalog if one exists.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="src.exomercat.catalogs.Catalog.identify_brown_dwarfs">
 <span class="sig-name descname"><span class="pre">identify_brown_dwarfs</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.catalogs.Catalog.identify_brown_dwarfs" title="Permalink to this definition">#</a></dt>
-<dd><p>The identify_brown_dwarfs function identifies possible brown dwarfs in the dataframe.</p>
-<p>It checks if the last character of a planet name is a number or if it ends with an uppercase letter.
-If so, it fills the ‘letter’ cell with ‘BD’ to filter it out later.</p>
-<p>The function excludes KOI-like objects by avoiding the patterns “.0d” with d being a digit.</p>
-<p>Special handling:</p>
-<ul class="simple">
-<li><p>Excludes ‘PSR B1257+12’ which is a known weird candidate.</p></li>
-<li><p>Handles the special case for the problematic triple BD system DENIS J063001.4-184014 (bc).</p></li>
-</ul>
+<dd><p>Identify possible brown dwarfs in the dataframe based on naming conventions.</p>
+<p>This method marks potential brown dwarfs by setting the ‘letter’ column to ‘BD’
+and handles special cases for certain objects.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>self</strong> (<a class="reference internal" href="#src.exomercat.catalogs.Catalog" title="src.exomercat.catalogs.Catalog"><em>Catalog</em></a>) – An instance of class Catalog</p>
@@ -605,19 +619,9 @@ If so, it fills the ‘letter’ cell with ‘BD’ to filter it out later.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="src.exomercat.catalogs.Catalog.replace_known_mistakes">
 <span class="sig-name descname"><span class="pre">replace_known_mistakes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.catalogs.Catalog.replace_known_mistakes" title="Permalink to this definition">#</a></dt>
-<dd><p>Replaces values in the dataframe with those specified in <cite>replacements.ini</cite>.</p>
-<p>This function reads replacements from the <cite>replacements.ini</cite> file and performs the following operations:</p>
-<ol class="arabic simple">
-<li><p>Remove rows from the dataframe based on specified values in the DROP section.</p></li>
-<li><p>Replace values in the name and host columns based on the NAMEtochangeNAME and NAMEtochangeHOST sections.</p></li>
-<li><p>Replace values in the host column based on the HOSTtochangeHOST section.</p></li>
-<li><p>Replace values in the ra and dec columns based on the ra and dec sections.</p></li>
-<li><p>Replace values in the name and host columns based on the const dictionary.</p></li>
-<li><p>Replace values in the binary column based on the NAMEtochangeBINARY section.</p></li>
-<li><p>Remove accents and extra spaces from the name column.</p></li>
-<li><p>Reset the index of the dataframe.</p></li>
-<li><p>Log the completion of the operation.</p></li>
-</ol>
+<dd><p>Replace known errors in the dataframe based on predefined rules.</p>
+<p>This method applies corrections specified in the ‘replacements.ini’ file,
+including dropping rows, replacing values, and standardizing names and coordinates.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>self</strong> (<a class="reference internal" href="#src.exomercat.catalogs.Catalog" title="src.exomercat.catalogs.Catalog"><em>Catalog</em></a>) – An instance of class Catalog</p>
@@ -635,9 +639,9 @@ If so, it fills the ‘letter’ cell with ‘BD’ to filter it out later.</p>
 <dt class="sig sig-object py" id="src.exomercat.catalogs.Catalog.remove_theoretical_masses">
 <span class="sig-name descname"><span class="pre">remove_theoretical_masses</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.catalogs.Catalog.remove_theoretical_masses" title="Permalink to this definition">#</a></dt>
 <dd><p>Remove theoretical masses from the dataframe.</p>
-<p>This function removes theoretical masses from the dataframe. The removal process is catalog-dependent,
-so it is not implemented in this base class. Subclasses should override this method to provide
-the specific implementation for their respective catalog.</p>
+<p>This process is catalog-dependent, so it is not implemented in this base class. 
+Subclasses should override this method to provide the specific implementation 
+for their respective catalog.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>self</strong> – An instance of class Catalog</p>
@@ -657,8 +661,10 @@ the specific implementation for their respective catalog.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="src.exomercat.catalogs.Catalog.handle_reference_format">
 <span class="sig-name descname"><span class="pre">handle_reference_format</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.catalogs.Catalog.handle_reference_format" title="Permalink to this definition">#</a></dt>
-<dd><p>The handle_reference_format function is used to create a URL for each reference in the references list.
-This function is left unimplemented here as it is catalog-dependent and should be implemented in subclasses.</p>
+<dd><p>Standardize the reference format for various parameters.</p>
+<p>This process is catalog-dependent, so it is not implemented in this base class. 
+Subclasses should override this method to provide the specific implementation 
+for their respective catalog.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>self</strong> (<a class="reference internal" href="#src.exomercat.catalogs.Catalog" title="src.exomercat.catalogs.Catalog"><em>Catalog</em></a>) – An instance of class Catalog</p>
@@ -679,8 +685,9 @@ This function is left unimplemented here as it is catalog-dependent and should b
 <dt class="sig sig-object py" id="src.exomercat.catalogs.Catalog.standardize_catalog">
 <span class="sig-name descname"><span class="pre">standardize_catalog</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.catalogs.Catalog.standardize_catalog" title="Permalink to this definition">#</a></dt>
 <dd><p>Standardize the dataframe columns and values.</p>
-<p>This method is not implemented in the base class. Subclasses should override this method to provide the
-specific implementation for their respective catalog.</p>
+<p>This process is catalog-dependent, so it is not implemented in this base class. 
+Subclasses should override this method to provide the specific implementation 
+for their respective catalog.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>self</strong> (<a class="reference internal" href="#src.exomercat.catalogs.Catalog" title="src.exomercat.catalogs.Catalog"><em>Catalog</em></a>) – An instance of class Catalog</p>
@@ -720,7 +727,14 @@ p_max, a_max, e_max, i_max, r_max, msini_max, mass_max, p_min, a_min, e_min, i_m
 <dl class="py method">
 <dt class="sig sig-object py" id="src.exomercat.catalogs.Catalog.remove_impossible_values">
 <span class="sig-name descname"><span class="pre">remove_impossible_values</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.catalogs.Catalog.remove_impossible_values" title="Permalink to this definition">#</a></dt>
-<dd><dl class="field-list simple">
+<dd><p>Remove impossible or nonsensical values from various parameters in the dataset.</p>
+<p>This method performs the following operations:</p>
+<ol class="arabic simple">
+<li><p>Sets negative values of ‘p’, ‘a’, ‘e’, ‘i’, ‘r’, ‘msini’, and ‘mass’ to NaN.</p></li>
+<li><p>Sets the corresponding ‘_min’ and ‘_max’ values to NaN when the main value is negative.</p></li>
+<li><p>Sets eccentricity (‘e’) values greater than 1 to NaN, along with their ‘_min’ and ‘_max’ values.</p></li>
+</ol>
+<dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>self</strong> (<a class="reference internal" href="#src.exomercat.catalogs.Catalog" title="src.exomercat.catalogs.Catalog"><em>Catalog</em></a>) – An instance of class Catalog</p>
 </dd>
@@ -736,13 +750,15 @@ p_max, a_max, e_max, i_max, r_max, msini_max, mass_max, p_min, a_min, e_min, i_m
 <dl class="py method">
 <dt class="sig sig-object py" id="src.exomercat.catalogs.Catalog.standardize_name_host_letter">
 <span class="sig-name descname"><span class="pre">standardize_name_host_letter</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.catalogs.Catalog.standardize_name_host_letter" title="Permalink to this definition">#</a></dt>
-<dd><p>This function standardizes the ‘name’, ‘host’, and ‘letter’ columns in the data.</p>
-<p>It processes the ‘name’ and ‘host’ columns by applying a standardized string function,
-filling empty host values with the name, stripping certain characters from host identifiers,
-and cleaning the host column with the standardize_string function.</p>
-<p>It also refines the ‘alias’ column by removing specific characters and transforming the values.</p>
-<p>Lastly, it assigns the ‘letter’ column based on certain conditions from the ‘name’ column.</p>
-<p>The function concludes by logging the completion of the standardization process.</p>
+<dd><p>Standardize the ‘name’, ‘host’, and ‘letter’ columns in the data.</p>
+<p>This function performs the following operations:</p>
+<ol class="arabic simple">
+<li><p>Standardizes the ‘name’ column using the Utils.standardize_string function.</p></li>
+<li><p>Fills empty ‘host’ values with the corresponding ‘name’ value.</p></li>
+<li><p>Cleans and standardizes the ‘host’ column, removing specific suffixes and applying Utils.standardize_string.</p></li>
+<li><p>Refines the ‘alias’ column by removing specific characters and standardizing the values.</p></li>
+<li><p>Assigns the ‘letter’ column based on specific conditions from the ‘name’ column.</p></li>
+</ol>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>self</strong> (<a class="reference internal" href="#src.exomercat.catalogs.Catalog" title="src.exomercat.catalogs.Catalog"><em>Catalog</em></a>) – An instance of class Catalog</p>
@@ -759,8 +775,10 @@ and cleaning the host column with the standardize_string function.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="src.exomercat.catalogs.Catalog.assign_status">
 <span class="sig-name descname"><span class="pre">assign_status</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.catalogs.Catalog.assign_status" title="Permalink to this definition">#</a></dt>
-<dd><p>Assigns a status to each planet based on the status column.</p>
-<p>This function is catalog-dependent and needs to be implemented in subclasses.</p>
+<dd><p>Assign a status to each planet based on the status column.</p>
+<p>This process is catalog-dependent, so it is not implemented in this base class. 
+Subclasses should override this method to provide the specific implementation 
+for their respective catalog.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>self</strong> (<a class="reference internal" href="#src.exomercat.catalogs.Catalog" title="src.exomercat.catalogs.Catalog"><em>Catalog</em></a>) – An instance of class Catalog</p>
@@ -780,15 +798,16 @@ and cleaning the host column with the standardize_string function.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="src.exomercat.catalogs.Catalog.check_mission_tables">
 <span class="sig-name descname"><span class="pre">check_mission_tables</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">table_path_str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.catalogs.Catalog.check_mission_tables" title="Permalink to this definition">#</a></dt>
-<dd><p>The check_mission_tables function checks the dataframe for any objects that have a name that matches an entry
-in the KOI or EPIC catalogs.</p>
-<p>If there is a match, it will update the status of that object to whatever status is listed in the KOI,
-TESS and EPIC catalogs and update its coordinates if they are missing from the dataframe.</p>
+<dd><p>Check and update the dataframe against mission tables.</p>
+<p>This function compares the objects in the dataframe with entries in the specified
+mission table. If a match is found, it updates the object’s status, discovery method,
+and aliases. It also handles cases where the object name or host name matches
+entries in the mission table.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>self</strong> (<a class="reference internal" href="#src.exomercat.catalogs.Catalog" title="src.exomercat.catalogs.Catalog"><em>Catalog</em></a>) – An instance of class Catalog</p></li>
-<li><p><strong>table_path_str</strong> (<em>str</em>) – the string containing path to the table.</p></li>
+<li><p><strong>table_path_str</strong> (<em>str</em>) – The file path to the mission table (CSV format)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -797,16 +816,32 @@ TESS and EPIC catalogs and update its coordinates if they are missing from the d
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>None</p>
 </dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>FileNotFoundError</strong> – If the specified table file does not exist</p></li>
+<li><p><strong>pd.errors.EmptyDataError</strong> – If the table file is empty</p></li>
+</ul>
+</dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="src.exomercat.catalogs.Catalog.fill_binary_column">
 <span class="sig-name descname"><span class="pre">fill_binary_column</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.catalogs.Catalog.fill_binary_column" title="Permalink to this definition">#</a></dt>
-<dd><p>The fill_binary_column function fills the binary column of the dataframe with
-the appropriate values. It does this by checking if there is a binary letter at the end of that host
-column. If so, it strips out that letter and puts it into its own column called binary.
-If not, nothing happens.</p>
+<dd><p>Fills the binary column of the dataframe with appropriate values.</p>
+<p>This function performs the following operations:</p>
+<ol class="arabic simple">
+<li><p>Initializes the ‘binary’ column with empty strings.</p></li>
+<li><p>Cleans up the ‘host’ column by removing planet names if present.</p></li>
+<li><p>Identifies and marks circumbinary systems (AB).</p></li>
+<li><p>Identifies and marks simple binary systems (A, B, C, N, S).</p></li>
+<li><p>Cleans the ‘host’ column by removing extra spaces and characters.</p></li>
+<li><p>Handles NASA-specific cases using the ‘cb_flag’ column if present.</p></li>
+<li><p>Handles OEC-specific cases using the ‘binaryflag’ column if present.</p></li>
+</ol>
+<p>The function uses regular expressions to identify different binary system patterns
+in the ‘name’ and ‘host’ columns. It updates the ‘binary’ column accordingly and
+adjusts the ‘host’ column as needed.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>self</strong> (<a class="reference internal" href="#src.exomercat.catalogs.Catalog" title="src.exomercat.catalogs.Catalog"><em>Catalog</em></a>) – An instance of class Catalog</p>
@@ -823,15 +858,16 @@ If not, nothing happens.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="src.exomercat.catalogs.Catalog.create_catalogstatus_string">
 <span class="sig-name descname"><span class="pre">create_catalogstatus_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.catalogs.Catalog.create_catalogstatus_string" title="Permalink to this definition">#</a></dt>
-<dd><p>The create_catalogstatus_string function creates a new column in the dataframe which is a concatenation of
-the Catalog and status columns. Depending on when it is called, it can be either formed by the “original”
-status provided by the catalog, or the “checked” status which is the one EMC picks after checking with the
-KOI/K2 catalogs.</p>
+<dd><p>Creates a new column in the dataframe which is a concatenation of the Catalog and status columns.</p>
+<p>This function generates a new column in the dataframe by combining the ‘catalog’ and ‘status’ columns.
+The new column’s name is specified by the ‘string’ parameter. This method can be used to create either
+an “original” status column (as provided by the catalog) or a “checked” status column (as determined by EMC
+after cross-checking with KOI/K2 catalogs).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>self</strong> (<a class="reference internal" href="#src.exomercat.catalogs.Catalog" title="src.exomercat.catalogs.Catalog"><em>Catalog</em></a>) – An instance of class Catalog</p></li>
-<li><p><strong>string</strong> (<em>str</em>) – The name of the new column</p></li>
+<li><p><strong>string</strong> (<em>str</em>) – The name of the new column to be created</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -846,10 +882,12 @@ KOI/K2 catalogs.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="src.exomercat.catalogs.Catalog.make_standardized_alias_list">
 <span class="sig-name descname"><span class="pre">make_standardized_alias_list</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.catalogs.Catalog.make_standardized_alias_list" title="Permalink to this definition">#</a></dt>
-<dd><p>The make_standardized_alias_list function takes in a dataframe and returns a list of aliases for each host. The
-function first groups the data by host, then creates a set of all the aliases associated with that host. The
-set is filtered to remove any None or NaN values, as well as removing the host name from this list. Finally,
-it iterates through each row in the groupby object and sets its alias value equal to this new list.</p>
+<dd><p>Standardize and consolidate alias lists for each host in the catalog.</p>
+<p>The method standardizes and consolidates alias lists for each host in the catalog. 
+It groups the data by host, combines all aliases for each host, removes invalid values, 
+standardizes the aliases, and removes duplicates.
+The resulting ‘alias’ column will contain a comma-separated string of unique,
+standardized aliases for each host.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>self</strong> (<a class="reference internal" href="#src.exomercat.catalogs.Catalog" title="src.exomercat.catalogs.Catalog"><em>Catalog</em></a>) – An instance of class Catalog</p>
@@ -866,29 +904,10 @@ it iterates through each row in the groupby object and sets its alias value equa
 <dl class="py method">
 <dt class="sig sig-object py" id="src.exomercat.catalogs.Catalog.convert_coordinates">
 <span class="sig-name descname"><span class="pre">convert_coordinates</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.catalogs.Catalog.convert_coordinates" title="Permalink to this definition">#</a></dt>
-<dd><p>Convert the <cite>ra</cite> and <cite>dec</cite> columns of the dataframe to decimal degrees.</p>
-<p>This method is not implemented in the base class. Subclasses should override this method to provide the
-specific implementation for their respective catalog.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>self</strong> (<a class="reference internal" href="#src.exomercat.catalogs.Catalog" title="src.exomercat.catalogs.Catalog"><em>Catalog</em></a>) – An instance of class Catalog</p>
-</dd>
-<dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>NotImplementedError</strong> – This method is not implemented in the base class.</p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>None</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>None</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="src.exomercat.catalogs.Catalog.fill_nan_on_coordinates">
-<span class="sig-name descname"><span class="pre">fill_nan_on_coordinates</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.catalogs.Catalog.fill_nan_on_coordinates" title="Permalink to this definition">#</a></dt>
-<dd><p>Fill missing values in the <cite>ra</cite> and <cite>dec</cite> columns of the dataframe with NaN.</p>
+<dd><p>Convert the ra and dec columns of the dataframe to decimal degrees.</p>
+<p>This process is catalog-dependent, so it is not implemented in this base class. 
+Subclasses should override this method to provide the specific implementation 
+for their respective catalog.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>self</strong> (<a class="reference internal" href="#src.exomercat.catalogs.Catalog" title="src.exomercat.catalogs.Catalog"><em>Catalog</em></a>) – An instance of class Catalog</p>
@@ -899,8 +918,25 @@ specific implementation for their respective catalog.</p>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>None</p>
 </dd>
-<dt class="field-even">Note<span class="colon">:</span></dt>
-<dd class="field-even"><p>Currently only used for Open Exoplanet Catalogue, KOI catalogs.</p>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>NotImplementedError</strong> – This method is not implemented in the base class.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.exomercat.catalogs.Catalog.fill_nan_on_coordinates">
+<span class="sig-name descname"><span class="pre">fill_nan_on_coordinates</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.catalogs.Catalog.fill_nan_on_coordinates" title="Permalink to this definition">#</a></dt>
+<dd><p>Fill missing values in the ‘ra’ and ‘dec’ columns of the dataframe with NaN.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>self</strong> (<a class="reference internal" href="#src.exomercat.catalogs.Catalog" title="src.exomercat.catalogs.Catalog"><em>Catalog</em></a>) – An instance of class Catalog</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
 </dd>
 </dl>
 </dd></dl>
@@ -908,13 +944,11 @@ specific implementation for their respective catalog.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="src.exomercat.catalogs.Catalog.print_catalog">
 <span class="sig-name descname"><span class="pre">print_catalog</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.catalogs.Catalog.print_catalog" title="Permalink to this definition">#</a></dt>
-<dd><p>The print_cat function prints the dataframe to a csv file.</p>
+<dd><p>Print the catalog data to a CSV file.</p>
+<p>This method saves the catalog’s dataframe to a CSV file at the specified location.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>self</strong> (<a class="reference internal" href="#src.exomercat.catalogs.Catalog" title="src.exomercat.catalogs.Catalog"><em>Catalog</em></a>) – An instance of class Catalog</p></li>
-<li><p><strong>filename</strong> (<em>Union</em><em>[</em><em>str</em><em>, </em><em>Path</em><em>]</em>) – The location of the file to be written</p></li>
-</ul>
+<dd class="field-odd"><p><strong>filename</strong> (<em>Union</em><em>[</em><em>str</em><em>, </em><em>Path</em><em>]</em>) – The path where the CSV file will be saved.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>None</p>
@@ -931,12 +965,23 @@ specific implementation for their respective catalog.</p>
 <dt class="sig sig-object py" id="src.exomercat.epic.Epic">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.exomercat.epic.</span></span><span class="sig-name descname"><span class="pre">Epic</span></span><a class="headerlink" href="#src.exomercat.epic.Epic" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#src.exomercat.catalogs.Catalog" title="src.exomercat.catalogs.Catalog"><code class="xref py py-class docutils literal notranslate"><span class="pre">Catalog</span></code></a></p>
+<p>A class representing the EPIC (Exoplanet Population Information Catalog) catalog.</p>
+<p>This class inherits from the Catalog base class and provides specific
+functionality for handling and processing data from the EPIC catalog.
+It includes methods for standardizing the catalog data, converting
+coordinates, handling reference formats, and assigning status to entries.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="src.exomercat.epic.Epic.standardize_catalog">
 <span class="sig-name descname"><span class="pre">standardize_catalog</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.epic.Epic.standardize_catalog" title="Permalink to this definition">#</a></dt>
-<dd><p>Standardizes the catalog by renaming columns and adding useful columns derived from existing ones.</p>
-<p>This function takes the data from the K2/EPIC catalog and creates a new table with only the columns we need
-for our analysis. It also adds some useful columns that are derived from existing ones.</p>
+<dd><p>Standardize the EPIC catalog data.</p>
+<p>This method performs the following operations:</p>
+<ol class="arabic simple">
+<li><p>Sets the catalog name and catalog-specific names.</p></li>
+<li><p>Renames columns to standard names used across all catalogs.</p></li>
+<li><p>Filters data based on the default_flag.</p></li>
+<li><p>Adds and modifies columns such as Kepler_host, letter, and alias.</p></li>
+<li><p>Converts discovery methods to standard format.</p></li>
+</ol>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>self</strong> (<a class="reference internal" href="#src.exomercat.epic.Epic" title="src.exomercat.epic.Epic"><em>Epic</em></a>) – The instance of the Epic class.</p>
@@ -953,8 +998,9 @@ for our analysis. It also adds some useful columns that are derived from existin
 <dl class="py method">
 <dt class="sig sig-object py" id="src.exomercat.epic.Epic.convert_coordinates">
 <span class="sig-name descname"><span class="pre">convert_coordinates</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.epic.Epic.convert_coordinates" title="Permalink to this definition">#</a></dt>
-<dd><p>Convert the right ascension (RA) and declination (Dec) columns of the dataframe to decimal degrees. This
-function is not implemented as the Epic catalog already has coordinates in decimal degrees.</p>
+<dd><p>Convert coordinates to decimal degrees.</p>
+<p>This method is a placeholder and does not perform any operations,
+as the EPIC catalog already has coordinates in decimal degrees.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>self</strong> (<a class="reference internal" href="#src.exomercat.epic.Epic" title="src.exomercat.epic.Epic"><em>Epic</em></a>) – An instance of class Epic</p>
@@ -974,7 +1020,9 @@ function is not implemented as the Epic catalog already has coordinates in decim
 <dl class="py method">
 <dt class="sig sig-object py" id="src.exomercat.epic.Epic.remove_theoretical_masses">
 <span class="sig-name descname"><span class="pre">remove_theoretical_masses</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.epic.Epic.remove_theoretical_masses" title="Permalink to this definition">#</a></dt>
-<dd><p>Remove theoretical masses from the dataframe. Not used in the Epic catalog.</p>
+<dd><p>Remove theoretical masses from the dataframe.</p>
+<p>This method is a placeholder and does not perform any operations,
+as it’s not necessary for the EPIC catalog.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>self</strong> (<a class="reference internal" href="#src.exomercat.epic.Epic" title="src.exomercat.epic.Epic"><em>Epic</em></a>) – The instance of the Epic class.</p>
@@ -994,9 +1042,13 @@ function is not implemented as the Epic catalog already has coordinates in decim
 <dl class="py method">
 <dt class="sig sig-object py" id="src.exomercat.epic.Epic.handle_reference_format">
 <span class="sig-name descname"><span class="pre">handle_reference_format</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.epic.Epic.handle_reference_format" title="Permalink to this definition">#</a></dt>
-<dd><p>This function takes in a dataframe and replaces the reference column with a url column. It also adds columns
-for each of the seven parameters (e, mass, msini, i, a, P, and R) and sets them to be equal to the
-corresponding reference column. It then removes all rows where any of these parameters are null.</p>
+<dd><p>Standardize reference format and create URL columns for parameters.</p>
+<p>This method performs the following operations:</p>
+<ol class="arabic simple">
+<li><p>Adds URL columns for each parameter (e, mass, msini, i, a, p, r).</p></li>
+<li><p>Extracts and standardizes URLs from the reference column.</p></li>
+<li><p>Replaces null values with empty strings in URL columns.</p></li>
+</ol>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>self</strong> (<a class="reference internal" href="#src.exomercat.epic.Epic" title="src.exomercat.epic.Epic"><em>Epic</em></a>) – The instance of the Epic class.</p>
@@ -1013,7 +1065,14 @@ corresponding reference column. It then removes all rows where any of these para
 <dl class="py method">
 <dt class="sig sig-object py" id="src.exomercat.epic.Epic.assign_status">
 <span class="sig-name descname"><span class="pre">assign_status</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.epic.Epic.assign_status" title="Permalink to this definition">#</a></dt>
-<dd><p>Assigns the status of each row in the data DataFrame based on the value in the “disposition” column.</p>
+<dd><p>Assign status to each entry based on the ‘disposition’ column.</p>
+<p>This method maps the values in the ‘disposition’ column to standard status values:</p>
+<ul class="simple">
+<li><p>‘CONFIRMED’ for confirmed planets</p></li>
+<li><p>‘CANDIDATE’ for candidate planets</p></li>
+<li><p>‘FALSE POSITIVE’ for false positives and refuted planets</p></li>
+</ul>
+<p>The method also logs the updated status counts.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>self</strong> (<a class="reference internal" href="#src.exomercat.epic.Epic" title="src.exomercat.epic.Epic"><em>Epic</em></a>) – The instance of the Epic class.</p>
@@ -1033,12 +1092,24 @@ corresponding reference column. It then removes all rows where any of these para
 <dt class="sig sig-object py" id="src.exomercat.koi.Koi">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.exomercat.koi.</span></span><span class="sig-name descname"><span class="pre">Koi</span></span><a class="headerlink" href="#src.exomercat.koi.Koi" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#src.exomercat.catalogs.Catalog" title="src.exomercat.catalogs.Catalog"><code class="xref py py-class docutils literal notranslate"><span class="pre">Catalog</span></code></a></p>
-<p>The Koi class contains all methods and attributes related to the Kepler Objects of Interest catalog.</p>
+<p>A class representing the Kepler Objects of Interest (KOI) catalog.</p>
+<p>This class inherits from the Catalog class and provides specific functionality
+for handling and processing data from the KOI catalog. It includes methods for
+standardizing the catalog data, converting coordinates, and managing KOI-specific
+attributes.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="src.exomercat.koi.Koi.standardize_catalog">
 <span class="sig-name descname"><span class="pre">standardize_catalog</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.koi.Koi.standardize_catalog" title="Permalink to this definition">#</a></dt>
-<dd><p>This function standardizes the catalog data by selecting relevant columns, creating aliases, renaming columns,
-and logging the standardization process.</p>
+<dd><p>Standardize the Kepler Objects of Interest catalog data.</p>
+<p>This method performs the following operations:</p>
+<ol class="arabic simple">
+<li><p>Selects relevant columns from the raw data.</p></li>
+<li><p>Creates new columns: KOI, KOI_host, Kepler_host, KIC_host.</p></li>
+<li><p>Generates a ‘letter’ column for planet designation.</p></li>
+<li><p>Creates ‘alias’ and ‘aliasplanet’ columns with various identifiers.</p></li>
+<li><p>Renames and creates standard columns like ‘name’, ‘disposition’, and ‘discoverymethod’.</p></li>
+<li><p>Retains only the standardized columns in the final dataset.</p></li>
+</ol>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>self</strong> (<a class="reference internal" href="#src.exomercat.koi.Koi" title="src.exomercat.koi.Koi"><em>Koi</em></a>) – The instance of the Koi class.</p>
@@ -1055,11 +1126,13 @@ and logging the standardization process.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="src.exomercat.koi.Koi.convert_coordinates">
 <span class="sig-name descname"><span class="pre">convert_coordinates</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.koi.Koi.convert_coordinates" title="Permalink to this definition">#</a></dt>
-<dd><blockquote>
-<div><p>Convert the right ascension (RA) and declination (Dec) columns of the dataframe to decimal degrees.</p>
-</div></blockquote>
-<p>This function handles missing values by replacing them with empty strings, then converts the RA and Dec
-values to decimal degrees using SkyCoord. If the values are empty strings, NaN is assigned.</p>
+<dd><p>Convert right ascension (RA) and declination (Dec) from string format to decimal degrees.</p>
+<p>This method performs the following operations:</p>
+<ol class="arabic simple">
+<li><p>Replaces missing values in RA and Dec columns with empty strings.</p></li>
+<li><p>Converts RA and Dec from string format (HH:MM:SS) to decimal degrees using astropy’s SkyCoord.</p></li>
+<li><p>Assigns NaN to entries where conversion is not possible (empty strings).</p></li>
+</ol>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>self</strong> (<a class="reference internal" href="#src.exomercat.koi.Koi" title="src.exomercat.koi.Koi"><em>Koi</em></a>) – An instance of class Koi</p>
@@ -1079,12 +1152,24 @@ values to decimal degrees using SkyCoord. If the values are empty strings, NaN i
 <dt class="sig sig-object py" id="src.exomercat.eu.Eu">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.exomercat.eu.</span></span><span class="sig-name descname"><span class="pre">Eu</span></span><a class="headerlink" href="#src.exomercat.eu.Eu" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#src.exomercat.catalogs.Catalog" title="src.exomercat.catalogs.Catalog"><code class="xref py py-class docutils literal notranslate"><span class="pre">Catalog</span></code></a></p>
+<p>A class representing the Exoplanet Encyclopedia (EU) catalog.</p>
+<p>This class inherits from the Catalog class and provides specific functionality
+for handling and processing data from the Exoplanet Encyclopedia. It includes
+methods for standardizing the catalog, removing theoretical masses, assigning
+status to planets, handling reference formats, and converting coordinates.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="src.exomercat.eu.Eu.standardize_catalog">
 <span class="sig-name descname"><span class="pre">standardize_catalog</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.eu.Eu.standardize_catalog" title="Permalink to this definition">#</a></dt>
-<dd><p>This function processes raw data from a catalog. It standardizes the data format, renames columns,
-adds new columns like aliases, discovery methods, and references. Finally, it performs some string
-manipulations on the data and converts discovery methods.</p>
+<dd><p>Standardize the Exoplanet Encyclopaedia catalog data.</p>
+<p>This method performs the following operations:</p>
+<ol class="arabic simple">
+<li><p>Sets the catalog name.</p></li>
+<li><p>Replaces “None” and “nan” values.</p></li>
+<li><p>Renames columns to standard names used across all catalogs.</p></li>
+<li><p>Adds new columns such as catalog_name, catalog_host, and reference.</p></li>
+<li><p>Processes and standardizes the alias information.</p></li>
+<li><p>Converts discovery methods to a standard format.</p></li>
+</ol>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>self</strong> (<a class="reference internal" href="#src.exomercat.eu.Eu" title="src.exomercat.eu.Eu"><em>Eu</em></a>) – An instance of class Eu</p>
@@ -1101,8 +1186,9 @@ manipulations on the data and converts discovery methods.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="src.exomercat.eu.Eu.remove_theoretical_masses">
 <span class="sig-name descname"><span class="pre">remove_theoretical_masses</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.eu.Eu.remove_theoretical_masses" title="Permalink to this definition">#</a></dt>
-<dd><p>This function removes theoretical masses from the dataframe by setting the mass/msini values to NaN where the
-MASSPROV column contains “Theoretical” and the radii where the RADPROV column contains “Theoretical”.</p>
+<dd><p>Remove theoretical masses and radii from the dataframe.</p>
+<p>This method sets mass, msini, and radius values (including their error ranges) to NaN 
+where the MASSPROV or RADPROV columns indicate theoretical values.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>self</strong> (<a class="reference internal" href="#src.exomercat.eu.Eu" title="src.exomercat.eu.Eu"><em>Eu</em></a>) – An instance of the Eu class.</p>
@@ -1119,10 +1205,14 @@ MASSPROV column contains “Theoretical” and the radii where the RADPROV colum
 <dl class="py method">
 <dt class="sig sig-object py" id="src.exomercat.eu.Eu.assign_status">
 <span class="sig-name descname"><span class="pre">assign_status</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.eu.Eu.assign_status" title="Permalink to this definition">#</a></dt>
-<dd><p>This function sets the status of each planet in the data DataFrame based on the value in the planet_status
-column. It first sets all planets with confirmed planets as CONFIRMED. Then, it looks for candidate,
-unconfirmed, and controversial planets and sets them as CANDIDATE. Finally, it looks for retracted planets
-and sets them as FALSE POSITIVE.</p>
+<dd><p>Assign status to each entry based on the ‘planet_status’ column.</p>
+<p>This method maps the values in the ‘planet_status’ column to standard status values:</p>
+<ul class="simple">
+<li><p>‘CONFIRMED’ for confirmed planets</p></li>
+<li><p>‘CANDIDATE’ for candidate, unconfirmed, or controversial planets</p></li>
+<li><p>‘FALSE POSITIVE’ for retracted planets</p></li>
+</ul>
+<p>The method also logs the updated status counts.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>self</strong> (<a class="reference internal" href="#src.exomercat.eu.Eu" title="src.exomercat.eu.Eu"><em>Eu</em></a>) – An instance of the Eu class.</p>
@@ -1139,8 +1229,10 @@ and sets them as FALSE POSITIVE.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="src.exomercat.eu.Eu.handle_reference_format">
 <span class="sig-name descname"><span class="pre">handle_reference_format</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.eu.Eu.handle_reference_format" title="Permalink to this definition">#</a></dt>
-<dd><p>The handle_reference_format function is used to create a URL for each reference in the references list. Since
-the Exoplanet Encyclopaedia table does not provide references, we just use “eu” as a keyword in the url.</p>
+<dd><p>Create placeholder URL references for each parameter.</p>
+<p>Since the Exoplanet Encyclopaedia does not provide specific references,
+this method creates a placeholder ‘eu’ URL for each non-null, finite parameter value.</p>
+<p>Parameters handled: e, mass, msini, i, a, p, r</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>self</strong> (<a class="reference internal" href="#src.exomercat.eu.Eu" title="src.exomercat.eu.Eu"><em>Eu</em></a>) – An instance of class Eu</p>
@@ -1157,8 +1249,9 @@ the Exoplanet Encyclopaedia table does not provide references, we just use “eu
 <dl class="py method">
 <dt class="sig sig-object py" id="src.exomercat.eu.Eu.convert_coordinates">
 <span class="sig-name descname"><span class="pre">convert_coordinates</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.eu.Eu.convert_coordinates" title="Permalink to this definition">#</a></dt>
-<dd><p>Convert the right ascension (RA) and declination (Dec) columns of the dataframe to decimal degrees. This
-function is not implemented as the Eu already has coordinates in decimal degrees.</p>
+<dd><p>Convert coordinates to decimal degrees.</p>
+<p>This method is a placeholder and does not perform any operations,
+as the Exoplanet Encyclopaedia catalog already has coordinates in decimal degrees.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>self</strong> (<a class="reference internal" href="#src.exomercat.eu.Eu" title="src.exomercat.eu.Eu"><em>Eu</em></a>) – An instance of class Eu</p>
@@ -1181,20 +1274,29 @@ function is not implemented as the Eu already has coordinates in decimal degrees
 <dt class="sig sig-object py" id="src.exomercat.oec.Oec">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.exomercat.oec.</span></span><span class="sig-name descname"><span class="pre">Oec</span></span><a class="headerlink" href="#src.exomercat.oec.Oec" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#src.exomercat.catalogs.Catalog" title="src.exomercat.catalogs.Catalog"><code class="xref py py-class docutils literal notranslate"><span class="pre">Catalog</span></code></a></p>
-<p>The Oec class contains all methods and attributes related to the Open Exoplanet Catalogue.</p>
+<p>The Oec class represents the Open Exoplanet Catalogue.</p>
+<p>This class inherits from the Catalog class and provides specific functionality
+for handling and processing data from the Open Exoplanet Catalogue. It includes
+methods for downloading, standardizing, and manipulating the catalog data.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="src.exomercat.oec.Oec.download_catalog">
 <span class="sig-name descname"><span class="pre">download_catalog</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">local_date</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.oec.Oec.download_catalog" title="Permalink to this definition">#</a></dt>
-<dd><p>Downloads a catalog from a given URL and saves it to a file. If no local file is found, it will download the
-catalog from the url. If there is an error in downloading or reading the catalog, it will take a previous
-version of that same day’s downloaded catalog if one exists.</p>
+<dd><p>Download the Open Exoplanet Catalogue from a given URL and save it to a file.</p>
+<p>This method performs the following operations:</p>
+<ol class="arabic simple">
+<li><p>Checks if a local file for the given date already exists.</p></li>
+<li><p>If not, attempts to download the catalog from the URL.</p></li>
+<li><p>Converts the downloaded XML file to CSV format.</p></li>
+<li><p>If download fails, attempts to use the most recent local copy.</p></li>
+<li><p>Handles various error scenarios and provides appropriate logging.</p></li>
+</ol>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>self</strong> (<a class="reference internal" href="#src.exomercat.catalogs.Catalog" title="src.exomercat.catalogs.Catalog"><em>Catalog</em></a>) – An instance of class Catalog</p></li>
 <li><p><strong>url</strong> (<em>str</em>) – The URL from which to download the catalog.</p></li>
 <li><p><strong>filename</strong> (<em>str</em>) – The name of the file to save the catalog to.</p></li>
-<li><p><strong>local_date</strong> (<em>str</em>) – The date of the catalog to download. Default is an empty string.</p></li>
+<li><p><strong>local_date</strong> (<em>str</em>) – The date of the catalog to download.(format: YYYY-MM-DD)</p></li>
 <li><p><strong>timeout</strong> (<em>float</em>) – The maximum amount of time to wait for the download to complete. Default is None.</p></li>
 </ul>
 </dd>
@@ -1210,9 +1312,16 @@ version of that same day’s downloaded catalog if one exists.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="src.exomercat.oec.Oec.standardize_catalog">
 <span class="sig-name descname"><span class="pre">standardize_catalog</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.oec.Oec.standardize_catalog" title="Permalink to this definition">#</a></dt>
-<dd><p>Standardizes the catalog by renaming columns and adding useful columns derived from existing ones. It
-standardizes the data format, renames columns, adds new columns like aliases, discovery methods,
-and references. Finally, it performs some string manipulations on the data and converts discovery methods.</p>
+<dd><p>Standardize the Open Exoplanet Catalogue data.</p>
+<p>This method performs the following operations:</p>
+<ol class="arabic simple">
+<li><p>Sets the catalog name.</p></li>
+<li><p>Renames columns to standard names used across all catalogs.</p></li>
+<li><p>Adds new columns such as host, catalog_name, and catalog_host.</p></li>
+<li><p>Separates mass into msini and mass based on the masstype column.</p></li>
+<li><p>Cleans host names.</p></li>
+<li><p>Converts discovery methods to a standard format.</p></li>
+</ol>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>self</strong> (<a class="reference internal" href="#src.exomercat.oec.Oec" title="src.exomercat.oec.Oec"><em>Oec</em></a>) – An instance of class Oec</p>
@@ -1229,8 +1338,9 @@ and references. Finally, it performs some string manipulations on the data and c
 <dl class="py method">
 <dt class="sig sig-object py" id="src.exomercat.oec.Oec.remove_theoretical_masses">
 <span class="sig-name descname"><span class="pre">remove_theoretical_masses</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.oec.Oec.remove_theoretical_masses" title="Permalink to this definition">#</a></dt>
-<dd><p>Remove theoretical masses from the dataframe. Not used in the Oec catalog, since it does not have theoretical
-masses.</p>
+<dd><p>Remove theoretical masses from the dataframe.</p>
+<p>This method is a placeholder and does not perform any operations,
+as the Open Exoplanet Catalogue does not include theoretical masses.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>self</strong> (<a class="reference internal" href="#src.exomercat.oec.Oec" title="src.exomercat.oec.Oec"><em>Oec</em></a>) – The instance of the Oec class.</p>
@@ -1250,13 +1360,14 @@ masses.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="src.exomercat.oec.Oec.assign_status">
 <span class="sig-name descname"><span class="pre">assign_status</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.oec.Oec.assign_status" title="Permalink to this definition">#</a></dt>
-<dd><p>Assigns a status to each row in the dataframe based on the value in the “list” column.</p>
+<dd><p>Assign status to each entry based on the ‘list’ column.</p>
+<p>This method assigns status as follows:</p>
 <ul class="simple">
-<li><p>If “Confirmed” is in the list, assigns “CONFIRMED”.</p></li>
-<li><p>If “Controversial” is in the list, assigns “CANDIDATE”.</p></li>
-<li><p>If “Retracted” is in the list, assigns “FALSE POSITIVE”.</p></li>
-<li><p>Kepler Objects of Interest are assigned “CANDIDATE”.</p></li>
+<li><p>“CONFIRMED” if ‘Confirmed’ is in the list.</p></li>
+<li><p>“CANDIDATE” if ‘Controversial’ is in the list or for Kepler Objects of Interest.</p></li>
+<li><p>“FALSE POSITIVE” if ‘Retracted’ is in the list.</p></li>
 </ul>
+<p>The method also logs the updated status counts.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>self</strong> (<a class="reference internal" href="#src.exomercat.oec.Oec" title="src.exomercat.oec.Oec"><em>Oec</em></a>) – An instance of class Oec</p>
@@ -1273,8 +1384,9 @@ masses.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="src.exomercat.oec.Oec.handle_reference_format">
 <span class="sig-name descname"><span class="pre">handle_reference_format</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.oec.Oec.handle_reference_format" title="Permalink to this definition">#</a></dt>
-<dd><p>The handle_reference_format function is used to create a URL for each reference in the references list. Since
-the Open Exoplanet Catalogue table does not provide references, we just use “oec” as a keyword in the url.</p>
+<dd><p>Standardize the reference format for various parameters.</p>
+<p>This method creates a ‘_url’ column for each parameter (e, mass, msini, i, a, p, r),
+setting the value to ‘oec’ for non-null, finite values and an empty string otherwise.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>self</strong> (<a class="reference internal" href="#src.exomercat.oec.Oec" title="src.exomercat.oec.Oec"><em>Oec</em></a>) – An instance of class Oec</p>
@@ -1291,9 +1403,13 @@ the Open Exoplanet Catalogue table does not provide references, we just use “o
 <dl class="py method">
 <dt class="sig sig-object py" id="src.exomercat.oec.Oec.convert_coordinates">
 <span class="sig-name descname"><span class="pre">convert_coordinates</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.oec.Oec.convert_coordinates" title="Permalink to this definition">#</a></dt>
-<dd><p>Convert the right ascension (RA) and declination (Dec) columns of the dataframe to decimal degrees.</p>
-<p>This function handles missing values by replacing them with empty strings, then converts the RA and Dec
-values to decimal degrees using SkyCoord. If the values are empty strings, NaN is assigned.</p>
+<dd><p>Convert right ascension (RA) and declination (Dec) from string format to decimal degrees.</p>
+<p>This method performs the following operations:</p>
+<ol class="arabic simple">
+<li><p>Replaces missing values in RA and Dec columns with empty strings.</p></li>
+<li><p>Converts RA and Dec from string format (HH:MM:SS) to decimal degrees using astropy’s SkyCoord.</p></li>
+<li><p>Assigns NaN to entries where conversion is not possible (empty strings).</p></li>
+</ol>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>self</strong> (<a class="reference internal" href="#src.exomercat.oec.Oec" title="src.exomercat.oec.Oec"><em>Oec</em></a>) – An instance of class Oec</p>
@@ -1313,13 +1429,25 @@ values to decimal degrees using SkyCoord. If the values are empty strings, NaN i
 <dt class="sig sig-object py" id="src.exomercat.nasa.Nasa">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.exomercat.nasa.</span></span><span class="sig-name descname"><span class="pre">Nasa</span></span><a class="headerlink" href="#src.exomercat.nasa.Nasa" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#src.exomercat.catalogs.Catalog" title="src.exomercat.catalogs.Catalog"><code class="xref py py-class docutils literal notranslate"><span class="pre">Catalog</span></code></a></p>
-<p>The Nasa class contains all methods and attributes related to the NASA Exoplanet Archive catalog.</p>
+<p>A class representing the NASA Exoplanet Archive catalog.</p>
+<p>This class inherits from the Catalog base class and provides specific
+functionality for processing and standardizing data from the NASA
+Exoplanet Archive. It includes methods for initializing the catalog,
+standardizing the data format, handling references, assigning planet
+status, and removing theoretical masses and radii.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="src.exomercat.nasa.Nasa.standardize_catalog">
 <span class="sig-name descname"><span class="pre">standardize_catalog</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.nasa.Nasa.standardize_catalog" title="Permalink to this definition">#</a></dt>
-<dd><p>This function processes raw data from a catalog. It standardizes the data format, renames columns,
-adds new columns like aliases, discovery methods, and references. Finally, it performs some string
-manipulations on the data and converts discovery methods.</p>
+<dd><p>Standardize the NASA Exoplanet Archive catalog data.</p>
+<p>This method performs the following operations:</p>
+<ol class="arabic simple">
+<li><p>Sets the catalog name.</p></li>
+<li><p>Renames columns to standard names used across all catalogs.</p></li>
+<li><p>Adds new columns such as catalog_name and catalog_host.</p></li>
+<li><p>Splits best mass into mass and msini.</p></li>
+<li><p>Processes and standardizes the alias information.</p></li>
+<li><p>Converts discovery methods to a standard format.</p></li>
+</ol>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>self</strong> (<a class="reference internal" href="#src.exomercat.nasa.Nasa" title="src.exomercat.nasa.Nasa"><em>Nasa</em></a>) – An instance of class Nasa</p>
@@ -1336,16 +1464,20 @@ manipulations on the data and converts discovery methods.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="src.exomercat.nasa.Nasa.sort_bestmass_to_mass_or_msini">
 <span class="sig-name descname"><span class="pre">sort_bestmass_to_mass_or_msini</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.nasa.Nasa.sort_bestmass_to_mass_or_msini" title="Permalink to this definition">#</a></dt>
-<dd><p>Sorts the values of ‘bestmass’ into either ‘mass’ or ‘msini’ based on the ‘bestmass_provenance’ column If
-‘bestmass’ is found to be a mass, it is sorted into ‘mass’. If it is found to be an ‘msini’ value,
-it is sorted into ‘msini’. If neither are true (e.g. theoretical mass), both ‘mass’ and ‘msini’ are set to
-NaN for that row.</p>
+<dd><p>Sort the ‘bestmass’ values into either ‘mass’ or ‘msini’ columns.</p>
+<p>This method categorizes the ‘bestmass’ values based on the ‘bestmass_provenance’:</p>
+<ul class="simple">
+<li><p>If ‘Mass’, values are placed in the ‘mass’ columns.</p></li>
+<li><p>If ‘Msini’, values are placed in the ‘msini’ columns.</p></li>
+<li><p>If ‘M-R relationship’ or ‘Msin(i)/sin(i)’, both ‘mass’ and ‘msini’ are set to NaN.</p></li>
+<li><p>For any other provenance, a RuntimeError is raised.</p></li>
+</ul>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>self</strong> (<a class="reference internal" href="#src.exomercat.nasa.Nasa" title="src.exomercat.nasa.Nasa"><em>Nasa</em></a>) – An instance of the Nasa class</p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>ValueError</strong> – If ‘bestmass’ is not a mass or an ‘msini’</p>
+<dd class="field-even"><p><strong>RuntimeError</strong> – If ‘bestmass’ is not a mass or an ‘msini’</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>None</p>
@@ -1359,9 +1491,14 @@ NaN for that row.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="src.exomercat.nasa.Nasa.handle_reference_format">
 <span class="sig-name descname"><span class="pre">handle_reference_format</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.nasa.Nasa.handle_reference_format" title="Permalink to this definition">#</a></dt>
-<dd><p>This function takes in a dataframe and replaces the reference column with a url column. It also adds columns
-for each of the seven parameters (e, mass, msini, i, a, P, and R) and sets them to be equal to the
-corresponding reference column. It then removes all rows where any of these parameters are null.</p>
+<dd><p>Standardize the reference format for various parameters.</p>
+<p>This method performs the following for each parameter (e, mass, msini, i, a, p, r):</p>
+<ol class="arabic simple">
+<li><p>Ensures a ‘_url’ column exists for each parameter.</p></li>
+<li><p>Extracts the bibcode from the reference URL.</p></li>
+<li><p>Standardizes the URL format.</p></li>
+<li><p>Sets empty strings for null values.</p></li>
+</ol>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>self</strong> (<a class="reference internal" href="#src.exomercat.nasa.Nasa" title="src.exomercat.nasa.Nasa"><em>Nasa</em></a>) – The instance of the Nasa class.</p>
@@ -1378,8 +1515,8 @@ corresponding reference column. It then removes all rows where any of these para
 <dl class="py method">
 <dt class="sig sig-object py" id="src.exomercat.nasa.Nasa.assign_status">
 <span class="sig-name descname"><span class="pre">assign_status</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.nasa.Nasa.assign_status" title="Permalink to this definition">#</a></dt>
-<dd><p>This function sets the status of each planet in the data DataFrame based on the value in the planet_status
-column. For Nasa, this is “CONFIRMED” by default.</p>
+<dd><p>Assign status to each entry in the catalog.</p>
+<p>For the NASA Exoplanet Archive, all entries are set to “CONFIRMED” by default.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>self</strong> (<a class="reference internal" href="#src.exomercat.nasa.Nasa" title="src.exomercat.nasa.Nasa"><em>Nasa</em></a>) – An instance of the Nasa class.</p>
@@ -1396,8 +1533,9 @@ column. For Nasa, this is “CONFIRMED” by default.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="src.exomercat.nasa.Nasa.convert_coordinates">
 <span class="sig-name descname"><span class="pre">convert_coordinates</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.nasa.Nasa.convert_coordinates" title="Permalink to this definition">#</a></dt>
-<dd><p>Convert the right ascension (RA) and declination (Dec) columns of the dataframe to decimal degrees. This
-function is not necessary as the NASA Exoplanet Archive already has coordinates in decimal degrees.</p>
+<dd><p>Convert coordinates to decimal degrees.</p>
+<p>This method is a placeholder and does not perform any operations,
+as the NASA Exoplanet Archive catalog already has coordinates in decimal degrees.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>self</strong> (<a class="reference internal" href="#src.exomercat.nasa.Nasa" title="src.exomercat.nasa.Nasa"><em>Nasa</em></a>) – An instance of class Nasa</p>
@@ -1417,8 +1555,9 @@ function is not necessary as the NASA Exoplanet Archive already has coordinates 
 <dl class="py method">
 <dt class="sig sig-object py" id="src.exomercat.nasa.Nasa.remove_theoretical_masses">
 <span class="sig-name descname"><span class="pre">remove_theoretical_masses</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.nasa.Nasa.remove_theoretical_masses" title="Permalink to this definition">#</a></dt>
-<dd><p>Removes theoretical masses and radii calculated through M-R relationships. This function removes all rows
-where the mass_url, msini_url, and r_url columns contain the word “Calculated”.</p>
+<dd><p>Remove theoretical masses and radii from the catalog.</p>
+<p>This method removes values for mass, msini, and radius (including their error ranges and URLs) 
+where the corresponding URL contains “Calculated”, indicating a theoretical value.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>self</strong> (<a class="reference internal" href="#src.exomercat.nasa.Nasa" title="src.exomercat.nasa.Nasa"><em>Nasa</em></a>) – An instance of the Nasa class.</p>
@@ -1438,12 +1577,14 @@ where the mass_url, msini_url, and r_url columns contain the word “Calculated�
 <dt class="sig sig-object py" id="src.exomercat.emc.Emc">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.exomercat.emc.</span></span><span class="sig-name descname"><span class="pre">Emc</span></span><a class="headerlink" href="#src.exomercat.emc.Emc" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#src.exomercat.catalogs.Catalog" title="src.exomercat.catalogs.Catalog"><code class="xref py py-class docutils literal notranslate"><span class="pre">Catalog</span></code></a></p>
-<p>The EMC class contains all methods and attributes related to Exo-MerCat catalog.</p>
+<p>The Emc (Exo-MerCat) class is a subclass of Catalog that represents the Exo-MerCat catalog.
+It contains methods for processing, merging, and managing exoplanet data from various sources.
+This class provides functionality for data cleaning, standardization, and analysis of exoplanet information.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="src.exomercat.emc.Emc.convert_coordinates">
 <span class="sig-name descname"><span class="pre">convert_coordinates</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.emc.Emc.convert_coordinates" title="Permalink to this definition">#</a></dt>
-<dd><p>Convert the right ascension (RA) and declination (Dec) columns of the dataframe to decimal degrees. This
-function is not implemented as the EMC already has coordinates in decimal degrees.</p>
+<dd><p>Convert the right ascension (RA) and declination (Dec) columns of the dataframe to decimal degrees.</p>
+<p>This function is not implemented as the EMC already has coordinates in decimal degrees.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>self</strong> (<a class="reference internal" href="#src.exomercat.emc.Emc" title="src.exomercat.emc.Emc"><em>Emc</em></a>) – The instance of the Emc class.</p>
@@ -1463,13 +1604,10 @@ function is not implemented as the EMC already has coordinates in decimal degree
 <dl class="py method">
 <dt class="sig sig-object py" id="src.exomercat.emc.Emc.alias_as_host">
 <span class="sig-name descname"><span class="pre">alias_as_host</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.emc.Emc.alias_as_host" title="Permalink to this definition">#</a></dt>
-<dd><p>The alias_as_host function takes the alias column of a dataframe and checks if any of the aliases are labeled
+<dd><p>Check if any aliases are labeled as hosts in some other entry and standardize the host name.</p>
+<p>This function takes the alias column of a dataframe and checks if any of the aliases are labeled
 as hosts in some other entry. If an alias is labeled as a host, it changes the host to be that of the
-original host. It then adds all aliases of both hosts into one list for each row. The method opens a file
-called “Logs/alias_as_host.txt” in append mode and writes information about the aliases that were changed to
-be hosts. Finally, it updates the dataframe with the new aliases and logs the number of times the aliases
-were changed to be hosts. It is okay if it happens multiple times, as long as it standardizes the host name and
-adds up all the aliases, SIMBAD will find them coherently.</p>
+original host. It then adds all aliases of both hosts into one list for each row. It logs results into “Logs/alias_as_host.txt”.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>self</strong> (<a class="reference internal" href="#src.exomercat.emc.Emc" title="src.exomercat.emc.Emc"><em>Emc</em></a>) – The instance of the Emc class.</p>
@@ -1486,9 +1624,11 @@ adds up all the aliases, SIMBAD will find them coherently.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="src.exomercat.emc.Emc.check_binary_mismatch">
 <span class="sig-name descname"><span class="pre">check_binary_mismatch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">keyword</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tolerance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0002777777777777778</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.emc.Emc.check_binary_mismatch" title="Permalink to this definition">#</a></dt>
-<dd><p>The check_binary_mismatch function is used to check for binary mismatches in the dataframe.
-It checks if there are multiple values of binary for a given system (identified by name and letter).
-If there are, it tries to replace the null or S-type binaries with the value of another non-null entry in that system.
+<dd><p>Check for binary mismatches in the dataframe.</p>
+<p>This function checks if there are multiple values of binary for a given system (identified by name and letter).
+It attempts to standardize the binary values and flags complex systems or those with coordinate disagreements.</p>
+<p>If there are multiple values of binary for a given system (identified by name and letter), 
+it tries to replace the null or S-type binaries with the value of another non-null entry in that system.
 If all entries have null or S-type binaries, it replaces them with ‘S-type’.
 If there are multiple non-null values of binary, it flags this as a complex system and does not try to correct anything.
 It also flags systems where coordinates do not agree within a tolerance (by default 1 arcsecond).</p>
@@ -1512,9 +1652,9 @@ It also flags systems where coordinates do not agree within a tolerance (by defa
 <dl class="py method">
 <dt class="sig sig-object py" id="src.exomercat.emc.Emc.prepare_columns_for_mainid_search">
 <span class="sig-name descname"><span class="pre">prepare_columns_for_mainid_search</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.emc.Emc.prepare_columns_for_mainid_search" title="Permalink to this definition">#</a></dt>
-<dd><p>Prepares the columns “hostbinary”, “aliasbinary”, “hostbinary2”, “aliasbinary2”, “main_id”, “list_id”,
-“main_id_ra”, “main_id_dec”, “angular_separation”, “angsep”, and “main_id_provenance”
-for the search of the main identifier. It also initializes the “angular_separation” column.</p>
+<dd><p>Prepare columns for the search of the main identifier.</p>
+<p>This function prepares various columns including “hostbinary”, “aliasbinary”, “main_id”, “list_id”,
+“main_id_ra”, “main_id_dec”, “angular_separation”, and “main_id_provenance” for the search of the main identifier.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>self</strong> (<a class="reference internal" href="#src.exomercat.emc.Emc" title="src.exomercat.emc.Emc"><em>Emc</em></a>) – The instance of the Emc class.</p>
@@ -1533,6 +1673,9 @@ for the search of the main identifier. It also initializes the “angular_separa
 <span class="sig-name descname"><span class="pre">fill_mainid_provenance_column</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">keyword</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.emc.Emc.fill_mainid_provenance_column" title="Permalink to this definition">#</a></dt>
 <dd><p>Fills the ‘main_id_provenance’ column with the provided keyword if ‘main_id_provenance’ is empty and
 ‘main_id’ is not empty for each relevant index.</p>
+<p>This function is used to track the source of the main identifier for each entry in the catalog.
+It only updates entries where the main_id_provenance is currently empty but a main_id exists,
+avoiding overwriting any existing provenance information.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -1552,9 +1695,10 @@ for the search of the main identifier. It also initializes the “angular_separa
 <dl class="py method">
 <dt class="sig sig-object py" id="src.exomercat.emc.Emc.simbad_list_host_search">
 <span class="sig-name descname"><span class="pre">simbad_list_host_search</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">typed_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.emc.Emc.simbad_list_host_search" title="Permalink to this definition">#</a></dt>
-<dd><p>The simbad_list_host_search function takes a column name as an argument and searches for the host star in that
-column in SIMBAD. It then fills in the main_id, IDS, RA, and DEC columns with information from SIMBAD if it
-finds a match.</p>
+<dd><p>Searches for host stars in SIMBAD using the specified column.</p>
+<p>This function takes a column name as an argument and searches for the host star in that
+column in SIMBAD. It then fills in the main_id, list_id, main_id_ra, and main_id_dec columns
+with information from SIMBAD if it finds a match.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -1574,15 +1718,25 @@ finds a match.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="src.exomercat.emc.Emc.simbad_list_alias_search">
 <span class="sig-name descname"><span class="pre">simbad_list_alias_search</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">column</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.emc.Emc.simbad_list_alias_search" title="Permalink to this definition">#</a></dt>
-<dd><p>The simbad_list_alias_search function takes a column name as an argument and searches for the main ID of
-each object in that column. The function first splits the string into a list of aliases, then iterates
-through each alias to search SIMBAD for its main ID. If it finds one, it will update the dataframe with
-that information.
-:type column: <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>
-:param column: The name of the column that contains the host star to search for (alias or aliasbinary)</p>
+<dd><p>Searches for the main ID of each object in the specified column using SIMBAD.</p>
+<p>This function performs the following steps:</p>
+<ol class="arabic simple">
+<li><p>Creates a DataFrame of aliases from the specified column</p></li>
+<li><p>Queries SIMBAD for each alias</p></li>
+<li><p>Updates the main dataframe with the SIMBAD information</p></li>
+</ol>
 <dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>self</strong> (<a class="reference internal" href="#src.exomercat.emc.Emc" title="src.exomercat.emc.Emc"><em>Emc</em></a>) – The instance of the Emc class.</p></li>
+<li><p><strong>column</strong> (<em>str</em>) – The name of the column that contains the host star aliases to search for (e.g., ‘alias’ or ‘aliasbinary’)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1590,10 +1744,7 @@ that information.
 <dl class="py method">
 <dt class="sig sig-object py" id="src.exomercat.emc.Emc.get_host_info_from_simbad">
 <span class="sig-name descname"><span class="pre">get_host_info_from_simbad</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.emc.Emc.get_host_info_from_simbad" title="Permalink to this definition">#</a></dt>
-<dd><p>The get_host_info_from_simbad function takes the dataframe and extracts all unique host star names.
-It then queries SIMBAD for each of these names, and returns a table with the main ID, alias IDs, RA and DEC.
-The function merges this table with the original dataframe on host name (left join). If there are
-still rows missing main_id values in the merged table, it will query SIMBAD again using all aliases from those rows.</p>
+<dd><p>Queries SIMBAD for the main identifier based on the host star name.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>self</strong> (<a class="reference internal" href="#src.exomercat.emc.Emc" title="src.exomercat.emc.Emc"><em>Emc</em></a>) – The instance of the Emc class.</p>
@@ -1610,15 +1761,12 @@ still rows missing main_id values in the merged table, it will query SIMBAD agai
 <dl class="py method">
 <dt class="sig sig-object py" id="src.exomercat.emc.Emc.get_coordinates_from_simbad">
 <span class="sig-name descname"><span class="pre">get_coordinates_from_simbad</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tolerance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0002777777777777778</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.emc.Emc.get_coordinates_from_simbad" title="Permalink to this definition">#</a></dt>
-<dd><dl class="simple">
-<dt>The get_coordinates_from_simbad function prepares a query for SIMBAD, executes the query and then merges</dt><dd><p>the results with the original dataframe.</p>
-</dd>
-</dl>
+<dd><p>Prepares a query for SIMBAD, executes the query and then merges the results with the original dataframe.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>self</strong> (<a class="reference internal" href="#src.exomercat.emc.Emc" title="src.exomercat.emc.Emc"><em>Emc</em></a>) – The instance of the Emc class.</p></li>
-<li><p><strong>tolerance</strong> (<em>float</em>) – The tolerance for the query</p></li>
+<li><p><strong>tolerance</strong> (<em>float</em>) – The tolerance for the query in degrees (default is 1 arcsecond)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -1633,13 +1781,13 @@ still rows missing main_id values in the merged table, it will query SIMBAD agai
 <dl class="py method">
 <dt class="sig sig-object py" id="src.exomercat.emc.Emc.get_host_info_from_tic">
 <span class="sig-name descname"><span class="pre">get_host_info_from_tic</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.emc.Emc.get_host_info_from_tic" title="Permalink to this definition">#</a></dt>
-<dd><p>The get_host_info_from_tic function takes the dataframe and extracts all unique host star names that are TIC
-identifiers.
-It then queries TIC for each of these names, and returns a table with the main ID, alias IDs, RA and DEC.
-The function merges this table with the original dataframe on host name (left join).
-If there are
-still rows missing main_id values in the merged table, it will query TIC again using all aliases from those
-rows, if they are TIC identifiers.</p>
+<dd><p>Retrieves host information from the TIC (TESS Input Catalog) for hosts with TIC identifiers.</p>
+<p>This function performs the following steps:</p>
+<ol class="arabic simple">
+<li><p>Extracts unique host star names that are TIC identifiers.</p></li>
+<li><p>Queries the TIC for each of these names.</p></li>
+<li><p>Merges the obtained information with the original dataframe.</p></li>
+</ol>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>self</strong> (<a class="reference internal" href="#src.exomercat.emc.Emc" title="src.exomercat.emc.Emc"><em>Emc</em></a>) – The instance of the Emc class.</p>
@@ -1656,15 +1804,19 @@ rows, if they are TIC identifiers.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="src.exomercat.emc.Emc.get_coordinates_from_tic">
 <span class="sig-name descname"><span class="pre">get_coordinates_from_tic</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tolerance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0002777777777777778</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.emc.Emc.get_coordinates_from_tic" title="Permalink to this definition">#</a></dt>
-<dd><dl class="simple">
-<dt>The get_coordinates_from_tic function prepares a query for TIC, executes the query and then merges</dt><dd><p>the results with the original dataframe.</p>
-</dd>
-</dl>
+<dd><p>Retrieves coordinates from the TESS Input Catalog (TIC) for objects without main IDs.</p>
+<p>This function performs the following steps:</p>
+<ol class="arabic simple">
+<li><p>Prepares a query for the TIC using objects without main IDs.</p></li>
+<li><p>Executes the query to retrieve matching TIC entries.</p></li>
+<li><p>Merges the results with the original dataframe.</p></li>
+<li><p>Updates the main_id, coordinates, and other relevant fields for matched objects.</p></li>
+</ol>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>self</strong> (<a class="reference internal" href="#src.exomercat.emc.Emc" title="src.exomercat.emc.Emc"><em>Emc</em></a>) – The instance of the Emc class.</p></li>
-<li><p><strong>tolerance</strong> (<em>float</em>) – The tolerance for the query</p></li>
+<li><p><strong>tolerance</strong> (<em>float</em>) – The tolerance for the query in degrees (default is 1 arcsecond)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -1679,16 +1831,16 @@ rows, if they are TIC identifiers.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="src.exomercat.emc.Emc.check_coordinates">
 <span class="sig-name descname"><span class="pre">check_coordinates</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tolerance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0002777777777777778</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.emc.Emc.check_coordinates" title="Permalink to this definition">#</a></dt>
-<dd><p>The check_coordinates function checks for mismatches in the RA and DEC coordinates of a given host
-(for the targets that cannot rely on SIMBAD or TIC MAIN_ID because the query was unsuccessful).
-It does this by grouping all entries with the same host name, then checking if any of those entries have
+<dd><p>Checks for mismatches in the RA and DEC coordinates of a given host.</p>
+<p>This function is used for targets that cannot rely on SIMBAD or TIC MAIN_ID because the query was unsuccessful.
+It groups all entries with the same host name, then checks if any of those entries have
 a RA or DEC that is more than a given tolerance away from the mode value for that group.
-If so, it prints out information about those mismatched values to a log file called check_coordinates.txt.</p>
+If so, it logs information about those mismatched values to a file called “check_coordinates.txt”.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>self</strong> (<a class="reference internal" href="#src.exomercat.emc.Emc" title="src.exomercat.emc.Emc"><em>Emc</em></a>) – The instance of the Emc class.</p></li>
-<li><p><strong>tolerance</strong> (<em>float</em>) – The tolerance for the check</p></li>
+<li><p><strong>tolerance</strong> (<em>float</em>) – The tolerance for coordinate mismatch, in degrees. Default is 1 arcsecond (1/3600 degrees).</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -1703,7 +1855,7 @@ If so, it prints out information about those mismatched values to a log file cal
 <dl class="py method">
 <dt class="sig sig-object py" id="src.exomercat.emc.Emc.replace_old_new_identifier">
 <span class="sig-name descname"><span class="pre">replace_old_new_identifier</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">identifier</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_identifier</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">binary</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.emc.Emc.replace_old_new_identifier" title="Permalink to this definition">#</a></dt>
-<dd><p>The replace_old_new_identifier function replaces the old identifier with the new identifier in the dataframe. It also adds additional aliases to the main_id_aliases. If binary is not None, it also replaces the old binary with the new binary in the dataframe as specified by the calling function.</p>
+<dd><p>Replaces the old identifier with the new identifier in the dataframe.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -1748,10 +1900,15 @@ If so, it prints out information about those mismatched values to a log file cal
 <dl class="py method">
 <dt class="sig sig-object py" id="src.exomercat.emc.Emc.fill_missing_main_id">
 <span class="sig-name descname"><span class="pre">fill_missing_main_id</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.emc.Emc.fill_missing_main_id" title="Permalink to this definition">#</a></dt>
-<dd><p>This function replaces empty strings in the ‘main_id_provenance’ column with the values from the ‘catalog’ column.
-It also replaces empty strings in the ‘main_id’ column with the values from the ‘host’ column from the source catalog.
-The ‘main_id_ra’ and ‘main_id_dec’ columns are filled with the values from the ‘ra’ and ‘dec’ columns respectively from the source catalog.
-The ‘angular_separation’ column is then filled with the concatenation of the ‘catalog’ column and the ‘angsep’ column converted to strings.</p>
+<dd><p>Fill missing values in main_id related columns with data from other columns.</p>
+<p>This function performs the following operations:</p>
+<ol class="arabic simple">
+<li><p>Fills empty ‘main_id_provenance’ with values from ‘catalog’.</p></li>
+<li><p>Fills empty ‘main_id’ with values from ‘host’.</p></li>
+<li><p>Fills empty ‘main_id_ra’ with values from ‘ra’, converting to float.</p></li>
+<li><p>Fills empty ‘main_id_dec’ with values from ‘dec’, converting to float.</p></li>
+<li><p>Creates ‘angular_separation’ by concatenating ‘catalog’ and ‘angsep’.</p></li>
+</ol>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>self</strong> (<a class="reference internal" href="#src.exomercat.emc.Emc" title="src.exomercat.emc.Emc"><em>Emc</em></a>) – The instance of the Emc class.</p>
@@ -1768,8 +1925,7 @@ The ‘angular_separation’ column is then filled with the concatenation of the
 <dl class="py method">
 <dt class="sig sig-object py" id="src.exomercat.emc.Emc.check_same_host_different_id">
 <span class="sig-name descname"><span class="pre">check_same_host_different_id</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.emc.Emc.check_same_host_different_id" title="Permalink to this definition">#</a></dt>
-<dd><p>The check_same_host_different_id function checks to see if there are any instances where the same host has
-multiple SIMBAD main IDs. This should _never_ happen unless the SIMBAD search is failing.</p>
+<dd><p>Checks if there are instances where the same host has multiple SIMBAD main IDs.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>self</strong> (<a class="reference internal" href="#src.exomercat.emc.Emc" title="src.exomercat.emc.Emc"><em>Emc</em></a>) – The instance of the Emc class.</p>
@@ -1786,10 +1942,10 @@ multiple SIMBAD main IDs. This should _never_ happen unless the SIMBAD search is
 <dl class="py method">
 <dt class="sig sig-object py" id="src.exomercat.emc.Emc.check_same_coords_different_id">
 <span class="sig-name descname"><span class="pre">check_same_coords_different_id</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tolerance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0002777777777777778</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.emc.Emc.check_same_coords_different_id" title="Permalink to this definition">#</a></dt>
-<dd><p>The check_same_host_different_id function checks to see if there are any instances where the same host
-has multiple SIMBAD main IDs. This might happen in case of very close stars or binary stars. The user
+<dd><p>Checks if there are any instances where the same host has multiple SIMBAD main IDs.</p>
+<p>This might happen in case of very close stars or binary stars. The user
 should check in Logs/post_main_id_query_checks.txt that the two main ids and coordinates are indeed
-different stars. Otherwise, they can force a replacement.</p>
+different stars. Otherwise, the user can force a replacement.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>self</strong> (<a class="reference internal" href="#src.exomercat.emc.Emc" title="src.exomercat.emc.Emc"><em>Emc</em></a>) – The instance of the Emc class.</p>
@@ -1806,12 +1962,14 @@ different stars. Otherwise, they can force a replacement.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="src.exomercat.emc.Emc.group_by_list_id_check_main_id">
 <span class="sig-name descname"><span class="pre">group_by_list_id_check_main_id</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.emc.Emc.group_by_list_id_check_main_id" title="Permalink to this definition">#</a></dt>
-<dd><p>This function groups the data by the ‘list_id’ column and checks if there are any inconsistencies
-in the ‘main_id’ column for each group.
-It iterates over each group of data, checks if the ‘list_id’ is not empty and if there are multiple unique
-values in the ‘main_id’ column.
-If there are, it sets the ‘main_id’ column for all rows in the group to the first unique value in the ‘main_id’ column.
-It then writes a message to the log file indicating the inconsistency and the details of the group.</p>
+<dd><p>Groups the data by ‘list_id’ and checks for inconsistencies in ‘main_id’.</p>
+<p>This function performs the following steps:</p>
+<ol class="arabic simple">
+<li><p>Groups the data by the ‘list_id’ column.</p></li>
+<li><p>For each group, checks if the ‘list_id’ is not empty and if there are multiple unique ‘main_id’ values.</p></li>
+<li><p>If inconsistencies are found, it sets all ‘main_id’ values in the group to the first unique ‘main_id’.</p></li>
+<li><p>Logs details of any inconsistencies found.</p></li>
+</ol>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>self</strong> (<a class="reference internal" href="#src.exomercat.emc.Emc" title="src.exomercat.emc.Emc"><em>Emc</em></a>) – The instance of the Emc class.</p>
@@ -1828,14 +1986,20 @@ It then writes a message to the log file indicating the inconsistency and the de
 <dl class="py method">
 <dt class="sig sig-object py" id="src.exomercat.emc.Emc.post_main_id_query_checks">
 <span class="sig-name descname"><span class="pre">post_main_id_query_checks</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tolerance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0002777777777777778</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.emc.Emc.post_main_id_query_checks" title="Permalink to this definition">#</a></dt>
-<dd><p>This function performs a series of checks after querying SIMBAD for main IDs.
-It checks for same host with different main IDs, same coordinates with different main IDs,
-and same list ID with different main IDs. The results are logged in <cite>Logs/post_main_id_query_checks.txt</cite>.</p>
+<dd><p>Performs a series of checks after querying SIMBAD for main IDs.</p>
+<p>This function executes three main checks:</p>
+<ol class="arabic simple">
+<li><p>Checks for instances where the same host has different main IDs.</p></li>
+<li><p>Checks for cases where the same coordinates (within a specified tolerance) have different main IDs.</p></li>
+<li><p>Checks for situations where the same list ID has different main IDs.</p></li>
+</ol>
+<p>The results of these checks are logged in the file ‘Logs/post_main_id_query_checks.txt’ for further
+analysis and review.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>self</strong> (<a class="reference internal" href="#src.exomercat.emc.Emc" title="src.exomercat.emc.Emc"><em>Emc</em></a>) – The instance of the Emc class.</p></li>
-<li><p><strong>tolerance</strong> (<em>float</em>) – The tolerance for the angular separation in degrees. Defaults to 1/3600.</p></li>
+<li><p><strong>tolerance</strong> (<em>float</em>) – The angular separation tolerance in degrees for considering coordinates as the same. Default is 1 arcsecond (1/3600 degrees).</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -1850,9 +2014,8 @@ and same list ID with different main IDs. The results are logged in <cite>Logs/p
 <dl class="py method">
 <dt class="sig sig-object py" id="src.exomercat.emc.Emc.group_by_main_id_set_main_id_aliases">
 <span class="sig-name descname"><span class="pre">group_by_main_id_set_main_id_aliases</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.emc.Emc.group_by_main_id_set_main_id_aliases" title="Permalink to this definition">#</a></dt>
-<dd><p>The group_by_main_id_set_main_id_aliases function takes the alias and list_id columns from
-the dataframe,and combines them into a single column called main_id_aliases.
-It then removes duplicates from this new column.</p>
+<dd><p>Groups the dataframe by main_id and combines alias and list_id columns into a single main_id_aliases column.
+This function consolidates all identifiers for each unique main_id.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>self</strong> (<a class="reference internal" href="#src.exomercat.emc.Emc" title="src.exomercat.emc.Emc"><em>Emc</em></a>) – The instance of the Emc class.</p>
@@ -1869,9 +2032,11 @@ It then removes duplicates from this new column.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="src.exomercat.emc.Emc.cleanup_catalog">
 <span class="sig-name descname"><span class="pre">cleanup_catalog</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.emc.Emc.cleanup_catalog" title="Permalink to this definition">#</a></dt>
-<dd><p>The cleanup_catalog function is used to replace any rows in
-the catalog that have a value of 0 or inf for any of the
-columns i, mass, msini, a, p and e with NaN.</p>
+<dd><p>Cleans up the catalog by replacing 0 and infinity values with NaN for specific columns.</p>
+<p>This function iterates through a set of columns (‘i’, ‘mass’, ‘msini’, ‘a’, ‘p’, ‘e’)
+and their corresponding ‘_min’ and ‘_max’ errors. It replaces any values that are
+exactly 0 or infinity with NaN (Not a Number). This helps to ensure that these
+extreme values don’t skew analyses or cause issues in later processing steps.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>self</strong> (<a class="reference internal" href="#src.exomercat.emc.Emc" title="src.exomercat.emc.Emc"><em>Emc</em></a>) – The instance of the Emc class.</p>
@@ -1888,14 +2053,19 @@ columns i, mass, msini, a, p and e with NaN.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="src.exomercat.emc.Emc.group_by_period_check_letter">
 <span class="sig-name descname"><span class="pre">group_by_period_check_letter</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.emc.Emc.group_by_period_check_letter" title="Permalink to this definition">#</a></dt>
-<dd><p>The group_by_period_check_letter function is used to check for inconsistencies in the letter column.
-It groups by main_id and binary, then checks if there are multiple planets in the system.
-If so, it calculates an estimate of p and a using Utils.calculate_working_p_sma().
-It then iterates through each unique value of the estimated p (or a) and checks if there are any inconsistencies with the letter column within that group of planets with similar periods (or semimajor axes).
-If so, it attempts to fix these issues by replacing all letters with one consistent value.</p>
+<dd><p>Check for inconsistencies in the letter column and attempt to fix them.</p>
+<p>This function performs the following steps:</p>
+<ol class="arabic simple">
+<li><p>Groups the data by main_id and binary.</p></li>
+</ol>
+<p>2. For each group with multiple planets it calculates an estimate of period (p) and semi-major axis (a).
+For each unique period (or semi-major axis if period is not available) it checks for inconsistencies in the letter column and attempts to fix inconsistencies by standardizing the letter.</p>
+<ol class="arabic simple" start="3">
+<li><p>Logs any inconsistencies and fixes to a file.</p></li>
+</ol>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>self</strong> (<a class="reference internal" href="#src.exomercat.emc.Emc" title="src.exomercat.emc.Emc"><em>Emc</em></a>) – An instance of the class EMC</p>
+<dd class="field-odd"><p><strong>self</strong> (<a class="reference internal" href="#src.exomercat.emc.Emc" title="src.exomercat.emc.Emc"><em>Emc</em></a>) – An instance of the Emc class</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>None</p>
@@ -1909,44 +2079,65 @@ If so, it attempts to fix these issues by replacing all letters with one consist
 <dl class="py method">
 <dt class="sig sig-object py" id="src.exomercat.emc.Emc.merge_into_single_entry">
 <em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">merge_into_single_entry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">group</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mainid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">binary</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">letter</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.emc.Emc.merge_into_single_entry" title="Permalink to this definition">#</a></dt>
-<dd><p>The merge_into_single_entry function takes the dataframe and merges all entries
-with the same main_id and letter (from the different catalogs) into a single entry.
-It does this by grouping by main_id and letter, then iterating through each group.
-It creates an empty dataframe called ‘entry’ and adds information to it from each group.
-The final entry contains: the official SIMBAD ID and coordinates; the measurements
+<dd><p>Merges multiple entries with the same main_id and letter into a single entry.</p>
+<p>This function combines information from different catalogs for a specific exoplanet,
+selecting the best available data and resolving conflicts. It performs the following tasks:</p>
+<ol class="arabic simple">
+<li><p>Creates a new entry with the given main_id, binary, and letter.</p></li>
+<li><p>Selects the most common host name.</p></li>
+<li><p>Saves catalog-specific names (NASA, TOI, EPIC, EU, OEC).</p></li>
+<li><p>Selects the best measurement for various parameters (i, mass, msini, r, a, p, e)
+based on the smallest relative error.</p></li>
+<li><p>Determines the status of the exoplanet.</p></li>
+<li><p>Selects the earliest discovery year and combines discovery methods.</p></li>
+<li><p>Combines aliases.</p></li>
+<li><p>Sets various flags for mismatches and duplicates.</p></li>
+<li><p>Selects the best source for coordinates (main_id_ra, main_id_dec).</p></li>
+<li><p>Logs warnings for multiple main_id_provenance and duplicate entries.</p></li>
+</ol>
+<p>The final entry contains: the official SIMBAD ID and coordinates; the measurements
 that have the smallest relative error with the corresponding reference; the preferred
 name, the preferred status, the preferred binary letter (chosen as the most common
 in the group); year of discovery, method of discovery, and final list of aliases.
 The function then concatenates all of these entries together into a final catalog.</p>
-<p>:param group : A pandas DataFrame containing the duplicate occurrences.
-:type group: pd.DataFrame
-:type mainid: <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>
-:param mainid: The main identifier of the group
-:type mainid: str
-:type binary: <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>
-:param binary: The binary identifier of the group
-:type binary: str
-:type letter: <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>
-:param letter: The letter identifier of the group
-:type letter: str
-:return: A pandas Series corresponding to the merged single entry.
-:rtype: pd.DataFrame</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>group</strong> (<em>pd.DataFrame</em>) – A pandas DataFrame containing the duplicate occurrences.</p></li>
+<li><p><strong>mainid</strong> (<em>str</em>) – The main identifier of the group</p></li>
+<li><p><strong>binary</strong> (<em>str</em>) – The binary identifier of the group</p></li>
+<li><p><strong>letter</strong> (<em>str</em>) – The letter identifier of the group</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A pandas Series corresponding to the merged single entry.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="src.exomercat.emc.Emc.group_by_letter_check_period">
 <span class="sig-name descname"><span class="pre">group_by_letter_check_period</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">verbose</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.emc.Emc.group_by_letter_check_period" title="Permalink to this definition">#</a></dt>
-<dd><p>The group_by_letter_check_period function groups the full catalog per main_id, binary, and letter. Then it
-checks the periods. If the periods exist and are the same, it merges into a single entry. If the periods exist
-but are different it leaves the different entries unmerged. If the period does not exist, it checks for the
-semi-major axis: if the semi-major axes exist and are the same, it merges into a single entry. If the semi-major
-axis does not match, it leaves the entries unmerged. If also the semi-major axis does not exist, it merges all
-the entries together.</p>
+<dd><p>Group the catalog by main_id, binary, and letter, then merge entries based on period or semi-major axis agreement.</p>
+<p>This function processes the entire catalog to consolidate multiple entries for the same exoplanet. It performs the following steps:</p>
+<ol class="arabic simple">
+<li><p>Groups the catalog by main_id, binary, and letter.</p></li>
+<li><p>For each group it calculates working period and semi-major axis values.</p></li>
+<li><p>Checks for agreement in period values. If periods agree, merges entries into a single entry. If periods disagree, keeps separate entries and logs the disagreement.</p></li>
+<li><p>If no period data, checks for agreement in semi-major axis values. If semi-major axes agree, merges entries into a single entry. If semi-major axes disagree, keeps separate entries and logs the disagreement.</p></li>
+<li><p>If neither period nor semi-major axis data available, merges all entries.</p></li>
+<li><p>Assigns merging_mismatch_flags: 0: Successful merge (period or semi-major axis agreement); 1: Disagreement in period or semi-major axis; 2: Fallback merge (no period or semi-major axis data)</p></li>
+<li><p>Creates a new catalog with the merged entries.</p></li>
+<li><p>Logs the merging process and any disagreements.</p></li>
+</ol>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>self</strong> (<a class="reference internal" href="#src.exomercat.emc.Emc" title="src.exomercat.emc.Emc"><em>Emc</em></a>) – An instance of the class Emc</p></li>
-<li><p><strong>verbose</strong> (<em>bool</em>) – boolean to allow printing of percentage, if desired</p></li>
+<li><p><strong>self</strong> (<a class="reference internal" href="#src.exomercat.emc.Emc" title="src.exomercat.emc.Emc"><em>Emc</em></a>) – An instance of the Emc class</p></li>
+<li><p><strong>verbose</strong> (<em>bool</em>) – If True, displays a progress bar during processing</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -1961,13 +2152,18 @@ the entries together.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="src.exomercat.emc.Emc.select_best_mass">
 <span class="sig-name descname"><span class="pre">select_best_mass</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.emc.Emc.select_best_mass" title="Permalink to this definition">#</a></dt>
-<dd><p>The select_best_mass function is used to select the best mass for each planet.
-The function first checks if the MASSREL value is greater than MSINIREL, and if so,
-it assigns the msini values to bestmass, bestmass_min and bestmass_max. If not,
-it assigns mass values to these columns instead.</p>
+<dd><p>Selects the best mass estimate for each planet in the catalog.</p>
+<p>This function determines whether to use the mass or minimum mass (msini) as the best mass estimate
+for each planet based on their relative errors. It performs the following steps:</p>
+<ol class="arabic simple">
+<li><p>If MASSREL (relative error of mass) is greater than or equal to MSINIREL (relative error of msini),
+it uses msini as the best mass estimate.</p></li>
+<li><p>If MASSREL is less than MSINIREL, it uses mass as the best mass estimate.</p></li>
+<li><p>If both mass and msini are missing (NaN), it sets all best mass related fields to NaN or empty string.</p></li>
+</ol>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>self</strong> (<a class="reference internal" href="#src.exomercat.emc.Emc" title="src.exomercat.emc.Emc"><em>Emc</em></a>) – An instance of the class Emc</p>
+<dd class="field-odd"><p><strong>self</strong> (<a class="reference internal" href="#src.exomercat.emc.Emc" title="src.exomercat.emc.Emc"><em>Emc</em></a>) – An instance of the Emc class</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>None</p>
@@ -1981,7 +2177,7 @@ it assigns mass values to these columns instead.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="src.exomercat.emc.Emc.set_exomercat_name">
 <span class="sig-name descname"><span class="pre">set_exomercat_name</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.emc.Emc.set_exomercat_name" title="Permalink to this definition">#</a></dt>
-<dd><p>The set_exo_mercat name creates the columns exo-mercat_name by joining the main_id, the binary (if any), and the letter.</p>
+<dd><p>Creates the ‘exo-mercat_name’ column by joining the main_id, binary (if any), and letter.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>self</strong> (<a class="reference internal" href="#src.exomercat.emc.Emc" title="src.exomercat.emc.Emc"><em>Emc</em></a>) – An instance of the class Emc</p>
@@ -1998,11 +2194,16 @@ it assigns mass values to these columns instead.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="src.exomercat.emc.Emc.keep_columns">
 <span class="sig-name descname"><span class="pre">keep_columns</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.emc.Emc.keep_columns" title="Permalink to this definition">#</a></dt>
-<dd><p>The keep_columns function is used to keep only the columns that are needed for the analysis.
-The function takes in a dataframe and returns a new dataframe with only the columns listed above.</p>
+<dd><p>Retain only specified columns in the dataframe and remove all others.</p>
+<p>This function performs the following operations:</p>
+<ol class="arabic simple">
+<li><p>Defines a list of columns to keep, including various exoplanet properties and metadata.</p></li>
+<li><p>Attempts to filter the dataframe to retain only these specified columns.</p></li>
+<li><p>If any specified column is missing from the dataframe, it raises a KeyError.</p></li>
+</ol>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>self</strong> (<a class="reference internal" href="#src.exomercat.emc.Emc" title="src.exomercat.emc.Emc"><em>Emc</em></a>) – An instance of the class Emc</p>
+<dd class="field-odd"><p><strong>self</strong> (<a class="reference internal" href="#src.exomercat.emc.Emc" title="src.exomercat.emc.Emc"><em>Emc</em></a>) – An instance of Emc class</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>None</p>
@@ -2010,21 +2211,34 @@ The function takes in a dataframe and returns a new dataframe with only the colu
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>None</p>
 </dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>KeyError</strong> – If any of the specified columns to keep are not present in the dataframe</p>
+</dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="src.exomercat.emc.Emc.remove_known_brown_dwarfs">
 <span class="sig-name descname"><span class="pre">remove_known_brown_dwarfs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">local_date</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">print_flag</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.emc.Emc.remove_known_brown_dwarfs" title="Permalink to this definition">#</a></dt>
-<dd><p>The remove_known_brown_dwarfs function removes all known brown dwarfs from the dataframe.
-It does this by checking if the mass of a planet is less than 20 Mjup, and if it isn’t,
-then it will be removed from the dataframe. If print_flag is set to True, then a csv file will be created
-with all of these planets in them.</p>
+<dd><p>Remove objects with masses greater than 20 Jupiter masses (considered brown dwarfs) from the dataset.</p>
+<p>This function performs the following operations:</p>
+<ol class="arabic simple">
+<li><p>Identifies objects with mass or minimum mass (msini) greater than 20 Jupiter masses.</p></li>
+<li><p>Optionally saves these identified objects to CSV files.</p></li>
+<li><p>Removes the identified objects from the main dataset.</p></li>
+</ol>
+<p>The mass threshold is applied as follows:</p>
+<ul class="simple">
+<li><p>Uses ‘mass’ if available, otherwise uses ‘msini’.</p></li>
+<li><p>If both are unavailable, treats the object as having zero mass (thus not removed).</p></li>
+<li><p>Empty strings are treated as zero mass.</p></li>
+</ul>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>self</strong> (<a class="reference internal" href="#src.exomercat.emc.Emc" title="src.exomercat.emc.Emc"><em>Emc</em></a>) – An instance of the class Emc</p></li>
-<li><p><strong>print_flag</strong> (<em>bool</em>) – Specify whether the function should print out a list of brown dwarfs</p></li>
+<li><p><strong>self</strong> (<a class="reference internal" href="#src.exomercat.emc.Emc" title="src.exomercat.emc.Emc"><em>Emc</em></a>) – An instance of the Emc class</p></li>
+<li><p><strong>local_date</strong> (<em>str</em>) – A string representation of the current date, used for naming output files</p></li>
+<li><p><strong>print_flag</strong> (<em>bool</em>) – If True, saves the removed objects to CSV files</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -2039,18 +2253,25 @@ with all of these planets in them.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="src.exomercat.emc.Emc.fill_row_update">
 <span class="sig-name descname"><span class="pre">fill_row_update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">local_date</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.emc.Emc.fill_row_update" title="Permalink to this definition">#</a></dt>
-<dd><p>This function updates the ‘row_update’ column in the DataFrame.
-If there are previous versions of the catalog present, it finds the most recent one that is earlier than
-the current date and checks it against the current DataFrame.
-For each row that, when compared, shows some differences or is new, it updates the ‘row_update’ column with the date of the current version.
-If the row did not change in any way, it keeps the value of row_update from the previous version.</p>
-<p>If local_date is provided, it uses that date to update the ‘row_update’ column for the current dataframe.
-Otherwise, it uses the current date.</p>
+<dd><p>Update the ‘row_update’ column in the DataFrame based on changes from the previous version.</p>
+<p>This function performs the following operations:</p>
+<ol class="arabic simple">
+<li><p>Uses the provided local_date as the update date.</p></li>
+<li><p>Checks for previous versions of the catalog.</p></li>
+<li><p>If previous versions exist, compares the current DataFrame with the most recent previous version.</p></li>
+<li><p>Updates the ‘row_update’ column for rows that have changed or are new.</p></li>
+<li><p>Retains the previous ‘row_update’ value for unchanged rows.</p></li>
+</ol>
+<p>The function handles the following scenarios:</p>
+<ul class="simple">
+<li><p>If no previous versions exist, all rows are considered new and updated with the current date.</p></li>
+<li><p>If previous versions exist, only changed or new rows are updated with the current date.</p></li>
+</ul>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>self</strong> (<a class="reference internal" href="#src.exomercat.emc.Emc" title="src.exomercat.emc.Emc"><em>Emc</em></a>) – An instance of the class Emc</p></li>
-<li><p><strong>local_date</strong> (<em>str</em>) – The date to update the ‘row_update’ column (if provided by the user)</p></li>
+<li><p><strong>self</strong> (<a class="reference internal" href="#src.exomercat.emc.Emc" title="src.exomercat.emc.Emc"><em>Emc</em></a>) – An instance of the Emc class</p></li>
+<li><p><strong>local_date</strong> (<em>str</em>) – The date to use for updating the ‘row_update’ column</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -2064,9 +2285,9 @@ Otherwise, it uses the current date.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="src.exomercat.emc.Emc.save_catalog">
-<span class="sig-name descname"><span class="pre">save_catalog</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">local_date</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">postfix</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.emc.Emc.save_catalog" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">save_catalog</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">local_date</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">postfix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.emc.Emc.save_catalog" title="Permalink to this definition">#</a></dt>
 <dd><p>Saves the catalog to csv viles.
-It is saved to the ‘Exo-MerCat’ folder both as a exo-mercat.csv file and as a exo-mercat_MM-DD-YYYY.csv file.</p>
+It is saved to the ‘Exo-MerCat’ folder both as a exo-mercat.csv file and as a exo-mercatYYYY-MM-DD.csv file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -2090,12 +2311,13 @@ It is saved to the ‘Exo-MerCat’ folder both as a exo-mercat.csv file and as 
 <dt class="sig sig-object py" id="src.exomercat.utility_functions.UtilityFunctions">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.exomercat.utility_functions.</span></span><span class="sig-name descname"><span class="pre">UtilityFunctions</span></span><a class="headerlink" href="#src.exomercat.utility_functions.UtilityFunctions" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>This is a class that contains utility functions that can be used in other modules.</p>
+<p>A class that contains utility functions that can be used in other modules.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="src.exomercat.utility_functions.UtilityFunctions.service_files_initialization">
 <em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">service_files_initialization</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.utility_functions.UtilityFunctions.service_files_initialization" title="Permalink to this definition">#</a></dt>
-<dd><p>Creates the <cite>Exo-MerCat</cite>, <cite>InputSources</cite>, <cite>StandardizedSources</cite>, and <cite>Logs</cite> folders if they do not exist,
-and deletes all files in the <cite>Logs</cite> folder.</p>
+<dd><p>Initialize the directory structure for the exoplanet catalog processing.</p>
+<p>Creates the following directories if they don’t exist: ‘Exo-MerCat/’; ‘InputSources/’; ‘StandardizedSources/’; ‘Logs/’.</p>
+<p>Clears all files in the ‘Logs/’ directory.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>None</p>
@@ -2109,20 +2331,27 @@ and deletes all files in the <cite>Logs</cite> folder.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="src.exomercat.utility_functions.UtilityFunctions.ping_simbad_vizier">
 <em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ping_simbad_vizier</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.utility_functions.UtilityFunctions.ping_simbad_vizier" title="Permalink to this definition">#</a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></p>
+<dd><p>Test the connection to SIMBAD and VizieR services.</p>
+<p>Attempts to perform a simple query on both SIMBAD and VizieR services
+to check if they are accessible and responding.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A string containing the status of both connection attempts.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="src.exomercat.utility_functions.UtilityFunctions.find_const">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">find_const</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.utility_functions.UtilityFunctions.find_const" title="Permalink to this definition">#</a></dt>
-<dd><p>Returns a dictionary containing a mapping of common astronomical constants to their abbreviated forms.</p>
+<dt class="sig sig-object py" id="src.exomercat.utility_functions.UtilityFunctions.get_common_nomenclature">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_common_nomenclature</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.utility_functions.UtilityFunctions.get_common_nomenclature" title="Permalink to this definition">#</a></dt>
+<dd><p>Provide a mapping of astronomical constants and abbreviations.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>A dictionary with astronomical constants as keys and their abbreviated forms as values.</p>
+<dd class="field-odd"><p>A dictionary mapping full names to abbreviated forms for various
+astronomical terms, constellations, and catalog prefixes.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p>dict</p>
@@ -2133,25 +2362,30 @@ and deletes all files in the <cite>Logs</cite> folder.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="src.exomercat.utility_functions.UtilityFunctions.read_config">
 <em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">read_config</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.utility_functions.UtilityFunctions.read_config" title="Permalink to this definition">#</a></dt>
-<dd><p>Reads the <cite>input_sources.ini</cite> file and returns a dictionary of the configuration parameters.
-:return: A dictionary of the configuration parameters.
-:rtype: dict</p>
+<dd><p>Read and parse the ‘input_sources.ini’ configuration file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A dictionary of the configuration parameters.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>dict</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="src.exomercat.utility_functions.UtilityFunctions.read_config_replacements">
 <em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">read_config_replacements</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">section</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.utility_functions.UtilityFunctions.read_config_replacements" title="Permalink to this definition">#</a></dt>
-<dd><p>The read_config_replacements function reads the replacements.ini file and returns a dictionary of
-replacement values for use in the replace_text function.</p>
+<dd><p>Read and parse a specific section of the ‘replacements.ini’ configuration file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>section</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Specify which section of the replacements</p>
+<dd class="field-odd"><p><strong>section</strong> (<em>str</em>) – Specify which section of the replacements</p>
 </dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></p>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A dictionary containing the custom replacements</p>
 </dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>A dictionary containing the custom replacements</p>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
 </dd>
 </dl>
 </dd></dl>
@@ -2159,18 +2393,18 @@ replacement values for use in the replace_text function.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="src.exomercat.utility_functions.UtilityFunctions.standardize_string">
 <em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">standardize_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.utility_functions.UtilityFunctions.standardize_string" title="Permalink to this definition">#</a></dt>
-<dd><p>The standardize_string function takes a string as input and returns the same string with some common formatting
-errors corrected. The function is used to correct for inconsistencies in the naming of exoplanets, which can be
-caused by different sources using different naming conventions.</p>
+<dd><p>Standardize the format of exoplanet and star names.</p>
+<p>Applies various rules to correct common formatting inconsistencies in
+exoplanet and star naming conventions.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>name</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Specify the string to standardize</p>
+<dd class="field-odd"><p><strong>name</strong> (<em>str</em>) – Specify the string to standardize</p>
 </dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></p>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The standardized string</p>
 </dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>The standardized string</p>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
 </dd>
 </dl>
 </dd></dl>
@@ -2178,8 +2412,7 @@ caused by different sources using different naming conventions.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="src.exomercat.utility_functions.UtilityFunctions.calculate_working_p_sma">
 <em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">calculate_working_p_sma</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">group</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tolerance</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.utility_functions.UtilityFunctions.calculate_working_p_sma" title="Permalink to this definition">#</a></dt>
-<dd><p>Calculate working parameters ‘working_p’ and ‘working_a’ based on the input group DataFrame.</p>
-<p>Sorts the group by column ‘p’, calculates ‘working_p’ and ‘working_a’ values based on tolerance.</p>
+<dd><p>Calculate working period and semi-major axis values for a group of exoplanets.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -2199,7 +2432,7 @@ caused by different sources using different naming conventions.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="src.exomercat.utility_functions.UtilityFunctions.get_parameter">
 <em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_parameter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">treeobject</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameter</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.utility_functions.UtilityFunctions.get_parameter" title="Permalink to this definition">#</a></dt>
-<dd><p>Parses a parameter from an XML ElementTree object.</p>
+<dd><p>Extract a parameter value from an XML ElementTree object.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -2219,7 +2452,7 @@ caused by different sources using different naming conventions.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="src.exomercat.utility_functions.UtilityFunctions.get_attribute">
 <em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_attribute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">treeobject</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameter</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attrib</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.utility_functions.UtilityFunctions.get_attribute" title="Permalink to this definition">#</a></dt>
-<dd><p>Parses the ElementTree object for a parameter and gets the desired attribute.</p>
+<dd><p>Extract an attribute value from a specific element in an XML ElementTree object.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -2240,8 +2473,7 @@ caused by different sources using different naming conventions.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="src.exomercat.utility_functions.UtilityFunctions.get_parameter_all">
 <em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_parameter_all</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">treeobject</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameter</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.utility_functions.UtilityFunctions.get_parameter_all" title="Permalink to this definition">#</a></dt>
-<dd><p>”
-Parses the ElementTree object for a list of parameters.</p>
+<dd><p>Extract all occurrences of a parameter from an XML ElementTree object.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -2261,7 +2493,7 @@ Parses the ElementTree object for a list of parameters.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="src.exomercat.utility_functions.UtilityFunctions.convert_xmlfile_to_csvfile">
 <em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">convert_xmlfile_to_csvfile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_file</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.utility_functions.UtilityFunctions.convert_xmlfile_to_csvfile" title="Permalink to this definition">#</a></dt>
-<dd><p>Converts an XML file to a CSV file, extracting specific fields from the XML data.</p>
+<dd><p>Convert an XML file containing exoplanet data to a CSV file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>file_path</strong> (<em>Union</em><em>[</em><em>Path</em><em>, </em><em>str</em><em>]</em>) – The file path of the XML file to be converted.</p>
@@ -2281,13 +2513,13 @@ Parses the ElementTree object for a list of parameters.</p>
 <dd><p>Convert the discovery methods in the DataFrame to standardized values.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>data</strong> (<em>pandas.DataFrame</em>) – The DataFrame containing the discovery methods.</p>
+<dd class="field-odd"><p><strong>data</strong> (<em>pd.DataFrame</em>) – The DataFrame containing the discovery methods.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>The DataFrame with the discovery methods converted.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>pandas.DataFrame</p>
+<dd class="field-odd"><p>pd.DataFrame</p>
 </dd>
 </dl>
 </dd></dl>
@@ -2308,7 +2540,7 @@ Parses the ElementTree object for a list of parameters.</p>
 <dd class="field-even"><p>The result of the query as a DataFrame.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>pandas.DataFrame</p>
+<dd class="field-odd"><p>pd.DataFrame</p>
 </dd>
 </dl>
 </dd></dl>
@@ -2316,7 +2548,7 @@ Parses the ElementTree object for a list of parameters.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="src.exomercat.utility_functions.UtilityFunctions.calculate_angsep">
 <em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">calculate_angsep</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">table</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.utility_functions.UtilityFunctions.calculate_angsep" title="Permalink to this definition">#</a></dt>
-<dd><p>Calculates the angular separation between two points based on their coordinates.</p>
+<dd><p>Calculate angular separations between coordinates in a DataFrame.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>table</strong> (<em>pd.DataFrame</em>) – A pandas DataFrame containing columns ‘ra’, ‘dec’, ‘ra_2’, ‘dec_2’.</p>
@@ -2333,9 +2565,23 @@ Parses the ElementTree object for a list of parameters.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="src.exomercat.utility_functions.UtilityFunctions.load_standardized_catalog">
 <span class="sig-name descname"><span class="pre">load_standardized_catalog</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">local_date</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.utility_functions.UtilityFunctions.load_standardized_catalog" title="Permalink to this definition">#</a></dt>
-<dd><dl class="field-list simple">
+<dd><p>Load a standardized catalog file for a given date. If not found,
+it falls back to the most recent available version.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filename</strong> (<em>str</em>) – The base filename of the catalog.</p></li>
+<li><p><strong>local_date</strong> (<em>str</em>) – The date for which to load the catalog (format: YYYY-MM-DD).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A DataFrame containing the loaded catalog data.</p>
+</dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code></p>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If no suitable catalog file can be found.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -2343,41 +2589,128 @@ Parses the ElementTree object for a list of parameters.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="src.exomercat.utility_functions.UtilityFunctions.print_progress_bar">
 <em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">print_progress_bar</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">iteration</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">total</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">suffix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fill</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'█'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.utility_functions.UtilityFunctions.print_progress_bar" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
+<dd><p>Print a progress bar to the console.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>iteration</strong> – Current iteration (Int).</p></li>
+<li><p><strong>total</strong> – Total iterations (Int).</p></li>
+<li><p><strong>prefix</strong> – Prefix string (Str).</p></li>
+<li><p><strong>suffix</strong> – Suffix string (Str).</p></li>
+<li><p><strong>length</strong> – Character length of bar (Int).</p></li>
+<li><p><strong>fill</strong> – Bar fill character (Str).</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
 
 </dd></dl>
 
 </section>
 <section id="module-src.exomercat.cli">
 <span id="functions"></span><h1>Functions<a class="headerlink" href="#module-src.exomercat.cli" title="Permalink to this heading">#</a></h1>
-<p>Created on Mon Oct  7 10:35:12 2019</p>
-<p>&#64;author: eleonoraalei</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="src.exomercat.cli.main">
 <span class="sig-prename descclassname"><span class="pre">src.exomercat.cli.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.cli.main" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
+<dd><p>Main entry point for the Exo-MerCat command-line interface.</p>
+<p>This function parses command-line arguments and executes the appropriate
+function based on the user’s input. It supports the following operations:</p>
+<ul class="simple">
+<li><p>maintenance: Perform sanity checks on the catalog data</p></li>
+<li><p>input: Download and standardize catalog files</p></li>
+<li><p>run: Process and merge catalog data to create the Exo-MerCat catalog</p></li>
+<li><p>check: Perform validation checks on the final Exo-MerCat catalog</p></li>
+<li><p>all: Execute all of the above operations in sequence</p></li>
+</ul>
+<p>Command-line arguments:</p>
+<ul class="simple">
+<li><p>function: The operation to perform (maintenance, input, run, check, or all)</p></li>
+<li><p>–verbose (-v): Increase output verbosity (use -v, -vv, or -vvv for more detail)</p></li>
+<li><p>–date (-d): Specify a date for catalog data (format: YYYY-MM-DD)</p></li>
+</ul>
+<p>This function is not intended to be imported and used directly in other modules.</p>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="src.exomercat.cli.sanity_checks">
 <span class="sig-prename descclassname"><span class="pre">src.exomercat.cli.</span></span><span class="sig-name descname"><span class="pre">sanity_checks</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">local_date</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.cli.sanity_checks" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
+<dd><p>Perform sanity checks on the input catalog data.</p>
+<p>This function performs the following checks for each catalog:</p>
+<ol class="arabic simple">
+<li><p>Attempts to download the catalog</p></li>
+<li><p>Tries to read the downloaded catalog</p></li>
+<li><p>Checks if all required columns are present</p></li>
+<li><p>Verifies the data types of the columns</p></li>
+<li><p>Checks for non-ASCII characters in the data</p></li>
+</ol>
+<p>It also checks the connection to SIMBAD and VizieR services.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>local_date</strong> (<em>str</em>) – The date for which to perform the checks (format: YYYY-MM-DD)</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If one or more sanity checks fail</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="src.exomercat.cli.input">
 <span class="sig-prename descclassname"><span class="pre">src.exomercat.cli.</span></span><span class="sig-name descname"><span class="pre">input</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">local_date</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.cli.input" title="Permalink to this definition">#</a></dt>
-<dd><p>This function downloads and standardizes the files.</p>
+<dd><p>Download and standardize catalog files.</p>
+<p>This function performs the following operations for each catalog:</p>
+<ol class="arabic simple">
+<li><p>Downloads the catalog data</p></li>
+<li><p>Reads the downloaded data</p></li>
+<li><p>Standardizes the catalog format</p></li>
+<li><p>Converts coordinates to a standard format</p></li>
+<li><p>Performs various data cleaning and standardization operations</p></li>
+<li><p>Saves the standardized catalog</p></li>
+</ol>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>local_date</strong> (<em>str</em>) – The date for which to download and process catalogs (format: YYYY-MM-DD)</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="src.exomercat.cli.run">
 <span class="sig-prename descclassname"><span class="pre">src.exomercat.cli.</span></span><span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">local_date</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.cli.run" title="Permalink to this definition">#</a></dt>
-<dd><p>This function runs the emc catalog</p>
+<dd><p>Process and merge catalog data to create the Exo-MerCat catalog.</p>
+<p>This function performs the following operations:</p>
+<ol class="arabic simple">
+<li><p>Loads standardized catalog files</p></li>
+<li><p>Merges data from different catalogs</p></li>
+<li><p>Matches with stellar catalogs</p></li>
+<li><p>Performs various data processing and standardization steps</p></li>
+<li><p>Merges entries for the same exoplanet from different catalogs</p></li>
+<li><p>Saves the final Exo-MerCat catalog</p></li>
+</ol>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>local_date</strong> (<em>str</em>) – The date for which to process the catalogs (format: YYYY-MM-DD)</p></li>
+<li><p><strong>verbose</strong> (<em>int</em>) – The verbosity level for output</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="src.exomercat.cli.check">
 <span class="sig-prename descclassname"><span class="pre">src.exomercat.cli.</span></span><span class="sig-name descname"><span class="pre">check</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">local_date</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.cli.check" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
+<dd><p>Perform validation checks on the final Exo-MerCat catalog.</p>
+<p>This function loads the final Exo-MerCat catalog and performs various consistency checks, including:
+- Verifying the presence and correctness of catalog-specific name columns
+- Checking the consistency of parameter values and their associated metadata (e.g., errors, URLs)
+- Verifying the completeness of critical fields like discovery method and year</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>local_date</strong> (<em>str</em>) – The date of the catalog to check (format: YYYY-MM-DD)</p>
+</dd>
+</dl>
+</dd></dl>
 
 </section>
 
@@ -2530,7 +2863,7 @@ Parses the ElementTree object for a list of parameters.</p>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.utility_functions.UtilityFunctions"><code class="docutils literal notranslate"><span class="pre">UtilityFunctions</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.utility_functions.UtilityFunctions.service_files_initialization"><code class="docutils literal notranslate"><span class="pre">UtilityFunctions.service_files_initialization()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.utility_functions.UtilityFunctions.ping_simbad_vizier"><code class="docutils literal notranslate"><span class="pre">UtilityFunctions.ping_simbad_vizier()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.utility_functions.UtilityFunctions.find_const"><code class="docutils literal notranslate"><span class="pre">UtilityFunctions.find_const()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.utility_functions.UtilityFunctions.get_common_nomenclature"><code class="docutils literal notranslate"><span class="pre">UtilityFunctions.get_common_nomenclature()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.utility_functions.UtilityFunctions.read_config"><code class="docutils literal notranslate"><span class="pre">UtilityFunctions.read_config()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.utility_functions.UtilityFunctions.read_config_replacements"><code class="docutils literal notranslate"><span class="pre">UtilityFunctions.read_config_replacements()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.utility_functions.UtilityFunctions.standardize_string"><code class="docutils literal notranslate"><span class="pre">UtilityFunctions.standardize_string()</span></code></a></li>

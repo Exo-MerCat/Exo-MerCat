@@ -54,7 +54,7 @@ def test__service_files_initialization(instance, tmp_path):
     os.chdir(original_dir)
 
 
-def test__find_const(instance):
+def test__get_common_nomenclature(instance):
     expected_constants = {
         "alfa ": "alf ",
         "beta ": "bet ",
@@ -224,7 +224,7 @@ def test__find_const(instance):
         "p ": "pi ",
     }
 
-    actual_constants = instance.find_const()
+    actual_constants = instance.get_common_nomenclature()
     assert expected_constants == actual_constants
 
 

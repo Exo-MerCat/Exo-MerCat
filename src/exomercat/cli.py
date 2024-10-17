@@ -1,11 +1,5 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-Created on Mon Oct  7 10:35:12 2019
-
-@author: eleonoraalei
-"""
-
 from .nasa import Nasa
 from .eu import Eu
 from .oec import Oec
@@ -29,15 +23,23 @@ def main():  # pragma: no cover
 
     This function parses command-line arguments and executes the appropriate
     function based on the user's input. It supports the following operations:
+
     - maintenance: Perform sanity checks on the catalog data
+
     - input: Download and standardize catalog files
+
     - run: Process and merge catalog data to create the Exo-MerCat catalog
+
     - check: Perform validation checks on the final Exo-MerCat catalog
+
     - all: Execute all of the above operations in sequence
 
     Command-line arguments:
+
     - function: The operation to perform (maintenance, input, run, check, or all)
+
     - --verbose (-v): Increase output verbosity (use -v, -vv, or -vvv for more detail)
+
     - --date (-d): Specify a date for catalog data (format: YYYY-MM-DD)
 
     This function is not intended to be imported and used directly in other modules.
@@ -106,10 +108,15 @@ def sanity_checks(local_date):  # pragma: no cover
     Perform sanity checks on the input catalog data.
 
     This function performs the following checks for each catalog:
+
     1. Attempts to download the catalog
+
     2. Tries to read the downloaded catalog
+
     3. Checks if all required columns are present
+
     4. Verifies the data types of the columns
+
     5. Checks for non-ASCII characters in the data
 
     It also checks the connection to SIMBAD and VizieR services.
@@ -198,11 +205,17 @@ def input(local_date):  # pragma: no cover
     Download and standardize catalog files.
 
     This function performs the following operations for each catalog:
+
     1. Downloads the catalog data
+
     2. Reads the downloaded data
+
     3. Standardizes the catalog format
+
     4. Converts coordinates to a standard format
+
     5. Performs various data cleaning and standardization operations
+
     6. Saves the standardized catalog
 
     :param local_date: The date for which to download and process catalogs (format: YYYY-MM-DD)
@@ -272,11 +285,17 @@ def run(local_date: str, verbose: int):  # pragma: no cover
     Process and merge catalog data to create the Exo-MerCat catalog.
 
     This function performs the following operations:
+
     1. Loads standardized catalog files
+
     2. Merges data from different catalogs
+
     3. Matches with stellar catalogs
+
     4. Performs various data processing and standardization steps
+
     5. Merges entries for the same exoplanet from different catalogs
+
     6. Saves the final Exo-MerCat catalog
 
     :param local_date: The date for which to process the catalogs (format: YYYY-MM-DD)
@@ -285,12 +304,6 @@ def run(local_date: str, verbose: int):  # pragma: no cover
     :type verbose: int
     """
 
-
-def run(local_date, verbose):  # pragma: no cover
-    """This function runs the emc catalog"""
-    
-def run(local_date, verbose):  # pragma: no cover
-    """This function runs the emc catalog"""
     emc = Emc()
 
     logging.info("Loading standardized files...")

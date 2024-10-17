@@ -16,26 +16,17 @@ class Eu(Catalog):
     for handling and processing data from the Exoplanet Encyclopedia. It includes
     methods for standardizing the catalog, removing theoretical masses, assigning
     status to planets, handling reference formats, and converting coordinates.
-
-    Attributes:
-        name (str): The name of the catalog, set to "eu".
-        data (pandas.DataFrame): The catalog data stored as a DataFrame.
-        columns (dict): A dictionary defining the expected columns and their data types.
-
-    Methods:
-        standardize_catalog(): Standardizes the catalog data format.
-        remove_theoretical_masses(): Removes theoretical masses from the data.
-        assign_status(): Assigns status to planets based on their classification.
-        handle_reference_format(): Standardize reference format and create URL columns.
-        convert_coordinates(): Placeholder method for coordinate conversion (not implemented for EU).
     """
     def __init__(self) -> None:
         """
         Initialize the Eu (Exoplanet Encyclopaedia) class.
 
         This method sets up the instance of the Eu class by:
+
         1. Calling the parent class initializer.
+
         2. Setting the catalog name to "eu".
+
         3. Defining the expected columns and their data types for this catalog.
 
         :param self: An instance of class Eu
@@ -86,11 +77,17 @@ class Eu(Catalog):
         Standardize the Exoplanet Encyclopaedia catalog data.
 
         This method performs the following operations:
+
         1. Sets the catalog name.
+
         2. Replaces "None" and "nan" values.
+
         3. Renames columns to standard names used across all catalogs.
+
         4. Adds new columns such as catalog_name, catalog_host, and reference.
+
         5. Processes and standardizes the alias information.
+
         6. Converts discovery methods to a standard format.
 
         :param self: An instance of class Eu
@@ -198,8 +195,11 @@ class Eu(Catalog):
         Assign status to each entry based on the 'planet_status' column.
 
         This method maps the values in the 'planet_status' column to standard status values:
+
         - 'CONFIRMED' for confirmed planets
+
         - 'CANDIDATE' for candidate, unconfirmed, or controversial planets
+
         - 'FALSE POSITIVE' for retracted planets
 
         The method also logs the updated status counts.

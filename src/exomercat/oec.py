@@ -24,21 +24,6 @@ class Oec(Catalog):
     This class inherits from the Catalog class and provides specific functionality
     for handling and processing data from the Open Exoplanet Catalogue. It includes
     methods for downloading, standardizing, and manipulating the catalog data.
-
-    Attributes:
-        name (str): The name of the catalog, set to "oec".
-        data (pandas.DataFrame): The catalog data stored as a DataFrame.
-        columns (dict): A dictionary defining the expected columns and their data types.
-
-    Methods:
-        download_catalog(url, filename, local_date, timeout): Downloads the catalog from a given URL.
-        standardize_catalog(): Standardizes the catalog data format.
-        sort_bestmass_to_mass_or_msini(): Sorts mass values into appropriate columns.
-        handle_reference_format(): Standardize reference format and create URL columns.
-        remove_theoretical_masses(): Placeholder method for theoretical masses (not implemented for OEC).
-        assign_status(): Assigns status to planets based on their classification.
-        handle_reference_format(): Standardize reference format and create URL columns.
-        convert_coordinates(): Converts RA and Dec to decimal degrees.
     """
     
 
@@ -47,8 +32,11 @@ class Oec(Catalog):
         Initialize the Oec class.
 
         This method sets up the instance of the Oec class by:
+
         1. Calling the parent class initializer.
+
         2. Setting the catalog name to "oec".
+
         3. Defining the expected columns and their data types for this catalog.
 
         :param self: An instance of class Oec
@@ -94,10 +82,15 @@ class Oec(Catalog):
         Download the Open Exoplanet Catalogue from a given URL and save it to a file.
 
         This method performs the following operations:
+
         1. Checks if a local file for the given date already exists.
+
         2. If not, attempts to download the catalog from the URL.
+
         3. Converts the downloaded XML file to CSV format.
+
         4. If download fails, attempts to use the most recent local copy.
+
         5. Handles various error scenarios and provides appropriate logging.
 
         :param self: An instance of class Catalog
@@ -215,11 +208,17 @@ class Oec(Catalog):
         Standardize the Open Exoplanet Catalogue data.
 
         This method performs the following operations:
+
         1. Sets the catalog name.
+
         2. Renames columns to standard names used across all catalogs.
+
         3. Adds new columns such as host, catalog_name, and catalog_host.
+
         4. Separates mass into msini and mass based on the masstype column.
+
         5. Cleans host names.
+
         6. Converts discovery methods to a standard format.
 
         :param self: An instance of class Oec
@@ -316,8 +315,11 @@ class Oec(Catalog):
         Assign status to each entry based on the 'list' column.
 
         This method assigns status as follows:
+
         - "CONFIRMED" if 'Confirmed' is in the list.
+
         - "CANDIDATE" if 'Controversial' is in the list or for Kepler Objects of Interest.
+
         - "FALSE POSITIVE" if 'Retracted' is in the list.
 
         The method also logs the updated status counts.
@@ -368,8 +370,11 @@ class Oec(Catalog):
         Convert right ascension (RA) and declination (Dec) from string format to decimal degrees.
 
         This method performs the following operations:
+
         1. Replaces missing values in RA and Dec columns with empty strings.
+
         2. Converts RA and Dec from string format (HH:MM:SS) to decimal degrees using astropy's SkyCoord.
+
         3. Assigns NaN to entries where conversion is not possible (empty strings).
 
         :param self: An instance of class Oec

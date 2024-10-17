@@ -21,50 +21,6 @@ class Emc(Catalog):
     It contains methods for processing, merging, and managing exoplanet data from various sources.
     This class provides functionality for data cleaning, standardization, and analysis of exoplanet information.
 
-    Key features include:
-    - Merging data from multiple exoplanet catalogs
-    - Standardizing identifiers and coordinates
-    - Resolving conflicts in planet properties
-    - Generating a unified exoplanet catalog
-
-    The class methods cover various aspects of catalog management, from initial data processing
-    to final catalog generation and export.
-
-    Attributes:
-        name (str): The name of the catalog, set to "exo_mercat".
-        data (pd.DataFrame): The main DataFrame containing the exoplanet catalog data.
-
-    Methods:
-        __init__(): Initializes the Emc class object.
-        convert_coordinates(): Placeholder for coordinate conversion (not implemented).
-        alias_as_host(): Checks and standardizes host names based on aliases.
-        check_binary_mismatch(keyword, tolerance): Checks for binary mismatches in the dataframe.
-        prepare_columns_for_mainid_search(): Prepares columns for the search of the main identifier.
-        fill_mainid_provenance_column(keyword): Fills the 'main_id_provenance' column with the provided keyword.
-        simbad_list_host_search(typed_id): Searches for host stars in SIMBAD using the specified column.
-        simbad_list_alias_search(column): Searches for the main ID of each object in the specified column using SIMBAD.
-        get_host_info_from_simbad(): Retrieves host information from SIMBAD.
-        get_coordinates_from_simbad(tolerance): Retrieves coordinates from SIMBAD for objects without main IDs.
-        get_host_info_from_tic(): Retrieves host information from the TESS Input Catalog (TIC).
-        get_coordinates_from_tic(tolerance): Retrieves coordinates from TIC for objects without main IDs.
-        check_coordinates(tolerance): Checks for mismatches in RA and DEC coordinates of a given host.
-        replace_old_new_identifier(identifier, new_identifier, binary): Replaces old identifiers with new ones.
-        polish_main_id(): Polishes the main_id column by removing planet/binary letters.
-        fill_missing_main_id(): Fills missing values in main_id related columns.
-        check_same_host_different_id(): Checks for instances where the same host has multiple SIMBAD main IDs.
-        check_same_coords_different_id(tolerance): Checks for instances where the same coordinates have different main IDs.
-        group_by_list_id_check_main_id(): Groups data by 'list_id' and checks for inconsistencies in 'main_id'.
-        post_main_id_query_checks(tolerance): Performs a series of checks after querying SIMBAD for main IDs.
-        group_by_main_id_set_main_id_aliases(): Groups by main_id and combines aliases into main_id_aliases.
-        cleanup_catalog(): Cleans up the catalog by replacing 0 and infinity values with NaN.
-        group_by_period_check_letter(): Checks for inconsistencies in the letter column and attempts to fix them.
-        group_by_letter_check_period(verbose): Groups by letter and merges entries based on period or semi-major axis agreement.
-        select_best_mass(): Selects the best mass estimate for each planet in the catalog.
-        set_exomercat_name(): Creates the 'exo-mercat_name' column.
-        keep_columns(): Retains only specified columns in the dataframe.
-        remove_known_brown_dwarfs(local_date, print_flag): Removes objects with masses greater than 20 Jupiter masses.
-        fill_row_update(local_date): Updates the 'row_update' column based on changes from the previous version.
-        save_catalog(local_date, postfix): Saves the catalog to CSV files.
     """
 
     def __init__(self) -> None:
@@ -109,8 +65,7 @@ class Emc(Catalog):
 
         This function takes the alias column of a dataframe and checks if any of the aliases are labeled
         as hosts in some other entry. If an alias is labeled as a host, it changes the host to be that of the
-        original host. It then adds all aliases of both hosts into one list for each row. It logs results into
-         "Logs/alias_as_host.txt".
+        original host. It then adds all aliases of both hosts into one list for each row. It logs results into "Logs/alias_as_host.txt".
 
         :param self: The instance of the Emc class.
         :type self: Emc
@@ -623,8 +578,11 @@ class Emc(Catalog):
         Searches for the main ID of each object in the specified column using SIMBAD.
 
         This function performs the following steps:
+
         1. Creates a DataFrame of aliases from the specified column
+
         2. Queries SIMBAD for each alias
+
         3. Updates the main dataframe with the SIMBAD information
 
         :param self: The instance of the Emc class.
@@ -700,10 +658,7 @@ class Emc(Catalog):
 
     def get_host_info_from_simbad(self) -> None:
         """
-        The get_host_info_from_simbad function takes the dataframe and extracts all unique host star names.
-        It then queries SIMBAD for each of these names, and returns a table with the main ID, alias IDs, RA and DEC.
-        The function merges this table with the original dataframe on host name (left join). If there are
-        still rows missing main_id values in the merged table, it will query SIMBAD again using all aliases from those rows.
+        Queries SIMBAD for the main identifier based on the host star name.
 
         :param self: The instance of the Emc class.
         :type self: Emc
@@ -772,8 +727,7 @@ class Emc(Catalog):
         
     def get_coordinates_from_simbad(self, tolerance: float = 1 / 3600) -> None:
         """
-        The get_coordinates_from_simbad function prepares a query for SIMBAD, executes the query and then merges
-         the results with the original dataframe.
+        Prepares a query for SIMBAD, executes the query and then merges the results with the original dataframe.
 
         :param self: The instance of the Emc class.
         :type self: Emc
@@ -853,9 +807,13 @@ class Emc(Catalog):
         Retrieves host information from the TIC (TESS Input Catalog) for hosts with TIC identifiers.
 
         This function performs the following steps:
+
         1. Extracts unique host star names that are TIC identifiers.
+
         2. Queries the TIC for each of these names.
+
         3. Merges the obtained information with the original dataframe.
+
         :param self: The instance of the Emc class.
         :type self: Emc
         :return: None
@@ -1014,10 +972,22 @@ class Emc(Catalog):
         Retrieves coordinates from the TESS Input Catalog (TIC) for objects without main IDs.
 
         This function performs the following steps:
+
         1. Prepares a query for the TIC using objects without main IDs.
+
         2. Executes the query to retrieve matching TIC entries.
+
         3. Merges the results with the original dataframe.
+
         4. Updates the main_id, coordinates, and other relevant fields for matched objects.
+
+
+        :param self: The instance of the Emc class.
+        :type self: Emc
+        :param tolerance: The tolerance for the query in degrees (default is 1 arcsecond)
+        :type tolerance: float
+        :return: None
+        :rtype: None
         """
 
 
@@ -1087,7 +1057,7 @@ class Emc(Catalog):
         
     def check_coordinates(self, tolerance: float = 1 / 3600) -> None:
         """
-        Check for mismatches in the RA and DEC coordinates of a given host.
+        Checks for mismatches in the RA and DEC coordinates of a given host.
 
         This function is used for targets that cannot rely on SIMBAD or TIC MAIN_ID because the query was unsuccessful.
         It groups all entries with the same host name, then checks if any of those entries have
@@ -1186,7 +1156,7 @@ class Emc(Catalog):
         self, identifier: str, new_identifier: str, binary: str = None
     ) -> str:
         """
-        The replace_old_new_identifier function replaces the old identifier with the new identifier in the dataframe. It also adds additional aliases to the main_id_aliases. If binary is not None, it also replaces the old binary with the new binary in the dataframe as specified by the calling function.
+        Replaces the old identifier with the new identifier in the dataframe.
 
         :param self: The instance of the Emc class.
         :type self: Emc
@@ -1385,10 +1355,15 @@ class Emc(Catalog):
         Fill missing values in main_id related columns with data from other columns.
 
         This function performs the following operations:
+
         1. Fills empty 'main_id_provenance' with values from 'catalog'.
+
         2. Fills empty 'main_id' with values from 'host'.
+
         3. Fills empty 'main_id_ra' with values from 'ra', converting to float.
+
         4. Fills empty 'main_id_dec' with values from 'dec', converting to float.
+
         5. Creates 'angular_separation' by concatenating 'catalog' and 'angsep'.
 
         :param self: The instance of the Emc class.
@@ -1433,6 +1408,7 @@ class Emc(Catalog):
         :return: None
         :rtype: None
         """
+
         # Open a file to log the results
         f = open("Logs/post_main_id_query_checks.txt", "a")
         f.write("**************************************\n")
@@ -1471,10 +1447,11 @@ class Emc(Catalog):
 
     def check_same_coords_different_id(self, tolerance: float = 1 / 3600) -> None:
         """
-        The check_same_host_different_id function checks to see if there are any instances where the same host
-        has multiple SIMBAD main IDs. This might happen in case of very close stars or binary stars. The user
+        Checks if there are any instances where the same host has multiple SIMBAD main IDs.
+
+        This might happen in case of very close stars or binary stars. The user
         should check in Logs/post_main_id_query_checks.txt that the two main ids and coordinates are indeed
-        different stars. Otherwise, they can force a replacement.
+        different stars. Otherwise, the user can force a replacement.
 
         :param self: The instance of the Emc class.
         :type self: Emc
@@ -1548,9 +1525,13 @@ class Emc(Catalog):
         Groups the data by 'list_id' and checks for inconsistencies in 'main_id'.
 
         This function performs the following steps:
+
         1. Groups the data by the 'list_id' column.
+
         2. For each group, checks if the 'list_id' is not empty and if there are multiple unique 'main_id' values.
+
         3. If inconsistencies are found, it sets all 'main_id' values in the group to the first unique 'main_id'.
+
         4. Logs details of any inconsistencies found.
 
         :param self: The instance of the Emc class.
@@ -1599,27 +1580,23 @@ class Emc(Catalog):
         Performs a series of checks after querying SIMBAD for main IDs.
 
         This function executes three main checks:
-        1. Checks for instances where the same host has different main IDs.
-        2. Checks for cases where the same coordinates (within a specified tolerance) have different main IDs.
-        3. Checks for situations where the same list ID has different main IDs.
 
-        These checks are crucial for identifying potential inconsistencies or errors in the catalog data,
-        particularly related to the identification and matching of celestial objects across different sources.
+        1. Checks for instances where the same host has different main IDs.
+
+        2. Checks for cases where the same coordinates (within a specified tolerance) have different main IDs.
+
+        3. Checks for situations where the same list ID has different main IDs.
 
         The results of these checks are logged in the file 'Logs/post_main_id_query_checks.txt' for further
         analysis and review.
+
+
         :param self: The instance of the Emc class.
         :type self: Emc
-        :param tolerance: The angular separation tolerance in degrees for considering coordinates as the same.
-                      Default is 1 arcsecond (1/3600 degrees).
+        :param tolerance: The angular separation tolerance in degrees for considering coordinates as the same. Default is 1 arcsecond (1/3600 degrees).
         :type tolerance: float
         :return: None
         :rtype: None
-
-        Note:
-        - This function modifies the internal state of the Emc instance by potentially updating flags or log files.
-        - The 'pragma: no cover' comment indicates that this function is excluded from code coverage checks,
-        typically because it involves complex external interactions or logging that are hard to test automatically.
         """
 
         # Check for same host with different main IDs
@@ -1636,6 +1613,7 @@ class Emc(Catalog):
         """
         Groups the dataframe by main_id and combines alias and list_id columns into a single main_id_aliases column.
         This function consolidates all identifiers for each unique main_id.
+
         :param self: The instance of the Emc class.
         :type self: Emc
         :return: None
@@ -1674,6 +1652,7 @@ class Emc(Catalog):
         and their corresponding '_min' and '_max' errors. It replaces any values that are
         exactly 0 or infinity with NaN (Not a Number). This helps to ensure that these
         extreme values don't skew analyses or cause issues in later processing steps.
+
         :param self: The instance of the Emc class.
         :type self: Emc
         :return: None
@@ -1701,12 +1680,12 @@ class Emc(Catalog):
         Check for inconsistencies in the letter column and attempt to fix them.
 
         This function performs the following steps:
+
         1. Groups the data by main_id and binary.
-        2. For each group with multiple planets:
-            a. Calculates an estimate of period (p) and semi-major axis (a).
-            b. For each unique period (or semi-major axis if period is not available):
-                - Checks for inconsistencies in the letter column.
-                - Attempts to fix inconsistencies by standardizing the letter.
+
+        2. For each group with multiple planets it calculates an estimate of period (p) and semi-major axis (a).
+        For each unique period (or semi-major axis if period is not available) it checks for inconsistencies in the letter column and attempts to fix inconsistencies by standardizing the letter.
+
         3. Logs any inconsistencies and fixes to a file.
 
         :param self: An instance of the Emc class
@@ -1825,21 +1804,30 @@ class Emc(Catalog):
         group: pd.DataFrame, mainid: str, binary: str, letter: str
     ) -> pd.DataFrame:
         """
-        Merge multiple entries with the same main_id and letter into a single entry.
+        Merges multiple entries with the same main_id and letter into a single entry.
 
         This function combines information from different catalogs for a specific exoplanet,
         selecting the best available data and resolving conflicts. It performs the following tasks:
 
         1. Creates a new entry with the given main_id, binary, and letter.
+
         2. Selects the most common host name.
+
         3. Saves catalog-specific names (NASA, TOI, EPIC, EU, OEC).
+
         4. Selects the best measurement for various parameters (i, mass, msini, r, a, p, e)
-        based on the smallest relative error.
+           based on the smallest relative error.
+
         5. Determines the status of the exoplanet.
+
         6. Selects the earliest discovery year and combines discovery methods.
+
         7. Combines aliases.
+
         8. Sets various flags for mismatches and duplicates.
+
         9. Selects the best source for coordinates (main_id_ra, main_id_dec).
+
         10. Logs warnings for multiple main_id_provenance and duplicate entries.
 
         The final entry contains: the official SIMBAD ID and coordinates; the measurements
@@ -1848,7 +1836,7 @@ class Emc(Catalog):
         in the group); year of discovery, method of discovery, and final list of aliases.
         The function then concatenates all of these entries together into a final catalog.
 
-        :param group : A pandas DataFrame containing the duplicate occurrences.
+        :param group: A pandas DataFrame containing the duplicate occurrences.
         :type group: pd.DataFrame
         :param mainid: The main identifier of the group
         :type mainid: str
@@ -1859,6 +1847,7 @@ class Emc(Catalog):
         :return: A pandas Series corresponding to the merged single entry.
         :rtype: pd.DataFrame
         """
+
         # Open a file to log any issues during the merging process
         f = open("Logs/merge_into_single_entry.txt", "a")
 
@@ -2175,21 +2164,20 @@ class Emc(Catalog):
         This function processes the entire catalog to consolidate multiple entries for the same exoplanet. It performs the following steps:
 
         1. Groups the catalog by main_id, binary, and letter.
-        2. For each group:
-            a. Calculates working period and semi-major axis values.
-            b. Checks for agreement in period values:
-                - If periods agree, merges entries into a single entry.
-                - If periods disagree, keeps separate entries and logs the disagreement.
-            c. If no period data, checks for agreement in semi-major axis values:
-                - If semi-major axes agree, merges entries into a single entry.
-                - If semi-major axes disagree, keeps separate entries and logs the disagreement.
-            d. If neither period nor semi-major axis data available, merges all entries.
-        3. Assigns merging_mismatch_flags:
-            - 0: Successful merge (period or semi-major axis agreement)
-            - 1: Disagreement in period or semi-major axis
-            - 2: Fallback merge (no period or semi-major axis data)
-        4. Creates a new catalog with the merged entries.
-        5. Logs the merging process and any disagreements.
+
+        2. For each group it calculates working period and semi-major axis values.
+
+        3. Checks for agreement in period values. If periods agree, merges entries into a single entry. If periods disagree, keeps separate entries and logs the disagreement.
+
+        4. If no period data, checks for agreement in semi-major axis values. If semi-major axes agree, merges entries into a single entry. If semi-major axes disagree, keeps separate entries and logs the disagreement.
+
+        5. If neither period nor semi-major axis data available, merges all entries.
+
+        6. Assigns merging_mismatch_flags: 0: Successful merge (period or semi-major axis agreement); 1: Disagreement in period or semi-major axis; 2: Fallback merge (no period or semi-major axis data)
+
+        7. Creates a new catalog with the merged entries.
+
+        8. Logs the merging process and any disagreements.
 
         :param self: An instance of the Emc class
         :type self: Emc
@@ -2444,8 +2432,11 @@ class Emc(Catalog):
         Retain only specified columns in the dataframe and remove all others.
 
         This function performs the following operations:
+
         1. Defines a list of columns to keep, including various exoplanet properties and metadata.
+
         2. Attempts to filter the dataframe to retain only these specified columns.
+
         3. If any specified column is missing from the dataframe, it raises a KeyError.
 
         :param self: An instance of Emc class
@@ -2539,13 +2530,19 @@ class Emc(Catalog):
         Remove objects with masses greater than 20 Jupiter masses (considered brown dwarfs) from the dataset.
 
         This function performs the following operations:
+
         1. Identifies objects with mass or minimum mass (msini) greater than 20 Jupiter masses.
+
         2. Optionally saves these identified objects to CSV files.
+
         3. Removes the identified objects from the main dataset.
 
         The mass threshold is applied as follows:
+
         - Uses 'mass' if available, otherwise uses 'msini'.
+
         - If both are unavailable, treats the object as having zero mass (thus not removed).
+
         - Empty strings are treated as zero mass.
 
         :param self: An instance of the Emc class
@@ -2589,14 +2586,21 @@ class Emc(Catalog):
         Update the 'row_update' column in the DataFrame based on changes from the previous version.
 
         This function performs the following operations:
+
         1. Uses the provided local_date as the update date.
+
         2. Checks for previous versions of the catalog.
+
         3. If previous versions exist, compares the current DataFrame with the most recent previous version.
+
         4. Updates the 'row_update' column for rows that have changed or are new.
+
         5. Retains the previous 'row_update' value for unchanged rows.
 
         The function handles the following scenarios:
+
         - If no previous versions exist, all rows are considered new and updated with the current date.
+
         - If previous versions exist, only changed or new rows are updated with the current date.
 
         :param self: An instance of the Emc class

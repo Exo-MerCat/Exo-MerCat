@@ -20,15 +20,6 @@ class Catalog:
     This class provides a foundation for handling various exoplanet catalogs.
     It includes methods for downloading, reading, and processing catalog data,
     as well as standardizing and validating the information.
-
-    Attributes:
-        name (str): The name of the catalog, set to "catalog".
-        data (pandas.DataFrame): The catalog data stored as a DataFrame.
-        columns (dict): A dictionary defining the expected columns and their data types.
-
-    Note:
-        Some methods in this class are meant to be overridden by subclasses
-        to provide catalog-specific implementations.
     """
 
     def __init__(self) -> None:
@@ -521,8 +512,11 @@ class Catalog:
         Remove impossible or nonsensical values from various parameters in the dataset.
 
         This method performs the following operations:
+
         1. Sets negative values of 'p', 'a', 'e', 'i', 'r', 'msini', and 'mass' to NaN.
+
         2. Sets the corresponding '_min' and '_max' values to NaN when the main value is negative.
+
         3. Sets eccentricity ('e') values greater than 1 to NaN, along with their '_min' and '_max' values.
 
         :param self: An instance of class Catalog
@@ -556,10 +550,15 @@ class Catalog:
         Standardize the 'name', 'host', and 'letter' columns in the data.
 
         This function performs the following operations:
+
         1. Standardizes the 'name' column using the Utils.standardize_string function.
+
         2. Fills empty 'host' values with the corresponding 'name' value.
+
         3. Cleans and standardizes the 'host' column, removing specific suffixes and applying Utils.standardize_string.
+
         4. Refines the 'alias' column by removing specific characters and standardizing the values.
+
         5. Assigns the 'letter' column based on specific conditions from the 'name' column.
 
         :param self: An instance of class Catalog
@@ -755,12 +754,19 @@ class Catalog:
         Fills the binary column of the dataframe with appropriate values.
 
         This function performs the following operations:
+
         1. Initializes the 'binary' column with empty strings.
+
         2. Cleans up the 'host' column by removing planet names if present.
+
         3. Identifies and marks circumbinary systems (AB).
+
         4. Identifies and marks simple binary systems (A, B, C, N, S).
+
         5. Cleans the 'host' column by removing extra spaces and characters.
+
         6. Handles NASA-specific cases using the 'cb_flag' column if present.
+
         7. Handles OEC-specific cases using the 'binaryflag' column if present.
 
         The function uses regular expressions to identify different binary system patterns

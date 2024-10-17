@@ -20,18 +20,6 @@ class Toi(Catalog):
     functionality for handling and processing data from the TOI catalog.
     It includes methods for standardizing the catalog data, converting
     coordinates, handling references, and assigning status to the objects.
-
-    Attributes:
-        name (str): The name of the catalog, set to "toi".
-        data (pandas.DataFrame): The catalog data.
-        columns (dict): A dictionary defining the data types of the columns.
-
-    Methods:
-        standardize_catalog(): Standardizes the catalog data format.
-        handle_reference_format(): Standardize reference format and create URL columns.
-        remove_theoretical_masses(): Removes theoretical masses from the data (not implemented for TOI).
-        assign_status(): Assigns status to planets based on their classification.
-        convert_coordinates(): Placeholder method for coordinate conversion (not implemented for TOI).
     """
 
 
@@ -40,9 +28,13 @@ class Toi(Catalog):
         Initialize the Toi class.
 
         This method sets up the instance of the Toi class by:
+
         1. Calling the parent class initializer.
+
         2. Setting the catalog name to "toi".
+
         3. Initializing the data attribute as None.
+
         4. Defining the expected columns and their data types for this catalog.
 
         :param self: An instance of class Toi
@@ -81,12 +73,19 @@ class Toi(Catalog):
         Standardize the TESS Objects of Interest catalog data.
 
         This method performs the following operations:
+
         1. Creates TOI, TOI_host, and TIC_host columns.
+
         2. Runs a TAP query to gather aliases for TIC stars.
+
         3. Renames columns to standard names used across all catalogs.
+
         4. Adds missing columns with NaN values.
+
         5. Converts radius and its uncertainties from Earth to Jupiter units.
+
         6. Adds discovery year and method.
+
         7. Sets a reference value for all entries.
 
         :param self: An instance of class Toi
@@ -228,12 +227,19 @@ class Toi(Catalog):
         Assign status to each entry based on the 'tfopwg_disp' column.
 
         This method maps the disposition values to standard status categories:
+
         - "APC" -> "CONTROVERSIAL"
+
         - "CP"  -> "CONFIRMED"
+
         - "FA"  -> "FALSE POSITIVE"
+
         - "FP"  -> "FALSE POSITIVE"
+
         - "KP"  -> "CONFIRMED"
+
         - "PC"  -> "CANDIDATE"
+
         - ""    -> "UNKNOWN"
 
         The method also logs the updated status counts.

@@ -17,20 +17,6 @@ class Nasa(Catalog):
     Exoplanet Archive. It includes methods for initializing the catalog,
     standardizing the data format, handling references, assigning planet
     status, and removing theoretical masses and radii.
-
-    Attributes:
-        name (str): The name of the catalog, set to "nasa".
-        data (pandas.DataFrame): The catalog data stored as a DataFrame.
-        columns (dict): A dictionary defining the expected columns and their data types.
-
-    Methods:
-        standardize_catalog(): Standardizes the catalog data format.
-        sort_bestmass_to_mass_or_msini(): Sorts mass values into appropriate columns.
-        handle_reference_format(): Standardize reference format and create URL columns.
-        remove_theoretical_masses(): Removes theoretical masses from the data.
-        assign_status(): Assigns status to planets based on their classification.
-        handle_reference_format(): Standardize reference format and create URL columns.
-        convert_coordinates(): Placeholder method for coordinate conversion (not implemented for NASA).
     """
    
 
@@ -39,8 +25,11 @@ class Nasa(Catalog):
         Initialize the Nasa class.
 
         This method sets up the instance of the Nasa class by:
+
         1. Calling the parent class initializer.
+
         2. Setting the catalog name to "nasa".
+
         3. Defining the expected columns and their data types for this catalog.
 
         :param self: An instance of class Nasa
@@ -95,11 +84,17 @@ class Nasa(Catalog):
         Standardize the NASA Exoplanet Archive catalog data.
 
         This method performs the following operations:
+
         1. Sets the catalog name.
+
         2. Renames columns to standard names used across all catalogs.
+
         3. Adds new columns such as catalog_name and catalog_host.
+
         4. Splits best mass into mass and msini.
+
         5. Processes and standardizes the alias information.
+
         6. Converts discovery methods to a standard format.
         
         :param self: An instance of class Nasa
@@ -198,9 +193,13 @@ class Nasa(Catalog):
         Sort the 'bestmass' values into either 'mass' or 'msini' columns.
 
         This method categorizes the 'bestmass' values based on the 'bestmass_provenance':
+
         - If 'Mass', values are placed in the 'mass' columns.
+
         - If 'Msini', values are placed in the 'msini' columns.
+
         - If 'M-R relationship' or 'Msin(i)/sin(i)', both 'mass' and 'msini' are set to NaN.
+
         - For any other provenance, a RuntimeError is raised.
 
         :param self: An instance of the Nasa class
@@ -249,9 +248,13 @@ class Nasa(Catalog):
         Standardize the reference format for various parameters.
 
         This method performs the following for each parameter (e, mass, msini, i, a, p, r):
+
         1. Ensures a '_url' column exists for each parameter.
+
         2. Extracts the bibcode from the reference URL.
+
         3. Standardizes the URL format.
+
         4. Sets empty strings for null values.
 
         :param self: The instance of the Nasa class.

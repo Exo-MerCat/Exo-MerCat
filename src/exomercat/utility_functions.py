@@ -21,13 +21,14 @@ from astropy.coordinates import SkyCoord
 
 class UtilityFunctions:
     """
-    This is a class that contains utility functions that can be used in other modules.
+    A class that contains utility functions that can be used in other modules.
     """
 
     def __init__(self) -> None:
         """
-        The __init__ function is called when the class is instantiated.
-        :param self: Represent the instance of the class
+        Initialize the UtilityFunction class.
+
+        :param self: An instance of the UtilityFunction class
         :type self: UtilityFunctions
         :return: None
         :rtype: None
@@ -476,7 +477,7 @@ class UtilityFunctions:
 
     @staticmethod
     def get_parameter_all(treeobject: ElementTree.Element, parameter: str) -> str:
-        """ "
+        """
         Extract all occurrences of a parameter from an XML ElementTree object.
 
         :param treeobject: An ElementTree object, which is the root of a parsed XML file.
