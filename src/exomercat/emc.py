@@ -2347,7 +2347,7 @@ class Emc(Catalog):
         self.data = final_catalog
 
         # Logging
-        logging.info("Catalog merged into single entries.")
+        logging.info("\nCatalog merged into single entries.")
 
 
     def select_best_mass(self) -> None:

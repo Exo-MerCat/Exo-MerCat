@@ -37,12 +37,16 @@ class UtilityFunctions:
     @staticmethod
     def service_files_initialization() -> None:
         """
-        Creates the `Exo-MerCat`, `InputSources`, `StandardizedSources`, and `Logs` folders if they do not exist,
-        and deletes all files in the `Logs` folder.
+        Initialize the directory structure for the exoplanet catalog processing.
+
+        Creates the following directories if they don't exist: 'Exo-MerCat/'; 'InputSources/'; 'StandardizedSources/'; 'Logs/'.
+
+        Clears all files in the 'Logs/' directory.
 
         :return: None
         :rtype: None
         """
+
         # Create Exo-MerCat folder if it does not exist
         if not os.path.exists("Exo-MerCat/"):
             os.makedirs("Exo-MerCat")
@@ -62,6 +66,16 @@ class UtilityFunctions:
 
     @staticmethod
     def ping_simbad_vizier() -> str:
+        """
+        Test the connection to SIMBAD and VizieR services.
+
+        Attempts to perform a simple query on both SIMBAD and VizieR services
+        to check if they are accessible and responding.
+
+        :return: A string containing the status of both connection attempts.
+        :rtype: str
+        """
+        # Test SIMBAD
         error_str = ""
         data = {
             "hostbinary": ["51 Peg"],
@@ -72,6 +86,7 @@ class UtilityFunctions:
         service = pyvo.dal.TAPService("http://simbad.cds.unistra.fr/simbad/sim-tap")
 
         t2 = Table.from_pandas(list_of_hosts)
+
         query = "SELECT t.*, basic.main_id, basic.ra as ra_2,basic.dec as dec_2, ids.ids as ids FROM TAP_UPLOAD.tab as t LEFT OUTER JOIN ident ON ident.id = t.hostbinary LEFT OUTER JOIN basic ON ident.oidref = basic.oid LEFT OUTER JOIN ids ON basic.oid = ids.oidref"
         # Set socket timeout
         timeout = 100000
@@ -83,6 +98,7 @@ class UtilityFunctions:
         except:
             error_str += "Ping to SIMBAD\t\t\tFAILED. \n"
 
+        # Test VizieR
         service = pyvo.dal.TAPService("http://TAPVizieR.cds.unistra.fr/TAPVizieR/tap/")
         data = {
             "hostbinary": ["TIC 50365310"],
@@ -110,11 +126,12 @@ class UtilityFunctions:
         return error_str
 
     @staticmethod
-    def find_const() -> dict:
+    def get_common_nomenclature() -> dict:
         """
-        Returns a dictionary containing a mapping of common astronomical constants to their abbreviated forms.
+        Provide a mapping of astronomical constants and abbreviations.
 
-        :return: A dictionary with astronomical constants as keys and their abbreviated forms as values.
+        :return: A dictionary mapping full names to abbreviated forms for various
+                 astronomical terms, constellations, and catalog prefixes.
         :rtype: dict
         """
 
@@ -292,47 +309,55 @@ class UtilityFunctions:
     @staticmethod
     def read_config() -> dict:
         """
-        Reads the `input_sources.ini` file and returns a dictionary of the configuration parameters.
+        Read and parse the 'input_sources.ini' configuration file.
+
         :return: A dictionary of the configuration parameters.
         :rtype: dict
         """
 
-        # read the input_sources.ini file
+        # Read the input_sources.ini file
         config = configparser.RawConfigParser(
             inline_comment_prefixes="#", delimiters=("=")
         )
         config.read("input_sources.ini")
-        #
+
+        # Save into dictionary
         output_dict = {s: dict(config.items(s)) for s in config.sections()}
         return output_dict
 
     @staticmethod
     def read_config_replacements(section: str) -> dict:
         """
-        The read_config_replacements function reads the replacements.ini file and returns a dictionary of
-        replacement values for use in the replace_text function.
+        Read and parse a specific section of the 'replacements.ini' configuration file.
 
         :param section: Specify which section of the replacements
+        :type section: str
         :return: A dictionary containing the custom replacements
+        :rtype: dict
         """
-        # read the replacements.ini file
+
+        # Read the replacements.ini file
         config = configparser.RawConfigParser(inline_comment_prefixes="#")
         config.optionxform = str
         config.read("replacements.ini")
-        # return the section as a dictionary
+        # Return the section as a dictionary
         config_replace = dict(config.items(section))
         return config_replace
 
     @staticmethod
     def standardize_string(name: str) -> str:
         """
-        The standardize_string function takes a string as input and returns the same string with some common formatting
-        errors corrected. The function is used to correct for inconsistencies in the naming of exoplanets, which can be
-        caused by different sources using different naming conventions.
+        Standardize the format of exoplanet and star names.
+
+        Applies various rules to correct common formatting inconsistencies in
+        exoplanet and star naming conventions.
 
         :param name: Specify the string to standardize
+        :type name: str
         :return: The standardized string
+        :rtype: str
         """
+
         name = name.replace("'", "").replace('"', "")
         if "K0" in name[:2]:
             name = "KOI-" + name.lstrip("K").lstrip("0")
@@ -366,10 +391,8 @@ class UtilityFunctions:
     @staticmethod
     def calculate_working_p_sma(group: pd.DataFrame, tolerance: float) -> pd.DataFrame:
         """
-        Calculate working parameters 'working_p' and 'working_a' based on the input group DataFrame.
-
-        Sorts the group by column 'p', calculates 'working_p' and 'working_a' values based on tolerance.
-
+        Calculate working period and semi-major axis values for a group of exoplanets.
+        
         :param group: The input DataFrame containing columns 'p' and 'a'.
         :type group: pd.DataFrame
         :param tolerance: The tolerance factor used in calculations.
@@ -402,12 +425,13 @@ class UtilityFunctions:
         # Fill NaN values in 'working_a' and 'working_p' with -1
         group.loc[:, "working_a"] = group.loc[:, "working_a"].fillna(-1)
         group.loc[:, "working_p"] = group.loc[:, "working_p"].fillna(-1)
+        
         return group
 
     @staticmethod
     def get_parameter(treeobject: ElementTree.Element, parameter: str) -> str:
         """
-        Parses a parameter from an XML ElementTree object.
+        Extract a parameter value from an XML ElementTree object.
 
         :param treeobject: An ElementTree object.
         :type treeobject: ElementTree.Element
@@ -431,7 +455,7 @@ class UtilityFunctions:
         treeobject: ElementTree.Element, parameter: str, attrib: str
     ) -> str:
         """
-        Parses the ElementTree object for a parameter and gets the desired attribute.
+        Extract an attribute value from a specific element in an XML ElementTree object.
 
         :param treeobject: An ElementTree object, which is the root of a parsed XML file.
         :type treeobject: ElementTree.Element
@@ -453,7 +477,7 @@ class UtilityFunctions:
     @staticmethod
     def get_parameter_all(treeobject: ElementTree.Element, parameter: str) -> str:
         """ "
-        Parses the ElementTree object for a list of parameters.
+        Extract all occurrences of a parameter from an XML ElementTree object.
 
         :param treeobject: An ElementTree object, which is the root of a parsed XML file.
         :type treeobject: ElementTree.Element
@@ -472,14 +496,14 @@ class UtilityFunctions:
         file_path: Union[Path, str], output_file: str
     ) -> None:
         """
-        Converts an XML file to a CSV file, extracting specific fields from the XML data.
-
+        Convert an XML file containing exoplanet data to a CSV file.
+      
         :param file_path: The file path of the XML file to be converted.
         :type file_path: Union[Path, str]
         :returns: None
         :rtype: None
         """
-        #
+        
         fields = [
             "name",
             "binaryflag",
@@ -533,7 +557,8 @@ class UtilityFunctions:
         if ".xml.gz" in file_path:
             input_file = gzip.open(Path(file_path), "r")
             table = ElementTree.parse(input_file)
-        else:  # if it ends in .xml. Strings ending in other extensions are forbidden in parent function
+        else:  
+            # if it ends in .xml. Strings ending in other extensions are forbidden in parent function
             table = ElementTree.parse(file_path)
 
         # Create an empty DataFrame to store the extracted data
@@ -603,9 +628,9 @@ class UtilityFunctions:
         Convert the discovery methods in the DataFrame to standardized values.
 
         :param data: The DataFrame containing the discovery methods.
-        :type data: pandas.DataFrame
+        :type data: pd.DataFrame
         :return: The DataFrame with the discovery methods converted.
-        :rtype: pandas.DataFrame
+        :rtype: pd.DataFrame
         """
         # Fill missing values with empty string and replace "nan" with empty string
         data["discovery_method"] = (
@@ -671,7 +696,7 @@ class UtilityFunctions:
         :type uploads_dict: dict, optional
 
         :return: The result of the query as a DataFrame.
-        :rtype: pandas.DataFrame
+        :rtype: pd.DataFrame
         """
         # Set socket timeout
         timeout = 100000
@@ -688,7 +713,7 @@ class UtilityFunctions:
             # table=table[table.otype.str.contains('\*')] # IF DECOMMENTED, ADD
             # OTYPE BACK IN THE QUERY
 
-            # if TIC case, treat things differently
+            # If TIC case, treat things differently
             if "TIC" in table.columns:
                 table = table.astype(str)
                 table["main_id"] = "TIC " + table["TIC"].replace("", "<NA>")
@@ -707,7 +732,7 @@ class UtilityFunctions:
                     ].agg(",".join, axis=1)
                     table["ids"] = table["ids"].map(lambda x: x.lstrip(",").rstrip(","))
 
-            # add default angsep if found via name and not by coordinates
+            # Add default angsep if found via name and not by coordinates
             table["angsep"] = 0.0  # default value
 
             table = table[table.main_id != ""]
@@ -720,7 +745,7 @@ class UtilityFunctions:
     @staticmethod
     def calculate_angsep(table) -> pd.DataFrame:
         """
-        Calculates the angular separation between two points based on their coordinates.
+        Calculate angular separations between coordinates in a DataFrame.
 
         :param table: A pandas DataFrame containing columns 'ra', 'dec', 'ra_2', 'dec_2'.
         :type table: pd.DataFrame
@@ -776,7 +801,18 @@ class UtilityFunctions:
         return table
 
     def load_standardized_catalog(filename: str, local_date: str) -> pd.DataFrame:
-        """ """
+        """
+        Load a standardized catalog file for a given date. If not found,
+        it falls back to the most recent available version.
+
+        :param filename: The base filename of the catalog.
+        :type filename: str
+        :param local_date: The date for which to load the catalog (format: YYYY-MM-DD).
+        :type local_date: str
+        :return: A DataFrame containing the loaded catalog data.
+        :rtype: pd.DataFrame
+        :raises ValueError: If no suitable catalog file can be found.
+        """
         file_path_str = filename + local_date + ".csv"
         # File already exists
         if os.path.exists(file_path_str):
@@ -787,7 +823,8 @@ class UtilityFunctions:
                 li = list(glob.glob(filename + "*.csv"))
                 li = [re.search(r"\d\d\d\d-\d\d-\d\d", l)[0] for l in li]
                 li = [datetime.strptime(l, "%Y-%m-%d") for l in li]
-                # get the most recent compared to the current date. Get only the ones earlier than the date
+
+                # Get the most recent compared to the current date. Get only the ones earlier than the date
                 local_date_datetime = datetime.strptime(
                     re.search(r"\d\d\d\d-\d\d-\d\d", file_path_str)[0], "%Y-%m-%d"
                 )
@@ -800,6 +837,7 @@ class UtilityFunctions:
                     file_path_str,
                 )
             else:
+                # Cannot find any previous copy
                 raise ValueError(
                     "Could not find catalog with this specific date. Please check your date value."
                 )
@@ -808,6 +846,16 @@ class UtilityFunctions:
 
     @staticmethod
     def print_progress_bar(iteration, total, prefix="", suffix="", length=50, fill="█"):
+        """
+        Print a progress bar to the console.
+
+        :param iteration: Current iteration (Int).
+        :param total: Total iterations (Int).
+        :param prefix: Prefix string (Str).
+        :param suffix: Suffix string (Str).
+        :param length: Character length of bar (Int).
+        :param fill: Bar fill character (Str).
+        """
         percent = ("{0:.1f}").format(100 * (iteration / float(total)))
         filled_length = int(length * iteration // total)
         bar = fill * filled_length + "-" * (length - filled_length)
