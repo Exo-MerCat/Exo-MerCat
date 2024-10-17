@@ -376,7 +376,6 @@ class Emc(Catalog):
             "****"
             + keyword
             + " POTENTIAL BINARIES NOT TREATED HERE. They should be treated manually in replacements.ini ****\n"
-            f"****{keyword} POTENTIAL BINARIES NOT TREATED HERE. They should be treated manually in replacements.ini ****\n"
         )
         for i in self.data.index:
             # Check if the keyword ends with a binary indicator (A, B, C, N, or S)
@@ -1005,6 +1004,8 @@ class Emc(Catalog):
 
         # Execute the query using the utility function
         table = Utils.perform_query(service, query, uploads_dict={"tab": t2})
+        table = table.drop_duplicates()
+        table = Utils.calculate_angsep(table)
 
         for host in table["hostbinary"]:
             self.data.loc[self.data["hostbinary"] == host, "main_id_ra"] = float(
