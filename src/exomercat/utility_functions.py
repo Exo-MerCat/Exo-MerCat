@@ -95,7 +95,10 @@ class UtilityFunctions:
         try:
             table = service.run_sync(query, uploads={"tab": t2}, timeout=timeout)
             table = table.to_table()
-            error_str += "Ping to SIMBAD\t\t\tOK. \n"
+            if len(table.to_pandas)==1:
+                error_str += "Ping to SIMBAD\t\t\tOK. \n"
+            else:
+                error_str += "Ping to SIMBAD\t\t\tFAILED. \n"
         except:
             error_str += "Ping to SIMBAD\t\t\tFAILED. \n"
 
@@ -120,7 +123,10 @@ class UtilityFunctions:
         try:
             table = service.run_sync(query, uploads={"tab": t2}, timeout=timeout)
             table = table.to_table()
-            error_str += "Ping to VizieR\t\t\tOK."
+            if len(table.to_pandas)==1:
+                error_str += "Ping to VizieR\t\t\tOK. \n"
+            else:
+                error_str += "Ping to VizieR\t\t\tFAILED. \n"
         except:
             error_str += "Ping to VizieR\t\t\tFAILED."
 

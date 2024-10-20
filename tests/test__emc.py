@@ -1,3 +1,4 @@
+import math
 import os
 from datetime import date
 
@@ -2183,7 +2184,7 @@ def test__merge_into_single_entry(tmp_path):
         "msini_max": [np.nan],
         "msini_min": [np.nan],
         "msini_url": ["eu"],
-        "MSINIREL": [1e32],
+        "MSINIREL": [1e9],
         "p": [4.4656343],
         "p_max": [2.4e-06],
         "p_min": [2.4e-06],
@@ -3135,6 +3136,47 @@ def test__select_best_mass(instance):
     assert pd.isna(instance.data.at[4, "bestmass_min"])
     assert pd.isna(instance.data.at[4, "bestmass_max"])
     assert instance.data.at[4, "bestmass_provenance"] == ""
+
+    # NAN ERRORS
+    data = {
+        "name": [
+            "Msini non-null, mass null error case",
+            "Mass non-null, msini null error case",
+            "Both errors null, prioritize mass",
+
+        ],
+        "mass":     [10,       10,     10],
+        "mass_min": [np.nan,    1, np.nan],
+        "mass_max": [np.nan,    1, np.nan],
+        "mass_url": ["url1","url2", "url3"],
+        "MASSREL":  [1e9,     0.1,    1e9],
+        "msini":    [5,        10,      5],
+        "msini_min":[0.1,  np.nan, np.nan],
+        "msini_max":[0.1,  np.nan, np.nan],
+        "MSINIREL": [0.005,   1e9,    1e9],
+        "msini_url":["url1", "url2",  ""],
+    }
+    instance.data = pd.DataFrame(data)
+    with LogCapture() as log:
+        instance.select_best_mass()
+        log = pd.DataFrame(list(log), columns=["user", "info", "message"])
+
+        assert "Bestmass calculated." in log["message"].to_list()
+
+    print(instance.data[['bestmass','bestmass_min','bestmass_max','bestmass_url']])
+    assert instance.data.at[0, "bestmass"] == 5
+    assert instance.data.at[0, "bestmass_min"] == 0.1
+    assert instance.data.at[0, "bestmass_max"] == 0.1
+    assert instance.data.at[0, "bestmass_provenance"] == "Msini"
+    assert instance.data.at[1, "bestmass"] == 10
+    assert instance.data.at[1, "bestmass_min"] == 1
+    assert instance.data.at[1, "bestmass_max"] == 1
+    assert instance.data.at[1, "bestmass_provenance"] == "Mass"
+    assert instance.data.at[2, "bestmass"] == 10
+    assert instance.data.at[2, "bestmass_min"] != instance.data.at[2, "bestmass_min"]
+    assert instance.data.at[2, "bestmass_max"] != instance.data.at[2, "bestmass_max"]
+    assert instance.data.at[2, "bestmass_provenance"] == "Mass"
+
 
 
 def test__set_exomercat_name(instance):

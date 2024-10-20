@@ -590,7 +590,7 @@ def check(local_date:str):  # pragma: no cover
     ):
         error_string = error_string + "CHECK bestmass.b\n"
 
-    # Bestmass must be as null only when both mass and msini are null
+    # Bestmass must be null only when both mass and msini are null
     if len(emc[emc.bestmass.isna() & (~(emc.mass.isna()) | ~(emc.msini.isna()))]) > 0:
         error_string = error_string + "CHECK bestmass.c\n"
 

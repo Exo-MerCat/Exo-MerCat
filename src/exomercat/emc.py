@@ -1893,6 +1893,15 @@ class Emc(Catalog):
                 ].tolist()[0]
         
         # Select best measurement for various planetary parameters
+
+        ''' 
+        INFO: RELATIVE ERRORS: Possible cases
+        1. value and error non-null -> relative error = error/value
+        2. value non-null, errors null -> relative error = 1e9
+        3. value and error null -> relative error = np.nan
+        '''
+
+
         params = [
             ["i_url", "i", "i_min", "i_max", "IREL"],
             ["mass_url", "mass", "mass_min", "mass_max", "MASSREL"],
@@ -1907,39 +1916,45 @@ class Emc(Catalog):
         for p in params:
             # Initialize result DataFrame with NaN values
             result = pd.DataFrame(columns=p)
+
+            # Assign nan by default. If value is null, this stays. Otherwise, it gets replaced in relative error section
             result.loc[0, p] = np.nan
             result.loc[0, p[0]] = ""
 
             # Extract relevant columns from the group
             subgroup = group[p[:-1]]
     
-            # Replace empty strings with NaN and drop rows where the main parameter is NaN
+            # Replace empty strings with NaN
+            subgroup = subgroup.replace(np.inf, np.nan)
             subgroup.loc[:, p[1:-1]] = (
                 subgroup.loc[:, p[1:-1]].fillna(np.nan).replace("", np.nan)
             )
+
+            # Drop nan values of the parameter; in this case, everything should stay nan as default
             subgroup = subgroup.dropna(subset=[p[1]])
 
+            # This is only done if the value is not null. In this case, we need to calculate the relative error
             if len(subgroup) > 0:
                 # Convert main parameter to float
                 subgroup[p[1]] = subgroup[p[1]].astype("float")
 
-                # Handle cases with NaN uncertainties
                 if len(subgroup.dropna(subset=[p[3], p[2]])) > 0:
-                    # Keep only rows with non-NaN error bars
+                    # If possible, keep only rows with non-NaN error bars
                     subgroup = subgroup.dropna(subset=[p[3], p[2]])
                     # Calculate relative errors
                     subgroup["maxrel"] = subgroup[p[3]].astype("float") / subgroup[p[1]].astype("float")
                     subgroup["minrel"] = subgroup[p[2]].astype("float") / subgroup[p[1]].astype("float")
-                else:
-                    # If all error bars are NaN, set relative error to a large value
-                    subgroup["maxrel"] = 1e32
-                    subgroup["minrel"] = 1e32
 
-                # Replace infinity with NaN and fill NaN relative errors
-                subgroup = subgroup.replace(np.inf, np.nan)
-                subgroup["maxrel"] = subgroup["maxrel"].fillna(subgroup[p[2]])
-                subgroup["minrel"] = subgroup["minrel"].fillna(subgroup[p[2]])
-        
+                    # Patch in case maxrel and minrel become infinity (e.g. division by zero with eccentricity)
+                    # In that case, replace with the value itself
+                    subgroup = subgroup.replace(np.inf, np.nan)
+                    subgroup["maxrel"] = subgroup["maxrel"].fillna(subgroup[p[2]])
+                    subgroup["minrel"] = subgroup["minrel"].fillna(subgroup[p[2]])
+                else:
+                    # If all error bars are NaN, keep the value but set relative error to a large value
+                    subgroup["maxrel"] = 1e9
+                    subgroup["minrel"] = 1e9
+
                 # Calculate the overall relative error (maximum of maxrel and minrel)
                 subgroup[p[-1]] = subgroup[["maxrel", "minrel"]].max(axis=1)
 
@@ -2327,15 +2342,16 @@ class Emc(Catalog):
                 Utils.print_progress_bar(
                     counter, len(grouped_df), prefix="Progress:", suffix="Complete"
                 )
-
             counter = counter + 1
         f1.close()
 
         # Assign final catalog
         self.data = final_catalog
 
+        print('\n')
+
         # Logging
-        logging.info("\nCatalog merged into single entries.")
+        logging.info("Catalog merged into single entries.")
 
 
     def select_best_mass(self) -> None:
@@ -2357,29 +2373,30 @@ class Emc(Catalog):
         :rtype: None
         """
 
-        # Select best mass estimate based on relative errors
-        # If MASSREL (relative error of mass) is greater than or equal to MSINIREL (relative error of msini),
-        # use msini as the best mass estimate
-        for i in self.data[
-            self.data.MASSREL.fillna(1e9) >= self.data.MSINIREL.fillna(1e9)
-        ].index:
-            self.data.at[i, "bestmass"] = self.data.at[i, "msini"]
-            self.data.at[i, "bestmass_min"] = self.data.at[i, "msini_min"]
-            self.data.at[i, "bestmass_max"] = self.data.at[i, "msini_max"]
-            self.data.at[i, "bestmass_url"] = self.data.at[i, "msini_url"]
-            self.data.at[i, "bestmass_provenance"] = "Msini"
+        # Fill NaN errors with high relative error (1e9) for comparison
+        massrel_filled = self.data.MASSREL.fillna(1e9)
+        msinirel_filled = self.data.MSINIREL.fillna(1e9)
 
-        # If MASSREL is less than MSINIREL, use mass as the best mass estimate
-        for i in self.data[
-            self.data.MASSREL.fillna(1e9) < self.data.MSINIREL.fillna(1e9)
-        ].index:
-            self.data.at[i, "bestmass"] = self.data.at[i, "mass"]
-            self.data.at[i, "bestmass_min"] = self.data.at[i, "mass_min"]
-            self.data.at[i, "bestmass_max"] = self.data.at[i, "mass_max"]
-            self.data.at[i, "bestmass_url"] = self.data.at[i, "mass_url"]
-            self.data.at[i, "bestmass_provenance"] = "Mass"
+        # Case 1: MASSREL is greater than MSINIREL (prefer msini)
+        for i in self.data[massrel_filled > msinirel_filled].index:
+                # Non-null msini values with non-null errors
+                self.data.at[i, "bestmass"] = self.data.at[i, "msini"]
+                self.data.at[i, "bestmass_min"] = self.data.at[i, "msini_min"]
+                self.data.at[i, "bestmass_max"] = self.data.at[i, "msini_max"]
+                self.data.at[i, "bestmass_url"] = self.data.at[i, "msini_url"]
+                self.data.at[i, "bestmass_provenance"] = "Msini"
 
-        # If both mass and msini are missing (NaN), set all best mass related fields to NaN or empty string
+
+        # Case 2: MASSREL is less than or equal to MSINIREL (prefer mass)
+        for i in self.data[massrel_filled <= msinirel_filled].index:
+                # Non-null mass values with non-null errors
+                self.data.at[i, "bestmass"] = self.data.at[i, "mass"]
+                self.data.at[i, "bestmass_min"] = self.data.at[i, "mass_min"]
+                self.data.at[i, "bestmass_max"] = self.data.at[i, "mass_max"]
+                self.data.at[i, "bestmass_url"] = self.data.at[i, "mass_url"]
+                self.data.at[i, "bestmass_provenance"] = "Mass"
+
+        # Case 3: Both mass and msini are NaN (set all bestmass-related fields to NaN or empty string)
         for i in self.data[
             (self.data.mass.fillna(1e9) == 1e9) & (self.data.msini.fillna(1e9) == 1e9)
         ].index:
@@ -2388,6 +2405,27 @@ class Emc(Catalog):
             self.data.at[i, "bestmass_max"] = np.nan
             self.data.at[i, "bestmass_url"] = np.nan
             self.data.at[i, "bestmass_provenance"] = ""
+
+        # Case 4: If one of mass or msini is NaN but not both, prefer the non-NaN value
+        for i in self.data[
+            (self.data.mass.isna()) & (~self.data.msini.isna())
+        ].index:
+            self.data.at[i, "bestmass"] = self.data.at[i, "msini"]
+            self.data.at[i, "bestmass_min"] = self.data.at[i, "msini_min"]
+            self.data.at[i, "bestmass_max"] = self.data.at[i, "msini_max"]
+
+            self.data.at[i, "bestmass_url"] = self.data.at[i, "msini_url"]
+            self.data.at[i, "bestmass_provenance"] = "Msini"
+
+        for i in self.data[
+            (self.data.msini.isna()) & (~self.data.mass.isna())
+        ].index:
+            self.data.at[i, "bestmass"] = self.data.at[i, "mass"]
+            self.data.at[i, "bestmass_min"] = self.data.at[i, "mass_min"]
+            self.data.at[i, "bestmass_max"] = self.data.at[i, "mass_max"]
+
+            self.data.at[i, "bestmass_url"] = self.data.at[i, "mass_url"]
+            self.data.at[i, "bestmass_provenance"] = "Mass"
 
         # Log that the best mass calculation is complete
         logging.info("Bestmass calculated.")
@@ -2615,10 +2653,10 @@ class Emc(Catalog):
         # Use the provided local_date as the update date
         update_date = local_date
 
-        # Check if there are older versions of the catalog present
-        if len(glob.glob("Exo-MerCat/exo-mercat*-*.csv")) > 0:
-            # Get a list of all previous catalog versions
-            li = list(glob.glob("Exo-MerCat/exo-mercat_full*-*.csv"))
+        # Get a list of all previous catalog versions with an explicit date
+        li = list(glob.glob("Exo-MerCat/exo-mercat_full*-*.csv"))
+
+        if len(li) > 0:
 
             # Extract the dates from the filenames
             li = [re.search(r"\d\d\d\d-\d\d-\d\d", l)[0] for l in li]
@@ -2627,7 +2665,7 @@ class Emc(Catalog):
             li = [datetime.strptime(l, "%Y-%m-%d") for l in li]
 
             # Get the most recent catalog version that's earlier than the current date
-            li = [l for l in li if l < datetime.strptime(update_date, "%Y-%m-%d")]
+            li = [l for l in li if l <= datetime.strptime(update_date, "%Y-%m-%d")]
             compar_date = max(li).strftime("%Y-%m-%d")
             
             # Load the most recent previous catalog
@@ -2662,10 +2700,14 @@ class Emc(Catalog):
             )
 
             all = all.dropna(subset=("new_index"))
+            all["new_index"] = all.new_index.astype(int)
+
+            self.data['row_update']=''
+
             # Get the previous date for all the entries that did not change
-            self.data.loc[all.new_index, "row_update"] = all.loc[
-                all.new_index, "row_update"
-            ]
+            for i in all.new_index:
+                self.data.at[i, "row_update"] = all.loc[all.new_index == i, 'row_update'].values[0]
+
             # Fill the missing ones with the update date
             self.data["row_update"] = self.data["row_update"].fillna(update_date)
             # Clean up
