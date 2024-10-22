@@ -90,12 +90,12 @@ class UtilityFunctions:
 
         query = "SELECT t.*, basic.main_id, basic.ra as ra_2,basic.dec as dec_2, ids.ids as ids FROM TAP_UPLOAD.tab as t LEFT OUTER JOIN ident ON ident.id = t.hostbinary LEFT OUTER JOIN basic ON ident.oidref = basic.oid LEFT OUTER JOIN ids ON basic.oid = ids.oidref"
         # Set socket timeout
-        timeout = 100000
+        timeout = 100
         socket.setdefaulttimeout(timeout)
         try:
             table = service.run_sync(query, uploads={"tab": t2}, timeout=timeout)
             table = table.to_table()
-            if len(table.to_pandas)==1:
+            if len(table.to_pandas())==1:
                 error_str += "Ping to SIMBAD\t\t\tOK. \n"
             else:
                 error_str += "Ping to SIMBAD\t\t\tFAILED. \n"
@@ -117,16 +117,16 @@ class UtilityFunctions:
 
         query = 'SELECT tc.*, RAJ2000 as ra_2, DEJ2000 as dec_2, GAIA, UCAC4, "2MASS", WISEA, TIC, KIC, HIP, TYC  FROM "IV/39/tic82" AS db JOIN TAP_UPLOAD.tab AS tc ON db.TIC = tc.host'
         # Set socket timeout
-        timeout = 100000
+        timeout = 100
         socket.setdefaulttimeout(timeout)
 
         try:
             table = service.run_sync(query, uploads={"tab": t2}, timeout=timeout)
             table = table.to_table()
-            if len(table.to_pandas)==1:
-                error_str += "Ping to VizieR\t\t\tOK. \n"
+            if len(table.to_pandas())==1:
+                error_str += "Ping to VizieR\t\t\tOK."
             else:
-                error_str += "Ping to VizieR\t\t\tFAILED. \n"
+                error_str += "Ping to VizieR\t\t\tFAILED."
         except:
             error_str += "Ping to VizieR\t\t\tFAILED."
 

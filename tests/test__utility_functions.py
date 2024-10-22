@@ -1045,19 +1045,21 @@ def test__load_standardized_catalog(tmp_path):
 
 
 def test__ping_simbad_vizier():
-    #SUCCESS
+    # SUCCESS
+    #
+    # SIMBAD expected result
+    dat=pd.DataFrame(data=[['51 Peg', '51 Peg', '*  51 Peg', 344.36658535524,
+        20.768832511140005,
+        'CNS5 5664|GJ 882|Gaia DR3 2835207319109249920|TIC 139298196|PLX 5568|LSPM J2257+2046|TYC 1717-2193-1|ASCC  826013|2MASS J22572795+2046077|USNO-B1.0 1107-00589893|*  51 Peg|AG+20 2595|BD+19  5036|CSV 102222|GC 32003|GCRV 14411|GEN# +1.00217014|HD 217014|HIC 113357|HIP 113357|HR  8729|JP11  3558|LTT 16750|N30 5052|NLTT 55385|NSV 14374|PPM 114985|ROT  3341|SAO  90896|SKY# 43603|SPOCS  990|TD1 29480|UBV M  26734|UBV   19678|YPAC 218|YZ   0  1227|YZ  20  9382|uvby98 100217014|Gaia DR2 2835207319109249920|PLX 5568.00|IRAS 22550+2030|AKARI-IRC-V1 J2257280+204608|NAME Helvetios|WEB 20165|** RBR   21A|WDS J22575+2046A']],
+columns=['hostbinary', 'host', 'main_id', 'ra_2', 'dec_2', 'ids'])
     # Mock for TAPService
     mock_service = MagicMock()
 
-    # Mock return value for SIMBAD service
-    mock_simbad_response = MagicMock()
-    mock_simbad_response.to_table.return_value = Table()
-    mock_service.run_sync.return_value = mock_simbad_response
-
-    # Mock return value for VizieR service
-    mock_vizier_response = MagicMock()
-    mock_vizier_response.to_table.return_value = Table()
-    mock_service.run_sync.return_value = mock_vizier_response
+    # Mock return value
+    mock_response = MagicMock()
+    mock_response.to_table.return_value = Table.from_pandas(dat)
+    mock_service.run_sync.return_value = mock_response
+    #
 
     # Mock the pyvo.dal.TAPService class and socket timeout
     with patch('pyvo.dal.TAPService', return_value=mock_service), \
@@ -1069,7 +1071,27 @@ def test__ping_simbad_vizier():
         assert 'Ping to SIMBAD\t\t\tOK.' in result
         assert 'Ping to VizieR\t\t\tOK.' in result
 
-    #FAILURE
+    #FAILURE: empty table returned
+    # Mock for TAPService
+    mock_service = MagicMock()
+
+    # Mock return value for SIMBAD service
+    mock_response = MagicMock()
+    mock_response.to_table.return_value = Table()
+    mock_service.run_sync.return_value = mock_response
+
+
+    # Mock the pyvo.dal.TAPService class and socket timeout
+    with patch('pyvo.dal.TAPService', return_value=mock_service), \
+            patch('socket.setdefaulttimeout'):
+        # Call the function
+        result = UtilityFunctions.ping_simbad_vizier()
+
+        # Check the output
+        assert 'Ping to SIMBAD\t\t\tFAILED.' in result
+        assert 'Ping to VizieR\t\t\tFAILED.' in result
+    #
+    # #FAILURE:pyvo error
     # Mock for TAPService
     mock_service = MagicMock()
 

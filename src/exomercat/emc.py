@@ -150,9 +150,11 @@ class Emc(Catalog):
         # Fill NaN values in 'binary' column with empty string
         self.data["binary"] = self.data["binary"].fillna("")
 
-        # Add 'binary_mismatch_flag' column if it doesn't exist
-        if "binary_mismatch_flag" not in self.data.columns:
-            self.data["binary_mismatch_flag"] = 0
+        # Add flag columns if they don't exist
+        if "binary_coordinate_mismatch_flag" not in self.data.columns:
+            self.data["binary_coordinate_mismatch_flag"] = 0
+        if "binary_complex_system_flag" not in self.data.columns:
+            self.data["binary_complex_system_flag"] = 0
 
         # Open log file in append mode
         f = open("Logs/check_binary_mismatch.txt", "a")
@@ -196,24 +198,27 @@ class Emc(Catalog):
                         # If coordinates don't agree within tolerance
                         if all([x <= tolerance for x in check_on_coordinates]) is False:
                             # For main_id, check if flags are changing compared to previous check
-                            if keyword == "main_id":
-                                if (len(list(set(group.binary_mismatch_flag.values))) > 1) or (
-                                    list(set(group.binary_mismatch_flag.values))[0] != 1
-                                ):
-                                    f.write(
-                                        "WARNING: Flags are changing here compared to previous check. Previous value of binary_mismatch_flag was: "
-                                        + ','.join([str(l) for l in (set(group.binary_mismatch_flag.values))])
-                                        + ". "
-                                    )
+                            # if keyword == "main_id":
+                                # # Check if more than one value in the same
+                                # if (len(list(set(group.binary_mismatch_flag.values))) > 1) or (
+                                #     list(set(group.binary_mismatch_flag.values))[0] != 1
+                                # ) or (
+                                #     list(set(group.binary_mismatch_flag.values))[0] != 0
+                                # ):
+                                #     f.write(
+                                #         "WARNING: Flags are changing here compared to previous check. Previous value of binary_mismatch_flag was: "
+                                #         + ','.join([str(l) for l in (set(group.binary_mismatch_flag.values))])
+                                #         + ". "
+                                #     )
 
                             # Flag for failed check on coordinates
-                            self.data.loc[group.index, "binary_mismatch_flag"] = 1
+                            self.data.loc[group.index, "binary_coordinate_mismatch_flag"] = 1
                             
                             # Prepare warning message for coordinate disagreement
                             warning = (
                                 "WARNING: coordinate agreement exceeds tolerance. Maximum difference: "
                                 + str(max(check_on_coordinates))
-                                + " (binary_mismatch_flag = 1) . Please check this system:\n"
+                                + " (binary_coordinate_mismatch_flag = 1). Please check this system:\n"
                                 + group[
                                     [
                                         "name",
@@ -255,24 +260,25 @@ class Emc(Catalog):
                         ]
                         if all([x <= tolerance for x in check_on_coordinates]) is False:
                             # If coordinates don't agree within tolerance, set a flag
-                            if keyword == "main_id":
-                                # Check if flags are changing compared to previous check
-                                if (len(list(set(group.binary_mismatch_flag.values))) > 1) or (
-                                    list(set(group.binary_mismatch_flag.values))[0] != 1
-                                ):
-                                    f.write(
-                                        "WARNING: Flags are changing here compared to previous check. Previous value of binary_mismatch_flag was: "
-                                        + ','.join([str(l) for l in (set(group.binary_mismatch_flag.values))])
-                                        + ". "
-                                    )
+                            # if keyword == "main_id":
+                            #     # Check if flags are changing compared to previous check
+                            #     if (len(list(set(group.binary_mismatch_flag.values))) > 1) or (
+                            #         list(set(group.binary_mismatch_flag.values))[0] != 1
+                            #     ):
+                            #         f.write(
+                            #             "WARNING: Flags are changing here compared to previous check. Previous value of binary_mismatch_flag was: "
+                            #             + ','.join([str(l) for l in (set(group.binary_mismatch_flag.values))])
+                            #             + ". "
+                            #         )
 
-                            # Set binary_mismatch_flag to 1 for failed check on coordinates
-                            self.data.loc[group.index, "binary_mismatch_flag"] = 1
+                            # Flag for failed check on coordinates
+                            self.data.loc[group.index, "binary_coordinate_mismatch_flag"] = 1
+
                             # Prepare warning message for coordinate disagreement
                             warning = (
                                 "WARNING: coordinate agreement exceeds tolerance. Maximum difference: "
                                 + str(max(check_on_coordinates))
-                                + " (binary_mismatch_flag = 1). Please check this system:\n"
+                                + " (binary_coordinate_mismatch_flag = 1). Please check this system:\n"
                                 + group[
                                     [
                                         "name",
@@ -300,23 +306,23 @@ class Emc(Catalog):
 
                 else:
                     # If there are multiple non-null binary values, this is a complex system
-                    if keyword == "main_id":
-                        # Check if flags are changing compared to previous check
-                        if (len(list(set(group.binary_mismatch_flag.values))) > 1) or (
-                            list(set(group.binary_mismatch_flag.values))[0] != 2
-                        ):
-                            f.write(
-                                "WARNING: Flags are changing here compared to previous check. Previous value of binary_mismatch_flag was: "
-                                +','.join([str(l) for l in (set(group.binary_mismatch_flag.values))])
-                                + ". "
-                            )
+                    # if keyword == "main_id":
+                    #     # Check if flags are changing compared to previous check
+                    #     if (len(list(set(group.binary_mismatch_flag.values))) > 1) or (
+                    #         list(set(group.binary_mismatch_flag.values))[0] != 2
+                    #     ):
+                    #         f.write(
+                    #             "WARNING: Flags are changing here compared to previous check. Previous value of binary_mismatch_flag was: "
+                    #             +','.join([str(l) for l in (set(group.binary_mismatch_flag.values))])
+                    #             + ". "
+                    #         )
 
-                    # Set binary_mismatch_flag to 2 for complex systems
-                    self.data.loc[group.index, "binary_mismatch_flag"] = 2
+                    # Set binary_complex_system_flag to 1 for complex systems
+                    self.data.loc[group.index, "binary_complex_system_flag"] = 1
 
                     # Write warning about complex system to log file
                     f.write(
-                        "WARNING: Either a complex system or a mismatch in the value of binary (binary_mismatch_flag = 2). Please check this system:  \n"
+                        "WARNING: Either a complex system or a mismatch in the value of binary (binary_complex_system_flag = 1). Please check this system:  \n"
                         + group[
                             [
                                 "name",
@@ -401,8 +407,12 @@ class Emc(Catalog):
             f"Checked potential binaries to be manually corrected. It happens {counter} times."
         )
         logging.info(
-            "Automatic correction results: "
-            + str(self.data.binary_mismatch_flag.value_counts())
+            "Binary coordinate check:"
+            + str(self.data.binary_coordinate_mismatch_flag.value_counts())
+        )
+        logging.info(
+            "Binary complex system check:"
+            + str(self.data.binary_complex_system_flag.value_counts())
         )
 
     def prepare_columns_for_mainid_search(self) -> None:
@@ -1801,7 +1811,7 @@ class Emc(Catalog):
 
     @staticmethod
     def merge_into_single_entry(
-        group: pd.DataFrame, mainid: str, binary: str, letter: str
+        group: pd.DataFrame, mainid: str, binary: str, letter: str,period_mismatch_flag: int = 0, fallback_merge_flag:int = 0
     ) -> pd.DataFrame:
         """
         Merges multiple entries with the same main_id and letter into a single entry.
@@ -1844,6 +1854,10 @@ class Emc(Catalog):
         :type binary: str
         :param letter: The letter identifier of the group
         :type letter: str
+        :param period_mismatch_flag: Flag for period mismatch. Defaults to 0
+        :type period_mismatch_flag: int
+        :param fallback_merge_flag: Flag for fallback merge. Defaults to 0
+        :type fallback_merge_flag: int
         :return: A pandas Series corresponding to the merged single entry.
         :rtype: pd.DataFrame
         """
@@ -2046,36 +2060,6 @@ class Emc(Catalog):
             ]
         )
 
-        # Set various flags
-        # Combine unique binary_mismatch_flag values
-        entry["binary_mismatch_flag"] = ",".join(
-            map(str, group.binary_mismatch_flag.unique())
-        ).rstrip(",")
-
-        # Combine unique coordinate_mismatch values
-        entry["coordinate_mismatch"] = ",".join(
-            map(str, group.coordinate_mismatch.unique())
-        ).rstrip(",")
-        # Set coordinate_mismatch_flag based on RA and DEC mismatches
-        if "RA" in set(group.coordinate_mismatch.unique()) and "DEC" in set(
-            group.coordinate_mismatch.unique()
-        ):
-            entry["coordinate_mismatch_flag"] = 2  # Both RA and DEC mismatch
-        elif "RA" in set(group.coordinate_mismatch.unique()) or "DEC" in set(
-            group.coordinate_mismatch.unique()
-        ):
-            entry["coordinate_mismatch_flag"] = 1  # Either RA or DEC mismatch
-        else:
-            entry["coordinate_mismatch_flag"] = 0  # No mismatch
-
-        # Combine unique angular_separation values
-        entry["angular_separation"] = ",".join(
-            map(str, sorted(group.angular_separation.unique()))
-        )
-
-        # Set angular_separation_flag based on number of unique angsep values
-        entry["angular_separation_flag"] = len(list(set(group.angsep.unique()))) - 1
-
         # Check if multiple main_id_provenance (user should check that it has been done right)
         if len(group.main_id_provenance.unique()) > 1:
             with pd.option_context("display.max_columns", 2000):
@@ -2166,6 +2150,33 @@ class Emc(Catalog):
             entry["duplicate_catalog_flag"] = 0
             entry["duplicate_names"] = ""
 
+        # Combine unique binary_coordinate_mismatch_flag values
+        entry["binary_coordinate_mismatch_flag"] = 1 if any(group.binary_coordinate_mismatch_flag) > 0 else 0
+
+        # Combine unique binary_complex_system_flag values
+        entry["binary_complex_system_flag"] = 1 if any(group.binary_complex_system_flag) > 0 else 0
+
+        # Combine unique coordinate_mismatch values
+        entry["coordinate_mismatch"] = ",".join(
+            map(str, group.coordinate_mismatch.unique())
+        ).rstrip(",")
+
+        # Coordinate mismatch flag: 1 if more than one unique angular_separation values, else 0
+        entry["coordinate_mismatch_flag"] = 1 if len(group.coordinate_mismatch.unique()) > 1 else 0
+
+        # Combine unique angular_separation values
+        entry["angular_separation"] = ",".join(
+            map(str, sorted(group.angular_separation.unique()))
+        )
+
+        # Angular separation flag: 1 if more than one unique angular_separation values, else 0
+        entry["angular_separation_flag"] = 1 if len(group.angsep.unique()) > 1 else 0
+
+
+        # Fill flags from parent function
+        entry['period_mismatch_flag']=period_mismatch_flag
+        entry["fallback_merge_flag"] = fallback_merge_flag
+
         # Close the log file
         f.close()
 
@@ -2226,8 +2237,8 @@ class Emc(Catalog):
             if len(period_list) == 1:
                 # All entries have the same period (excluding NaN values):
                 # Merge all entries into a single entry
-                entry = Emc.merge_into_single_entry(group, mainid, binary, str(letter))
-                entry["merging_mismatch_flag"] = 0  # Indicates successful merge
+                entry = Emc.merge_into_single_entry(group, mainid, binary, str(letter),
+                                                    period_mismatch_flag= 0, fallback_merge_flag= 0)
                 final_catalog = pd.concat(
                     [final_catalog, entry], sort=False
                 ).reset_index(drop=True)
@@ -2236,7 +2247,7 @@ class Emc(Catalog):
                 # Multiple different periods found (excluding NaN values):
                 # Log the disagreement for further investigation
                 f1.write(
-                    "DISAGREEMENT (merging_mismatch_flag=1)\n"
+                    "DISAGREEMENT (period_mismatch_flag=1)\n"
                     + group[
                         [
                             "main_id",
@@ -2253,9 +2264,9 @@ class Emc(Catalog):
                 for pgroup in period_list:
                     subgroup = group[group.working_p == pgroup]
                     entry = Emc.merge_into_single_entry(
-                        subgroup, mainid, binary, str(letter)
-                    )
-                    entry["merging_mismatch_flag"] = 1  # Indicates disagreement in period
+                        subgroup, mainid, binary, str(letter),
+                        period_mismatch_flag= 1, fallback_merge_flag= 0)
+
 
                     final_catalog = pd.concat(
                         [final_catalog, entry], sort=False
@@ -2270,9 +2281,9 @@ class Emc(Catalog):
                     # Semi-major axis values are in agreement (excluding NaN values):
                     # Perform regular merging of entries
                     entry = Emc.merge_into_single_entry(
-                        group, mainid, binary, str(letter)
+                        group, mainid, binary, str(letter),
+                        period_mismatch_flag= 0, fallback_merge_flag= 0
                     )
-                    entry["merging_mismatch_flag"] = 0  # Indicates successful merge
 
                     # Add the merged entry to the final catalog
                     final_catalog = pd.concat(
@@ -2284,7 +2295,7 @@ class Emc(Catalog):
                     # Semi-major axis values disagree (excluding NaN values):
                     # Log the disagreement for further investigation
                     f1.write(
-                        "DISAGREEMENT (merging_mismatch_flag=1)\n"
+                        "DISAGREEMENT (period_mismatch_flag=1)\n"
                         + group[
                             [
                                 "main_id",
@@ -2301,10 +2312,9 @@ class Emc(Catalog):
                     for agroup in sma_list:
                         subgroup = group[group.working_a == agroup]
                         entry = Emc.merge_into_single_entry(
-                            subgroup, mainid, binary, letter
+                            subgroup, mainid, binary, letter,
+                            period_mismatch_flag=1, fallback_merge_flag=0
                         )
-
-                        entry["merging_mismatch_flag"] = 1 # Indicates disagreement in sma
 
                         # Add the merged entry to the final catalog
                         final_catalog = pd.concat(
@@ -2314,7 +2324,7 @@ class Emc(Catalog):
                     # No period nor sma: will merge together
                     if len(group) > 1:
                         f1.write(
-                            "FALLBACK, MERGE (merging_mismatch_flag=2) \n"
+                            "FALLBACK, MERGE (fallback_merge_flag=1) \n"
                             + group[
                                 [
                                     "main_id",
@@ -2327,10 +2337,9 @@ class Emc(Catalog):
                             + "\n\n"
                         )
                     entry = Emc.merge_into_single_entry(
-                        group, mainid, binary, str(letter)
+                        group, mainid, binary, str(letter),
+                        period_mismatch_flag = 0, fallback_merge_flag = 1
                     )
-
-                    entry["merging_mismatch_flag"] = 2 # Indicates fallback merge
 
                     # Add the merged entry to the final catalog
                     final_catalog = pd.concat(
@@ -2348,7 +2357,7 @@ class Emc(Catalog):
         # Assign final catalog
         self.data = final_catalog
 
-        print('\n')
+        logging.info('\n')
 
         # Logging
         logging.info("Catalog merged into single entries.")
@@ -2537,16 +2546,18 @@ class Emc(Catalog):
             "confirmed",
             "discovery_year",
             "main_id_aliases",
-            "catalog",
+            "main_id_provenance",
             "angular_separation",
             "angular_separation_flag",
-            "main_id_provenance",
-            "binary_mismatch_flag",
-            "coordinate_mismatch",
-            "coordinate_mismatch_flag",
+            "catalog",
             "duplicate_catalog_flag",
             "duplicate_names",
-            "merging_mismatch_flag",
+            "binary_coordinate_mismatch_flag",
+            "binary_complex_system_flag",
+            "coordinate_mismatch",
+            "coordinate_mismatch_flag",
+            "period_mismatch_flag",
+            "fallback_merge_flag",
             "row_update",
         ]
 
@@ -2649,7 +2660,19 @@ class Emc(Catalog):
         :rtype: None
 
         """
-        
+        # Columns to check on. Disregard flags, focus on the data only
+        comparison_columns=['exo-mercat_name', 'nasa_name', 'toi_name', 'epic_name', 'eu_name',
+         'oec_name', 'host', 'letter', 'main_id', 'binary', 'main_id_ra',
+         'main_id_dec', 'mass', 'mass_max', 'mass_min', 'mass_url', 'msini',
+         'msini_max', 'msini_min', 'msini_url', 'bestmass', 'bestmass_max',
+         'bestmass_min', 'bestmass_url', 'bestmass_provenance', 'p', 'p_max',
+         'p_min', 'p_url', 'r', 'r_max', 'r_min', 'r_url', 'a', 'a_max', 'a_min',
+         'a_url', 'e', 'e_max', 'e_min', 'e_url', 'i', 'i_max', 'i_min', 'i_url',
+         'discovery_method', 'status', 'checked_status_string',
+         'original_status_string', 'confirmed', 'discovery_year',
+         'main_id_aliases', 'catalog', 'main_id_provenance']
+
+
         # Use the provided local_date as the update date
         update_date = local_date
 
@@ -2690,11 +2713,7 @@ class Emc(Catalog):
             # Merge current and previous catalog
             all = left_merge.fillna("").merge(
                 right_merge.fillna(""),
-                on=[
-                    x
-                    for x in right_merge.columns
-                    if x not in ["index", "new_index", "old_index", "row_update"]
-                ],
+                on=comparison_columns,
                 how="outer",
                 indicator=True,
             )
