@@ -3481,10 +3481,6 @@ def test__identify_misnamed_duplicates(instance,tmp_path):
                 lines = f.readlines()
                 assert lines == expected_log
 
-
-
-
-
     os.chdir(original_dir)
 
 
@@ -3574,6 +3570,7 @@ def test__keep_columns(instance):
         "binary_complex_system_flag": [0],
         "period_mismatch_flag":[0],
         "fallback_merge_flag":[0],
+        "misnamed_duplicates_flag":[0],
         "row_update": ["03-28-2024"],
     }
 
@@ -3651,7 +3648,7 @@ def test__keep_columns(instance):
         "coordinate_mismatch_flag",
         "period_mismatch_flag",
         "fallback_merge_flag",
-
+        "misnamed_duplicates_flag",
         "row_update",
     ]
     assert list(instance.data.columns) == expected_columns

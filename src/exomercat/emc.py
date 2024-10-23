@@ -2627,6 +2627,7 @@ class Emc(Catalog):
             "coordinate_mismatch_flag",
             "period_mismatch_flag",
             "fallback_merge_flag",
+            "misnamed_duplicates_flag",
             "row_update",
         ]
 
