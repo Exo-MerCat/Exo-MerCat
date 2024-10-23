@@ -2151,10 +2151,10 @@ class Emc(Catalog):
             entry["duplicate_names"] = ""
 
         # Combine unique binary_coordinate_mismatch_flag values
-        entry["binary_coordinate_mismatch_flag"] = 1 if any(group.binary_coordinate_mismatch_flag) > 0 else 0
+        entry["binary_coordinate_mismatch_flag"] = 1 if any(group.binary_coordinate_mismatch_flag > 0) else 0
 
         # Combine unique binary_complex_system_flag values
-        entry["binary_complex_system_flag"] = 1 if any(group.binary_complex_system_flag) > 0 else 0
+        entry["binary_complex_system_flag"] = 1 if any(group.binary_complex_system_flag > 0) else 0
 
         # Combine unique coordinate_mismatch values
         entry["coordinate_mismatch"] = ",".join(
@@ -2162,7 +2162,7 @@ class Emc(Catalog):
         ).rstrip(",")
 
         # Coordinate mismatch flag: 1 if more than one unique angular_separation values, else 0
-        entry["coordinate_mismatch_flag"] = 1 if len(group.coordinate_mismatch.unique()) > 1 else 0
+        entry["coordinate_mismatch_flag"] = 1 if any(entry.coordinate_mismatch.str.contains('RA|DEC')) else 0
 
         # Combine unique angular_separation values
         entry["angular_separation"] = ",".join(
