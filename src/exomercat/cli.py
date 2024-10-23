@@ -347,6 +347,7 @@ def run(local_date: str, verbose: int):  # pragma: no cover
     emc.group_by_letter_check_period(verbose=verbose)
     emc.select_best_mass()
     emc.set_exomercat_name()
+    emc.identify_misnamed_duplicates()
     emc.fill_row_update(local_date)
     emc.keep_columns()
     emc.save_catalog(local_date, "_full")

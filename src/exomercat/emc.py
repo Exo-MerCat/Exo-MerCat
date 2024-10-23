@@ -2474,6 +2474,75 @@ class Emc(Catalog):
         # Log that the Exo-MerCat name has been assigned
         logging.info("Exo-MerCat name assigned.")
 
+    def identify_misnamed_duplicates(self) -> None:
+        """
+        Identifies potential misnamed duplicate planets in systems with multiple planets
+        based on discrepancies in their estimated periods (p) or semi-major axes (a).
+        Flags records where planets within the same system (main_id) have different periods
+        or semi-major axes, which might indicate misnaming.
+
+        :param self: An instance of the class Emc
+        :type self: Emc
+        :return: None
+        :rtype: None
+        """
+        # Open a file for writing results related to misnamed duplicates
+        f1 = open('Logs/identify_misnamed_duplicates.txt', 'w')
+
+        # Initialize the misnamed_duplicates_flag column to 0
+        self.data['misnamed_duplicates_flag'] = 0
+
+        # Group the DataFrame by 'main_id' (indicating planetary systems)
+        grouped_df = self.data.groupby("main_id", sort=True, as_index=False)
+
+        # Initialize a counter (though it is currently unused)
+        count = 0
+
+        # Iterate through each system (grouped by main_id)
+        for mainid, group in grouped_df:
+            # Check if there are multiple planets in the system
+            if len(group) > 1:
+
+                # Calculate estimates for periods (p) and semi-major axes (a)
+                group = Utils.calculate_working_p_sma(group, tolerance=0.1)
+
+                # Group by 'working_p' (estimated period)
+                group_p = group.groupby("working_p", sort=True, as_index=False)
+
+                # Iterate through subgroups by period (p)
+                for p, subgroup_p in group_p:
+                    if p != -1:  # Valid period check
+                        if len(subgroup_p) > 1:  # Multiple planets with the same period
+
+                            # Write info on planets with the same main_id but different periods
+                            f1.write('SAME MAIN_ID DIFFERENT PERIOD\n' +
+                                     subgroup_p[
+                                         ["exo-mercat_name", "main_id", "binary", "letter", "p"]].to_string() + '\n\n')
+
+                            # Flag the misnamed duplicates for planets with different periods
+                            self.data.loc[subgroup_p.index, "misnamed_duplicates_flag"] = 1
+                    else:
+                        # No valid period, group by semi-major axis (a)
+                        group_a = subgroup_p.groupby("working_a", sort=True, as_index=False)
+
+                        # Iterate through subgroups by semi-major axis (a)
+                        for a, subgroup_a in group_a:
+                            if a != -1:  # Valid semi-major axis check
+                                if len(subgroup_a) > 1:  # Multiple planets with the same sma
+
+                                    # Print info on planets with the same main_id but different semi-major axes
+                                    f1.write('SAME MAIN_ID DIFFERENT SMA\n' +
+                                             subgroup_a[["exo-mercat_name", "main_id", "binary", "letter",
+                                                         "a"]].to_string() + '\n\n')
+
+                                    # Flag the misnamed duplicates for planets with different semi-major axes
+                                    self.data.loc[subgroup_a.index, "misnamed_duplicates_flag"] = 1
+
+        # Close the output file
+        f1.close()
+        logging.info("Identified misnamed duplicates.")
+
+
     def keep_columns(self) -> None:
         """
         Retain only specified columns in the dataframe and remove all others.

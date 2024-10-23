@@ -3389,6 +3389,105 @@ def test__fill_row_update(instance, tmp_path):
     os.chdir(original_dir)
 
 
+def test__identify_misnamed_duplicates(instance,tmp_path):
+    original_dir = os.getcwd()
+
+    os.chdir(tmp_path)  # Create a temporary in-memory configuration object
+    os.mkdir("Logs/")
+
+    # TEST 1: same period, different binary and letter
+    dat1={'exo-mercat_name': [ '*  83 Leo B b', '*  83 Leo B c', '*  83 Leo B c','*  83 Leo d'],
+ 'main_id': [ '*  83 Leo', '*  83 Leo', '*  83 Leo', '*  83 Leo'],
+ 'binary': ['B', 'B', 'B', ""],
+ 'letter': ['b', 'c',  'c',  'd'],
+ 'p': [17.0503, 4970.0, 95.233, 4970.0],
+ 'a': [ 0.123, 5.4,  0.383, 5.4]}
+
+    expected_dat1={'exo-mercat_name': [ '*  83 Leo B b', '*  83 Leo B c', '*  83 Leo B c','*  83 Leo d'],
+ 'main_id': [ '*  83 Leo', '*  83 Leo', '*  83 Leo', '*  83 Leo'],
+ 'binary': ['B', 'B', 'B', ""],
+ 'letter': ['b', 'c',  'c',  'd'],
+ 'p': [17.0503, 4970.0, 95.233, 4970.0],
+ 'a': [ 0.123, 5.4,  0.383, 5.4],
+ 'misnamed_duplicates_flag':[0,1,0,1]}
+
+    expected_log1=['SAME MAIN_ID DIFFERENT PERIOD\n',
+ '  exo-mercat_name    main_id binary letter       p\n',
+ '1   *  83 Leo B c  *  83 Leo      B      c  4970.0\n',
+ '3     *  83 Leo d  *  83 Leo             d  4970.0\n',
+ '\n']
+
+    # TEST 2: same sma, different binary and letter
+    dat2 = {'exo-mercat_name': ['BD+13  2618 AB c', 'BD+13  2618 C BD', 'BD+13  2618 b'],
+           'main_id': ['BD+13  2618', 'BD+13  2618', 'BD+13  2618'],
+           'binary': ['AB', 'C', ""],
+           'letter': ['c', 'BD', 'b'],
+           'p': [np.nan, np.nan, np.nan],
+           'a': [1100.0, np.nan, 1168.0]}
+
+    expected_dat2 = {'exo-mercat_name': ['BD+13  2618 AB c', 'BD+13  2618 C BD', 'BD+13  2618 b'],
+                    'main_id': ['BD+13  2618', 'BD+13  2618', 'BD+13  2618'],
+                    'binary': ['AB', 'C', ""],
+                    'letter': ['c', 'BD', 'b'],
+                    'p': [np.nan, np.nan, np.nan],
+                    'a': [1100.0, np.nan, 1168.0],
+                     'misnamed_duplicates_flag': [1, 0, 1]
+                     }
+    expected_log2=['SAME MAIN_ID DIFFERENT SMA\n',
+ '    exo-mercat_name      main_id binary letter       a\n',
+ '0  BD+13  2618 AB c  BD+13  2618     AB      c  1100.0\n',
+ '2     BD+13  2618 b  BD+13  2618             b  1168.0\n',
+ '\n']
+    # TEST 3: all is well
+    dat3={'exo-mercat_name': ['Kepler-85 b', 'Kepler-85 c','Kepler-85 d','Kepler-85 e'],
+     'main_id': [ 'Kepler-85', 'Kepler-85', 'Kepler-85', 'Kepler-85'],
+     'binary': ["","","",""],
+     'letter': [ 'b', 'c', 'd',  'e'],
+     'p': [ 8.305738, 12.512598, 17.91323, 25.216751],
+     'a': [0.07891, 0.10369, 0.13, 0.163],
+     }
+
+    expected_dat3={'exo-mercat_name': ['Kepler-85 b', 'Kepler-85 c','Kepler-85 d','Kepler-85 e'],
+     'main_id': [ 'Kepler-85', 'Kepler-85', 'Kepler-85', 'Kepler-85'],
+     'binary': ["","","",""],
+     'letter': [ 'b', 'c', 'd',  'e'],
+     'p': [ 8.305738, 12.512598, 17.91323, 25.216751],
+     'a': [0.07891, 0.10369, 0.13, 0.163],
+     'misnamed_duplicates_flag': [0, 0, 0, 0]}
+
+    expected_log3=''
+    macro_tuple = [
+        (dat1, expected_dat1,expected_log1),
+        (dat2, expected_dat2,expected_log2),
+        (dat3, expected_dat3,expected_log3),
+    ]
+
+    for dat, expected_dat,expected_log in macro_tuple:
+        dat = pd.DataFrame(dat)
+        expected_dat=pd.DataFrame(expected_dat)
+
+        instance.data = dat
+        with LogCapture() as log:
+            instance.identify_misnamed_duplicates()
+            log = pd.DataFrame(list(log), columns=["user", "info", "message"])
+            assert "Identified misnamed duplicates." in log["message"].tolist()
+
+        assert "misnamed_duplicates_flag" in instance.data.columns
+        pd.testing.assert_frame_equal(
+            instance.data, expected_dat
+        )
+        if expected_log!='':
+            with open("Logs/identify_misnamed_duplicates.txt") as f:
+                lines = f.readlines()
+                assert lines == expected_log
+
+
+
+
+
+    os.chdir(original_dir)
+
+
 def test__keep_columns(instance):
     # Test the keep_columns function
 
