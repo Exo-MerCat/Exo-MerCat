@@ -36,13 +36,11 @@ class UtilityFunctions:
         pass
 
     @staticmethod
-    def service_files_initialization() -> None:
+    def folder_initialization() -> None:
         """
         Initialize the directory structure for the exoplanet catalog processing.
 
         Creates the following directories if they don't exist: 'Exo-MerCat/'; 'InputSources/'; 'StandardizedSources/'; 'Logs/'.
-
-        Clears all files in the 'Logs/' directory.
 
         :return: None
         :rtype: None
@@ -60,10 +58,9 @@ class UtilityFunctions:
         if not os.path.exists("StandardizedSources/"):
             os.makedirs("StandardizedSources")
 
-        # Create Logs folder if it does not exist and remove all files
+        # Create Logs folder if it does not exist
         if not os.path.exists("Logs/"):
             os.makedirs("Logs")
-        os.system("rm Logs/*")
 
     @staticmethod
     def ping_simbad_vizier() -> str:

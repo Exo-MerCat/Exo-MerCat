@@ -23,33 +23,20 @@ def test__init(instance):
     assert isinstance(instance, UtilityFunctions)
 
 
-def test__service_files_initialization(instance, tmp_path):
+def test__folder_initialization(instance, tmp_path):
     # Change current working directory to the temporary folder
     original_dir = os.getcwd()
 
     os.chdir(tmp_path)
 
     # Call the function
-    instance.service_files_initialization()
+    instance.folder_initialization()
 
     # Assert that the folders are created
     assert os.path.exists("Exo-MerCat")
     assert os.path.exists("InputSources")
     assert os.path.exists("StandardizedSources")
     assert os.path.exists("Logs")
-
-    # Create some dummy files in the Logs folder
-    with open("Logs/file1.txt", "w") as f:
-        f.write("Dummy content")
-    with open("Logs/file2.txt", "w") as f:
-        f.write("Dummy content")
-
-    # Call the function
-    instance.service_files_initialization()
-
-    # Assert that the Logs folder is empty
-    logs_files = os.listdir("Logs/")
-    assert len(logs_files) == 0
 
     os.chdir(original_dir)
 
