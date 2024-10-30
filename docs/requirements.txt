@@ -1,4 +1,5 @@
 sphinx
+sphinx-book-theme
 sphinx-autodoc-typehints
 sphinx-toolbox
 sphinx-design
