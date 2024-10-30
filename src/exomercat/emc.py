@@ -2226,73 +2226,40 @@ class Emc(Catalog):
         counter = 0
         # Iterate through each group in the grouped DataFrame
         for (mainid, binary, letter), group in grouped_df:
-            # Calculate working period and semi-major axis for the group
-            group = Utils.calculate_working_p_sma(group, tolerance=0.1)
-            
-            # Get a list of unique periods, excluding NaN and -1 values
-            period_list = list(
-                set(group.working_p.replace(-1, np.nan).dropna().unique())
-            )
-            
-            if len(period_list) == 1:
-                # All entries have the same period (excluding NaN values):
-                # Merge all entries into a single entry
-                entry = Emc.merge_into_single_entry(group, mainid, binary, str(letter),
-                                                    period_mismatch_flag= 0, fallback_merge_flag= 0)
+            if len(group)==1:
+                # One single entry in the group, the full entry will get in the final catalog
+                entry = Emc.merge_into_single_entry(
+                    group, mainid, binary, str(letter),
+                    period_mismatch_flag=0, fallback_merge_flag=0
+                )
+                # Add the merged entry to the final catalog
                 final_catalog = pd.concat(
                     [final_catalog, entry], sort=False
                 ).reset_index(drop=True)
 
-            elif len(period_list) > 1:
-                # Multiple different periods found (excluding NaN values):
-                # Log the disagreement for further investigation
-                f1.write(
-                    "DISAGREEMENT (period_mismatch_flag=1)\n"
-                    + group[
-                        [
-                            "main_id",
-                            "binary",
-                            "letter",
-                            "catalog",
-                            "catalog_name",
-                            "p",
-                        ]
-                    ].to_string()
-                    + "\n\n"
-                )
-                # Create separate entries for each unique period
-                for pgroup in period_list:
-                    subgroup = group[group.working_p == pgroup]
-                    entry = Emc.merge_into_single_entry(
-                        subgroup, mainid, binary, str(letter),
-                        period_mismatch_flag= 1, fallback_merge_flag= 0)
-
-
-                    final_catalog = pd.concat(
-                        [final_catalog, entry], sort=False
-                    ).reset_index(drop=True)
             else:
-                # No valid period data available, check semi-major axis (sma)
-                sma_list = list(
-                    set(group.working_a.replace(-1, np.nan).dropna().unique())
+                # If multiple values per group
+                # Calculate working period and semi-major axis for the group
+                group = Utils.calculate_working_p_sma(group, tolerance=0.1)
+
+                # Get a list of unique periods, excluding NaN and -1 values
+                period_list = list(
+                    set(group.working_p.replace(-1, np.nan).dropna().unique())
                 )
 
-                if len(sma_list) == 1:
-                    # Semi-major axis values are in agreement (excluding NaN values):
-                    # Perform regular merging of entries
-                    entry = Emc.merge_into_single_entry(
-                        group, mainid, binary, str(letter),
-                        period_mismatch_flag= 0, fallback_merge_flag= 0
-                    )
-
+                if len(period_list) == 1:
+                    # All entries have the same period (excluding NaN values):
+                    # Merge all entries into a single entry
+                    entry = Emc.merge_into_single_entry(group, mainid, binary, str(letter),
+                                                        period_mismatch_flag= 0, fallback_merge_flag= 0)
                     # Add the merged entry to the final catalog
                     final_catalog = pd.concat(
                         [final_catalog, entry], sort=False
                     ).reset_index(drop=True)
 
-                    
-                elif len(sma_list) > 1:
-                    # Semi-major axis values disagree (excluding NaN values):
+
+                elif len(period_list) > 1:
+                    # Multiple different periods found (excluding NaN values):
                     # Log the disagreement for further investigation
                     f1.write(
                         "DISAGREEMENT (period_mismatch_flag=1)\n"
@@ -2303,28 +2270,47 @@ class Emc(Catalog):
                                 "letter",
                                 "catalog",
                                 "catalog_name",
-                                "a",
+                                "p",
                             ]
                         ].to_string()
                         + "\n\n"
                     )
-                    # Create separate entries for each unique semi-major axis value
-                    for agroup in sma_list:
-                        subgroup = group[group.working_a == agroup]
+                    # Create separate entries for each unique period
+                    for pgroup in period_list:
+                        subgroup = group[group.working_p == pgroup]
                         entry = Emc.merge_into_single_entry(
-                            subgroup, mainid, binary, letter,
-                            period_mismatch_flag=1, fallback_merge_flag=0
-                        )
+                            subgroup, mainid, binary, str(letter),
+                            period_mismatch_flag= 1, fallback_merge_flag= 0)
 
                         # Add the merged entry to the final catalog
                         final_catalog = pd.concat(
                             [final_catalog, entry], sort=False
                         ).reset_index(drop=True)
+
+
                 else:
-                    # No period nor sma: will merge together
-                    if len(group) > 1:
+                    # No valid period data available, check semi-major axis (sma)
+                    sma_list = list(
+                        set(group.working_a.replace(-1, np.nan).dropna().unique())
+                    )
+
+                    if len(sma_list) == 1:
+                        # Semi-major axis values are in agreement (excluding NaN values):
+                        # Perform regular merging of entries
+                        entry = Emc.merge_into_single_entry(
+                            group, mainid, binary, str(letter),
+                            period_mismatch_flag= 0, fallback_merge_flag= 0
+                        )
+                        # Add the merged entry to the final catalog
+                        final_catalog = pd.concat(
+                            [final_catalog, entry], sort=False
+                        ).reset_index(drop=True)
+
+                    elif len(sma_list) > 1:
+                        # Semi-major axis values disagree (excluding NaN values):
+                        # Log the disagreement for further investigation
                         f1.write(
-                            "FALLBACK, MERGE (fallback_merge_flag=1) \n"
+                            "DISAGREEMENT (period_mismatch_flag=1)\n"
                             + group[
                                 [
                                     "main_id",
@@ -2332,19 +2318,46 @@ class Emc(Catalog):
                                     "letter",
                                     "catalog",
                                     "catalog_name",
+                                    "a",
                                 ]
                             ].to_string()
                             + "\n\n"
                         )
-                    entry = Emc.merge_into_single_entry(
-                        group, mainid, binary, str(letter),
-                        period_mismatch_flag = 0, fallback_merge_flag = 1
-                    )
+                        # Create separate entries for each unique semi-major axis value
+                        for agroup in sma_list:
+                            subgroup = group[group.working_a == agroup]
+                            entry = Emc.merge_into_single_entry(
+                                subgroup, mainid, binary, letter,
+                                period_mismatch_flag=1, fallback_merge_flag=0
+                            )
+                            # Add the merged entry to the final catalog
+                            final_catalog = pd.concat(
+                                [final_catalog, entry], sort=False
+                            ).reset_index(drop=True)
 
-                    # Add the merged entry to the final catalog
-                    final_catalog = pd.concat(
-                        [final_catalog, entry], sort=False
-                    ).reset_index(drop=True)
+                    else:
+                            # If there are multiple entries, write in file as they might be an error to be fixed
+                            f1.write(
+                                "FALLBACK, MERGE (fallback_merge_flag=1) \n"
+                                + group[
+                                    [
+                                        "main_id",
+                                        "binary",
+                                        "letter",
+                                        "catalog",
+                                        "catalog_name",
+                                    ]
+                                ].to_string()
+                                + "\n\n"
+                            )
+                            entry = Emc.merge_into_single_entry(
+                                group, mainid, binary, str(letter),
+                                period_mismatch_flag = 0, fallback_merge_flag = 1
+                            )
+                            # Add the merged entry to the final catalog
+                            final_catalog = pd.concat(
+                                [final_catalog, entry], sort=False
+                            ).reset_index(drop=True)
 
             # Print progress
             if verbose:
@@ -2616,15 +2629,15 @@ class Emc(Catalog):
             "discovery_year",
             "main_id_aliases",
             "main_id_provenance",
-            "angular_separation",
             "angular_separation_flag",
+            "angular_separation",
             "catalog",
             "duplicate_catalog_flag",
             "duplicate_names",
             "binary_coordinate_mismatch_flag",
             "binary_complex_system_flag",
-            "coordinate_mismatch",
             "coordinate_mismatch_flag",
+            "coordinate_mismatch",
             "period_mismatch_flag",
             "fallback_merge_flag",
             "misnamed_duplicates_flag",

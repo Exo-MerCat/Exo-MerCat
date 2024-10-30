@@ -78,7 +78,7 @@ def main():  # pragma: no cover
     # Execute the specified function based on the command-line argument
     if args["function"] == "maintenance":
         # Perform sanity checks on the catalog data
-        sanity_checks(local_date)
+        ping(local_date)
     if args["function"] == "input":
         # Download and standardize catalog files
         input(local_date)
@@ -91,7 +91,7 @@ def main():  # pragma: no cover
     if args["function"] == "all":
         # Execute all operations in sequence
         # 1. Perform sanity checks
-        sanity_checks(local_date)
+        ping(local_date)
         # 2. Download and standardize catalog files
         input(local_date)
         # 3. Process and merge catalog data
@@ -103,7 +103,7 @@ def main():  # pragma: no cover
     socket.setdefaulttimeout(timeout)
 
 
-def sanity_checks(local_date):  # pragma: no cover
+def ping(local_date):  # pragma: no cover
     """
     Perform sanity checks on the input catalog data.
 
@@ -319,7 +319,6 @@ def run(local_date: str, verbose: int):  # pragma: no cover
                 ),
             ]
         )
-
     # Fix for TOI catalog: convert 'letter' column to string and keep only last 3 characters
     emc.data.letter = emc.data.letter.astype(str)
     emc.data.letter = emc.data.letter.str[-3:]

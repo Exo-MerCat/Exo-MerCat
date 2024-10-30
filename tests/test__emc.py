@@ -2725,6 +2725,166 @@ def test__group_by_letter_check_period(tmp_path, instance):
     os.chdir(tmp_path)  # Create a temporary in-memory configuration object
     os.mkdir("Logs/")
 
+    # CASE 0: ONLY ONE ENTRY, SO ENTRY IS MAINTAINED ENTIRELY (EXCEPT FORMATTING CHANGES)
+    # CASE 0: ONLY ONE ENTRY, SO ENTRY IS MAINTAINED ENTIRELY (EXCEPT FORMATTING CHANGES)
+
+    # GENERALIZED DATASET AND EXPECTED DATASET
+    data0 = {
+        "name": ["6 Lyn b"],
+        "catalog_name": ["6 Lyn b"],
+        "discovery_method": ["Radial Velocity"],
+        "ra": [97.6958333],
+        "dec": [58.1627778],
+        "p": [934.3],
+        "p_max": [8.6],
+        "p_min": [8.6],
+        "a": [2.0],
+        "a_max": [0.1],
+        "a_min": [0.1],
+        "e": [0.073],
+        "e_max": [0.036],
+        "e_min": [0.036],
+        "i": [2.0],
+        "i_max": [0.1],
+        "i_min": [0.1],
+        "mass": [np.nan],
+        "mass_max": [np.nan],
+        "mass_min": [np.nan],
+        "msini": [2.01],
+        "msini_max": [0.077],
+        "msini_min": [0.077],
+        "r": [np.nan],
+        "r_max": [np.nan],
+        "r_min": [np.nan],
+        "discovery_year": [2008],
+        "alias": [
+            "2MASS J06304711+5809453",
+        ],
+        "a_url": ["eu"],
+        "mass_url": [""],
+        "p_url": ["eu"],
+        "msini_url": ["eu"],
+        "r_url": [""],
+        "i_url": ["eu"],
+        "e_url": ["eu"],
+        "main_id": ["*   6 Lyn"],
+        "host": ["6 Lyn"],
+        "binary": [""],
+        "letter": ["b"],
+        "status": ["CONFIRMED"],
+        "catalog": ["eu"],
+        "original_catalog_status": ["eu: CONFIRMED"],
+        "checked_catalog_status": ["eu: CONFIRMED"],
+        "binary_coordinate_mismatch_flag": [0],
+        "binary_complex_system_flag": [0],
+        "hostbinary": ["6 Lyn"],
+        "RA": ["06 30 47.1075"],
+        "DEC": ["+58 09 45.479"],
+        "list_id": [
+            "LTT 11856,*   6 Lyn",
+        ],
+        "main_id_ra": [97.69628124999998],
+        "main_id_dec": [58.16263305555555],
+        "coordinate_mismatch": [""],
+        "angsep": [0.0],
+        "angular_separation": ["eu: 0.0"],
+        "main_id_provenance": ["SIMBAD"],
+        "main_id_aliases": [
+            "2MASS J06304711+5809453,HR 2331",
+        ],
+    }
+
+    data0 = pd.DataFrame(data0)
+    expected_result0 = {
+        "main_id": ["*   6 Lyn"],
+        "binary": [""],
+        "letter": ["b"],
+        "host": ["6 Lyn"],
+        "nasa_name": [""],
+        "toi_name": [""],
+        "epic_name": [""],
+        "eu_name": ["6 Lyn b"],
+        "oec_name": [""],
+        "i_url": ["eu"],
+        "i": [2.0],
+        "i_min": [0.1],
+        "i_max": [0.1],
+        "IREL": [0.05],
+        "mass_url": [""],
+        "mass": [np.nan],
+        "mass_min": [np.nan],
+        "mass_max": [np.nan],
+        "MASSREL": [np.nan],
+        "msini_url": ["eu"],
+        "msini": [2.01],
+        "msini_min": [0.077],
+        "msini_max": [0.077],
+        "MSINIREL": [0.03830845771144279],
+        "r_url": [""],
+        "r": [np.nan],
+        "r_min": [np.nan],
+        "r_max": [np.nan],
+        "RADREL": [np.nan],
+        "a_url": ["eu"],
+        "a": [2.0],
+        "a_min": [0.10],
+        "a_max": [0.10],
+        "AREL": [0.05],
+        "p_url": ["eu"],
+        "p": [934.3],
+        "p_min": [8.6],
+        "p_max": [8.6],
+        "PERREL": [0.009204752220914053],
+        "e_url": ["eu"],
+        "e": [0.073],
+        "e_min": [0.036],
+        "e_max": [0.036],
+        "EREL": [0.4931506849315068],
+        "checked_status_string": ["eu: CONFIRMED"],
+        "original_status_string": ["eu: CONFIRMED"],
+        "confirmed": [1],
+        "status": ["CONFIRMED"],
+        "discovery_year": [2008],
+        "discovery_method": ["Radial Velocity"],
+        "catalog": ["eu"],
+        "main_id_aliases": ["2MASS J06304711+5809453,HR 2331"],
+        "main_id_provenance": ["SIMBAD"],
+        "main_id_ra": [97.69628124999998],
+        "main_id_dec": [58.16263305555555],
+        "duplicate_catalog_flag": [0],
+        "duplicate_names": [""],
+        "binary_coordinate_mismatch_flag": [0],
+        "binary_complex_system_flag": [0],
+        "coordinate_mismatch": [""],
+        "coordinate_mismatch_flag": [0],
+        "angular_separation": ["eu: 0.0"],
+        "angular_separation_flag": [0],
+        "period_mismatch_flag": [0],
+        "fallback_merge_flag": [0],
+    }
+    expected_result0 = pd.DataFrame(expected_result0)
+
+
+    instance.data = data0
+    instance.group_by_letter_check_period(verbose=True)
+    assert os.path.exists("Logs/group_by_letter_check_period.txt")
+
+    assert sorted(instance.data.columns) == sorted(expected_result0.columns)
+
+    instance.data = instance.data.convert_dtypes()
+    expected = expected_result0.convert_dtypes()
+    for col in instance.data.columns:
+            for row in instance.data.index:
+                if pd.isna(instance.data.at[row, col]) and pd.isna(
+                        expected.at[row, col]
+                ):
+                    continue
+                try:
+                    assert instance.data.at[row, col] == expected.at[row, col]
+                except AssertionError:
+                    assert np.isclose(instance.data.at[row, col], expected.at[row, col])
+
+
     # GENERALIZED DATASET AND EXPECTED DATASET
     data = {
         "name": ["6 Lyn b", "6 Lyn b"],
@@ -3041,10 +3201,11 @@ def test__group_by_letter_check_period(tmp_path, instance):
                 ):
                     continue
                 try:
+                    print(col)
                     assert instance.data.at[row, col] == expected.at[row, col]
                 except AssertionError:
                     assert np.isclose(instance.data.at[row, col], expected.at[row, col])
-
+    #
     # CASE 5: SMA disagreeing, keep both
     case5_data = data.copy(deep=True)
     case5_data["p"] = [np.nan, np.nan]
@@ -3637,15 +3798,15 @@ def test__keep_columns(instance):
         "discovery_year",
         "main_id_aliases",
         "main_id_provenance",
-        "angular_separation",
         "angular_separation_flag",
+        "angular_separation",
         "catalog",
         "duplicate_catalog_flag",
         "duplicate_names",
         "binary_coordinate_mismatch_flag",
         "binary_complex_system_flag",
-        "coordinate_mismatch",
         "coordinate_mismatch_flag",
+        "coordinate_mismatch",
         "period_mismatch_flag",
         "fallback_merge_flag",
         "misnamed_duplicates_flag",
