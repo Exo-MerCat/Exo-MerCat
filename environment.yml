@@ -1,0 +1,14 @@
+name: exomercat2
+channels:
+  - defaults
+dependencies:
+  - pandas=1.5.3
+  - numpy
+  - astropy
+  - Unidecode
+  - requests
+  - pip
+  - pip:
+    - pyvo
+    - astroquery
+    - testfixtures

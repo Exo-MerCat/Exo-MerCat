@@ -1,0 +1,9 @@
+pandas
+numpy
+astropy
+Unidecode
+pytest
+requests
+pyvo
+astroquery
+testfixtures

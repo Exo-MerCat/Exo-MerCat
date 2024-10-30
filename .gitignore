@@ -1,0 +1,10 @@
+Logs/*
+InputSources/*
+legacy_src/
+StandardizedSources/*
+.idea/
+build/
+Exo-MerCat/
+tests/__pycache__/
+src/*egg-info
+UniformSources/
