@@ -7,3 +7,5 @@ requests
 pyvo
 astroquery
 testfixtures
+sphinx-autodoc-typehints
+sphinx_rtd_theme
