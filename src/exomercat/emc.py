@@ -932,7 +932,7 @@ class Emc(Catalog):
 
         # Execute the query
         table = Utils.perform_query(service, query, uploads_dict={"t1": t2})
-        
+
         # Log the number of successful TIC queries
         logging.info(
             "List of unique star names with a TIC alias "
@@ -1549,7 +1549,6 @@ class Emc(Catalog):
         :return: None
         :rtype: None
         """
-
         # Open a file to log the results of the grouping check
         f = open("Logs/post_main_id_query_checks.txt", "a")
         f.write("****************************************\n")
