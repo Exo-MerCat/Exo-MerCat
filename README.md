@@ -23,12 +23,13 @@ The catalog is available via TAP (see {doc}`run_tap` for more info). The user ca
 
 ```{note}
 If you use Exo-MerCat, please cite the following papers: 
-[Alei et al. 2020](https://ui.adsabs.harvard.edu/abs/2020A%26C....3100370A/abstract), Alei et al. 2024
+[Alei et al. 2020](https://ui.adsabs.harvard.edu/abs/2020A%26C....3100370A/abstract), 
+[Alei et al. 2025](https://ui.adsabs.harvard.edu/abs/2025A%26C....5100936A/abstract)
 ```
 
 ## Changelog
 
-### v2.0.0 (see Alei et al., 2024)
+### v2.0.0 (see [Alei et al. 2025](https://ui.adsabs.harvard.edu/abs/2025A%26C....5100936A/abstract))
 - Added TESS Project Candidates Table as input source; promoted EPIC/K2 Planets and Candidates Table to input source; removed Exoplanet Orbit Database (now retired); updated interfaces with NASA Exoplanet Archive, Kepler Objects of Interest catalog, and Exoplanet Encyclopaedia.
 - Increased number of entries and improved completeness of parameter estimates in Exo-MerCat catalog.
 - Main identifier now searched in SIMBAD and TESS Input Catalog v8.2 for both name- and coordinate-based queries; coordinate-based queries now use a smaller tolerance radius (1 arcsec instead of 36 arcsec), reducing errors.

@@ -1639,11 +1639,11 @@ class Emc(Catalog):
 
             # Concatenate all aliases from the 'alias' column
             for al in group.alias:
-                main_id_aliases += "," + str(al)
+                main_id_aliases = main_id_aliases+ "," + str(al)
 
             # Concatenate all identifiers from the 'list_id' column
             for al in group.list_id:
-                main_id_aliases += "," + str(al)
+                main_id_aliases = main_id_aliases + "," + str(al)
 
             # Remove duplicates and unnecessary characters from main_id_aliases
             main_id_aliases = ",".join(
@@ -1651,8 +1651,8 @@ class Emc(Catalog):
             )
             main_id_aliases = main_id_aliases.replace("nan", "").replace(",,", ",")
 
-        # Update the main_id_aliases column for all rows with the current main_id
-        self.data.loc[self.data.main_id == host, "main_id_aliases"] = main_id_aliases
+            # Update the main_id_aliases column for all rows with the current main_id
+            self.data.loc[self.data.main_id == host, "main_id_aliases"] = main_id_aliases
 
     def cleanup_catalog(self) -> None:
         """
