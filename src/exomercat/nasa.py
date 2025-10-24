@@ -148,6 +148,7 @@ class Nasa(Catalog):
                 "pl_orbper_reflink": "p_url",
                 "pl_orbincl_reflink": "i_url",
                 "pl_bmassj_reflink": "bestmass_url",
+                "gaia_dr3_id": "gaia_id",
             }
         )
 

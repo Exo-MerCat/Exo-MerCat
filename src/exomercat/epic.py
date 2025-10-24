@@ -147,6 +147,7 @@ class Epic(Catalog):
                 "st_masserr1": "Mstar_max",
                 "st_masserr2": "Mstar_min",
                 "pl_refname": "reference",
+                "gaia_dr3_id": "gaia_id",
             }
         )
 
