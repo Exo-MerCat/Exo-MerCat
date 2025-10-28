@@ -1,6 +1,6 @@
 [project]
 name = "Exo-MerCat"
-version = "2.0.0"
+version = "2.0.1"
 authors = [
   { name="Eleonora Alei", email="eleonora.alei.phd@gmail.com" },
   { name="Andrea Bignmaini", email="andrea.bignamini@inaf.it"},
