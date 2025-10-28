@@ -76,7 +76,9 @@ class Nasa(Catalog):
             "hd_name": StringDtype(),
             "hip_name": StringDtype(),
             "tic_id": StringDtype(),
-            "gaia_id": StringDtype(),
+            "gaia_dr2_id": StringDtype(),
+            "gaia_dr3_id": StringDtype(),
+
         }
 
     def standardize_catalog(self) -> None:
@@ -148,7 +150,6 @@ class Nasa(Catalog):
                 "pl_orbper_reflink": "p_url",
                 "pl_orbincl_reflink": "i_url",
                 "pl_bmassj_reflink": "bestmass_url",
-                "gaia_dr3_id": "gaia_id",
             }
         )
 
@@ -173,16 +174,11 @@ class Nasa(Catalog):
             self.sort_bestmass_to_mass_or_msini()
 
         # String manipulations on alias
-        self.data[["hd_name", "hip_name", "tic_id", "gaia_id"]] = self.data[
-            ["hd_name", "hip_name", "tic_id", "gaia_id"]
-        ].fillna("")
 
-        self.data["alias"] = (
-            self.data["hd_name"]
-            .str.cat(self.data[["hip_name", "tic_id", "gaia_id"]].fillna(""), sep=",")
-            .str.lstrip(",")
-        )
-
+        self.data["alias"] =self.data[
+            ["hd_name", "hip_name", "tic_id", "gaia_dr2_id", "gaia_dr3_id"]
+            ].apply(lambda x: ",".join(filter(None, x.astype(str).replace(np.nan, "").replace("nan",""))), axis=1)
+        
         # Convert discovery methods
         self.data = Utils.convert_discovery_methods(self.data)
 
