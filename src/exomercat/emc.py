@@ -338,6 +338,8 @@ class Emc(Catalog):
 
                     if len(subgroup1) > 0:
                         # If there's at least one S-type or null binary, try to replace it based on coordinates
+                        # This is done for each entry, the code calculates the distance of that entry compared to the 
+                        # ones that have a binary value. If it works, it replaces.
                         for i in subgroup1.index:
                             for j in subgroup2.index:
                                 # Calculate angular separation between each pair of coordinates
@@ -348,26 +350,36 @@ class Emc(Catalog):
                                 )
                             # Filter subgroup2 to only include entries within 1 arcsecond
                             sub = subgroup2[subgroup2.angsep <= tolerance]
-                            # Select the entry with the minimum angular separation
-                            sub = sub[
+
+                            #If successful:
+                            if len(sub)>=1:
+                                sub = sub[
                                 sub.angsep == min(sub.angsep)
                             ]  # minimum angular separation from the unknown source
+                          
+                                # Update the binary value for the S-type or null entry
+                                self.data.loc[i, "binary"] = list(
+                                    set(sub.binary)
+                                )[0]
+                                counter += 1
 
-                            # Update the binary value for the S-type or null entry
-                            self.data.loc[subgroup1.index, "binary"] = list(
-                                set(sub.binary)
-                            )[0]
-                            counter += 1
-
-                            # Log the change
-                            f.write( "Fixed binary for complex system "
-                                + key
-                                + letter
-                                + " based on angular separation. New binary value: "
-                                + str(list(set(sub.binary))[0])
-                                + ".\n\n")
-                            
-
+                                # Log the change
+                                f.write("Fixed binary for complex system for entry: "
+                                    + str(subgroup1.loc[i, "name"])
+                                    +' index: '
+                                    +str(i)
+                                    + " based on angular separation. New binary value: "
+                                    + str(list(set(sub.binary))[0])
+                                    + ".\n\n")
+                            else:
+                                # the stars are outside tolerance. Cannot confidently match. Log the issue
+                                f.write( "Cannot fix coordinates for entry: "
+                                    + str(subgroup1.loc[i, "name"])
+                                    +' index: '
+                                    +str(i)
+                                +". Stars are outside tolerance. separation: "
+                                    + str(list(set(subgroup2['angsep'])))
+                                    + ". Please increase tolerance or check coordinates.\n\n")
         # Log potential binaries that weren't treated automatically
         f.write(
             "****"

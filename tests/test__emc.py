@@ -102,347 +102,185 @@ def test__alias_as_host(tmp_path, instance):
 
     os.chdir(original_dir)
 
-
 def test__check_binary_mismatch(tmp_path, instance):
-    original_dir = os.getcwd()
+    import os
+    import pandas as pd
+    from pandas.testing import assert_frame_equal
 
-    os.chdir(tmp_path)  # Create a temporary in-memory configuration object
+    original_dir = os.getcwd()
+    os.chdir(tmp_path)
     os.mkdir("Logs/")
 
-    # # host
-    # mismatches
-    data = {
-        "name": [
-            "GJ 229 A c",  # no error
-            "GJ 229 A c",  # no error
-            "GJ 229 A c",  # no error
-            "91 Aqr A b",  # binary coordinate mismatch 1
-            "91 Aqr b",  # binary coordinate mismatch 1
-            "HD 202206 (AB) c",  # binary complex system 1
-            "HD 202206 c",  # binary complex system 1
-            "ROXs 42B b",  # potential missed binary
-            "HD 156846 b",  # only null and S-type
-            "HD 156846 b",  # only null and S-type
-            "HD 41004 A b",  # complex system with fix on coordinates
-            "HD 41004 B b",  # complex system with fix on coordinates
-            "HD 41004 b",  # complex system with fix on coordinates
-        ],
-        "host": [
-            "GJ 229",
-            "GJ 229",
-            "GJ 229",
-            "91 Aqr",
-            "91 Aqr",
-            "HD 202206",
-            "HD 202206",
-            "ROXs 42B",
-            "HD 156846",
-            "HD 156846",
-            "HD 41004",
-            "HD 41004",
-            "HD 41004",
-        ],
-        "binary": [
-            "A",
-            "S-type",
-            "S-type",
-            "A",
-            "",
-            "A",
-            "AB",
-            "AB",
-            "",
-            "S-type",
-            "A",
-            "B",
-            "S-type",
-        ],
-        "catalog": [
-            "eu",
-            "nasa",
-            "other",
-            "Catalog 1",
-            "Catalog 3",
-            "eu",
-            "oec",
-            "nasa",
-            "oec",
-            "eu",
-            "eu",
-            "eu",
-            "nasa",
-        ],
-        "ra": [
-            92.644231,
-            92.644231,
-            92.644232,
-            10.0,
-            20.0,
-            10.0,
-            10.0,
-            10.0,
-            260.141667,
-            260.142337,
-            1.222,
-            1.23,
-            1.222,
-        ],
-        "dec": [
-            -21.864642,
-            -21.864642,
-            -21.864643,
-            40.0,
-            50.0,
-            40.0,
-            40.0,
-            40.0,
-            -19.333611,
-            -19.334365,
-            9.00,
-            8.99,
-            9.0001,
-        ],
-        "letter": ["c", "c", "c", "b", "b", "c", "c", "b", "b", "b", "b", "b", "b"],
+    counter = 0
+
+    # -----------------------
+    # 1. Null/S-type replacement
+    # -----------------------
+    data1 = {
+        "name": ["HD 156846 b", "HD 156846 b"],
+        "host": ["HD 156846", "HD 156846"],
+        "binary": ["", "S-type"],
+        "catalog": ["oec", "eu"],
+        "ra": [260.141667, 260.142337],
+        "dec": [-19.333611, -19.334365],
+        "letter": ["b", "b"],
     }
-
-    expected_data = {
-        "name": [
-            "GJ 229 A c",
-            "GJ 229 A c",
-            "GJ 229 A c",
-            "91 Aqr A b",
-            "91 Aqr b",
-            "HD 202206 (AB) c",
-            "HD 202206 c",
-            "ROXs 42B b",
-            "HD 156846 b",
-            "HD 156846 b",
-            "HD 41004 A b",  # complex system with fix on coordinates
-            "HD 41004 B b",  # complex system with fix on coordinates
-            "HD 41004 b",  # complex system with fix on coordinates
-        ],
-        "host": [
-            "GJ 229",
-            "GJ 229",
-            "GJ 229",
-            "91 Aqr",
-            "91 Aqr",
-            "HD 202206",
-            "HD 202206",
-            "ROXs 42B",
-            "HD 156846",
-            "HD 156846",
-            "HD 41004",
-            "HD 41004",
-            "HD 41004",
-        ],
-        "binary": [
-            "A",
-            "A",
-            "A",
-            "A",
-            "A",
-            "A",
-            "AB",
-            "AB",
-            "S-type",
-            "S-type",
-            "A",
-            "B",
-            "A",
-        ],
-        "catalog": [
-            "eu",
-            "nasa",
-            "other",
-            "Catalog 1",
-            "Catalog 3",
-            "eu",
-            "oec",
-            "nasa",
-            "oec",
-            "eu",
-            "eu",
-            "eu",
-            "nasa",
-        ],
-        "ra": [
-            92.644231,
-            92.644231,
-            92.644232,
-            10.0,
-            20.0,
-            10.0,
-            10.0,
-            10.0,
-            260.141667,
-            260.142337,
-            1.222,
-            1.23,
-            1.222,
-        ],
-        "dec": [
-            -21.864642,
-            -21.864642,
-            -21.864643,
-            40.0,
-            50.0,
-            40.0,
-            40.0,
-            40.0,
-            -19.333611,
-            -19.334365,
-            9.00,
-            8.99,
-            9.0001,
-        ],
-        "letter": ["c", "c", "c", "b", "b", "c", "c", "b", "b", "b", "b", "b", "b"],
-        "binary_coordinate_mismatch_flag": [0, 0, 0, 1, 1, 0, 0, 0, 1, 1, 0, 0, 0],
-        "binary_complex_system_flag": [0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 1, 1],
+    expected1 = {
+        **data1,
+        "binary": ["S-type", "S-type"],
+        "binary_coordinate_mismatch_flag": [1, 1],
+        "binary_complex_system_flag": [0, 0],
     }
-    instance.data = pd.DataFrame(data)
+    instance.data = pd.DataFrame(data1)
+    instance.check_binary_mismatch(keyword="host", tolerance=1/3600)
+    df_expected1 = pd.DataFrame(expected1)
+    assert_frame_equal(instance.data, df_expected1)
 
-    # Execute the function
-    instance.check_binary_mismatch(keyword="host", tolerance=1.0 / 3600.0)
-    assert_frame_equal(instance.data, pd.DataFrame(expected_data))
-
-    ### Specific tests for main_id
-
-    # mismatches
-    data = {
-        "name": [
-            "91 Aqr A b",  # FLAG 1
-            "91 Aqr b",  # FLAG 1
-            "HD 202206 (AB) c",  # FLAG 2
-            "HD 202206 c",  # FLAG 2
-            "HD 156846 b",  # only null and S-type
-            "HD 156846 b",  # only null and S-type
-        ],
-        "main_id": [
-            "91 Aqr",
-            "91 Aqr",
-            "HD 202206",
-            "HD 202206",
-            "HD 156846",
-            "HD 156846",
-        ],
-        "binary": ["A", "", "A", "AB", "", "S-type"],
-        "catalog": ["Catalog 1", "Catalog 3", "eu", "oec", "oec", "eu"],
-        "ra": [10.0, 20.0, 10.0, 10.0, 260.141667, 260.142337],
-        "dec": [40.0, 50.0, 40.0, 40.0, -19.333611, -19.334365],
-        "letter": ["b", "b", "c", "c", "b", "b"],
-        "binary_coordinate_mismatch_flag": [0, 0, 0, 0, 0, 0],
-        "binary_complex_system_flag": [0, 0, 0, 0, 0, 0],
+    # -----------------------
+    # 2. Coordinate mismatch
+    # -----------------------
+    data2 = {
+        "name": ["91 Aqr A b", "91 Aqr b"],
+        "host": ["91 Aqr", "91 Aqr"],
+        "binary": ["A", ""],
+        "catalog": ["Catalog 1", "Catalog 3"],
+        "ra": [10.0, 20.0],
+        "dec": [40.0, 50.0],
+        "letter": ["b", "b"],
     }
-
-    expected_data = {
-        "name": [
-            "91 Aqr A b",
-            "91 Aqr b",
-            "HD 202206 (AB) c",
-            "HD 202206 c",
-            "HD 156846 b",
-            "HD 156846 b",
-        ],
-        "main_id": [
-            "91 Aqr",
-            "91 Aqr",
-            "HD 202206",
-            "HD 202206",
-            "HD 156846",
-            "HD 156846",
-        ],
-        "binary": ["A", "A", "A", "AB", "S-type", "S-type"],
-        "catalog": ["Catalog 1", "Catalog 3", "eu", "oec", "oec", "eu"],
-        "ra": [10.0, 20.0, 10.0, 10.0, 260.141667, 260.142337],
-        "dec": [40.0, 50.0, 40.0, 40.0, -19.333611, -19.334365],
-        "letter": ["b", "b", "c", "c", "b", "b"],
-        "binary_coordinate_mismatch_flag": [1, 1, 0, 0, 1, 1],
-        "binary_complex_system_flag": [0, 0, 1, 1, 0, 0],
-
+    expected2 = {
+        **data2,
+        "binary": ["A", "A"],
+        "binary_coordinate_mismatch_flag": [1, 1],
+        "binary_complex_system_flag": [0, 0],
     }
-    instance.data = pd.DataFrame(data)
+    instance.data = pd.DataFrame(data2)
+    instance.check_binary_mismatch(keyword="host", tolerance=1/3600)
+    df_expected2 = pd.DataFrame(expected2)
+    assert_frame_equal(instance.data, df_expected2)
 
-    # Execute the function
-    instance.check_binary_mismatch(keyword="main_id", tolerance=1.0 / 3600.0)
-    assert_frame_equal(instance.data, pd.DataFrame(expected_data))
+    # -----------------------
+    # 3. Complex system (multiple non-null binaries)
+    # -----------------------
+    data3 = {
+        "name": ["HD 202206 (AB) c", "HD 202206 c"],
+        "host": ["HD 202206", "HD 202206"],
+        "binary": ["A", "AB"],
+        "catalog": ["eu", "oec"],
+        "ra": [10.0, 10.0],
+        "dec": [40.0, 40.0],
+        "letter": ["c", "c"],
+    }
+    expected3 = {
+        **data3,
+        "binary_coordinate_mismatch_flag": [0, 0],
+        "binary_complex_system_flag": [1, 1],
+    }
+    instance.data = pd.DataFrame(data3)
+    instance.check_binary_mismatch(keyword="host", tolerance=1/3600)
+    df_expected3 = pd.DataFrame(expected3)
+    assert_frame_equal(instance.data, df_expected3)
 
-    ### Check the logs
+    # -----------------------
+    # 4. Complex system fix via angular separation (HD 41004)
+    # -----------------------
+    data4 = {
+        "name": ["HD 41004 A b", "HD 41004 B b", "HD 41004 b"],
+        "host": ["HD 41004"]*3,
+        "binary": ["A", "B", "S-type"],
+        "catalog": ["eu", "eu", "nasa"],
+        "ra": [1.222, 1.23, 1.222],
+        "dec": [9.0, 8.99, 9.0001],
+        "letter": ["b"]*3,
+    }
+    expected4 = {
+        **data4,
+        "binary": ["A", "B", "A"],  # fixed via closest angular separation
+        "binary_coordinate_mismatch_flag": [0, 0, 0],
+        "binary_complex_system_flag": [1, 1, 1],
+    }
+    instance.data = pd.DataFrame(data4)
+    instance.check_binary_mismatch(keyword="host", tolerance=1/3600)
+    df_expected4 = pd.DataFrame(expected4)
+    assert_frame_equal(instance.data, df_expected4)
 
-    assert os.path.exists("Logs/check_binary_mismatch.txt")
-    with open("Logs/check_binary_mismatch.txt") as f:
-        lines = f.readlines()
+    # -----------------------
+    # 5. Complex system. Cannot fix because stars are outside tolerance (11 Com)
+    # -----------------------
+    data5 = {
+        "name": ["11 Com b", "11 Com Ab", "11 Com Bb", "11 Com b"],
+        "host": ["11 Com"]*4,
+        "binary": ["", "A", "B", ""],
+        "catalog": ["nasa", "eu", "eu", "oec"],
+        "ra": [185.178779,
+                185.179167,
+                185.181203,
+                185.179273],
+        "dec": [17.793252,
+                17.792778,
+                17.794790,
+                17.792872],
+        "letter": ["b"]*4,
+    }
+    expected5 = {
+         "name": ["11 Com b", "11 Com Ab", "11 Com Bb", "11 Com b"],
+        "host": ["11 Com"]*4,
+        "binary": ["", "A", "B", "A"], 
+        "catalog": ["nasa", "eu", "eu", "oec"],
+        "ra": [185.178779,
+                185.179167,
+                185.181203,
+                185.179273],
+        "dec": [17.793252,
+                17.792778,
+                17.794790,
+                17.792872],
+        "letter": ["b"]*4,
+        "binary_coordinate_mismatch_flag": [0, 0, 0, 0],
+        "binary_complex_system_flag": [1, 1, 1, 1],
+    }
+    instance.data = pd.DataFrame(data5)
+    instance.check_binary_mismatch(keyword="host", tolerance=1/3600)
+    df_expected5 = pd.DataFrame(expected5)
+    assert_frame_equal(instance.data, df_expected5)
 
-    assert lines == [
-        "*************************************************\n",
-        "**** CHECKING BINARIES USING: host ****\n",
-        "*************************************************\n",
-        "\n",
-        "Fixed S-type or null binary for 91 Aqr b. New binary value: A. WARNING: coordinate agreement exceeds tolerance. Maximum difference: 12.22406962954591 (binary_coordinate_mismatch_flag = 1). Please check this system:\n",
-        "         name    host binary letter    catalog    ra   dec\n",
-        "3  91 Aqr A b  91 Aqr      A      b  Catalog 1  10.0  40.0\n",
-        "4    91 Aqr b  91 Aqr   null      b  Catalog 3  20.0  50.0\n",
-        "\n",
-        "\n",
-        "Fixed S-type or null binary for GJ 229 c. New binary value: A. \n",
-        "\n",
-        "\n",
-        "Only S-type and null in the system for HD 156846 b. New binary value: "
-        "S-type. WARNING: coordinate agreement exceeds tolerance. Maximum difference: "
-        "0.0009839776494423166 (binary_coordinate_mismatch_flag = 1). Please check "
-        "this system:\n",
-        "          name       host  binary letter catalog          ra        dec\n",
-        "8  HD 156846 b  HD 156846    null      b     oec  260.141667 -19.333611\n",
-        "9  HD 156846 b  HD 156846  S-type      b      eu  260.142337 -19.334365\n",
-        "\n",
-        "\n",
-        "WARNING: Either a complex system or a mismatch in the value of binary (binary_complex_system_flag = 1). Please check this system:  \n",
-        "               name       host binary letter catalog\n",
-        "5  HD 202206 (AB) c  HD 202206      A      c      eu\n",
-        "6       HD 202206 c  HD 202206     AB      c     oec\n",
-        "\n",
-        "\n",
-        "WARNING: Either a complex system or a mismatch in the value of binary (binary_complex_system_flag = 1). Please check this system:  \n",
-        "            name      host  binary letter catalog\n",
-        "10  HD 41004 A b  HD 41004       A      b      eu\n",
-        "11  HD 41004 B b  HD 41004       B      b      eu\n",
-        "12    HD 41004 b  HD 41004  S-type      b    nasa\n",
-        "\n",
-        "Fixed binary for complex system HD 41004b based on angular separation. New binary value: A.\n",
-        "\n",
-        "****host POTENTIAL BINARIES NOT TREATED HERE. They should be treated manually in replacements.ini ****\n",
-        "MISSED POTENTIAL BINARY Key:ROXs 42B name: ROXs 42B b binary: AB catalog:nasa.\n",
-        "*************************************************\n",
-        "**** CHECKING BINARIES USING: main_id ****\n",
-        "*************************************************\n",
-        "\n",
-        "Fixed S-type or null binary for 91 Aqr b. New binary value: A. WARNING: coordinate agreement exceeds tolerance. Maximum difference: 12.22406962954591 (binary_coordinate_mismatch_flag = 1). Please check this system:\n",
-        "         name main_id binary letter    catalog    ra   dec\n",
-        "0  91 Aqr A b  91 Aqr      A      b  Catalog 1  10.0  40.0\n",
-        "1    91 Aqr b  91 Aqr   null      b  Catalog 3  20.0  50.0\n",
-        "\n",
-        "\n",
-        "Only S-type and "
-        "null in the system for HD 156846 b. New binary value: S-type. WARNING: "
-        "coordinate agreement exceeds tolerance. Maximum difference: "
-        "0.0009839776494423166 (binary_coordinate_mismatch_flag = 1). Please check "
-        "this system:\n",
-        "          name    main_id  binary letter catalog          ra        dec\n",
-        "4  HD 156846 b  HD 156846    null      b     oec  260.141667 -19.333611\n",
-        "5  HD 156846 b  HD 156846  S-type      b      eu  260.142337 -19.334365\n",
-        "\n",
-        "\n",
-        "WARNING: Either "
-        "a complex system or a mismatch in the value of binary (binary_complex_system_flag"
-        " = 1). Please check this system:  \n",
-        "               name    main_id binary letter catalog\n",
-        "2  HD 202206 (AB) c  HD 202206      A      c      eu\n",
-        "3       HD 202206 c  HD 202206     AB      c     oec\n",
-        "\n",
-        "****main_id POTENTIAL BINARIES NOT TREATED HERE. They should be treated manually in replacements.ini ****\n",
-        # "MISSED POTENTIAL BINARY Key:ROXs 42B name: ROXs 42B b binary: AB catalog:nasa.\n",
-    ]
 
+    # -----------------------
+    # 6. Missed potential binary
+    # -----------------------
+    data6 = {
+        "name": ["ROXs 42B b"],
+        "host": ["ROXs 42B"],
+        "binary": ["AB"],
+        "catalog": ["eu",],
+        "ra": [185.178779,],
+        "dec": [17.793252,],
+        "letter": ["b"],
+    }
+    expected6 = { 
+               **data6,
+        "binary_coordinate_mismatch_flag": [0],
+        "binary_complex_system_flag": [0],
+    }
+    instance.data = pd.DataFrame(data6)
+    instance.check_binary_mismatch(keyword="host", tolerance=1/3600)
+    df_expected6 = pd.DataFrame(expected6)
+    assert_frame_equal(instance.data, df_expected6)
+    # -----------------------
+    # Logs
+    # -----------------------
+    log_file = "Logs/check_binary_mismatch.txt"
+    assert os.path.exists(log_file)
+    with open(log_file) as f:
+        logs = f.read()
+    # Each of these should appear exactly once
+    assert logs.count("Only S-type and null in the system") == 1
+    assert logs.count("WARNING: coordinate agreement exceeds tolerance") == 2  # HD 156846 + 91 Aqr
+    assert logs.count("WARNING: Either a complex system or a mismatch in the value of binary") == 3  # HD 202206 + HD 41004 + 11 Com
+    assert logs.count("Fixed binary for complex system") == 2  # HD 41004 angular separation fix + 11 Com A
+    assert logs.count("Cannot fix coordinates for entry: 11 Com b index: 0") == 1  # 11 Com outside tolerance
+    assert "POTENTIAL BINARIES NOT TREATED HERE" in logs
+    assert "MISSED POTENTIAL BINARY Key:ROXs 42B name: ROXs 42B b binary: AB catalog:eu.\n" in logs
     os.chdir(original_dir)
 
 

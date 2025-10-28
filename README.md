@@ -29,6 +29,14 @@ If you use Exo-MerCat, please cite the following papers:
 
 ## Changelog
 
+### v2.1.0
+- Hotfix to accomodate on changes on NASA Exoplanet Archive. The NASA and EPIC tables now have two different columns, `gaia_dr2_id` and `gaia_dr3_id`, instead of the earlier version which only had `gaia_id` displaying Gaia DR2 identifiers. Both Gaia DR2 and Gaia DR3 identifiers are now included in Exo-MerCat's aliases when available.
+Edited `nasa.py` and `epic.py` and related unit tests.
+- New minor feature: Improved `check_binary_mismatch` after encountering instance where coordinates were above the default tolerance. Added related warning in logs. Refactored `test__check_binary_mismatch` accordingly.
+
+### v2.0.1
+- Bugfix on main_id_alias column.
+
 ### v2.0.0 (see [Alei et al. 2025](https://ui.adsabs.harvard.edu/abs/2025A%26C....5100936A/abstract))
 - Added TESS Project Candidates Table as input source; promoted EPIC/K2 Planets and Candidates Table to input source; removed Exoplanet Orbit Database (now retired); updated interfaces with NASA Exoplanet Archive, Kepler Objects of Interest catalog, and Exoplanet Encyclopaedia.
 - Increased number of entries and improved completeness of parameter estimates in Exo-MerCat catalog.
