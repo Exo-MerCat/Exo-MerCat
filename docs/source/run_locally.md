@@ -1,6 +1,6 @@
 # Run Exo-MerCat locally
 
-The script is written in Python v3.x and it has been tested for Python v3.8 **test**.
+The script is written in Python v3.x and it has been tested for Python v3.8-3.12.
 
 ## Create virtual environment
 
