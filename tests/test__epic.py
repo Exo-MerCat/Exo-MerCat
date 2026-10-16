@@ -62,7 +62,9 @@ def test__standardize_catalog(instance):
         "hd_name": ["", np.nan],
         "hip_name": ["nan", np.nan],
         "tic_id": ["TIC 178266267", np.nan],
-        "gaia_id": ["Gaia DR2 665640392382991360", np.nan],
+        "gaia_dr2_id": ["Gaia DR2 665640392382991360", np.nan],
+        "gaia_dr3_id": ["Gaia DR3 665640392382991360", np.nan],
+
     }
 
     data = pd.DataFrame(data)
@@ -113,7 +115,8 @@ def test__standardize_catalog(instance):
         "hd_name",
         "hip_name",
         "tic_id",
-        "gaia_id",
+        "gaia_dr2_id",
+        "gaia_dr3_id",
         "pl_letter",
         "k2_name",
         "alias",
@@ -124,12 +127,14 @@ def test__standardize_catalog(instance):
 
     assert sorted(list(instance.data.columns)) == sorted(expected_columns)
     assert len(instance.data) == 1
-    assert data.at[0, "gaia_id"] + "," in instance.data.at[0, "alias"]
+    assert data.at[0, "gaia_dr2_id"] + "," in instance.data.at[0, "alias"]
+    assert data.at[0, "gaia_dr3_id"] in instance.data.at[0, "alias"] #it is the last one
+
     assert "nan" not in instance.data.at[0, "alias"]
 
-    assert (data.at[0, "gaia_id"] + ",") in instance.data.at[0, "alias"] and (
+    assert (data.at[0, "gaia_dr2_id"] + ",") in instance.data.at[0, "alias"] and (
         data.at[0, "tic_id"] + ","
-    ) in instance.data.at[0, "alias"]
+    ) in instance.data.at[0, "alias"] and (data.at[0, "gaia_dr3_id"]) in instance.data.at[0, "alias"]
     assert ".01" in instance.data.at[0, "letter"]
 
 

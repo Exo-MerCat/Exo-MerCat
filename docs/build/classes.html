@@ -422,6 +422,7 @@ document.write(`
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.emc.Emc.group_by_letter_check_period"><code class="docutils literal notranslate"><span class="pre">Emc.group_by_letter_check_period()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.emc.Emc.select_best_mass"><code class="docutils literal notranslate"><span class="pre">Emc.select_best_mass()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.emc.Emc.set_exomercat_name"><code class="docutils literal notranslate"><span class="pre">Emc.set_exomercat_name()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.emc.Emc.identify_misnamed_duplicates"><code class="docutils literal notranslate"><span class="pre">Emc.identify_misnamed_duplicates()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.emc.Emc.keep_columns"><code class="docutils literal notranslate"><span class="pre">Emc.keep_columns()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.emc.Emc.remove_known_brown_dwarfs"><code class="docutils literal notranslate"><span class="pre">Emc.remove_known_brown_dwarfs()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.emc.Emc.fill_row_update"><code class="docutils literal notranslate"><span class="pre">Emc.fill_row_update()</span></code></a></li>
@@ -2078,7 +2079,7 @@ For each unique period (or semi-major axis if period is not available) it checks
 
 <dl class="py method">
 <dt class="sig sig-object py" id="src.exomercat.emc.Emc.merge_into_single_entry">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">merge_into_single_entry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">group</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mainid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">binary</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">letter</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.emc.Emc.merge_into_single_entry" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">merge_into_single_entry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">group</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mainid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">binary</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">letter</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">period_mismatch_flag</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fallback_merge_flag</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.emc.Emc.merge_into_single_entry" title="Permalink to this definition">#</a></dt>
 <dd><p>Merges multiple entries with the same main_id and letter into a single entry.</p>
 <p>This function combines information from different catalogs for a specific exoplanet,
 selecting the best available data and resolving conflicts. It performs the following tasks:</p>
@@ -2107,6 +2108,8 @@ The function then concatenates all of these entries together into a final catalo
 <li><p><strong>mainid</strong> (<em>str</em>) – The main identifier of the group</p></li>
 <li><p><strong>binary</strong> (<em>str</em>) – The binary identifier of the group</p></li>
 <li><p><strong>letter</strong> (<em>str</em>) – The letter identifier of the group</p></li>
+<li><p><strong>period_mismatch_flag</strong> (<em>int</em>) – Flag for period mismatch. Defaults to 0</p></li>
+<li><p><strong>fallback_merge_flag</strong> (<em>int</em>) – Flag for fallback merge. Defaults to 0</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -2178,6 +2181,26 @@ it uses msini as the best mass estimate.</p></li>
 <dt class="sig sig-object py" id="src.exomercat.emc.Emc.set_exomercat_name">
 <span class="sig-name descname"><span class="pre">set_exomercat_name</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.emc.Emc.set_exomercat_name" title="Permalink to this definition">#</a></dt>
 <dd><p>Creates the ‘exo-mercat_name’ column by joining the main_id, binary (if any), and letter.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>self</strong> (<a class="reference internal" href="#src.exomercat.emc.Emc" title="src.exomercat.emc.Emc"><em>Emc</em></a>) – An instance of the class Emc</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.exomercat.emc.Emc.identify_misnamed_duplicates">
+<span class="sig-name descname"><span class="pre">identify_misnamed_duplicates</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.exomercat.emc.Emc.identify_misnamed_duplicates" title="Permalink to this definition">#</a></dt>
+<dd><p>Identifies potential misnamed duplicate planets in systems with multiple planets
+based on discrepancies in their estimated periods (p) or semi-major axes (a).
+Flags records where planets within the same system (main_id) have different periods
+or semi-major axes, which might indicate misnaming.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>self</strong> (<a class="reference internal" href="#src.exomercat.emc.Emc" title="src.exomercat.emc.Emc"><em>Emc</em></a>) – An instance of the class Emc</p>
@@ -2854,6 +2877,7 @@ function based on the user’s input. It supports the following operations:</p>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.emc.Emc.group_by_letter_check_period"><code class="docutils literal notranslate"><span class="pre">Emc.group_by_letter_check_period()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.emc.Emc.select_best_mass"><code class="docutils literal notranslate"><span class="pre">Emc.select_best_mass()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.emc.Emc.set_exomercat_name"><code class="docutils literal notranslate"><span class="pre">Emc.set_exomercat_name()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.emc.Emc.identify_misnamed_duplicates"><code class="docutils literal notranslate"><span class="pre">Emc.identify_misnamed_duplicates()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.emc.Emc.keep_columns"><code class="docutils literal notranslate"><span class="pre">Emc.keep_columns()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.emc.Emc.remove_known_brown_dwarfs"><code class="docutils literal notranslate"><span class="pre">Emc.remove_known_brown_dwarfs()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#src.exomercat.emc.Emc.fill_row_update"><code class="docutils literal notranslate"><span class="pre">Emc.fill_row_update()</span></code></a></li>

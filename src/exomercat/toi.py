@@ -118,7 +118,11 @@ class Toi(Catalog):
         result = Utils.perform_query(tap_service, query, uploads_dict={"t1": t2})
         result["tid"] = result["tid"].astype(int)
         result = result[["tid", "ids"]]
-        self.data = self.data.merge(result, how="outer", on="tid")
+        result=result.drop_duplicates()
+        for tid in result["tid"]:
+            self.data.loc[self.data["tid"] == tid, "ids"] = (
+                result.loc[result["tid"] == tid, "ids"].values[0]
+            )
 
         # Save to aliases
         self.data["alias"] = self.data["alias"] + "," + self.data["ids"]
@@ -170,6 +174,8 @@ class Toi(Catalog):
         # Add reference
         self.data["reference"] = "toi"
 
+        # Remove duplicates (which are relatively common in TOI)
+        self.data=self.data.drop_duplicates()
         # Logging
         logging.info("Catalog standardized.")
 

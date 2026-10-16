@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+import glob
+
 from .nasa import Nasa
 from .eu import Eu
 from .oec import Oec
@@ -12,6 +14,7 @@ import socket
 import warnings
 import pandas as pd
 import logging
+import os
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 from datetime import date, datetime
 import numpy as np
@@ -75,23 +78,35 @@ def main():  # pragma: no cover
     else:
         local_date = date.today().strftime("%Y-%m-%d")
 
+    # Initialize service files and folders
+    Utils.folder_initialization()
+
     # Execute the specified function based on the command-line argument
     if args["function"] == "maintenance":
+
         # Perform sanity checks on the catalog data
-        sanity_checks(local_date)
+        ping(local_date)
     if args["function"] == "input":
+        # Remove log file created in input
+        os.system("rm Logs/replace_known_mistakes.txt")
         # Download and standardize catalog files
         input(local_date)
     if args["function"] == "run":
+        # Remove log files created in run
+        for file in glob.glob('Logs/*'):
+            if 'replace_known_mistakes.txt' not in file:
+                os.system("rm "+file)
         # Process and merge catalog data to create the Exo-MerCat catalog
         run(local_date, args["verbose"])
     if args["function"] == "check":
         # Perform validation checks on the final Exo-MerCat catalog
         check(local_date)
     if args["function"] == "all":
+        # Remove all log files
+        os.system("rm Logs/*")
         # Execute all operations in sequence
         # 1. Perform sanity checks
-        sanity_checks(local_date)
+        ping(local_date)
         # 2. Download and standardize catalog files
         input(local_date)
         # 3. Process and merge catalog data
@@ -103,7 +118,7 @@ def main():  # pragma: no cover
     socket.setdefaulttimeout(timeout)
 
 
-def sanity_checks(local_date):  # pragma: no cover
+def ping(local_date):  # pragma: no cover
     """
     Perform sanity checks on the input catalog data.
 
@@ -129,8 +144,6 @@ def sanity_checks(local_date):  # pragma: no cover
     logging.info("STARTING SANITY CHECKS.")
     error = 0
     config_dict = Utils.read_config()
-
-    Utils.service_files_initialization()
 
     # List of catalog types to check
     cat_types = [Koi(), Eu(), Nasa(), Oec(), Toi(), Epic()]
@@ -222,9 +235,8 @@ def input(local_date):  # pragma: no cover
     :type local_date: str
     """
 
-    # Load configuration and initialize service files
+    # Load configuration
     config_dict = Utils.read_config()
-    Utils.service_files_initialization()
 
     # Process KOI catalog separately
     for cat in [Koi()]:
@@ -319,7 +331,6 @@ def run(local_date: str, verbose: int):  # pragma: no cover
                 ),
             ]
         )
-
     # Fix for TOI catalog: convert 'letter' column to string and keep only last 3 characters
     emc.data.letter = emc.data.letter.astype(str)
     emc.data.letter = emc.data.letter.str[-3:]
@@ -347,6 +358,7 @@ def run(local_date: str, verbose: int):  # pragma: no cover
     emc.group_by_letter_check_period(verbose=verbose)
     emc.select_best_mass()
     emc.set_exomercat_name()
+    emc.identify_misnamed_duplicates()
     emc.fill_row_update(local_date)
     emc.keep_columns()
     emc.save_catalog(local_date, "_full")

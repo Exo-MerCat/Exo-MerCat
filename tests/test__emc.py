@@ -102,343 +102,185 @@ def test__alias_as_host(tmp_path, instance):
 
     os.chdir(original_dir)
 
-
 def test__check_binary_mismatch(tmp_path, instance):
-    original_dir = os.getcwd()
+    import os
+    import pandas as pd
+    from pandas.testing import assert_frame_equal
 
-    os.chdir(tmp_path)  # Create a temporary in-memory configuration object
+    original_dir = os.getcwd()
+    os.chdir(tmp_path)
     os.mkdir("Logs/")
 
-    # # host
-    # mismatches
-    data = {
-        "name": [
-            "GJ 229 A c",  # no error
-            "GJ 229 A c",  # no error
-            "GJ 229 A c",  # no error
-            "91 Aqr A b",  # FLAG 1
-            "91 Aqr b",  # FLAG 1
-            "HD 202206 (AB) c",  # FLAG 2
-            "HD 202206 c",  # FLAG 2
-            "ROXs 42B b",  # potential missed binary
-            "HD 156846 b",  # only null and S-type
-            "HD 156846 b",  # only null and S-type
-            "HD 41004 A b",  # complex system (FLAG 2) with fix on coordinates
-            "HD 41004 B b",  # complex system (FLAG 2) with fix on coordinates
-            "HD 41004 b",  # complex system (FLAG 2) with fix on coordinates
-        ],
-        "host": [
-            "GJ 229",
-            "GJ 229",
-            "GJ 229",
-            "91 Aqr",
-            "91 Aqr",
-            "HD 202206",
-            "HD 202206",
-            "ROXs 42B",
-            "HD 156846",
-            "HD 156846",
-            "HD 41004",
-            "HD 41004",
-            "HD 41004",
-        ],
-        "binary": [
-            "A",
-            "S-type",
-            "S-type",
-            "A",
-            "",
-            "A",
-            "AB",
-            "AB",
-            "",
-            "S-type",
-            "A",
-            "B",
-            "S-type",
-        ],
-        "catalog": [
-            "eu",
-            "nasa",
-            "other",
-            "Catalog 1",
-            "Catalog 3",
-            "eu",
-            "oec",
-            "nasa",
-            "oec",
-            "eu",
-            "eu",
-            "eu",
-            "nasa",
-        ],
-        "ra": [
-            92.644231,
-            92.644231,
-            92.644232,
-            10.0,
-            20.0,
-            10.0,
-            10.0,
-            10.0,
-            260.141667,
-            260.142337,
-            1.222,
-            1.23,
-            1.222,
-        ],
-        "dec": [
-            -21.864642,
-            -21.864642,
-            -21.864643,
-            40.0,
-            50.0,
-            40.0,
-            40.0,
-            40.0,
-            -19.333611,
-            -19.334365,
-            9.00,
-            8.99,
-            9.0001,
-        ],
-        "letter": ["c", "c", "c", "b", "b", "c", "c", "b", "b", "b", "b", "b", "b"],
+    counter = 0
+
+    # -----------------------
+    # 1. Null/S-type replacement
+    # -----------------------
+    data1 = {
+        "name": ["HD 156846 b", "HD 156846 b"],
+        "host": ["HD 156846", "HD 156846"],
+        "binary": ["", "S-type"],
+        "catalog": ["oec", "eu"],
+        "ra": [260.141667, 260.142337],
+        "dec": [-19.333611, -19.334365],
+        "letter": ["b", "b"],
     }
-
-    expected_data = {
-        "name": [
-            "GJ 229 A c",
-            "GJ 229 A c",
-            "GJ 229 A c",
-            "91 Aqr A b",
-            "91 Aqr b",
-            "HD 202206 (AB) c",
-            "HD 202206 c",
-            "ROXs 42B b",
-            "HD 156846 b",
-            "HD 156846 b",
-            "HD 41004 A b",  # complex system (FLAG 2) with fix on coordinates
-            "HD 41004 B b",  # complex system (FLAG 2) with fix on coordinates
-            "HD 41004 b",  # complex system (FLAG 2) with fix on coordinates
-        ],
-        "host": [
-            "GJ 229",
-            "GJ 229",
-            "GJ 229",
-            "91 Aqr",
-            "91 Aqr",
-            "HD 202206",
-            "HD 202206",
-            "ROXs 42B",
-            "HD 156846",
-            "HD 156846",
-            "HD 41004",
-            "HD 41004",
-            "HD 41004",
-        ],
-        "binary": [
-            "A",
-            "A",
-            "A",
-            "A",
-            "A",
-            "A",
-            "AB",
-            "AB",
-            "S-type",
-            "S-type",
-            "A",
-            "B",
-            "A",
-        ],
-        "catalog": [
-            "eu",
-            "nasa",
-            "other",
-            "Catalog 1",
-            "Catalog 3",
-            "eu",
-            "oec",
-            "nasa",
-            "oec",
-            "eu",
-            "eu",
-            "eu",
-            "nasa",
-        ],
-        "ra": [
-            92.644231,
-            92.644231,
-            92.644232,
-            10.0,
-            20.0,
-            10.0,
-            10.0,
-            10.0,
-            260.141667,
-            260.142337,
-            1.222,
-            1.23,
-            1.222,
-        ],
-        "dec": [
-            -21.864642,
-            -21.864642,
-            -21.864643,
-            40.0,
-            50.0,
-            40.0,
-            40.0,
-            40.0,
-            -19.333611,
-            -19.334365,
-            9.00,
-            8.99,
-            9.0001,
-        ],
-        "letter": ["c", "c", "c", "b", "b", "c", "c", "b", "b", "b", "b", "b", "b"],
-        "binary_mismatch_flag": [0, 0, 0, 1, 1, 2, 2, 0, 1, 1, 2, 2, 2],
+    expected1 = {
+        **data1,
+        "binary": ["S-type", "S-type"],
+        "binary_coordinate_mismatch_flag": [1, 1],
+        "binary_complex_system_flag": [0, 0],
     }
-    instance.data = pd.DataFrame(data)
+    instance.data = pd.DataFrame(data1)
+    instance.check_binary_mismatch(keyword="host", tolerance=1/3600)
+    df_expected1 = pd.DataFrame(expected1)
+    assert_frame_equal(instance.data, df_expected1)
 
-    # Execute the function
-    instance.check_binary_mismatch(keyword="host", tolerance=1.0 / 3600.0)
-    assert_frame_equal(instance.data, pd.DataFrame(expected_data))
-
-    ### Specific tests for main_id
-
-    # mismatches
-    data = {
-        "name": [
-            "91 Aqr A b",  # FLAG 1
-            "91 Aqr b",  # FLAG 1
-            "HD 202206 (AB) c",  # FLAG 2
-            "HD 202206 c",  # FLAG 2
-            "HD 156846 b",  # only null and S-type
-            "HD 156846 b",  # only null and S-type
-        ],
-        "main_id": [
-            "91 Aqr",
-            "91 Aqr",
-            "HD 202206",
-            "HD 202206",
-            "HD 156846",
-            "HD 156846",
-        ],
-        "binary": ["A", "", "A", "AB", "", "S-type"],
-        "catalog": ["Catalog 1", "Catalog 3", "eu", "oec", "oec", "eu"],
-        "ra": [10.0, 20.0, 10.0, 10.0, 260.141667, 260.142337],
-        "dec": [40.0, 50.0, 40.0, 40.0, -19.333611, -19.334365],
-        "letter": ["b", "b", "c", "c", "b", "b"],
-        "binary_mismatch_flag": [0, 0, 0, 1, 2, 2],
+    # -----------------------
+    # 2. Coordinate mismatch
+    # -----------------------
+    data2 = {
+        "name": ["91 Aqr A b", "91 Aqr b"],
+        "host": ["91 Aqr", "91 Aqr"],
+        "binary": ["A", ""],
+        "catalog": ["Catalog 1", "Catalog 3"],
+        "ra": [10.0, 20.0],
+        "dec": [40.0, 50.0],
+        "letter": ["b", "b"],
     }
-
-    expected_data = {
-        "name": [
-            "91 Aqr A b",
-            "91 Aqr b",
-            "HD 202206 (AB) c",
-            "HD 202206 c",
-            "HD 156846 b",
-            "HD 156846 b",
-        ],
-        "main_id": [
-            "91 Aqr",
-            "91 Aqr",
-            "HD 202206",
-            "HD 202206",
-            "HD 156846",
-            "HD 156846",
-        ],
-        "binary": ["A", "A", "A", "AB", "S-type", "S-type"],
-        "catalog": ["Catalog 1", "Catalog 3", "eu", "oec", "oec", "eu"],
-        "ra": [10.0, 20.0, 10.0, 10.0, 260.141667, 260.142337],
-        "dec": [40.0, 50.0, 40.0, 40.0, -19.333611, -19.334365],
-        "letter": ["b", "b", "c", "c", "b", "b"],
-        "binary_mismatch_flag": [1, 1, 2, 2, 1, 1],
+    expected2 = {
+        **data2,
+        "binary": ["A", "A"],
+        "binary_coordinate_mismatch_flag": [1, 1],
+        "binary_complex_system_flag": [0, 0],
     }
-    instance.data = pd.DataFrame(data)
+    instance.data = pd.DataFrame(data2)
+    instance.check_binary_mismatch(keyword="host", tolerance=1/3600)
+    df_expected2 = pd.DataFrame(expected2)
+    assert_frame_equal(instance.data, df_expected2)
 
-    # Execute the function
-    instance.check_binary_mismatch(keyword="main_id", tolerance=1.0 / 3600.0)
-    assert_frame_equal(instance.data, pd.DataFrame(expected_data))
+    # -----------------------
+    # 3. Complex system (multiple non-null binaries)
+    # -----------------------
+    data3 = {
+        "name": ["HD 202206 (AB) c", "HD 202206 c"],
+        "host": ["HD 202206", "HD 202206"],
+        "binary": ["A", "AB"],
+        "catalog": ["eu", "oec"],
+        "ra": [10.0, 10.0],
+        "dec": [40.0, 40.0],
+        "letter": ["c", "c"],
+    }
+    expected3 = {
+        **data3,
+        "binary_coordinate_mismatch_flag": [0, 0],
+        "binary_complex_system_flag": [1, 1],
+    }
+    instance.data = pd.DataFrame(data3)
+    instance.check_binary_mismatch(keyword="host", tolerance=1/3600)
+    df_expected3 = pd.DataFrame(expected3)
+    assert_frame_equal(instance.data, df_expected3)
 
-    ### Check the logs
+    # -----------------------
+    # 4. Complex system fix via angular separation (HD 41004)
+    # -----------------------
+    data4 = {
+        "name": ["HD 41004 A b", "HD 41004 B b", "HD 41004 b"],
+        "host": ["HD 41004"]*3,
+        "binary": ["A", "B", "S-type"],
+        "catalog": ["eu", "eu", "nasa"],
+        "ra": [1.222, 1.23, 1.222],
+        "dec": [9.0, 8.99, 9.0001],
+        "letter": ["b"]*3,
+    }
+    expected4 = {
+        **data4,
+        "binary": ["A", "B", "A"],  # fixed via closest angular separation
+        "binary_coordinate_mismatch_flag": [0, 0, 0],
+        "binary_complex_system_flag": [1, 1, 1],
+    }
+    instance.data = pd.DataFrame(data4)
+    instance.check_binary_mismatch(keyword="host", tolerance=1/3600)
+    df_expected4 = pd.DataFrame(expected4)
+    assert_frame_equal(instance.data, df_expected4)
 
-    assert os.path.exists("Logs/check_binary_mismatch.txt")
-    with open("Logs/check_binary_mismatch.txt") as f:
-        lines = f.readlines()
+    # -----------------------
+    # 5. Complex system. Cannot fix because stars are outside tolerance (11 Com)
+    # -----------------------
+    data5 = {
+        "name": ["11 Com b", "11 Com Ab", "11 Com Bb", "11 Com b"],
+        "host": ["11 Com"]*4,
+        "binary": ["", "A", "B", ""],
+        "catalog": ["nasa", "eu", "eu", "oec"],
+        "ra": [185.178779,
+                185.179167,
+                185.181203,
+                185.179273],
+        "dec": [17.793252,
+                17.792778,
+                17.794790,
+                17.792872],
+        "letter": ["b"]*4,
+    }
+    expected5 = {
+         "name": ["11 Com b", "11 Com Ab", "11 Com Bb", "11 Com b"],
+        "host": ["11 Com"]*4,
+        "binary": ["", "A", "B", "A"], 
+        "catalog": ["nasa", "eu", "eu", "oec"],
+        "ra": [185.178779,
+                185.179167,
+                185.181203,
+                185.179273],
+        "dec": [17.793252,
+                17.792778,
+                17.794790,
+                17.792872],
+        "letter": ["b"]*4,
+        "binary_coordinate_mismatch_flag": [0, 0, 0, 0],
+        "binary_complex_system_flag": [1, 1, 1, 1],
+    }
+    instance.data = pd.DataFrame(data5)
+    instance.check_binary_mismatch(keyword="host", tolerance=1/3600)
+    df_expected5 = pd.DataFrame(expected5)
+    assert_frame_equal(instance.data, df_expected5)
 
-    assert lines == [
-        "*************************************************\n",
-        "**** CHECKING BINARIES USING: host ****\n",
-        "*************************************************\n",
-        "\n",
-        "Fixed S-type or null binary for 91 Aqr b. New binary value: A. WARNING: coordinate agreement exceeds tolerance. Maximum difference: 12.22406962954591 (binary_mismatch_flag = 1). Please check this system:\n",
-        "         name    host binary letter    catalog    ra   dec\n",
-        "3  91 Aqr A b  91 Aqr      A      b  Catalog 1  10.0  40.0\n",
-        "4    91 Aqr b  91 Aqr   null      b  Catalog 3  20.0  50.0\n",
-        "\n",
-        "\n",
-        "Fixed S-type or null binary for GJ 229 c. New binary value: A. \n",
-        "\n",
-        "\n",
-        "Only S-type and null in the system for HD 156846 b. New binary value: "
-        "S-type. WARNING: coordinate agreement exceeds tolerance. Maximum difference: "
-        "0.0009839776494423166 (binary_mismatch_flag = 1) . Please check "
-        "this system:\n",
-        "          name       host  binary letter catalog          ra        dec\n",
-        "8  HD 156846 b  HD 156846    null      b     oec  260.141667 -19.333611\n",
-        "9  HD 156846 b  HD 156846  S-type      b      eu  260.142337 -19.334365\n",
-        "\n",
-        "\n",
-        "WARNING: Either a complex system or a mismatch in the value of binary (binary_mismatch_flag = 2). Please check this system:  \n",
-        "               name       host binary letter catalog\n",
-        "5  HD 202206 (AB) c  HD 202206      A      c      eu\n",
-        "6       HD 202206 c  HD 202206     AB      c     oec\n",
-        "\n",
-        "\n",
-        "WARNING: Either a complex system or a mismatch in the value of binary (binary_mismatch_flag = 2). Please check this system:  \n",
-        "            name      host  binary letter catalog\n",
-        "10  HD 41004 A b  HD 41004       A      b      eu\n",
-        "11  HD 41004 B b  HD 41004       B      b      eu\n",
-        "12    HD 41004 b  HD 41004  S-type      b    nasa\n",
-        "\n",
-        "Fixed binary for complex system HD 41004b based on angular separation. New binary value: A.\n",
-        "\n",
-        "****host POTENTIAL BINARIES NOT TREATED HERE. They should be treated manually in replacements.ini ****\n",
-        "MISSED POTENTIAL BINARY Key:ROXs 42B name: ROXs 42B b binary: AB catalog:nasa.\n",
-        "*************************************************\n",
-        "**** CHECKING BINARIES USING: main_id ****\n",
-        "*************************************************\n",
-        "\n",
-        "WARNING: Flags are changing here compared to previous check. Previous value of binary_mismatch_flag was: 0. Fixed S-type or null binary for 91 Aqr b. New binary value: A. WARNING: coordinate agreement exceeds tolerance. Maximum difference: 12.22406962954591 (binary_mismatch_flag = 1). Please check this system:\n",
-        "         name main_id binary letter    catalog    ra   dec\n",
-        "0  91 Aqr A b  91 Aqr      A      b  Catalog 1  10.0  40.0\n",
-        "1    91 Aqr b  91 Aqr   null      b  Catalog 3  20.0  50.0\n",
-        "\n",
-        "\n",
-        "WARNING: Flags are changing here compared to previous check. Previous value of binary_mismatch_flag was: 2. Only S-type and "
-        "null in the system for HD 156846 b. New binary value: S-type. WARNING: "
-        "coordinate agreement exceeds tolerance. Maximum difference: "
-        "0.0009839776494423166 (binary_mismatch_flag = 1) . Please check "
-        "this system:\n",
-        "          name    main_id  binary letter catalog          ra        dec\n",
-        "4  HD 156846 b  HD 156846    null      b     oec  260.141667 -19.333611\n",
-        "5  HD 156846 b  HD 156846  S-type      b      eu  260.142337 -19.334365\n",
-        "\n",
-        "\n",
-        "WARNING: Flags are changing here compared to previous check. Previous value of binary_mismatch_flag was: 0,1. WARNING: Either "
-        "a complex system or a mismatch in the value of binary (binary_mismatch_flag"
-        " = 2). Please check this system:  \n",
-        "               name    main_id binary letter catalog\n",
-        "2  HD 202206 (AB) c  HD 202206      A      c      eu\n",
-        "3       HD 202206 c  HD 202206     AB      c     oec\n",
-        "\n",
-        "****main_id POTENTIAL BINARIES NOT TREATED HERE. They should be treated manually in replacements.ini ****\n",
-        # "MISSED POTENTIAL BINARY Key:ROXs 42B name: ROXs 42B b binary: AB catalog:nasa.\n",
-    ]
 
+    # -----------------------
+    # 6. Missed potential binary
+    # -----------------------
+    data6 = {
+        "name": ["ROXs 42B b"],
+        "host": ["ROXs 42B"],
+        "binary": ["AB"],
+        "catalog": ["eu",],
+        "ra": [185.178779,],
+        "dec": [17.793252,],
+        "letter": ["b"],
+    }
+    expected6 = { 
+               **data6,
+        "binary_coordinate_mismatch_flag": [0],
+        "binary_complex_system_flag": [0],
+    }
+    instance.data = pd.DataFrame(data6)
+    instance.check_binary_mismatch(keyword="host", tolerance=1/3600)
+    df_expected6 = pd.DataFrame(expected6)
+    assert_frame_equal(instance.data, df_expected6)
+    # -----------------------
+    # Logs
+    # -----------------------
+    log_file = "Logs/check_binary_mismatch.txt"
+    assert os.path.exists(log_file)
+    with open(log_file) as f:
+        logs = f.read()
+    # Each of these should appear exactly once
+    assert logs.count("Only S-type and null in the system") == 1
+    assert logs.count("WARNING: coordinate agreement exceeds tolerance") == 2  # HD 156846 + 91 Aqr
+    assert logs.count("WARNING: Either a complex system or a mismatch in the value of binary") == 3  # HD 202206 + HD 41004 + 11 Com
+    assert logs.count("Fixed binary for complex system") == 2  # HD 41004 angular separation fix + 11 Com A
+    assert logs.count("Cannot fix coordinates for entry: 11 Com b index: 0") == 1  # 11 Com outside tolerance
+    assert "POTENTIAL BINARIES NOT TREATED HERE" in logs
+    assert "MISSED POTENTIAL BINARY Key:ROXs 42B name: ROXs 42B b binary: AB catalog:eu.\n" in logs
     os.chdir(original_dir)
 
 
@@ -2116,7 +1958,8 @@ def test__merge_into_single_entry(tmp_path):
             "oec: CONFIRMED",
             "epic: CONFIRMED",
         ],
-        "binary_mismatch_flag": [0, 0, 0, 0, 0],
+        "binary_coordinate_mismatch_flag": [0, 0, 0, 0, 0],
+        "binary_complex_system_flag": [0, 0, 0, 0, 0],
         "main_id": ["WASP-55", "WASP-55", "WASP-55", "WASP-55", "WASP-55"],
         "main_id_aliases": [
             "GALAH 150429002601133,Gaia DR3 3603529272750802560,TOI-774,RAVE J133502.0-173012,RAVE J133502.0-173013,"
@@ -2233,7 +2076,10 @@ def test__merge_into_single_entry(tmp_path):
         "coordinate_mismatch_flag": [0],
         "duplicate_catalog_flag": [0],
         "duplicate_names": [""],
-        "binary_mismatch_flag": ["0"],
+        "binary_coordinate_mismatch_flag": [0],
+        "binary_complex_system_flag": [0],
+        "period_mismatch_flag":[0],
+        "fallback_merge_flag":[0]
     }
     expected_result = pd.DataFrame(expected_result)
 
@@ -2414,17 +2260,19 @@ def test__merge_into_single_entry(tmp_path):
     # 5.1 binary mismatch
     test51_data = test5_data.copy(deep=True)
     test51_expected = test5_expected.copy(deep=True)
-    test51_data["binary_mismatch_flag"] = [0, 1, 2, 0, 1]
-    test51_expected["binary_mismatch_flag"] = ["0,1,2"]
+    test51_data["binary_coordinate_mismatch_flag"] = [0, 1, 0, 0, 1]
+    test51_data["binary_complex_system_flag"] = [0, 0, 1, 0, 0]
+    test51_expected["binary_coordinate_mismatch_flag"] = [1]
+    test51_expected["binary_complex_system_flag"] = [1]
 
     # 5.2 coordinate mismatch
     test52_data = test5_data.copy(deep=True)
     test52_expected = test5_expected.copy(deep=True)
-    test52_data["binary_mismatch_flag"] = [0, 0, 0, 0, 0]
-    test52_expected["binary_mismatch_flag"] = ["0"]
+    test52_data["binary_coordinate_mismatch_flag"] = [0, 0, 0, 0, 0]
+    test52_expected["binary_coordinate_mismatch_flag"] = [0]
     test52_data["coordinate_mismatch"] = ["RA", "DEC", "RADEC", "", ""]
     test52_expected["coordinate_mismatch"] = ["RA,DEC,RADEC"]
-    test52_expected["coordinate_mismatch_flag"] = [2]
+    test52_expected["coordinate_mismatch_flag"] = [1]
 
     # 5.3 coordinate mismatch part 2
     test53_data = test5_data.copy(deep=True)
@@ -2465,7 +2313,7 @@ def test__merge_into_single_entry(tmp_path):
     ]
 
     for data, expected in macro_tuple:
-        result = Emc.merge_into_single_entry(data, "WASP-55", "", "b")
+        result = Emc.merge_into_single_entry(data, "WASP-55", "", "b",period_mismatch_flag=0,fallback_merge_flag=0)
 
         assert sorted(result.columns) == sorted(expected.columns)
 
@@ -2715,6 +2563,166 @@ def test__group_by_letter_check_period(tmp_path, instance):
     os.chdir(tmp_path)  # Create a temporary in-memory configuration object
     os.mkdir("Logs/")
 
+    # CASE 0: ONLY ONE ENTRY, SO ENTRY IS MAINTAINED ENTIRELY (EXCEPT FORMATTING CHANGES)
+    # CASE 0: ONLY ONE ENTRY, SO ENTRY IS MAINTAINED ENTIRELY (EXCEPT FORMATTING CHANGES)
+
+    # GENERALIZED DATASET AND EXPECTED DATASET
+    data0 = {
+        "name": ["6 Lyn b"],
+        "catalog_name": ["6 Lyn b"],
+        "discovery_method": ["Radial Velocity"],
+        "ra": [97.6958333],
+        "dec": [58.1627778],
+        "p": [934.3],
+        "p_max": [8.6],
+        "p_min": [8.6],
+        "a": [2.0],
+        "a_max": [0.1],
+        "a_min": [0.1],
+        "e": [0.073],
+        "e_max": [0.036],
+        "e_min": [0.036],
+        "i": [2.0],
+        "i_max": [0.1],
+        "i_min": [0.1],
+        "mass": [np.nan],
+        "mass_max": [np.nan],
+        "mass_min": [np.nan],
+        "msini": [2.01],
+        "msini_max": [0.077],
+        "msini_min": [0.077],
+        "r": [np.nan],
+        "r_max": [np.nan],
+        "r_min": [np.nan],
+        "discovery_year": [2008],
+        "alias": [
+            "2MASS J06304711+5809453",
+        ],
+        "a_url": ["eu"],
+        "mass_url": [""],
+        "p_url": ["eu"],
+        "msini_url": ["eu"],
+        "r_url": [""],
+        "i_url": ["eu"],
+        "e_url": ["eu"],
+        "main_id": ["*   6 Lyn"],
+        "host": ["6 Lyn"],
+        "binary": [""],
+        "letter": ["b"],
+        "status": ["CONFIRMED"],
+        "catalog": ["eu"],
+        "original_catalog_status": ["eu: CONFIRMED"],
+        "checked_catalog_status": ["eu: CONFIRMED"],
+        "binary_coordinate_mismatch_flag": [0],
+        "binary_complex_system_flag": [0],
+        "hostbinary": ["6 Lyn"],
+        "RA": ["06 30 47.1075"],
+        "DEC": ["+58 09 45.479"],
+        "list_id": [
+            "LTT 11856,*   6 Lyn",
+        ],
+        "main_id_ra": [97.69628124999998],
+        "main_id_dec": [58.16263305555555],
+        "coordinate_mismatch": [""],
+        "angsep": [0.0],
+        "angular_separation": ["eu: 0.0"],
+        "main_id_provenance": ["SIMBAD"],
+        "main_id_aliases": [
+            "2MASS J06304711+5809453,HR 2331",
+        ],
+    }
+
+    data0 = pd.DataFrame(data0)
+    expected_result0 = {
+        "main_id": ["*   6 Lyn"],
+        "binary": [""],
+        "letter": ["b"],
+        "host": ["6 Lyn"],
+        "nasa_name": [""],
+        "toi_name": [""],
+        "epic_name": [""],
+        "eu_name": ["6 Lyn b"],
+        "oec_name": [""],
+        "i_url": ["eu"],
+        "i": [2.0],
+        "i_min": [0.1],
+        "i_max": [0.1],
+        "IREL": [0.05],
+        "mass_url": [""],
+        "mass": [np.nan],
+        "mass_min": [np.nan],
+        "mass_max": [np.nan],
+        "MASSREL": [np.nan],
+        "msini_url": ["eu"],
+        "msini": [2.01],
+        "msini_min": [0.077],
+        "msini_max": [0.077],
+        "MSINIREL": [0.03830845771144279],
+        "r_url": [""],
+        "r": [np.nan],
+        "r_min": [np.nan],
+        "r_max": [np.nan],
+        "RADREL": [np.nan],
+        "a_url": ["eu"],
+        "a": [2.0],
+        "a_min": [0.10],
+        "a_max": [0.10],
+        "AREL": [0.05],
+        "p_url": ["eu"],
+        "p": [934.3],
+        "p_min": [8.6],
+        "p_max": [8.6],
+        "PERREL": [0.009204752220914053],
+        "e_url": ["eu"],
+        "e": [0.073],
+        "e_min": [0.036],
+        "e_max": [0.036],
+        "EREL": [0.4931506849315068],
+        "checked_status_string": ["eu: CONFIRMED"],
+        "original_status_string": ["eu: CONFIRMED"],
+        "confirmed": [1],
+        "status": ["CONFIRMED"],
+        "discovery_year": [2008],
+        "discovery_method": ["Radial Velocity"],
+        "catalog": ["eu"],
+        "main_id_aliases": ["2MASS J06304711+5809453,HR 2331"],
+        "main_id_provenance": ["SIMBAD"],
+        "main_id_ra": [97.69628124999998],
+        "main_id_dec": [58.16263305555555],
+        "duplicate_catalog_flag": [0],
+        "duplicate_names": [""],
+        "binary_coordinate_mismatch_flag": [0],
+        "binary_complex_system_flag": [0],
+        "coordinate_mismatch": [""],
+        "coordinate_mismatch_flag": [0],
+        "angular_separation": ["eu: 0.0"],
+        "angular_separation_flag": [0],
+        "period_mismatch_flag": [0],
+        "fallback_merge_flag": [0],
+    }
+    expected_result0 = pd.DataFrame(expected_result0)
+
+
+    instance.data = data0
+    instance.group_by_letter_check_period(verbose=True)
+    assert os.path.exists("Logs/group_by_letter_check_period.txt")
+
+    assert sorted(instance.data.columns) == sorted(expected_result0.columns)
+
+    instance.data = instance.data.convert_dtypes()
+    expected = expected_result0.convert_dtypes()
+    for col in instance.data.columns:
+            for row in instance.data.index:
+                if pd.isna(instance.data.at[row, col]) and pd.isna(
+                        expected.at[row, col]
+                ):
+                    continue
+                try:
+                    assert instance.data.at[row, col] == expected.at[row, col]
+                except AssertionError:
+                    assert np.isclose(instance.data.at[row, col], expected.at[row, col])
+
+
     # GENERALIZED DATASET AND EXPECTED DATASET
     data = {
         "name": ["6 Lyn b", "6 Lyn b"],
@@ -2763,7 +2771,8 @@ def test__group_by_letter_check_period(tmp_path, instance):
         "catalog": ["eu", "nasa"],
         "original_catalog_status": ["eu: CONFIRMED", "nasa: CANDIDATE"],
         "checked_catalog_status": ["eu: CONFIRMED", "nasa: CONFIRMED"],
-        "binary_mismatch_flag": [0, 0],
+        "binary_coordinate_mismatch_flag": [0, 0],
+        "binary_complex_system_flag": [0, 0],
         "hostbinary": ["6 Lyn", "6 Lyn"],
         "RA": ["06 30 47.1075", "06 30 47.1075"],
         "DEC": ["+58 09 45.479", "+58 09 45.479"],
@@ -2789,33 +2798,16 @@ def test__group_by_letter_check_period(tmp_path, instance):
         "binary": [""],
         "letter": ["b"],
         "host": ["6 Lyn"],
-        "angular_separation": ["eu: 0.0,nasa: 0.0"],
-        "main_id_ra": [97.69628124999998],
-        "main_id_dec": [58.16263305555555],
-        "eu_name": ["6 Lyn b"],
         "nasa_name": ["6 Lyn b"],
-        "oec_name": [""],
         "toi_name": [""],
         "epic_name": [""],
+        "eu_name": ["6 Lyn b"],
+        "oec_name": [""],
         "i_url": ["eu"],
         "i": [2.0],
         "i_min": [1.0],
         "i_max": [79.0],
         "IREL": [39.5],
-        "checked_status_string": ["eu: CONFIRMED,nasa: CONFIRMED"],
-        "original_status_string": ["eu: CONFIRMED,nasa: CANDIDATE"],
-        "confirmed": [2],
-        "status": ["CONFIRMED"],
-        "discovery_year": [2008],
-        "discovery_method": ["Radial Velocity"],
-        "catalog": ["eu,nasa"],
-        "main_id_aliases": ["2MASS J06304711+5809453,HR 2331"],
-        "binary_mismatch_flag": ["0"],
-        "coordinate_mismatch": [""],
-        "coordinate_mismatch_flag": [0],
-        "angular_separation_flag": [0],
-        "main_id_provenance": ["SIMBAD"],
-        "duplicate_catalog_flag": [0],
         "mass_url": [""],
         "mass": [np.nan],
         "mass_min": [np.nan],
@@ -2846,8 +2838,27 @@ def test__group_by_letter_check_period(tmp_path, instance):
         "e_min": [0.036],
         "e_max": [0.036],
         "EREL": [0.4931506849315068],
+        "checked_status_string": ["eu: CONFIRMED,nasa: CONFIRMED"],
+        "original_status_string": ["eu: CONFIRMED,nasa: CANDIDATE"],
+        "confirmed": [2],
+        "status": ["CONFIRMED"],
+        "discovery_year": [2008],
+        "discovery_method": ["Radial Velocity"],
+        "catalog": ["eu,nasa"],
+        "main_id_aliases": ["2MASS J06304711+5809453,HR 2331"],
+        "main_id_provenance": ["SIMBAD"],
+        "main_id_ra": [97.69628124999998],
+        "main_id_dec": [58.16263305555555],
+        "duplicate_catalog_flag": [0],
         "duplicate_names": [""],
-        "merging_mismatch_flag": [0],
+        "binary_coordinate_mismatch_flag": [0],
+        "binary_complex_system_flag": [0],
+        "coordinate_mismatch": [""],
+        "coordinate_mismatch_flag": [0],
+        "angular_separation": ["eu: 0.0,nasa: 0.0"],
+        "angular_separation_flag": [0],
+        "period_mismatch_flag": [0],
+        "fallback_merge_flag": [0],
     }
     expected_result = pd.DataFrame(expected_result)
 
@@ -2920,7 +2931,7 @@ def test__group_by_letter_check_period(tmp_path, instance):
     case3_expected["a_max"] = np.nan
     case3_expected["a_url"] = ""
     case3_expected["AREL"] = np.nan
-    case3_expected["merging_mismatch_flag"] = 2
+    case3_expected["fallback_merge_flag"] = 1
 
     # run same tests for fallback case (log text changes)
     macro_tuple = [(case3_data, case3_expected)]
@@ -2932,7 +2943,7 @@ def test__group_by_letter_check_period(tmp_path, instance):
         with open("Logs/group_by_letter_check_period.txt") as f:
             lines = f.readlines()
             assert lines == [
-                "FALLBACK, MERGE (merging_mismatch_flag=2) \n",
+                "FALLBACK, MERGE (fallback_merge_flag=1) \n",
                 "     main_id binary letter catalog catalog_name\n",
                 "0  *   6 Lyn             b      eu      6 Lyn b\n",
                 "1  *   6 Lyn             b    nasa      6 Lyn b\n",
@@ -2973,7 +2984,6 @@ def test__group_by_letter_check_period(tmp_path, instance):
     for col in case4_data.columns:
         if col in case4_expected.columns:
             case4_expected[col] = case4_data[col]
-    case4_expected["binary_mismatch_flag"] = ["0", "0"]
 
     case4_expected["main_id_ra"] = case4_data["main_id_ra"]
     case4_expected["main_id_dec"] = case4_data["main_id_dec"]
@@ -2996,7 +3006,9 @@ def test__group_by_letter_check_period(tmp_path, instance):
     case4_expected["PERREL"] = [0.0625, 0.04]
     case4_expected["EREL"] = [0.493151, 0.493151]
     case4_expected["duplicate_names"] = ["", ""]
-    case4_expected["merging_mismatch_flag"] = [1, 1]
+    case4_expected["period_mismatch_flag"] = [1, 1]
+    case4_expected["fallback_merge_flag"] = [0, 0]
+
 
     # run same tests for case 4 (log text changes)
     macro_tuple = [(case4_data, case4_expected)]
@@ -3008,7 +3020,7 @@ def test__group_by_letter_check_period(tmp_path, instance):
         with open("Logs/group_by_letter_check_period.txt") as f:
             lines = f.readlines()
             assert lines == [
-                "DISAGREEMENT (merging_mismatch_flag=1)\n",
+                "DISAGREEMENT (period_mismatch_flag=1)\n",
                 "     main_id binary letter catalog catalog_name     p\n",
                 "0  *   6 Lyn             b      eu      6 Lyn b   8.0\n",
                 "1  *   6 Lyn             b    nasa      6 Lyn b  15.0\n",
@@ -3027,10 +3039,11 @@ def test__group_by_letter_check_period(tmp_path, instance):
                 ):
                     continue
                 try:
+                    print(col)
                     assert instance.data.at[row, col] == expected.at[row, col]
                 except AssertionError:
                     assert np.isclose(instance.data.at[row, col], expected.at[row, col])
-
+    #
     # CASE 5: SMA disagreeing, keep both
     case5_data = data.copy(deep=True)
     case5_data["p"] = [np.nan, np.nan]
@@ -3048,10 +3061,11 @@ def test__group_by_letter_check_period(tmp_path, instance):
     for col in case5_data.columns:
         if col in case5_expected.columns:
             case5_expected[col] = case5_data[col]
-    case5_expected["binary_mismatch_flag"] = ["0", "0"]
+
     case5_expected["AREL"] = [0.05, 0.025]
     case5_expected["PERREL"] = [np.nan, np.nan]
-    case5_expected["merging_mismatch_flag"] = [1, 1]
+    case5_expected["period_mismatch_flag"] = [1, 1]
+    case5_expected["fallback_merge_flag"] = [0, 0]
 
     # run same tests for case 5 (log text changes)
     macro_tuple = [(case5_data, case5_expected)]
@@ -3063,7 +3077,7 @@ def test__group_by_letter_check_period(tmp_path, instance):
         with open("Logs/group_by_letter_check_period.txt") as f:
             lines = f.readlines()
             assert lines == [
-                "DISAGREEMENT (merging_mismatch_flag=1)\n",
+                "DISAGREEMENT (period_mismatch_flag=1)\n",
                 "     main_id binary letter catalog catalog_name    a\n",
                 "0  *   6 Lyn             b      eu      6 Lyn b  2.0\n",
                 "1  *   6 Lyn             b    nasa      6 Lyn b  4.0\n",
@@ -3084,7 +3098,7 @@ def test__group_by_letter_check_period(tmp_path, instance):
                 try:
                     assert instance.data.at[row, col] == expected.at[row, col]
                 except AssertionError:
-                    assert np.isclose(instance.data.at[row, col], expected.at[row, col])
+                    assert np.isclose(instance.data.at[row, col], expected.at[row, col],rtol=1e-02)
 
     os.chdir(original_dir)
 
@@ -3210,12 +3224,72 @@ def test__fill_row_update(instance, tmp_path):
         "letter": ["b", "b"],
         "main_id": ["KMT-2019-BLG-2991", "*   6 Lyn"],
         "binary": ["", ""],
-        "main_id_ra": [271.54545, 97.69628],
-        "main_id_dec": [-27.485469, 58.16263],
-        "mass": [0.54, 2.01],
-        "mass_max": [0.37, 0.077],
-        "mass_min": [0.37, 0.077],
+        "nasa_name": ["", "6 Lyn b"],
+        "toi_name": ["","" ],
+        "epic_name": ["", ""],
+        "eu_name": ["MOA-2019-BLG-421 b", "6 Lyn b"],
+        "oec_name": ["", "6 Lyn b"],
+        "i_url": ["", "oec"],
+        "i": [np.nan, 2.0],
+        "i_min": [np.nan, 1.0],
+        "i_max": [np.nan, 79.0],
+        "IREL": [np.nan, 39.5],
         "mass_url": ["eu", "eu"],
+        "mass": [0.54, 2.01],
+        "mass_min": [0.37, 0.077],
+        "mass_max": [0.37, 0.077],
+        "MASSREL": [0.6851851851851851, 0.03830845771144279],
+        "msini_url": ["", "eu"],
+        "msini": [np.nan, 2.01],
+        "msini_min": [np.nan, 0.077],
+        "msini_max": [np.nan, 0.077],
+        "MSINIREL": [np.nan, 0.03830845771144279],
+        "r_url": ["","" ],
+        "r": [np.nan, np.nan],
+        "r_min": [np.nan,np.nan],
+        "r_max": [np.nan, np.nan],
+        "RADREL": [np.nan, np.nan],
+        "a_url": ["eu", "2023arXiv230805343T"],
+        "a": [2.0, 2.028],
+        "a_min": [1.1, 0.005],
+        "a_max": [1.1, 0.003],
+        "AREL": [0.55, 0.002465483234714004],
+        "p_url": ["", "2023arXiv230805343T"],
+        "p": [np.nan, 919.86],
+        "p_min": [np.nan, 3.71],
+        "p_max": [np.nan, 1.92],
+        "PERREL": [np.nan, 0.004033222446894092],
+        "e_url": ["", "eu"],
+        "e": [np.nan, 0.073],
+        "e_min": [np.nan, 0.036],
+        "e_max": [np.nan, 0.036],
+        "EREL": [np.nan, 0.4931506849315068],
+        "checked_status_string": ["eu: CONFIRMED", "eu: CONFIRMED, nasa: CONFIRMED, oec: CONFIRMED"],
+    "original_status_string": ["eu: CONFIRMED", "eu: CONFIRMED, nasa: CONFIRMED, oec: CONFIRMED"],
+    "confirmed": [1, 3],
+    "status": ["CONFIRMED", "CONFIRMED"],
+    "discovery_year": [2023, 2008],
+    "discovery_method": ["Microlensing", "Radial Velocity"],
+    "catalog": ["eu", "eu, nasa, oec"],
+    "main_id_aliases": ["","" ],
+    "main_id_provenance": ["SIMBAD", "SIMBAD"],
+    "main_id_ra": [271.54545833333333, 97.69628162561209],
+    "main_id_dec": [-27.485469444444444, 58.162633282470274],
+    "duplicate_catalog_flag": [0, 0],
+    "duplicate_names": ["","" ],
+    "binary_coordinate_mismatch_flag": [0, 0],
+    "binary_complex_system_flag": [0, 0],
+    "coordinate_mismatch": ["",""],
+    "coordinate_mismatch_flag": [0, 0],
+    "angular_separation": ["eu: 0.0","eu: 0.0, nasa: 0.0, oec: 0.0"],
+    "angular_separation_flag": [0, 0],
+    "period_mismatch_flag": [0, 0],
+    "fallback_merge_flag": [0, 0],
+    "bestmass": [0.54, 2.01],
+    "bestmass_min": [0.37, 0.077],
+    "bestmass_max": [0.37, 0.077],
+    "bestmass_url": ["eu", "eu"],
+    "bestmass_provenance": ["Mass", "Mass"],
     }
     compar_data = pd.DataFrame(compar_data)
     # CASE: no other exomercats available
@@ -3226,28 +3300,186 @@ def test__fill_row_update(instance, tmp_path):
     assert instance.data.loc[0, "row_update"] == "2020-01-01"
     assert instance.data.loc[1, "row_update"] == "2020-01-01"
 
-    # CASE: Data has changed
 
-    new_data = {
+    # CASE: Data has changed (only column 1)
+    # save current dataframe to file.
+    pd.DataFrame(compar_data).to_csv("Exo-MerCat/exo-mercat_full2020-01-01.csv")
+
+    updated_data =     compar_data = {
         "exo-mercat_name": ["KMT-2019-BLG-2991 b", "*   6 Lyn b"],
         "host": ["MOA 2019-BLG-421", "6 Lyn"],
         "letter": ["b", "b"],
         "main_id": ["KMT-2019-BLG-2991", "*   6 Lyn"],
         "binary": ["", ""],
-        "main_id_ra": [271.54545, 97.6962],
-        "main_id_dec": [-27.485469, 58.1623],
+        "nasa_name": ["", "6 Lyn b"],
+        "toi_name": ["","" ],
+        "epic_name": ["", ""],
+        "eu_name": ["MOA-2019-BLG-421 b", "6 Lyn b"],
+        "oec_name": ["", "6 Lyn b"],
+        "i_url": ["", "changed value"],
+        "i": [np.nan, 25.0],
+        "i_min": [np.nan, 1.0],
+        "i_max": [np.nan, 79.0],
+        "IREL": [np.nan, 3.16],
+        "mass_url": ["eu", "changed value"],
         "mass": [0.54, 2.10],
-        "mass_max": [0.37, 0.09],
-        "mass_min": [0.37, 0.09],
-        "mass_url": ["eu", "nasa"],
+        "mass_min": [0.37, 0.077],
+        "mass_max": [0.37, 0.077],
+        "MASSREL": [0.6851851851851851, 0.036667],
+        "msini_url": ["", "eu"],
+        "msini": [np.nan, 2.01],
+        "msini_min": [np.nan, 0.077],
+        "msini_max": [np.nan, 0.077],
+        "MSINIREL": [np.nan, 0.03830845771144279],
+        "r_url": ["","" ],
+        "r": [np.nan, np.nan],
+        "r_min": [np.nan,np.nan],
+        "r_max": [np.nan, np.nan],
+        "RADREL": [np.nan, np.nan],
+        "a_url": ["eu", "2023arXiv230805343T"],
+        "a": [2.0, 2.028],
+        "a_min": [1.1, 0.005],
+        "a_max": [1.1, 0.003],
+        "AREL": [0.55, 0.002465483234714004],
+        "p_url": ["", "2023arXiv230805343T"],
+        "p": [np.nan, 919.86],
+        "p_min": [np.nan, 3.71],
+        "p_max": [np.nan, 1.92],
+        "PERREL": [np.nan, 0.004033222446894092],
+        "e_url": ["", "eu"],
+        "e": [np.nan, 0.073],
+        "e_min": [np.nan, 0.036],
+        "e_max": [np.nan, 0.036],
+        "EREL": [np.nan, 0.4931506849315068],
+        "checked_status_string": ["eu: CONFIRMED", "eu: CONFIRMED, nasa: CONFIRMED, oec: CONFIRMED"],
+    "original_status_string": ["eu: CONFIRMED", "eu: CONFIRMED, nasa: CONFIRMED, oec: CONFIRMED"],
+    "confirmed": [1, 3],
+    "status": ["CONFIRMED", "CONFIRMED"],
+    "discovery_year": [2023, 2008],
+    "discovery_method": ["Microlensing", "Radial Velocity"],
+    "catalog": ["eu", "eu, nasa, oec"],
+    "main_id_aliases": ["","" ],
+    "main_id_provenance": ["SIMBAD", "SIMBAD"],
+    "main_id_ra": [271.54545833333333, 97.69628162561209],
+    "main_id_dec": [-27.485469444444444, 58.162633282470274],
+    "duplicate_catalog_flag": [0, 0],
+    "duplicate_names": ["","" ],
+    "binary_coordinate_mismatch_flag": [0, 0],
+    "binary_complex_system_flag": [0, 0],
+    "coordinate_mismatch": ["",""],
+    "coordinate_mismatch_flag": [0, 0],
+    "angular_separation": ["eu: 0.0","eu: 0.0, nasa: 0.0, oec: 0.0"],
+    "angular_separation_flag": [0, 0],
+    "period_mismatch_flag": [0, 0],
+    "fallback_merge_flag": [0, 0],
+    "bestmass": [0.54, 2.01],
+    "bestmass_min": [0.37, 0.077],
+    "bestmass_max": [0.37, 0.077],
+    "bestmass_url": ["eu", "eu"],
+    "bestmass_provenance": ["Mass", "Mass"],
     }
-    new_data = pd.DataFrame(new_data)
-    pd.DataFrame(compar_data).to_csv("Exo-MerCat/exo-mercat_full2020-01-01.csv")
-    instance.data = new_data.copy()
+    updated_data = pd.DataFrame(updated_data)
+
+    instance.data = updated_data.copy()
     instance.fill_row_update(local_date=date.today().strftime("%Y-%m-%d"))
     assert "row_update" in instance.data.columns
     assert instance.data.loc[0, "row_update"] == "2020-01-01"
     assert instance.data.loc[1, "row_update"] == date.today().strftime("%Y-%m-%d")
+    os.chdir(original_dir)
+
+
+def test__identify_misnamed_duplicates(instance,tmp_path):
+    original_dir = os.getcwd()
+
+    os.chdir(tmp_path)  # Create a temporary in-memory configuration object
+    os.mkdir("Logs/")
+
+    # TEST 1: same period, different binary and letter
+    dat1={'exo-mercat_name': [ '*  83 Leo B b', '*  83 Leo B c', '*  83 Leo B c','*  83 Leo d'],
+ 'main_id': [ '*  83 Leo', '*  83 Leo', '*  83 Leo', '*  83 Leo'],
+ 'binary': ['B', 'B', 'B', ""],
+ 'letter': ['b', 'c',  'c',  'd'],
+ 'p': [17.0503, 4970.0, 95.233, 4970.0],
+ 'a': [ 0.123, 5.4,  0.383, 5.4]}
+
+    expected_dat1={'exo-mercat_name': [ '*  83 Leo B b', '*  83 Leo B c', '*  83 Leo B c','*  83 Leo d'],
+ 'main_id': [ '*  83 Leo', '*  83 Leo', '*  83 Leo', '*  83 Leo'],
+ 'binary': ['B', 'B', 'B', ""],
+ 'letter': ['b', 'c',  'c',  'd'],
+ 'p': [17.0503, 4970.0, 95.233, 4970.0],
+ 'a': [ 0.123, 5.4,  0.383, 5.4],
+ 'misnamed_duplicates_flag':[0,1,0,1]}
+
+    expected_log1=['SAME MAIN_ID DIFFERENT PERIOD\n',
+ '  exo-mercat_name    main_id binary letter       p\n',
+ '1   *  83 Leo B c  *  83 Leo      B      c  4970.0\n',
+ '3     *  83 Leo d  *  83 Leo             d  4970.0\n',
+ '\n']
+
+    # TEST 2: same sma, different binary and letter
+    dat2 = {'exo-mercat_name': ['BD+13  2618 AB c', 'BD+13  2618 C BD', 'BD+13  2618 b'],
+           'main_id': ['BD+13  2618', 'BD+13  2618', 'BD+13  2618'],
+           'binary': ['AB', 'C', ""],
+           'letter': ['c', 'BD', 'b'],
+           'p': [np.nan, np.nan, np.nan],
+           'a': [1100.0, np.nan, 1168.0]}
+
+    expected_dat2 = {'exo-mercat_name': ['BD+13  2618 AB c', 'BD+13  2618 C BD', 'BD+13  2618 b'],
+                    'main_id': ['BD+13  2618', 'BD+13  2618', 'BD+13  2618'],
+                    'binary': ['AB', 'C', ""],
+                    'letter': ['c', 'BD', 'b'],
+                    'p': [np.nan, np.nan, np.nan],
+                    'a': [1100.0, np.nan, 1168.0],
+                     'misnamed_duplicates_flag': [1, 0, 1]
+                     }
+    expected_log2=['SAME MAIN_ID DIFFERENT SMA\n',
+ '    exo-mercat_name      main_id binary letter       a\n',
+ '0  BD+13  2618 AB c  BD+13  2618     AB      c  1100.0\n',
+ '2     BD+13  2618 b  BD+13  2618             b  1168.0\n',
+ '\n']
+    # TEST 3: all is well
+    dat3={'exo-mercat_name': ['Kepler-85 b', 'Kepler-85 c','Kepler-85 d','Kepler-85 e'],
+     'main_id': [ 'Kepler-85', 'Kepler-85', 'Kepler-85', 'Kepler-85'],
+     'binary': ["","","",""],
+     'letter': [ 'b', 'c', 'd',  'e'],
+     'p': [ 8.305738, 12.512598, 17.91323, 25.216751],
+     'a': [0.07891, 0.10369, 0.13, 0.163],
+     }
+
+    expected_dat3={'exo-mercat_name': ['Kepler-85 b', 'Kepler-85 c','Kepler-85 d','Kepler-85 e'],
+     'main_id': [ 'Kepler-85', 'Kepler-85', 'Kepler-85', 'Kepler-85'],
+     'binary': ["","","",""],
+     'letter': [ 'b', 'c', 'd',  'e'],
+     'p': [ 8.305738, 12.512598, 17.91323, 25.216751],
+     'a': [0.07891, 0.10369, 0.13, 0.163],
+     'misnamed_duplicates_flag': [0, 0, 0, 0]}
+
+    expected_log3=''
+    macro_tuple = [
+        (dat1, expected_dat1,expected_log1),
+        (dat2, expected_dat2,expected_log2),
+        (dat3, expected_dat3,expected_log3),
+    ]
+
+    for dat, expected_dat,expected_log in macro_tuple:
+        dat = pd.DataFrame(dat)
+        expected_dat=pd.DataFrame(expected_dat)
+
+        instance.data = dat
+        with LogCapture() as log:
+            instance.identify_misnamed_duplicates()
+            log = pd.DataFrame(list(log), columns=["user", "info", "message"])
+            assert "Identified misnamed duplicates." in log["message"].tolist()
+
+        assert "misnamed_duplicates_flag" in instance.data.columns
+        pd.testing.assert_frame_equal(
+            instance.data, expected_dat
+        )
+        if expected_log!='':
+            with open("Logs/identify_misnamed_duplicates.txt") as f:
+                lines = f.readlines()
+                assert lines == expected_log
+
     os.chdir(original_dir)
 
 
@@ -3333,8 +3565,11 @@ def test__keep_columns(instance):
         "bestmass_provenance": ["Msini"],
         "exo-mercat_name": ["*   6 Lyn  b"],
         "main_id_provenance": ["SIMBAD"],
-        "binary_mismatch_flag": [0],
-        "merging_mismatch_flag": [0],
+        "binary_coordinate_mismatch_flag": [0],
+        "binary_complex_system_flag": [0],
+        "period_mismatch_flag":[0],
+        "fallback_merge_flag":[0],
+        "misnamed_duplicates_flag":[0],
         "row_update": ["03-28-2024"],
     }
 
@@ -3400,16 +3635,19 @@ def test__keep_columns(instance):
         "confirmed",
         "discovery_year",
         "main_id_aliases",
-        "catalog",
-        "angular_separation",
-        "angular_separation_flag",
         "main_id_provenance",
-        "binary_mismatch_flag",
-        "coordinate_mismatch",
-        "coordinate_mismatch_flag",
+        "angular_separation_flag",
+        "angular_separation",
+        "catalog",
         "duplicate_catalog_flag",
         "duplicate_names",
-        "merging_mismatch_flag",
+        "binary_coordinate_mismatch_flag",
+        "binary_complex_system_flag",
+        "coordinate_mismatch_flag",
+        "coordinate_mismatch",
+        "period_mismatch_flag",
+        "fallback_merge_flag",
+        "misnamed_duplicates_flag",
         "row_update",
     ]
     assert list(instance.data.columns) == expected_columns

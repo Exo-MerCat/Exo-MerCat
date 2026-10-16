@@ -69,7 +69,8 @@ def test__standardize_catalog(instance):
         "hd_name": ["hd_name"],
         "hip_name": ["hip_name"],
         "tic_id": ["tic_id,second_id"],
-        "gaia_id": [np.nan],
+        "gaia_dr2_id": [""],
+        "gaia_dr3_id": ["gaia_id"],
     }
 
     df = pd.DataFrame(data)
@@ -118,7 +119,7 @@ def test__standardize_catalog(instance):
     assert instance.data.at[0, "mass"] == data["pl_bmassj"]
     assert np.isnan(instance.data.at[0, "msini"])
 
-    assert instance.data.at[0, "alias"] == "hd_name,hip_name,tic_id,second_id,"
+    assert instance.data.at[0, "alias"] == "hd_name,hip_name,tic_id,second_id,gaia_id"
 
 
 def test__sort_best_mass_to_mass_or_msini(instance):

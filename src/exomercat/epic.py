@@ -78,7 +78,8 @@ class Epic(Catalog):
             "hd_name": StringDtype(),
             "hip_name": StringDtype(),
             "tic_id": StringDtype(),
-            "gaia_id": StringDtype(),
+            "gaia_dr2_id": StringDtype(),
+            "gaia_dr3_id": StringDtype(),
             "pl_letter": StringDtype(),
         }
 
@@ -168,14 +169,11 @@ class Epic(Catalog):
             self.data.host + " " + self.data.letter
         )
         # Fill missing values in hd_name, hip_name, tic_id, and gaia_id columns
-        self.data[["hd_name", "hip_name", "tic_id", "gaia_id"]] = self.data[
-            ["hd_name", "hip_name", "tic_id", "gaia_id"]
-        ].fillna("")
 
         # Add alias column
         self.data["alias"] = self.data[
-            ["tic_id", "hip_name", "hd_name", "gaia_id", "Kepler_host"]
-        ].agg(",".join, axis=1)
+            ["tic_id", "hip_name", "hd_name", "gaia_dr2_id","gaia_dr3_id", "Kepler_host"]
+        ].apply(lambda x: ",".join(filter(None, x.astype(str).replace(np.nan, "").replace("nan",""))), axis=1)
 
         # Remove nan from alias
         for i in self.data.index:
